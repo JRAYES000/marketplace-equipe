@@ -1,0 +1,9 @@
+{
+  "name": "skills-equipe",
+  "version": "0.3.0",
+  "description": "Les meilleures skills partagées de l'équipe. Remplace le dossier OneDrive SHARED SKILLS : une installation, des mises à jour automatiques pour tous.",
+  "author": {
+    "name": "Julien Rayes"
+  },
+  "keywords": ["equipe", "skills", "partage"]
+}
