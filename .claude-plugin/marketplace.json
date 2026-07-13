@@ -1,0 +1,14 @@
+{
+  "name": "marketplace-equipe",
+  "owner": {
+    "name": "Julien Rayes",
+    "email": "jrayes000@gmail.com"
+  },
+  "plugins": [
+    {
+      "name": "skills-equipe",
+      "source": "./plugins/skills-equipe",
+      "description": "Les meilleures skills partagées de l'équipe (délégation DeepSeek/OpenRouter, et plus à venir)."
+    }
+  ]
+}
