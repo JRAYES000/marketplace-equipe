@@ -7,6 +7,7 @@ Plugin regroupant les meilleures skills partagées de l'équipe.
 | Skill | Rôle |
 |---|---|
 | `delegation-deepseek-openrouter` | Économiser les tokens Claude Pro en déléguant les tâches lourdes à DeepSeek V4 Pro via le connecteur OpenRouter MCP |
+| `phrases-magiques` | Appliquer automatiquement les « phrases magiques » (reformulation, plan à valider, contradicteur, angles morts, auto-critique) sur les demandes complexes pour améliorer la pertinence des réponses |
 
 ## Installation
 
