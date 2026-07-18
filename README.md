@@ -19,13 +19,14 @@ Voici l'écran « Ajouter une marketplace » — collez exactement cette URL :
 
 ![Écran « Ajouter une marketplace » dans Claude, avec l'URL JRAYES000/marketplace-equipe](ajouter-marketplace.png)
 
-C'est tout. Vérifiez : la skill `delegation-deepseek-openrouter` doit apparaître dans vos capacités.
+C'est tout. Vérifiez : les skills `delegation-deepseek-openrouter` et `phrases-magiques` doivent apparaître dans vos capacités.
 
 ## 📦 Skills disponibles
 
 | Skill | À quoi ça sert | Auteur |
 |---|---|---|
 | `delegation-deepseek-openrouter` | Économiser vos tokens Claude Pro en déléguant les grosses tâches (résumés, traductions, gros volumes) à DeepSeek V4 Pro via OpenRouter | Julien |
+| `phrases-magiques` | Améliorer la pertinence des réponses de Claude : sur les demandes complexes, il reformule, propose un plan à valider, joue le contradicteur, signale vos angles morts et s'auto-critique avant de livrer | Julien |
 
 ## ✍️ Proposer une skill (le rituel du vendredi)
 
