@@ -17,7 +17,7 @@ Ou avec la souris : **Réglages → Capacités → Plugins → Ajouter une marke
 
 ![Écran « Ajouter une marketplace » dans Claude, avec l'URL JRAYES000/marketplace-equipe](ajouter-marketplace.png)
 
-**Pour vérifier que ça a marché :** tu dois voir `delegation-deepseek-openrouter`, `phrases-magiques` et `parallelisation-taches` dans tes capacités.
+**Pour vérifier que ça a marché :** tu dois voir `delegation-deepseek-openrouter`, `phrase-magique` et `parallelisation-taches` dans tes capacités.
 
 ## 📦 Les skills de l'équipe
 
@@ -25,7 +25,7 @@ Une fois `skills-equipe` installé, les skills arrivent avec le paquet. Tu n'as 
 
 | Skill | Ce qu'elle fait |
 |---|---|
-| `phrases-magiques` | Quand ta demande est compliquée, Claude pose ses questions avant de foncer, te dit ce que tu as oublié, relit son travail avant de te le rendre — et sait aussi réécrire ton prompt à la demande. Contient les 17 « phrases magiques » et les règles pour ne pas gaspiller de tokens. |
+| `phrase-magique` | Le mode « travail soigné ». Quand ta demande est compliquée, Claude cadre avant de foncer, te dit ce que tu as oublié, vérifie vraiment son travail (il ouvre ce qu'il a produit au lieu de supposer que c'est bon) et te le dit s'il a raté quelque chose. Trois niveaux d'exigence, les 17 « phrases magiques », et les règles pour ne pas gaspiller de tokens. Tape `phrase magique` pour l'activer, `mode normal` pour l'arrêter. |
 | `parallelisation-taches` | Pour les gros lots (50 documents à résumer, 60 lignes à classer, 12 pages à auditer) : Claude découpe le travail et le confie à plusieurs assistants rapides en même temps. Beaucoup plus vite, et moins cher. Dis simplement « parallélise ça ». |
 | `delegation-deepseek-openrouter` | Fait faire les grosses tâches (résumés, traductions, gros volumes) par une IA moins chère. Tu économises tes messages Claude. |
 
@@ -102,7 +102,7 @@ Le nom de la skill s'écrit en minuscules, sujet puis action : `seo-audit-page`.
 Relance Claude. Si ça ne suffit pas, tape `/plugin marketplace update marketplace-equipe`.
 
 **Est-ce que ça va effacer mes skills à moi ?**
-Non, jamais. Les skills du dépôt sont rangées dans un dossier séparé et portent une étiquette devant leur nom : `skills-equipe:phrases-magiques`, `superpowers:brainstorming`. Les tiennes ne bougent pas. Même si deux skills ont exactement le même nom, elles vivent chacune de leur côté — dis le nom complet avec l'étiquette pour choisir laquelle tu veux.
+Non, jamais. Les skills du dépôt sont rangées dans un dossier séparé et portent une étiquette devant leur nom : `skills-equipe:phrase-magique`, `superpowers:brainstorming`. Les tiennes ne bougent pas. Même si deux skills ont exactement le même nom, elles vivent chacune de leur côté — dis le nom complet avec l'étiquette pour choisir laquelle tu veux.
 
 **J'ai déjà installé un de ces modules de mon côté ?**
 Aucun souci, tant que tu ne l'installes qu'**une** fois. Évite juste d'installer le **même** module depuis deux magasins différents : tu te retrouverais avec tout en double.
