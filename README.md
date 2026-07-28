@@ -69,11 +69,8 @@ Chemin d'installation commun : **Personnaliser → onglet Connecteurs → + → 
 | **GitHub** | Lire et modifier le code du site, gérer les versions et les mises en ligne | Parcourir → `GitHub` → Connecter. **Identifiants du compte GitHub du projet et jeton d'écriture : demandez-les à Julien** — ils ne sont pas publiés ici. Compte partagé : ne changez pas le mot de passe, ne l'utilisez que pour le travail sur le site |
 | **Claude in Chrome** | Laisser Claude naviguer et agir dans votre navigateur (remplir des formulaires, lire des pages, agir dans l'admin WordPress en dernier recours) | C'est une **extension**, pas un connecteur : Google Chrome → Chrome Web Store → « Claude for Chrome » (par Anthropic) → Ajouter à Chrome → connectez l'extension à votre compte Claude |
 | **OpenRouter** | Accéder à des centaines de modèles d'IA (texte et image) de tous les fournisseurs — Anthropic, OpenAI, Google, Meta, Mistral… — avec **un seul compte et une seule clé**. Sert surtout à **générer les visuels** des articles et des pages, et à comparer plusieurs modèles | ⚠️ Créez d'abord un compte gratuit sur [openrouter.ai](https://openrouter.ai) (catalogue : [openrouter.ai/models](https://openrouter.ai/models)). Puis demandez à Claude de se connecter à votre compte en lui donnant votre clé API, et de la garder en mémoire |
-| **Google Search Console** | Suivre les performances SEO du site : requêtes, clics, indexation | Parcourir → `Google Search Console` → Connecter. Accès fournis par Julien |
 | **context7** | Donner à Claude la documentation technique **à jour** des outils (utile dès qu'on touche au thème WordPress, à Yoast, à du PHP) | Parcourir → `context7`. Sinon : *Ajouter un connecteur personnalisé* → Nom `context7` → URL `https://mcp.context7.com/mcp` → validez |
-| **Composio** | Brancher des centaines d'outils externes via **un seul** connecteur sécurisé — chez nous surtout **Google Ads, Google Analytics et Google Search Console**, pilotés en langage naturel | ⚠️ Créez d'abord votre compte sur [dashboard.composio.dev](https://dashboard.composio.dev) et branchez-y vos outils Google. Puis Parcourir → `Composio` → Connecter |
-
-> 💡 **Composio et Google Search Console font doublon — c'est voulu.** Composio va plus loin (Ads + Analytics en plus). Gardez le connecteur GSC natif et utilisez Composio en complément.
+| **Composio** | Brancher des centaines d'outils externes via **un seul** connecteur sécurisé — chez nous surtout les outils **Google** (Ads, Analytics, Search Console), pilotés en langage naturel | ⚠️ Créez d'abord votre compte sur [dashboard.composio.dev](https://dashboard.composio.dev) et branchez-y les outils dont vous avez besoin. Puis Parcourir → `Composio` → Connecter |
 
 ### Optionnels (à installer seulement si une tâche le demande)
 
@@ -85,7 +82,9 @@ Chemin d'installation commun : **Personnaliser → onglet Connecteurs → + → 
 
 ✅ **Résultat attendu** : dans *Personnaliser → Connecteurs*, vous voyez la liste installée, chacun marqué **connecté**.
 
-🆘 **Bloqué ?** Installez ce qui marche — Notion, Claude in Chrome, OpenRouter et context7 sont les plus faciles. Pour **WordPress, Hostinger et Search Console**, c'est **Julien** qui fournit et branche les accès : envoyez-lui ce qui vous manque.
+🆘 **Bloqué ?** Installez ce qui marche — Notion, Claude in Chrome, OpenRouter et context7 sont les plus faciles. Pour tout ce qui demande un accès partagé (identifiants, jeton, connecteur absent du catalogue), c'est **Julien** : envoyez-lui ce qui vous manque.
+
+> Certains projets ont besoin d'accès spécifiques (WordPress, hébergeur, Search Console…). Ils ne sont pas dans cette liste : Julien les branche au cas par cas, quand le projet le demande.
 
 ## ✍️ Proposer une skill (le rituel du vendredi)
 
