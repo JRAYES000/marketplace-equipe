@@ -55,6 +55,38 @@ Deux chemins d'installation seulement :
 >
 > Vous ne trouvez pas une de ces entrées dans votre catalogue ? Signalez-le à Julien plutôt que d'installer un plugin au nom approchant trouvé ailleurs.
 
+## 🔌 Connecteurs MCP recommandés (Claude Desktop)
+
+Les plugins ci-dessus apprennent à Claude **comment travailler**. Les connecteurs, eux, lui donnent **accès à vos outils** : le site, le dépôt de code, votre navigateur, vos données SEO. Les deux sont complémentaires.
+
+Chemin d'installation commun : **Personnaliser → onglet Connecteurs → + → Parcourir**, cherchez le nom, **Connecter**.
+
+### À installer
+
+| Connecteur | À quoi ça sert | Comment |
+|---|---|---|
+| **Notion** | Accéder à l'espace Notion de l'équipe (comptes rendus, suivi) | Parcourir → `Notion` → Connecter |
+| **GitHub** | Lire et modifier le code du site, gérer les versions et les mises en ligne | Parcourir → `GitHub` → Connecter. **Identifiants du compte GitHub du projet et jeton d'écriture : demandez-les à Julien** — ils ne sont pas publiés ici. Compte partagé : ne changez pas le mot de passe, ne l'utilisez que pour le travail sur le site |
+| **Claude in Chrome** | Laisser Claude naviguer et agir dans votre navigateur (remplir des formulaires, lire des pages, agir dans l'admin WordPress en dernier recours) | C'est une **extension**, pas un connecteur : Google Chrome → Chrome Web Store → « Claude for Chrome » (par Anthropic) → Ajouter à Chrome → connectez l'extension à votre compte Claude |
+| **OpenRouter** | Accéder à des centaines de modèles d'IA (texte et image) de tous les fournisseurs — Anthropic, OpenAI, Google, Meta, Mistral… — avec **un seul compte et une seule clé**. Sert surtout à **générer les visuels** des articles et des pages, et à comparer plusieurs modèles | ⚠️ Créez d'abord un compte gratuit sur [openrouter.ai](https://openrouter.ai) (catalogue : [openrouter.ai/models](https://openrouter.ai/models)). Puis demandez à Claude de se connecter à votre compte en lui donnant votre clé API, et de la garder en mémoire |
+| **Google Search Console** | Suivre les performances SEO du site : requêtes, clics, indexation | Parcourir → `Google Search Console` → Connecter. Accès fournis par Julien |
+| **context7** | Donner à Claude la documentation technique **à jour** des outils (utile dès qu'on touche au thème WordPress, à Yoast, à du PHP) | Parcourir → `context7`. Sinon : *Ajouter un connecteur personnalisé* → Nom `context7` → URL `https://mcp.context7.com/mcp` → validez |
+| **Composio** | Brancher des centaines d'outils externes via **un seul** connecteur sécurisé — chez nous surtout **Google Ads, Google Analytics et Google Search Console**, pilotés en langage naturel | ⚠️ Créez d'abord votre compte sur [dashboard.composio.dev](https://dashboard.composio.dev) et branchez-y vos outils Google. Puis Parcourir → `Composio` → Connecter |
+
+> 💡 **Composio et Google Search Console font doublon — c'est voulu.** Composio va plus loin (Ads + Analytics en plus). Gardez le connecteur GSC natif et utilisez Composio en complément.
+
+### Optionnels (à installer seulement si une tâche le demande)
+
+| Connecteur | À quoi ça sert | Comment |
+|---|---|---|
+| **File System** | Laisser Claude lire et écrire des fichiers sur votre ordinateur | Le plus simple : dans le projet, utilisez **Connecter un dossier** et choisissez le dossier du site — c'est souvent suffisant. Si on vous demande le connecteur dédié : Parcourir → `Filesystem` → autorisez le dossier de travail |
+| **Playwright** | Automatiser un navigateur « invisible » : tester des pages, extraire des données, prendre des captures | Parcourir → `Playwright`. S'il n'apparaît pas, demandez à Julien — c'est plus technique |
+| **Windows MCP** | Piloter le bureau Windows (ouvrir des applications, cliquer, taper) | En général **absent du catalogue**. Demandez à Julien de vous l'installer. Notez-le et passez au suivant si vous êtes seul |
+
+✅ **Résultat attendu** : dans *Personnaliser → Connecteurs*, vous voyez la liste installée, chacun marqué **connecté**.
+
+🆘 **Bloqué ?** Installez ce qui marche — Notion, Claude in Chrome, OpenRouter et context7 sont les plus faciles. Pour **WordPress, Hostinger et Search Console**, c'est **Julien** qui fournit et branche les accès : envoyez-lui ce qui vous manque.
+
 ## ✍️ Proposer une skill (le rituel du vendredi)
 
 1. Dans Claude : « *Transforme tout notre échange en une skill, incluant ma demande initiale et tous mes feedbacks, et exporte-la en fichier .skill.* »
