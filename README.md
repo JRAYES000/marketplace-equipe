@@ -17,16 +17,19 @@ Ou avec la souris : **Réglages → Capacités → Plugins → Ajouter une marke
 
 ![Écran « Ajouter une marketplace » dans Claude, avec l'URL JRAYES000/marketplace-equipe](ajouter-marketplace.png)
 
-**Pour vérifier que ça a marché :** tu dois voir `delegation-deepseek-openrouter` et `phrases-magiques` dans tes capacités.
+**Pour vérifier que ça a marché :** tu dois voir `delegation-deepseek-openrouter`, `phrases-magiques` et `parallelisation-taches` dans tes capacités.
 
 ## 📦 Les skills de l'équipe
 
-Elles arrivent toutes seules une fois `skills-equipe` installé. Rien à faire.
+Une fois `skills-equipe` installé, les skills arrivent avec le paquet. Tu n'as rien à télécharger.
 
 | Skill | Ce qu'elle fait |
 |---|---|
+| `phrases-magiques` | Quand ta demande est compliquée, Claude pose ses questions avant de foncer, te dit ce que tu as oublié, relit son travail avant de te le rendre — et sait aussi réécrire ton prompt à la demande. Contient les 17 « phrases magiques » et les règles pour ne pas gaspiller de tokens. |
+| `parallelisation-taches` | Pour les gros lots (50 documents à résumer, 60 lignes à classer, 12 pages à auditer) : Claude découpe le travail et le confie à plusieurs assistants rapides en même temps. Beaucoup plus vite, et moins cher. Dis simplement « parallélise ça ». |
 | `delegation-deepseek-openrouter` | Fait faire les grosses tâches (résumés, traductions, gros volumes) par une IA moins chère. Tu économises tes messages Claude. |
-| `phrases-magiques` | Quand ta demande est compliquée, Claude te propose un plan avant de foncer, te dit ce que tu as oublié, et relit son travail avant de te le rendre. |
+
+> **Une nouvelle skill n'apparaît pas ?** Les mises à jour ne sont pas instantanées. Va dans **Réglages → Capacités → Plugins**, et rafraîchis (ou désinstalle puis réinstalle `skills-equipe`). Redémarrer Claude Desktop aide aussi.
 
 ## ⭐ Les modules à installer toi-même
 
