@@ -1,111 +1,117 @@
 # 🧩 Marketplace Équipe — nos skills Claude partagées
 
-Ce dépôt est le **magasin de skills de l'équipe**. Il remplace l'ancien dossier OneDrive « SHARED SKILLS ».
+Ici, on range les **skills** de l'équipe. Une skill, c'est une notice que Claude lit tout seul pour mieux faire un travail précis.
 
-Il contient le plugin **`skills-equipe`**, qui regroupe nos meilleures skills. Vous l'installez **une seule fois**, et ensuite chaque nouvelle skill (ou mise à jour) arrive **automatiquement** dans votre Claude — plus rien à télécharger.
+Tu installes **une seule fois** le paquet `skills-equipe`. Ensuite, chaque nouvelle skill arrive **toute seule** chez toi. Tu n'as plus rien à télécharger.
 
-## 🚀 Installation (une seule fois, 2 minutes)
+## 🚀 Installation (une fois, 2 minutes)
 
-Dans Claude Desktop (ou Claude Code), tapez :
+Dans Claude, tape ces deux lignes :
 
 ```
 /plugin marketplace add JRAYES000/marketplace-equipe
 /plugin install skills-equipe@marketplace-equipe
 ```
 
-Ou via l'interface : **Réglages → Capacités → Plugins → Ajouter une marketplace** avec l'adresse `JRAYES000/marketplace-equipe`.
-
-Voici l'écran « Ajouter une marketplace » — collez exactement cette URL :
+Ou avec la souris : **Réglages → Capacités → Plugins → Ajouter une marketplace**, puis colle `JRAYES000/marketplace-equipe`.
 
 ![Écran « Ajouter une marketplace » dans Claude, avec l'URL JRAYES000/marketplace-equipe](ajouter-marketplace.png)
 
-C'est tout. Vérifiez : les skills `delegation-deepseek-openrouter` et `phrases-magiques` doivent apparaître dans vos capacités.
+**Pour vérifier que ça a marché :** tu dois voir `delegation-deepseek-openrouter` et `phrases-magiques` dans tes capacités.
 
-## 📦 Skills de l'équipe (plugin `skills-equipe`)
+## 📦 Les skills de l'équipe
 
-Celles-ci arrivent **toutes seules** une fois `skills-equipe` installé.
+Elles arrivent toutes seules une fois `skills-equipe` installé. Rien à faire.
 
-| Skill | À quoi ça sert | Auteur |
-|---|---|---|
-| `delegation-deepseek-openrouter` | Économiser vos tokens Claude Pro en déléguant les grosses tâches (résumés, traductions, gros volumes) à DeepSeek V4 Pro via OpenRouter | Julien |
-| `phrases-magiques` | Améliorer la pertinence des réponses de Claude : sur les demandes complexes, il reformule, propose un plan à valider, joue le contradicteur, signale vos angles morts et s'auto-critique avant de livrer | Julien |
+| Skill | Ce qu'elle fait |
+|---|---|
+| `delegation-deepseek-openrouter` | Fait faire les grosses tâches (résumés, traductions, gros volumes) par une IA moins chère. Tu économises tes messages Claude. |
+| `phrases-magiques` | Quand ta demande est compliquée, Claude te propose un plan avant de foncer, te dit ce que tu as oublié, et relit son travail avant de te le rendre. |
 
-## ⭐ Plugins recommandés (à installer vous-même, 1 minute chacun)
+## ⭐ Les modules à installer toi-même
 
-Ceux-là ne sont **pas** dans `skills-equipe` : ils sont maintenus par Anthropic ou par leurs auteurs, et se mettent donc à jour tout seuls de leur côté. On les recommande à toute l'équipe. Installez ceux qui servent à votre poste, dans l'ordre qui vous parle.
+Ceux-là ne sont pas dans notre paquet : ils appartiennent à Anthropic ou à d'autres gens, qui les mettent à jour de leur côté. Installe ceux qui servent à **ton** travail, pas tous.
 
-Deux chemins d'installation seulement :
+Il y a deux façons de les installer :
 
-- **Catalogue officiel** — *Personnaliser → Plugins → Parcourir les plugins*, tapez le nom, **Installer**. Rien d'autre à faire.
-- **Marketplace à ajouter** — *Personnaliser → Plugins → **+** → Ajouter une marketplace*, collez le slug `auteur/dépôt`, validez, puis **Installer** le plugin.
+- **Depuis le catalogue** — *Personnaliser → Plugins → Parcourir les plugins*, tu tapes le nom, tu cliques **Installer**. C'est tout.
+- **En ajoutant un magasin** — *Personnaliser → Plugins → **+** → Ajouter une marketplace*, tu colles l'adresse `auteur/dépôt`, tu valides, puis **Installer**.
 
-| # | Plugin | À quoi ça sert | Où le trouver | Comment s'en servir |
-|---|---|---|---|---|
-| 4 | **superpowers** | Méthode de travail complète : Claude réfléchit et planifie avant d'agir, puis vérifie son travail. La plus utile des neuf. | Catalogue officiel (`Superpowers`). À défaut : marketplace `obra/superpowers-marketplace` | Se déclenche tout seul dès qu'un travail est un peu complexe |
-| 5 | **frontend-design** | Génère des interfaces web soignées et distinctives, évite le rendu « IA générique » | Catalogue officiel (`frontend-design`) | `/frontend-design` dans le chat |
-| 6 | **impeccable** | Vocabulaire de vrai designer : typo, couleur, espacement, motion, détection d'anti-patterns. 1 skill + 23 commandes. Respecte votre charte existante. Complète frontend-design. | Marketplace `pbakaus/impeccable` | `/impeccable polish`, `/impeccable audit`, `/impeccable critique` (tapez `/` pour les 23) |
-| 7 | **ponytail** | Pousse Claude à écrire le moins de code possible : d'abord se demander si c'est nécessaire, préférer le standard et une ligne à cinquante. Moins de code = moins de bugs et de dette. Sans rogner sur la sécurité, l'accessibilité ni la validation. | Marketplace `DietrichGebert/ponytail` | Actif à chaque session ; `/ponytail-review` pour repérer ce qu'on peut supprimer, `/ponytail-help` pour le reste |
-| 8 | **marketing** | Créer du contenu, planifier des campagnes, analyser la performance, garder une voix de marque cohérente | Catalogue officiel (`Marketing`) | Décrivez la tâche : « planifie une campagne », « rédige un post », « analyse ces résultats » |
-| 9 | **searchfit-seo** | Boîte à outils SEO : clustering de mots-clés, briefs de contenu, schema, maillage interne — et suivi de visibilité dans les IA (AI Overviews, ChatGPT, Perplexity) | Catalogue officiel (`searchfit`) | Tapez `/` pour voir ses commandes, ou décrivez la tâche (audit, brief, schema…) |
-| 10 | **deep-research** | Rapports de recherche multi-sources et fact-checkés. Pour fonder articles et contenus de prospection sur des sources vérifiées. | Skill officielle Anthropic : onglet Plugins (ou *Réglages → Capacités → Skills*), tapez `deep research` | `/deep-research` suivi de votre question |
-| 11 | *copywriting* | Textes de pages qui convertissent (accueil, landing, titres, CTA, propositions de valeur) | ⚠️ **Rien à installer** : c'est déjà dans le plugin **marketing** (n° 8) | `/draft-content` ou `/content-creation` pour rédiger, `/brand-review` pour faire relire |
-| 12 | **doc-coauthoring** | Workflow guidé pour co-rédiger des articles et documents longs : cadrage, itérations, vérification que ça marche pour le lecteur | Skill officielle Anthropic : onglet Plugins (ou *Réglages → Capacités → Skills*), tapez `doc` | Se déclenche quand vous rédigez, ou décrivez votre demande |
+| Module | Ce qu'il fait | Où le trouver | Comment l'utiliser |
+|---|---|---|---|
+| **superpowers** | Claude réfléchit et fait un plan **avant** de travailler, puis vérifie ce qu'il a fait. Le plus utile de la liste. | Catalogue : `Superpowers`. Sinon, magasin `obra/superpowers-marketplace` | Rien à faire, il se lance tout seul quand le travail est compliqué |
+| **frontend-design** | Fabrique des pages web qui ont l'air faites par un humain, pas par une IA | Catalogue : `frontend-design` | Écris `/frontend-design` |
+| **impeccable** | Donne à Claude l'œil d'un vrai graphiste : polices, couleurs, espaces, animations. Il repère aussi ce qui est moche. Va bien avec frontend-design. | Magasin `pbakaus/impeccable` | `/impeccable polish`, `/impeccable audit`, `/impeccable critique` (tape `/` pour voir le reste) |
+| **ponytail** | Force Claude à écrire le moins de code possible. Moins de code = moins de bugs. | Magasin `DietrichGebert/ponytail` | Rien à faire, il est actif tout le temps. `/ponytail-review` pour voir ce qu'on peut supprimer |
+| **marketing** | Écrire des posts, préparer une campagne, regarder si ça a marché, garder le même ton partout | Catalogue : `Marketing` | Dis simplement ce que tu veux : « prépare une campagne », « écris un post » |
+| **searchfit-seo** | Aide le site à sortir dans Google **et** à être cité par les IA (ChatGPT, Perplexity) | Catalogue : `searchfit` | Tape `/` pour voir les commandes, ou explique ce que tu veux |
+| **deep-research** | Fait une vraie recherche : il va chercher plusieurs sources et vérifie avant de te répondre. Pratique pour écrire un article sans dire de bêtises. | Skills officielles Anthropic : *Réglages → Capacités → Skills*, tape `deep research` | `/deep-research` puis ta question |
+| **doc-coauthoring** | T'accompagne pour écrire un long document ou un article, étape par étape | Skills officielles Anthropic : *Réglages → Capacités → Skills*, tape `doc` | Se lance quand tu écris un document |
 
-> La numérotation commence à 4 : les n° 1 à 3 d'une liste plus large n'ont pas été retenus.
+> **Tu cherches un module pour écrire des textes de pages web ?** Il n'y en a pas à installer : c'est déjà dans **marketing**. Utilise `/draft-content` pour écrire, `/brand-review` pour faire relire.
 >
-> Vous ne trouvez pas une de ces entrées dans votre catalogue ? Signalez-le à Julien plutôt que d'installer un plugin au nom approchant trouvé ailleurs.
+> **Tu ne trouves pas un de ces modules ?** Dis-le à Julien. N'installe pas un autre module qui porte un nom qui ressemble.
 
-## 🔌 Connecteurs MCP recommandés (Claude Desktop)
+## 🔌 Les connecteurs (pour brancher tes outils)
 
-Les plugins ci-dessus apprennent à Claude **comment travailler**. Les connecteurs, eux, lui donnent **accès à vos outils** : le site, le dépôt de code, votre navigateur, vos données SEO. Les deux sont complémentaires.
+Les modules du dessus apprennent à Claude **comment travailler**. Les connecteurs, eux, lui donnent **accès à tes outils** : ton navigateur, le code du site, tes fichiers.
 
-Chemin d'installation commun : **Personnaliser → onglet Connecteurs → + → Parcourir**, cherchez le nom, **Connecter**.
+Pour tous : **Personnaliser → onglet Connecteurs → + → Parcourir**, tu tapes le nom, tu cliques **Connecter**.
 
 ### À installer
 
-| Connecteur | À quoi ça sert | Comment |
+| Connecteur | Ce qu'il fait | Comment |
 |---|---|---|
-| **Notion** | Accéder à l'espace Notion de l'équipe (comptes rendus, suivi) | Parcourir → `Notion` → Connecter |
-| **GitHub** | Lire et modifier le code du site, gérer les versions et les mises en ligne | Parcourir → `GitHub` → Connecter. **Identifiants du compte GitHub du projet et jeton d'écriture : demandez-les à Julien** — ils ne sont pas publiés ici. Compte partagé : ne changez pas le mot de passe, ne l'utilisez que pour le travail sur le site |
-| **Claude in Chrome** | Laisser Claude naviguer et agir dans votre navigateur (remplir des formulaires, lire des pages, agir dans l'admin WordPress en dernier recours) | C'est une **extension**, pas un connecteur : Google Chrome → Chrome Web Store → « Claude for Chrome » (par Anthropic) → Ajouter à Chrome → connectez l'extension à votre compte Claude |
-| **OpenRouter** | Accéder à des centaines de modèles d'IA (texte et image) de tous les fournisseurs — Anthropic, OpenAI, Google, Meta, Mistral… — avec **un seul compte et une seule clé**. Sert surtout à **générer les visuels** des articles et des pages, et à comparer plusieurs modèles | ⚠️ Créez d'abord un compte gratuit sur [openrouter.ai](https://openrouter.ai) (catalogue : [openrouter.ai/models](https://openrouter.ai/models)). Puis demandez à Claude de se connecter à votre compte en lui donnant votre clé API, et de la garder en mémoire |
-| **context7** | Donner à Claude la documentation technique **à jour** des outils (utile dès qu'on touche au thème WordPress, à Yoast, à du PHP) | Parcourir → `context7`. Sinon : *Ajouter un connecteur personnalisé* → Nom `context7` → URL `https://mcp.context7.com/mcp` → validez |
-| **Composio** | Brancher des centaines d'outils externes via **un seul** connecteur sécurisé — chez nous surtout les outils **Google** (Ads, Analytics, Search Console), pilotés en langage naturel | ⚠️ Créez d'abord votre compte sur [dashboard.composio.dev](https://dashboard.composio.dev) et branchez-y les outils dont vous avez besoin. Puis Parcourir → `Composio` → Connecter |
+| **Notion** | Ouvrir les pages Notion de l'équipe | Parcourir → `Notion` → Connecter |
+| **GitHub** | Lire et modifier le code du site, mettre en ligne | Parcourir → `GitHub` → Connecter. **Le compte et le mot de passe : demande-les à Julien**, ils ne sont pas écrits ici. C'est un compte partagé : ne change pas le mot de passe et ne l'utilise que pour le travail |
+| **Claude in Chrome** | Laisser Claude utiliser ton navigateur : lire des pages, remplir des formulaires | Ce n'est pas un connecteur mais une **extension**. Va sur Chrome → Chrome Web Store → cherche « Claude for Chrome » (par Anthropic) → Ajouter à Chrome → connecte-la à ton compte Claude |
+| **OpenRouter** | Un seul compte pour utiliser plein d'autres IA. On s'en sert surtout pour **fabriquer les images** des articles | D'abord, crée un compte gratuit sur [openrouter.ai](https://openrouter.ai). Ensuite, donne ta clé à Claude et demande-lui de la retenir |
+| **context7** | Donne à Claude les manuels techniques **à jour** (utile dès qu'on touche à WordPress) | Parcourir → `context7`. Sinon : *Ajouter un connecteur personnalisé* → Nom `context7` → Adresse `https://mcp.context7.com/mcp` |
+| **Composio** | Un seul branchement pour accéder à plein d'outils extérieurs, surtout ceux de Google | D'abord, crée ton compte sur [dashboard.composio.dev](https://dashboard.composio.dev) et branches-y tes outils. Ensuite : Parcourir → `Composio` → Connecter |
 
-### Optionnels (à installer seulement si une tâche le demande)
+### Seulement si on te le demande
 
-| Connecteur | À quoi ça sert | Comment |
+| Connecteur | Ce qu'il fait | Comment |
 |---|---|---|
-| **File System** | Laisser Claude lire et écrire des fichiers sur votre ordinateur | Le plus simple : dans le projet, utilisez **Connecter un dossier** et choisissez le dossier du site — c'est souvent suffisant. Si on vous demande le connecteur dédié : Parcourir → `Filesystem` → autorisez le dossier de travail |
-| **Playwright** | Automatiser un navigateur « invisible » : tester des pages, extraire des données, prendre des captures | Parcourir → `Playwright`. S'il n'apparaît pas, demandez à Julien — c'est plus technique |
-| **Windows MCP** | Piloter le bureau Windows (ouvrir des applications, cliquer, taper) | En général **absent du catalogue**. Demandez à Julien de vous l'installer. Notez-le et passez au suivant si vous êtes seul |
+| **File System** | Laisser Claude lire et écrire des fichiers sur ton ordinateur | Le plus simple : dans ton projet, clique **Connecter un dossier** et choisis le dossier du site. Ça suffit presque toujours |
+| **Playwright** | Ouvrir un navigateur invisible pour tester des pages ou prendre des captures | Parcourir → `Playwright`. S'il n'apparaît pas, demande à Julien |
+| **Windows MCP** | Laisser Claude piloter ton ordinateur (ouvrir des applis, cliquer, taper) | Souvent absent du catalogue. Demande à Julien de te l'installer, et passe à la suite en attendant |
 
-✅ **Résultat attendu** : dans *Personnaliser → Connecteurs*, vous voyez la liste installée, chacun marqué **connecté**.
+✅ **C'est bon quand** : dans *Personnaliser → Connecteurs*, tu vois ta liste et chacun est marqué **connecté**.
 
-🆘 **Bloqué ?** Installez ce qui marche — Notion, Claude in Chrome, OpenRouter et context7 sont les plus faciles. Pour tout ce qui demande un accès partagé (identifiants, jeton, connecteur absent du catalogue), c'est **Julien** : envoyez-lui ce qui vous manque.
+🆘 **Ça coince ?** Installe déjà ce qui marche — Notion, Claude in Chrome, OpenRouter et context7 sont les plus faciles. Dès qu'il faut un mot de passe ou un accès partagé, c'est Julien : envoie-lui ce qui te manque.
 
-> Certains projets ont besoin d'accès spécifiques (WordPress, hébergeur, Search Console…). Ils ne sont pas dans cette liste : Julien les branche au cas par cas, quand le projet le demande.
+> Certains projets ont besoin d'accès en plus (WordPress, hébergeur, Search Console…). Ils ne sont pas dans la liste : Julien les branche seulement quand un projet en a besoin.
 
-## ✍️ Proposer une skill (le rituel du vendredi)
+## ✍️ Proposer ta skill (le rituel du vendredi)
 
-1. Dans Claude : « *Transforme tout notre échange en une skill, incluant ma demande initiale et tous mes feedbacks, et exporte-la en fichier .skill.* »
-2. Déposez-la vous-même : demandez à Claude « *Dépose cette skill sur le dépôt GitHub JRAYES000/marketplace-equipe : ajoute son dossier dans plugins/skills-equipe/skills/ et incrémente la version dans plugins/skills-equipe/.claude-plugin/plugin.json* ». Nom de la skill en minuscules : `sujet-action` (ex. `seo-audit-page`). Prérequis (une seule fois) : un compte GitHub + l'invitation « Collaborator » de Julien acceptée.
-3. C'est tout — toute l'équipe la reçoit automatiquement, aucune validation nécessaire.
+Tu as trouvé une bonne façon de faire avec Claude ? Partage-la, ça prend 5 minutes.
 
-## 🔧 Pour le mainteneur (Julien) — mettre à jour
+1. Dans Claude, écris : « *Transforme tout notre échange en une skill, avec ma demande de départ et tous mes retours, et exporte-la en fichier .skill.* »
+2. Puis : « *Dépose cette skill sur le dépôt GitHub JRAYES000/marketplace-equipe : ajoute son dossier dans `plugins/skills-equipe/skills/` et augmente le numéro de version dans `plugins/skills-equipe/.claude-plugin/plugin.json`.* »
+3. Fini. Toute l'équipe la reçoit automatiquement, personne n'a besoin de valider.
 
-1. Ajouter/modifier un dossier dans `plugins/skills-equipe/skills/` (un dossier = une skill avec son `SKILL.md`)
-2. Incrémenter `version` dans `plugins/skills-equipe/.claude-plugin/plugin.json` (ex. 0.1.0 → 0.2.0)
-3. Commit + push — les mises à jour se propagent aux membres (au besoin : `/plugin marketplace update marketplace-equipe`)
+Le nom de la skill s'écrit en minuscules, sujet puis action : `seo-audit-page`. Il te faut un compte GitHub et l'invitation de Julien (une seule fois).
 
-## ❓ FAQ
+## ❓ Questions fréquentes
 
-**Je ne vois pas les nouvelles skills ?** Relancez Claude, ou tapez `/plugin marketplace update marketplace-equipe`.
+**Je ne vois pas les nouvelles skills.**
+Relance Claude. Si ça ne suffit pas, tape `/plugin marketplace update marketplace-equipe`.
 
-**Est-ce que ça va écraser mes skills à moi ?** Non. Les skills d'un plugin sont installées dans un dossier séparé (`~/.claude/plugins/…`) et portent un préfixe : `skills-equipe:phrases-magiques`, `superpowers:brainstorming`. Vos skills personnelles (`~/.claude/skills/`) ne sont ni touchées ni renommées. Même si une skill du dépôt porte exactement le même nom que l'une des vôtres, les deux coexistent — précisez le nom complet avec le préfixe pour lever l'ambiguïté.
+**Est-ce que ça va effacer mes skills à moi ?**
+Non, jamais. Les skills du dépôt sont rangées dans un dossier séparé et portent une étiquette devant leur nom : `skills-equipe:phrases-magiques`, `superpowers:brainstorming`. Les tiennes ne bougent pas. Même si deux skills ont exactement le même nom, elles vivent chacune de leur côté — dis le nom complet avec l'étiquette pour choisir laquelle tu veux.
 
-**Et si j'ai déjà installé un de ces plugins de mon côté ?** Aucun problème tant que vous ne l'installez qu'**une** fois. Éviter en revanche d'installer le **même** plugin depuis deux magasins différents : ses skills se retrouveraient en double sous le même préfixe.
+**J'ai déjà installé un de ces modules de mon côté ?**
+Aucun souci, tant que tu ne l'installes qu'**une** fois. Évite juste d'installer le **même** module depuis deux magasins différents : tu te retrouverais avec tout en double.
 
-**Une skill me semble buguée ?** Dites-le à Julien — il corrige dans le dépôt et tout le monde profite du correctif.
+**Une skill a l'air cassée.**
+Préviens Julien. Il corrige une fois, et tout le monde reçoit le correctif.
 
-**Je peux modifier une skill directement ici ?** Oui si vous êtes à l'aise avec GitHub : proposez une pull request.
+**Je peux modifier une skill directement ici ?**
+Oui, si tu sais te servir de GitHub : propose une pull request.
+
+## 🔧 Pour Julien — mettre à jour
+
+1. Ajouter ou modifier un dossier dans `plugins/skills-equipe/skills/` (un dossier = une skill avec son `SKILL.md`)
+2. Augmenter `version` dans `plugins/skills-equipe/.claude-plugin/plugin.json` (0.1.0 → 0.2.0)
+3. Commit + push. Les membres reçoivent la mise à jour au redémarrage de Claude, ou avec `/plugin marketplace update marketplace-equipe`
