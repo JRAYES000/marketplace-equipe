@@ -122,5 +122,6 @@ Oui, si tu sais te servir de GitHub : propose une pull request.
 ## 🔧 Pour Julien — mettre à jour
 
 1. Ajouter ou modifier un dossier dans `plugins/skills-equipe/skills/` (un dossier = une skill avec son `SKILL.md`)
-2. Augmenter `version` dans `plugins/skills-equipe/.claude-plugin/plugin.json` (0.1.0 → 0.2.0). **Jamais optionnel.** Claude compare des numéros de version, pas des contenus : si tu pousses une skill modifiée en laissant l'ancien numéro, il ne voit rien de neuf. Le bouton **Mettre à jour** reste grisé chez tout le monde, et le seul moyen de recevoir le changement devient désinstaller puis réinstaller
+2. Augmenter `version` dans `plugins/skills-equipe/.claude-plugin/plugin.json` (0.1.0 → 0.2.0). Claude compare des numéros de version, pas des contenus : sans ce bump, il ne voit rien de neuf, le bouton **Mettre à jour** reste grisé chez tout le monde et l'équipe garde l'ancienne skill sans le savoir.
+   **Si tu oublies, ce n'est pas grave** : une GitHub Action (`.github/workflows/bump-version.yml`) le détecte et incrémente le patch à ta place, une minute après ton push. Le petit commit `Bump auto` qui apparaît, c'est elle. Un bump à la main reste préférable quand le changement est important — mineur pour une nouvelle skill, majeur pour une refonte
 3. Commit + push. Les membres reçoivent la mise à jour au redémarrage de Claude, ou avec `/plugin marketplace update marketplace-equipe`
