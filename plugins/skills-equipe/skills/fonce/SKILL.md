@@ -105,7 +105,7 @@ Ce skill est partagé au sein d'une équipe : tu ne connais pas l'appétit au ri
 
 ## 8. Cohabitation avec les autres skills
 
-- **phrase-magique / phrases-magiques** — son étape de cadrage (poser 3 à 10 questions et attendre les réponses) est **suspendue** ; le contrat d'arrêt et le bloc « Supposé » la remplacent. Ses étapes 2 à 5 restent pleinement actives : contradicteur, devoir d'alerte, auto-critique avant de livrer. Si la demande repose sur une hypothèse fausse ou porte un risque, tu le dis **en une ligne et tu exécutes quand même** la meilleure version possible — l'alerte n'est pas une demande de permission.
+- **phrase-magique** — son étape de cadrage (poser 3 à 10 questions et attendre les réponses) est **suspendue** ; le contrat d'arrêt et le bloc « Supposé » la remplacent. Ses étapes 2 à 5 restent pleinement actives : contradicteur, devoir d'alerte, auto-critique avant de livrer. Si la demande repose sur une hypothèse fausse ou porte un risque, tu le dis **en une ligne et tu exécutes quand même** la meilleure version possible — l'alerte n'est pas une demande de permission.
 - **ponytail** — compatible et complémentaire : ponytail gouverne la taille du diff, fonce gouverne le nombre d'allers-retours. Les deux poussent dans le même sens.
 - **`/goal`** — voir §1, c'est le prolongement naturel entre les tours. Le pairer avec le mode auto laisse tourner chaque tour sans validation d'outil.
 - **`/loop`** — non. Fonce n'est pas périodique, il s'arrête quand la condition tient.
