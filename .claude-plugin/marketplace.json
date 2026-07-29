@@ -8,7 +8,7 @@
     {
       "name": "skills-equipe",
       "source": "./plugins/skills-equipe",
-      "description": "Les meilleures skills partagées de l'équipe : qualité des réponses (phrase-magique), parallélisation des gros lots, délégation à une IA moins chère."
+      "description": "Les meilleures skills partagées de l'équipe : mode autonome à condition d'arrêt (fonce), qualité des réponses (phrase-magique), parallélisation des gros lots, délégation à une IA moins chère."
     }
   ]
 }

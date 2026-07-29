@@ -17,7 +17,7 @@ Ou avec la souris : **Réglages → Capacités → Plugins → Ajouter une marke
 
 ![Écran « Ajouter une marketplace » dans Claude, avec l'URL JRAYES000/marketplace-equipe](ajouter-marketplace.png)
 
-**Pour vérifier que ça a marché :** tu dois voir `delegation-deepseek-openrouter`, `phrase-magique` et `parallelisation-taches` dans tes capacités.
+**Pour vérifier que ça a marché :** tu dois voir `fonce`, `delegation-deepseek-openrouter`, `phrase-magique` et `parallelisation-taches` dans tes capacités.
 
 ## 📦 Les skills de l'équipe
 
@@ -25,9 +25,12 @@ Une fois `skills-equipe` installé, les skills arrivent avec le paquet. Tu n'as 
 
 | Skill | Ce qu'elle fait |
 |---|---|
+| `fonce` | Le mode « je pars, tu gères ». Claude écrit d'abord noir sur blanc à quoi ressemblera « c'est fini » (un test qui passe, une page qui répond), puis il y va tout seul : aucune question, il tranche les doutes lui-même et te dit à la fin ce qu'il a supposé — tu corriges d'un mot si besoin. Il vérifie pour de vrai avant d'annoncer terminé. Tape `/fonce` suivi de ta demande. |
 | `phrase-magique` | Le mode « travail soigné ». Quand ta demande est compliquée, Claude cadre avant de foncer, te dit ce que tu as oublié, vérifie vraiment son travail (il ouvre ce qu'il a produit au lieu de supposer que c'est bon) et te le dit s'il a raté quelque chose. Trois niveaux d'exigence, les 17 « phrases magiques », et les règles pour ne pas gaspiller de tokens. Tape `phrase magique` pour l'activer, `mode normal` pour l'arrêter. |
 | `parallelisation-taches` | Pour les gros lots (50 documents à résumer, 60 lignes à classer, 12 pages à auditer) : Claude découpe le travail et le confie à plusieurs assistants rapides en même temps. Beaucoup plus vite, et moins cher. Dis simplement « parallélise ça ». |
 | `delegation-deepseek-openrouter` | Fait faire les grosses tâches (résumés, traductions, gros volumes) par une IA moins chère. Tu économises tes messages Claude. |
+
+> **Attention avec `fonce` :** il décide seul et va jusqu'au bout. Ne le lance pas sur quelque chose que tu ne saurais pas défaire toi-même (mettre le site en ligne, envoyer un message à un client). Pour ça, décris ta demande normalement — Claude te demandera confirmation.
 
 > **Une nouvelle skill n'apparaît pas ?** Les mises à jour ne sont pas instantanées. Va dans **Réglages → Capacités → Plugins**, et rafraîchis (ou désinstalle puis réinstalle `skills-equipe`). Redémarrer Claude Desktop aide aussi.
 
