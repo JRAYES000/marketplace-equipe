@@ -102,7 +102,10 @@ Le nom de la skill s'écrit en minuscules, sujet puis action : `seo-audit-page`.
 ## ❓ Questions fréquentes
 
 **Je ne vois pas les nouvelles skills.**
-Relance Claude. Si ça ne suffit pas, tape `/plugin marketplace update marketplace-equipe`.
+D'abord : **ouvre une nouvelle conversation.** Une conversation déjà commencée garde les skills qu'elle avait à son démarrage — même après une mise à jour, elle continue avec les anciennes. Si une conversation neuve ne suffit pas, relance Claude, puis tape `/plugin marketplace update marketplace-equipe`.
+
+**Le bouton « Mettre à jour » est grisé.**
+C'est normal : tu as déjà la dernière version (elle est affichée juste à côté, dans le panneau). Le bouton ne s'allume que si le dépôt annonce un numéro plus élevé que le tien.
 
 **Est-ce que ça va effacer mes skills à moi ?**
 Non, jamais. Les skills du dépôt sont rangées dans un dossier séparé et portent une étiquette devant leur nom : `skills-equipe:phrase-magique`, `superpowers:brainstorming`. Les tiennes ne bougent pas. Même si deux skills ont exactement le même nom, elles vivent chacune de leur côté — dis le nom complet avec l'étiquette pour choisir laquelle tu veux.
@@ -119,5 +122,5 @@ Oui, si tu sais te servir de GitHub : propose une pull request.
 ## 🔧 Pour Julien — mettre à jour
 
 1. Ajouter ou modifier un dossier dans `plugins/skills-equipe/skills/` (un dossier = une skill avec son `SKILL.md`)
-2. Augmenter `version` dans `plugins/skills-equipe/.claude-plugin/plugin.json` (0.1.0 → 0.2.0)
+2. Augmenter `version` dans `plugins/skills-equipe/.claude-plugin/plugin.json` (0.1.0 → 0.2.0). **Jamais optionnel.** Claude compare des numéros de version, pas des contenus : si tu pousses une skill modifiée en laissant l'ancien numéro, il ne voit rien de neuf. Le bouton **Mettre à jour** reste grisé chez tout le monde, et le seul moyen de recevoir le changement devient désinstaller puis réinstaller
 3. Commit + push. Les membres reçoivent la mise à jour au redémarrage de Claude, ou avec `/plugin marketplace update marketplace-equipe`
