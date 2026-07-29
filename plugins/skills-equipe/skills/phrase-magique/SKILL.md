@@ -42,7 +42,7 @@ Choisir seul selon l'enjeu ; l'utilisateur peut forcer un niveau.
 |---|---|---|---|
 | **Léger** | Tâche moyenne bien décrite, « vite fait », « mode léger » | 0-1 technique | Socle non négociable seul |
 | **Standard** *(défaut)* | Tâche complexe, ambiguë, multi-étapes | 2 techniques, 1 🔴 max | Cadrage + route + auto-critique |
-| **Maximal** | « qualité maximale », « sois exigeant », gros livrable | Sans plafond | Tout, y compris 2 itérations d'auto-critique |
+| **Maximal** | « qualité maximale », « sois exigeant », gros livrable | Sans plafond | Tout, y compris le cadrage long (jusqu'à 10 questions) et 2 itérations d'auto-critique |
 
 ---
 
@@ -71,7 +71,16 @@ Choisir seul selon l'enjeu ; l'utilisateur peut forcer un niveau.
 Exemple : « réussi = la page s'ouvre sans débordement à 1280 et 390 px, le CTA est visible, ≤ 1 écran de code ».
 À la fin, vérifier la sortie contre ces critères et le dire. C'est ça, « se relire » : un acte testable, pas un vœu.
 
-**Questions de cadrage** — si la demande est floue ou à fort enjeu : poser les questions via `AskUserQuestion`, **3 maximum, un seul tour**, et attendre les réponses avant de produire. Ne poser que des questions dont la réponse change réellement le livrable. Faire toujours préciser les critères de succès (audience, format, ton, longueur, contraintes, usage prévu).
+**Questions de cadrage** — si la demande est floue ou à fort enjeu : poser les questions via `AskUserQuestion`, **en un seul tour**, et attendre les réponses avant de produire. Ne poser que des questions dont la réponse change réellement le livrable. Faire toujours préciser les critères de succès (audience, format, ton, longueur, contraintes, usage prévu).
+
+Combien de questions, selon l'intensité :
+
+| Intensité | Plafond |
+|---|---|
+| Léger / Standard | **3** — au-delà, le cadrage coûte plus qu'il ne rapporte sur une tâche de cette taille |
+| Maximal | **jusqu'à 10** — projet flou, stratégique, gros livrable : trois questions ne couvrent pas l'espace de décision, et un aller-retour raté coûte plus cher que sept questions de plus |
+
+Le **tour unique n'est jamais négociable**, quelle que soit l'intensité : tout ce qu'il faut savoir se demande d'un coup. Un cadrage qui s'étale sur plusieurs tours est un interrogatoire, pas un cadrage.
 
 ---
 
@@ -196,7 +205,7 @@ Utilisable en **coach de prompt** (l'utilisateur soumet un prompt à améliorer 
 3. **Technique 7** : 2 itérations maximum.
 4. **Technique 10** : corpus few-shot ≤ 1 500 mots ; sinon extraire 2-3 passages représentatifs.
 5. **Technique 17** : citer les passages minimaux, pas des pages.
-6. **Clarifications** : un seul tour, 3 questions maximum.
+6. **Clarifications** : un seul tour, toujours. 3 questions maximum en léger / standard, jusqu'à 10 en maximal.
 7. **Hygiène de conversation** — le contexte entier est retraité à chaque tour :
    - conversation longue et aboutie → capitaliser (technique 2) puis repartir sur une conversation neuve ;
    - demander des modifications ciblées (« modifie uniquement la section X ») plutôt que des régénérations complètes ;
