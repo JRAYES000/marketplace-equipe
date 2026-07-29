@@ -1,0 +1,63 @@
+name: Bump auto de la version
+
+# Une skill poussée sans changement de `version` dans plugin.json n'atteint
+# personne : Claude compare des numéros, pas des contenus. Le bouton
+# « Mettre à jour » reste grisé et l'équipe garde l'ancienne skill sans le savoir.
+#
+# Une Action ne peut pas refuser un push (elle tourne après), donc elle corrige :
+# si les skills ont bougé et pas la version, elle incrémente le patch elle-même.
+#
+# ponytail: un seul plugin en dur. Le jour où il y en a deux, boucler sur
+# `plugins/*/` au lieu de PLUGIN.
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'plugins/skills-equipe/skills/**'
+
+permissions:
+  contents: write
+
+jobs:
+  bump:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Bumper si la version n'a pas bougé
+        env:
+          BEFORE: ${{ github.event.before }}
+        run: |
+          set -euo pipefail
+          PLUGIN=plugins/skills-equipe/.claude-plugin/plugin.json
+
+          # Premier push / force-push : pas de point de comparaison, on ne touche à rien.
+          if [ -z "$BEFORE" ] || [ "$BEFORE" = "0000000000000000000000000000000000000000" ]; then
+            echo "Pas de commit de reference, rien a comparer."
+            exit 0
+          fi
+
+          version_de() { grep -oP '"version"\s*:\s*"\K[^"]+' "$1"; }
+
+          NOUVELLE=$(version_de "$PLUGIN")
+          ANCIENNE=$(git show "$BEFORE:$PLUGIN" 2>/dev/null | grep -oP '"version"\s*:\s*"\K[^"]+' || echo "")
+
+          if [ "$NOUVELLE" != "$ANCIENNE" ]; then
+            echo "Version deja passee de ${ANCIENNE:-neant} a $NOUVELLE. Rien a faire."
+            exit 0
+          fi
+
+          IFS=. read -r MAJEUR MINEUR PATCH <<< "$NOUVELLE"
+          BUMPEE="$MAJEUR.$MINEUR.$((PATCH + 1))"
+          sed -i "s/\"version\": \"$NOUVELLE\"/\"version\": \"$BUMPEE\"/" "$PLUGIN"
+
+          echo "Skills modifiees sans bump : $NOUVELLE -> $BUMPEE"
+
+          git config user.name  "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git commit -m "Bump auto $NOUVELLE -> $BUMPEE (skills modifiees sans changement de version)" "$PLUGIN"
+          # Ne re-declenche pas ce workflow : ce commit ne touche pas skills/**.
+          git push
