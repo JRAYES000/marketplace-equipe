@@ -101,11 +101,21 @@ Le nom de la skill s'écrit en minuscules, sujet puis action : `seo-audit-page`.
 
 ## ❓ Questions fréquentes
 
-**Je ne vois pas les nouvelles skills.**
+**Je ne vois pas les nouvelles skills — dans Claude Code (terminal).**
+Deux commandes, dans cet ordre. La première rafraîchit le catalogue, la seconde met à jour ton installation — l'une sans l'autre ne suffit pas :
+
+```
+/plugin marketplace update marketplace-equipe
+/plugin update skills-equipe@marketplace-equipe
+```
+
+Puis relance Claude Code.
+
+**Je ne vois pas les nouvelles skills — dans Claude Desktop.**
 D'abord : **ouvre une nouvelle conversation.** Une conversation déjà commencée garde les skills qu'elle avait à son démarrage — même après une mise à jour, elle continue avec les anciennes. Si une conversation neuve ne suffit pas, relance Claude, puis tape `/plugin marketplace update marketplace-equipe`.
 
-**Le bouton « Mettre à jour » est grisé.**
-C'est normal : tu as déjà la dernière version (elle est affichée juste à côté, dans le panneau). Le bouton ne s'allume que si le dépôt annonce un numéro plus élevé que le tien.
+**Le bouton « Mettre à jour » de Claude Desktop est grisé alors que le dépôt a bougé.**
+Sur Desktop, le plugin n'est pas installé sur ton ordinateur : il vit sur les serveurs de Claude, qui relisent le dépôt à leur propre rythme. Le numéro affiché dans le panneau est celui qu'**ils** connaissent, pas celui de GitHub — il n'y a donc rien à vider en local, et le bouton s'allumera de lui-même une fois la synchronisation faite. Si c'est urgent, désinstalle et réinstalle le plugin : ça force une relecture immédiate. Claude Code (terminal), lui, lit GitHub en direct — voir les deux commandes ci-dessus.
 
 **Est-ce que ça va effacer mes skills à moi ?**
 Non, jamais. Les skills du dépôt sont rangées dans un dossier séparé et portent une étiquette devant leur nom : `skills-equipe:phrase-magique`, `superpowers:brainstorming`. Les tiennes ne bougent pas. Même si deux skills ont exactement le même nom, elles vivent chacune de leur côté — dis le nom complet avec l'étiquette pour choisir laquelle tu veux.
