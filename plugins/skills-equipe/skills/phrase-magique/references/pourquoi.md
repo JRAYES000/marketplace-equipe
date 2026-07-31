@@ -1,6 +1,24 @@
 # Pourquoi ces règles — preuves et sources
 
-Sommaire : [Ce qui est étayé](#ce-qui-est-étayé) · [Ce qui est réfuté](#ce-qui-est-réfuté) · [Ce qui reste une hypothèse](#ce-qui-reste-une-hypothèse) · [Réserves de portée](#réserves-de-portée) · [Sources](#sources)
+Sommaire : [Calibrage Claude Opus 5](#calibrage-claude-opus-5) · [Ce qui est étayé](#ce-qui-est-étayé) · [Ce qui est réfuté](#ce-qui-est-réfuté) · [Ce qui reste une hypothèse](#ce-qui-reste-une-hypothèse) · [Réserves de portée](#réserves-de-portée) · [Sources](#sources)
+
+## Calibrage Claude Opus 5
+
+Ce skill est écrit pour Claude Opus 5, dont la documentation officielle change ce qu'il faut prescrire.
+
+**Retiré parce que le modèle le fait déjà.** « Claude Opus 5 verifies its own work without being told to. If your prompt contains explicit verification instructions […] remove them : instructions like these cause over-verification […] removing them reduces wasted tokens with no loss in quality. » La system card ajoute que le modèle produit parfois « elaborate verification pipelines that distract from the primary task ». La passe de vérification explicite a donc été supprimée du skill. **Ce qui reste, c'est la règle d'honnêteté du socle** — ne pas annoncer « vérifié » sans signal constaté — qui répond à un travers documenté ailleurs dans la même system card : « a surprising number of cases in which Opus 5 confidently stated an answer about which it was in fact unsure ».
+
+**Retiré pour la même raison** : « réfléchis étape par étape ». Le raisonnement est natif et adaptatif ; la doc note qu'« a prompt like "think thoroughly" often produces better reasoning than a hand-written step-by-step plan ».
+
+**Conservé parce que le modèle ne le corrige pas seul.** La verbosité : « Claude Opus 5's default user-facing responses run longer than prior Opus models' » — et l'effort ne la réduit pas, il faut la demander explicitement. D'où la règle dure anti-verbosité.
+
+**Ajouté à cause de travers documentés.** L'élargissement de périmètre (« can also expand the scope of a task, adding steps that weren't requested »), la sur-délégation à des sous-agents (« delegates to subagents more readily than prior models »), et la sur-narration.
+
+**Cohérent avec le cadrage.** La doc recommande de donner « the complete task specification up front » et de laisser le modèle dérouler : c'est exactement ce que produisent les 4 questions posées en un seul tour.
+
+**Forme des règles.** « Positive examples of the communication style you want tend to be more effective than instructions about what not to do » — d'où la conversion d'une partie des interdits en formulations positives. Les interdits restants visent des travers qui résistent sous pression (persona, auto-notation, second tour de questions).
+
+Sources : [Prompting Claude Opus 5](https://platform.claude.com/docs/en/build-with-claude/prompt-engineering/prompting-claude-opus-5) · [Prompting best practices](https://platform.claude.com/docs/en/build-with-claude/prompt-engineering/claude-prompting-best-practices) · [Effort](https://platform.claude.com/docs/en/build-with-claude/effort) · [Claude Opus 5 System Card (24/07/2026)](https://www.anthropic.com/news/claude-opus-5)
 
 Revue faite le 31/07/2026. Chaque référence a été contrôlée au texte intégral — titre, date et chiffre cité — par un vérificateur adversarial. Sur neuf références remontées, neuf existaient, mais deux se voyaient attribuer des conclusions absentes du texte : un identifiant arXiv plausible ne prouve rien.
 
