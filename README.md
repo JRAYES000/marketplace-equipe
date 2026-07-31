@@ -85,15 +85,20 @@ Fais-le dans tous les cas. Le tableau du dessous, c'est pour des besoins particu
 
 | Connecteur | Ce qu'il fait | Comment |
 |---|---|---|
-| **Windows MCP** | Piloter les **applications** de ton ordinateur : ouvrir Word ou l'Explorateur, cliquer, taper, faire une capture d'écran. **Pas pour tes fichiers** — pour ça, c'est « Connecter un dossier » | Absent du catalogue : il s'installe à la main, en 5 minutes — la marche à suivre est juste en dessous |
+| **Windows MCP** | Piloter les **applications** de ton ordinateur : ouvrir Word ou l'Explorateur, cliquer, taper, faire une capture d'écran. **Pas pour tes fichiers** — pour ça, c'est « Connecter un dossier » | Absent du catalogue : une commande à coller, voir juste en dessous |
 
-**Installer Windows MCP à la main** — une seule fois, sur Windows.
+**Installer Windows MCP** — une seule fois, sur Windows. Trois gestes, rien à éditer.
 
-1. Dans PowerShell, installe l'outil qui fait tourner le serveur : `winget install astral-sh.uv`
-2. Ouvre le fichier de configuration de Claude en collant ce chemin dans la barre de l'Explorateur : `%APPDATA%\Claude\claude_desktop_config.json`
-3. **S'il n'existe pas**, crée-le avec exactement ce contenu, puis va à l'étape 5 : `{"mcpServers":{"windows-mcp":{"command":"uvx","args":["windows-mcp@latest","serve"]}}}`
-4. **S'il existe déjà**, ajoute cette ligne juste après `"mcpServers": {` : `"windows-mcp": { "command": "uvx", "args": ["windows-mcp@latest", "serve"] },`
-5. Enregistre, quitte complètement Claude, rouvre-le. Le connecteur apparaît dans *Personnaliser → Connecteurs*.
+1. Ouvre **PowerShell** : touche Windows, tape `powershell`, Entrée.
+2. Colle cette ligne, appuie sur Entrée, laisse-la finir :
+
+```powershell
+irm https://raw.githubusercontent.com/JRAYES000/marketplace-equipe/main/scripts/install-windows-mcp.ps1 | iex
+```
+
+3. Ferme complètement Claude, rouvre-le. Le connecteur apparaît dans *Personnaliser → Connecteurs*.
+
+Le script dit à chaque étape ce qu'il fait. Il sauvegarde ta configuration avant d'y toucher, ne change rien si le connecteur est déjà là, et tu peux le relancer autant de fois que tu veux. Son contenu est lisible ici : [`scripts/install-windows-mcp.ps1`](scripts/install-windows-mcp.ps1).
 
 ⚠️ **Windows MCP donne à Claude la main sur tout l'ordinateur** : n'importe quel fichier, n'importe quel dossier, y compris les supprimer. « Connecter un dossier » se limite au dossier que tu as choisi. Quand les deux savent faire le travail, prends toujours « Connecter un dossier ».
 
