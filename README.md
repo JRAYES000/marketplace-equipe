@@ -85,17 +85,9 @@ Fais-le dans tous les cas. Le tableau du dessous, c'est pour des besoins particu
 
 | Connecteur | Ce qu'il fait | Comment |
 |---|---|---|
-| **Playwright** | Ouvre un navigateur invisible pour lire des **sites publics**, tester des pages ou prendre des captures. Il travaille en arrière-plan, sans occuper ton Chrome | Il n'est pas dans le catalogue, même en cherchant. Demande à Julien de te l'installer |
 | **Windows MCP** | Piloter les **applications** de ton ordinateur : ouvrir Word ou l'Explorateur, cliquer, taper, faire une capture d'écran. **Pas pour tes fichiers** — pour ça, c'est « Connecter un dossier » | Absent du catalogue. Demande à Julien de te l'installer, et passe à la suite en attendant |
 
 ⚠️ **Windows MCP donne à Claude la main sur tout l'ordinateur** : n'importe quel fichier, n'importe quel dossier, y compris les supprimer. « Connecter un dossier » se limite au dossier que tu as choisi. Quand les deux savent faire le travail, prends toujours « Connecter un dossier ».
-
-🧭 **Claude in Chrome ou Playwright ?** Une seule question : **faut-il être connecté au site ?**
-
-- **Oui** — espace client, back-office, réseau social, France Travail : c'est **Claude in Chrome**. Lui seul utilise ta session déjà ouverte, avec ton mot de passe et ta double authentification.
-- **Non** — site public, page à lire, capture à prendre : c'est **Playwright**. Plus rapide, il tourne sans surveillance et ne bloque pas ton navigateur pendant que tu travailles.
-
-Les deux ne font donc pas double emploi : garde-les tous les deux si ton travail passe par le web.
 
 ✅ **C'est bon quand** : dans *Personnaliser → Connecteurs*, tu vois ta liste et chacun est marqué **connecté**.
 
