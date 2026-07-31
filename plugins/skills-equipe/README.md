@@ -9,7 +9,7 @@ Plugin regroupant les meilleures skills partagées de l'équipe.
 | `fonce` | Mode autonome à condition d'arrêt : formule d'abord une condition de fin vérifiable (état mesurable, preuve exécutable, borne de tours), puis exécute de bout en bout sans une seule question — décide seul, journalise ses hypothèses, vérifie sur le résultat réel, ne rend qu'un récap final. Se prolonge entre les tours avec `/goal`. Remplace l'ancien slash command `/fonce` |
 | `parallelisation-taches` | Découper un gros lot homogène (50 documents, 60 lignes, 12 pages) et le confier à plusieurs sous-agents en parallèle |
 | `delegation-deepseek-openrouter` | Économiser les tokens Claude Pro en déléguant les tâches lourdes à DeepSeek V4 Pro via le connecteur OpenRouter MCP |
-| `phrase-magique` | Disposition de travail exigeante tenue toute la session : limites signalées puis 4 questions de cadrage en un seul appel quelle que soit la complexité, critères de réussite binaires écrits d'avance, routage ARTEFACT / PROSE / ANALYSE, contradicteur, une passe de vérification branchée sur un signal déterministe, garde-fous de sobriété tokens. Catalogue des 17 phrases et preuves dans `references/` |
+| `phrase-magique` | Disposition de travail exigeante tenue toute la session : limites signalées puis 4 questions de cadrage en un seul appel — avec un premier jet joint quand la tâche s'y prête —, critères de réussite binaires écrits d'avance, routage ARTEFACT / PROSE / ANALYSE, contradicteur, jamais de « vérifié » sans signal déterministe. ~1 800 tokens ; catalogue des 17 phrases et preuves dans `references/`, chargés à la demande |
 
 ## Installation
 
