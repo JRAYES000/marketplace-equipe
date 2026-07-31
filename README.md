@@ -108,16 +108,6 @@ Le script dit à chaque étape ce qu'il fait. Il sauvegarde ta configuration ava
 
 > Certains projets ont besoin d'accès en plus (WordPress, hébergeur, Search Console…). Ils ne sont pas dans la liste : ils sont branchés au cas par cas, quand un projet en a vraiment besoin.
 
-## ✍️ Proposer ta skill (le rituel du vendredi)
-
-Tu as trouvé une bonne façon de faire avec Claude ? Partage-la, ça prend 5 minutes.
-
-1. Dans Claude, écris : « *Transforme tout notre échange en une skill, avec ma demande de départ et tous mes retours, et exporte-la en fichier .skill.* »
-2. Puis : « *Dépose cette skill sur le dépôt GitHub JRAYES000/marketplace-equipe : ajoute son dossier dans `plugins/skills-equipe/skills/` et augmente le numéro de version dans `plugins/skills-equipe/.claude-plugin/plugin.json`.* »
-3. Fini. Toute l'équipe la reçoit automatiquement, personne n'a besoin de valider.
-
-Le nom de la skill s'écrit en minuscules, sujet puis action : `seo-audit-page`. Le dépôt est public : si tu n'as pas encore les droits d'écriture dessus, propose ta skill en pull request depuis ton propre compte GitHub — ça marche sans autorisation préalable.
-
 ## ❓ Questions fréquentes
 
 **Je ne vois pas les nouvelles skills — dans Claude Code (terminal).**
@@ -143,10 +133,7 @@ Non, jamais. Les skills du dépôt sont rangées dans un dossier séparé et por
 Aucun souci, tant que tu ne l'installes qu'**une** fois. Évite juste d'installer le **même** module depuis deux magasins différents : tu te retrouverais avec tout en double.
 
 **Une skill a l'air cassée.**
-Ouvre une issue sur le dépôt : [github.com/JRAYES000/marketplace-equipe/issues](https://github.com/JRAYES000/marketplace-equipe/issues). Décris ce que tu attendais et ce que Claude a fait. Corrigée une fois, la skill est réparée pour toute l'équipe — et si tu sais faire, propose directement la correction en pull request.
-
-**Je peux modifier une skill directement ici ?**
-Oui, si tu sais te servir de GitHub : propose une pull request.
+Ouvre une issue sur le dépôt : [github.com/JRAYES000/marketplace-equipe/issues](https://github.com/JRAYES000/marketplace-equipe/issues). Décris ce que tu attendais et ce que Claude a fait. Corrigée une fois, la skill est réparée pour toute l'équipe.
 
 ## 🔧 Maintenir le dépôt
 
