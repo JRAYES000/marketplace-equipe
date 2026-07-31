@@ -1,7 +1,7 @@
 {
   "name": "skills-equipe",
-  "version": "1.2.1",
-  "description": "Les meilleures skills partagÃ©es de l'Ã©quipe : mode autonome Ã  condition d'arrÃªt, qualitÃ© des rÃ©ponses, parallÃ©lisation des gros lots, dÃ©lÃ©gation Ã  une IA moins chÃ¨re. Une installation, des mises Ã  jour pour tous.",
+  "version": "1.2.2",
+  "description": "Les meilleures skills partagées de l'équipe : mode autonome à condition d'arrêt, qualité des réponses, parallélisation des gros lots, délégation à une IA moins chère. Une installation, des mises à jour pour tous.",
   "author": {
     "name": "Julien Rayes"
   },

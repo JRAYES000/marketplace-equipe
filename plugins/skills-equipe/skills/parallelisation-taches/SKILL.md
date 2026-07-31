@@ -1,6 +1,20 @@
 ---
 name: parallelisation-taches
-description: Orchestre l'exécution parallèle de tâches indépendantes en assignant un modèle rapide (Haiku/Sonnet) à des sous-agents workers pendant que l'orchestrateur découpe, dispatche et synthétise. But : accélérer le wall-clock ET réduire le coût sur n'importe quel batch (extraction, classification, scraping, traduction, audit, recherche). À déclencher UNIQUEMENT sur demande explicite — FR : 'parallélise', 'fais en parallèle', 'lance des sous-agents', 'utilise un worker pool', 'dispatch en workers', 'éclate en sous-tâches' ; EN : 'parallelize', 'run in parallel', 'spawn workers', 'dispatch to subagents', 'use a worker pool'. NE PAS déclencher sur une simple tâche batch sans demande explicite. Une fois active, applique les bonnes pratiques (routage des modèles par rôle, fan-out par vagues 'all in a single message', workers isolés, gestion des échecs, pilot sur 3 items, vérification post-dispatch, handoffs à 75%, /schedule) et fournit les templates orchestrateur/worker.
+description: >-
+  Orchestre l'exécution parallèle de tâches indépendantes en assignant un
+  modèle rapide (Haiku/Sonnet) à des sous-agents workers pendant que
+  l'orchestrateur découpe, dispatche et synthétise. But : accélérer le
+  wall-clock ET réduire le coût sur n'importe quel batch (extraction,
+  classification, scraping, traduction, audit, recherche). À déclencher
+  UNIQUEMENT sur demande explicite — FR : 'parallélise', 'fais en parallèle',
+  'lance des sous-agents', 'utilise un worker pool', 'dispatch en workers',
+  'éclate en sous-tâches' ; EN : 'parallelize', 'run in parallel', 'spawn
+  workers', 'dispatch to subagents', 'use a worker pool'. NE PAS déclencher
+  sur une simple tâche batch sans demande explicite. Une fois active, applique
+  les bonnes pratiques (routage des modèles par rôle, fan-out par vagues 'all
+  in a single message', workers isolés, gestion des échecs, pilot sur 3 items,
+  vérification post-dispatch, handoffs à 75%, /schedule) et fournit les
+  templates orchestrateur/worker.
 ---
 
 # Parallélisation de tâches — Fan-out par vagues vers sous-agents
