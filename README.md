@@ -70,18 +70,32 @@ Pour tous : **Personnaliser → onglet Connecteurs → + → Parcourir**, tu tap
 |---|---|---|
 | **Notion** | Ouvrir les pages Notion de l'équipe | Parcourir → `Notion` → Connecter |
 | **GitHub** | Lire et modifier le code du site, mettre en ligne | Parcourir → `GitHub` → Connecter. **Le compte et le mot de passe : demande-les à Julien**, ils ne sont pas écrits ici. C'est un compte partagé : ne change pas le mot de passe et ne l'utilise que pour le travail |
-| **Claude in Chrome** | Laisser Claude utiliser ton navigateur : lire des pages, remplir des formulaires | Ce n'est pas un connecteur mais une **extension**. Va sur Chrome → Chrome Web Store → cherche « Claude for Chrome » (par Anthropic) → Ajouter à Chrome → connecte-la à ton compte Claude |
+| **Claude in Chrome** | Laisser Claude utiliser ton navigateur : lire des pages, remplir des formulaires. Indispensable dès qu'il faut **être connecté** au site (espace client, back-office, double authentification) | Ce n'est pas un connecteur mais une **extension**. Va sur Chrome → Chrome Web Store → cherche « Claude for Chrome » (par Anthropic) → Ajouter à Chrome → connecte-la à ton compte Claude |
 | **OpenRouter** | Un seul compte pour utiliser plein d'autres IA. On s'en sert surtout pour **fabriquer les images** des articles | D'abord, crée un compte gratuit sur [openrouter.ai](https://openrouter.ai). Ensuite, donne ta clé à Claude et demande-lui de la retenir |
 | **context7** | Donne à Claude les manuels techniques **à jour** (utile dès qu'on touche à WordPress) | Parcourir → `context7`. Sinon : *Ajouter un connecteur personnalisé* → Nom `context7` → Adresse `https://mcp.context7.com/mcp` |
 | **Composio** | Un seul branchement pour accéder à plein d'outils extérieurs, surtout ceux de Google | D'abord, crée ton compte sur [dashboard.composio.dev](https://dashboard.composio.dev) et branches-y tes outils. Ensuite : Parcourir → `Composio` → Connecter |
+
+### Tes fichiers : rien à installer
+
+Pour que Claude lise et écrive tes fichiers, il n'y a **aucun connecteur à brancher**. Dans ton projet, clique **Connecter un dossier** et choisis ton dossier de travail. C'est intégré à Claude, ça marche partout (sur ton ordinateur comme dans le cloud), et Claude ne voit que ce dossier-là.
+
+Fais-le dans tous les cas. Le tableau du dessous, c'est pour des besoins particuliers.
 
 ### Seulement si on te le demande
 
 | Connecteur | Ce qu'il fait | Comment |
 |---|---|---|
-| **File System** | Laisser Claude lire et écrire des fichiers sur ton ordinateur | Le plus simple : dans ton projet, clique **Connecter un dossier** et choisis le dossier du site. Ça suffit presque toujours |
-| **Playwright** | Ouvrir un navigateur invisible pour tester des pages ou prendre des captures | Parcourir → `Playwright`. S'il n'apparaît pas, demande à Julien |
-| **Windows MCP** | Laisser Claude piloter ton ordinateur (ouvrir des applis, cliquer, taper) | Souvent absent du catalogue. Demande à Julien de te l'installer, et passe à la suite en attendant |
+| **Playwright** | Ouvre un navigateur invisible pour lire des **sites publics**, tester des pages ou prendre des captures. Il travaille en arrière-plan, sans occuper ton Chrome | Il n'est pas dans le catalogue, même en cherchant. Demande à Julien de te l'installer |
+| **Windows MCP** | Piloter les **applications** de ton ordinateur : ouvrir Word ou l'Explorateur, cliquer, taper, faire une capture d'écran. **Pas pour tes fichiers** — pour ça, c'est « Connecter un dossier » | Absent du catalogue. Demande à Julien de te l'installer, et passe à la suite en attendant |
+
+⚠️ **Windows MCP donne à Claude la main sur tout l'ordinateur** : n'importe quel fichier, n'importe quel dossier, y compris les supprimer. « Connecter un dossier » se limite au dossier que tu as choisi. Quand les deux savent faire le travail, prends toujours « Connecter un dossier ».
+
+🧭 **Claude in Chrome ou Playwright ?** Une seule question : **faut-il être connecté au site ?**
+
+- **Oui** — espace client, back-office, réseau social, France Travail : c'est **Claude in Chrome**. Lui seul utilise ta session déjà ouverte, avec ton mot de passe et ta double authentification.
+- **Non** — site public, page à lire, capture à prendre : c'est **Playwright**. Plus rapide, il tourne sans surveillance et ne bloque pas ton navigateur pendant que tu travailles.
+
+Les deux ne font donc pas double emploi : garde-les tous les deux si ton travail passe par le web.
 
 ✅ **C'est bon quand** : dans *Personnaliser → Connecteurs*, tu vois ta liste et chacun est marqué **connecté**.
 
