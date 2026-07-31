@@ -56,7 +56,7 @@ Il y a deux façons de les installer :
 
 > **Tu cherches un module pour écrire des textes de pages web ?** Il n'y en a pas à installer : c'est déjà dans **marketing**. Utilise `/draft-content` pour écrire, `/brand-review` pour faire relire.
 >
-> **Tu ne trouves pas un de ces modules ?** Dis-le à Julien. N'installe pas un autre module qui porte un nom qui ressemble.
+> **Tu ne trouves pas un de ces modules ?** Relis la colonne « Où le trouver » : ceux qui viennent d'un magasin n'apparaissent dans le catalogue qu'une fois le magasin ajouté. N'installe pas un autre module qui porte un nom qui ressemble.
 
 ## 🔌 Les connecteurs (pour brancher tes outils)
 
@@ -69,35 +69,44 @@ Pour tous : **Personnaliser → onglet Connecteurs → + → Parcourir**, tu tap
 | Connecteur | Ce qu'il fait | Comment |
 |---|---|---|
 | **Notion** | Ouvrir les pages Notion de l'équipe | Parcourir → `Notion` → Connecter |
-| **GitHub** | Lire et modifier le code du site, mettre en ligne | Parcourir → `GitHub` → Connecter. **Le compte et le mot de passe : demande-les à Julien**, ils ne sont pas écrits ici. C'est un compte partagé : ne change pas le mot de passe et ne l'utilise que pour le travail |
-| **Claude in Chrome** | Laisser Claude utiliser ton navigateur : lire des pages, remplir des formulaires | Ce n'est pas un connecteur mais une **extension**. Va sur Chrome → Chrome Web Store → cherche « Claude for Chrome » (par Anthropic) → Ajouter à Chrome → connecte-la à ton compte Claude |
+| **GitHub** | Lire et modifier le code du site, mettre en ligne | Parcourir → `GitHub` → Connecter. C'est un **compte partagé** : les identifiants te sont remis à ton arrivée, ils ne sont pas écrits ici. Ne change pas le mot de passe et ne l'utilise que pour le travail |
+| **Claude in Chrome** | Laisser Claude utiliser ton navigateur : lire des pages, remplir des formulaires. Indispensable dès qu'il faut **être connecté** au site (espace client, back-office, double authentification) | Ce n'est pas un connecteur mais une **extension**. Va sur Chrome → Chrome Web Store → cherche « Claude for Chrome » (par Anthropic) → Ajouter à Chrome → connecte-la à ton compte Claude |
 | **OpenRouter** | Un seul compte pour utiliser plein d'autres IA. On s'en sert surtout pour **fabriquer les images** des articles | D'abord, crée un compte gratuit sur [openrouter.ai](https://openrouter.ai). Ensuite, donne ta clé à Claude et demande-lui de la retenir |
 | **context7** | Donne à Claude les manuels techniques **à jour** (utile dès qu'on touche à WordPress) | Parcourir → `context7`. Sinon : *Ajouter un connecteur personnalisé* → Nom `context7` → Adresse `https://mcp.context7.com/mcp` |
 | **Composio** | Un seul branchement pour accéder à plein d'outils extérieurs, surtout ceux de Google | D'abord, crée ton compte sur [dashboard.composio.dev](https://dashboard.composio.dev) et branches-y tes outils. Ensuite : Parcourir → `Composio` → Connecter |
+
+### Tes fichiers : rien à installer
+
+Pour que Claude lise et écrive tes fichiers, il n'y a **aucun connecteur à brancher**. Dans ton projet, clique **Connecter un dossier** et choisis ton dossier de travail. C'est intégré à Claude, ça marche partout (sur ton ordinateur comme dans le cloud), et Claude ne voit que ce dossier-là.
+
+Fais-le dans tous les cas. Le tableau du dessous, c'est pour des besoins particuliers.
 
 ### Seulement si on te le demande
 
 | Connecteur | Ce qu'il fait | Comment |
 |---|---|---|
-| **File System** | Laisser Claude lire et écrire des fichiers sur ton ordinateur | Le plus simple : dans ton projet, clique **Connecter un dossier** et choisis le dossier du site. Ça suffit presque toujours |
-| **Playwright** | Ouvrir un navigateur invisible pour tester des pages ou prendre des captures | Parcourir → `Playwright`. S'il n'apparaît pas, demande à Julien |
-| **Windows MCP** | Laisser Claude piloter ton ordinateur (ouvrir des applis, cliquer, taper) | Souvent absent du catalogue. Demande à Julien de te l'installer, et passe à la suite en attendant |
+| **Windows MCP** | Piloter les **applications** de ton ordinateur : ouvrir Word ou l'Explorateur, cliquer, taper, faire une capture d'écran. **Pas pour tes fichiers** — pour ça, c'est « Connecter un dossier » | Absent du catalogue : une commande à coller, voir juste en dessous |
+
+**Installer Windows MCP** — une seule fois, sur Windows. Trois gestes, rien à éditer.
+
+1. Ouvre **PowerShell** : touche Windows, tape `powershell`, Entrée.
+2. Colle cette ligne, appuie sur Entrée, laisse-la finir :
+
+```powershell
+irm https://raw.githubusercontent.com/JRAYES000/marketplace-equipe/main/scripts/install-windows-mcp.ps1 | iex
+```
+
+3. Ferme complètement Claude, rouvre-le. Le connecteur apparaît dans *Personnaliser → Connecteurs*.
+
+Le script dit à chaque étape ce qu'il fait. Il sauvegarde ta configuration avant d'y toucher, ne change rien si le connecteur est déjà là, et tu peux le relancer autant de fois que tu veux. Son contenu est lisible ici : [`scripts/install-windows-mcp.ps1`](scripts/install-windows-mcp.ps1).
+
+⚠️ **Windows MCP donne à Claude la main sur tout l'ordinateur** : n'importe quel fichier, n'importe quel dossier, y compris les supprimer. « Connecter un dossier » se limite au dossier que tu as choisi. Quand les deux savent faire le travail, prends toujours « Connecter un dossier ».
 
 ✅ **C'est bon quand** : dans *Personnaliser → Connecteurs*, tu vois ta liste et chacun est marqué **connecté**.
 
-🆘 **Ça coince ?** Installe déjà ce qui marche — Notion, Claude in Chrome, OpenRouter et context7 sont les plus faciles. Dès qu'il faut un mot de passe ou un accès partagé, c'est Julien : envoie-lui ce qui te manque.
+🆘 **Ça coince ?** Installe déjà ce qui marche et avance : Notion, Claude in Chrome, OpenRouter et context7 sont les plus faciles, et aucun ne dépend des autres. Les accès partagés (mot de passe d'équipe, comptes communs) te sont remis séparément — ils ne figurent pas dans ce guide.
 
-> Certains projets ont besoin d'accès en plus (WordPress, hébergeur, Search Console…). Ils ne sont pas dans la liste : Julien les branche seulement quand un projet en a besoin.
-
-## ✍️ Proposer ta skill (le rituel du vendredi)
-
-Tu as trouvé une bonne façon de faire avec Claude ? Partage-la, ça prend 5 minutes.
-
-1. Dans Claude, écris : « *Transforme tout notre échange en une skill, avec ma demande de départ et tous mes retours, et exporte-la en fichier .skill.* »
-2. Puis : « *Dépose cette skill sur le dépôt GitHub JRAYES000/marketplace-equipe : ajoute son dossier dans `plugins/skills-equipe/skills/` et augmente le numéro de version dans `plugins/skills-equipe/.claude-plugin/plugin.json`.* »
-3. Fini. Toute l'équipe la reçoit automatiquement, personne n'a besoin de valider.
-
-Le nom de la skill s'écrit en minuscules, sujet puis action : `seo-audit-page`. Il te faut un compte GitHub et l'invitation de Julien (une seule fois).
+> Certains projets ont besoin d'accès en plus (WordPress, hébergeur, Search Console…). Ils ne sont pas dans la liste : ils sont branchés au cas par cas, quand un projet en a vraiment besoin.
 
 ## ❓ Questions fréquentes
 
@@ -124,12 +133,9 @@ Non, jamais. Les skills du dépôt sont rangées dans un dossier séparé et por
 Aucun souci, tant que tu ne l'installes qu'**une** fois. Évite juste d'installer le **même** module depuis deux magasins différents : tu te retrouverais avec tout en double.
 
 **Une skill a l'air cassée.**
-Préviens Julien. Il corrige une fois, et tout le monde reçoit le correctif.
+Ouvre une issue sur le dépôt : [github.com/JRAYES000/marketplace-equipe/issues](https://github.com/JRAYES000/marketplace-equipe/issues). Décris ce que tu attendais et ce que Claude a fait. Corrigée une fois, la skill est réparée pour toute l'équipe.
 
-**Je peux modifier une skill directement ici ?**
-Oui, si tu sais te servir de GitHub : propose une pull request.
-
-## 🔧 Pour Julien — mettre à jour
+## 🔧 Maintenir le dépôt
 
 1. Ajouter ou modifier un dossier dans `plugins/skills-equipe/skills/` (un dossier = une skill avec son `SKILL.md`)
 2. Augmenter `version` dans `plugins/skills-equipe/.claude-plugin/plugin.json` (0.1.0 → 0.2.0). Claude compare des numéros de version, pas des contenus : sans ce bump, il ne voit rien de neuf, le bouton **Mettre à jour** reste grisé chez tout le monde et l'équipe garde l'ancienne skill sans le savoir.

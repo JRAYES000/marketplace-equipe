@@ -4,9 +4,11 @@
 
 ## Le principe
 
-Claude reste le cerveau : il comprend, planifie et rédige la réponse finale. Les tâches lourdes (résumés longs, traductions, génération de masse, extraction) sont déléguées à **DeepSeek V4 Pro** via l'outil `send-message` du serveur MCP officiel d'OpenRouter. Claude consomme peu de tokens Pro ; le modèle bon marché fait le gros du travail, facturé quelques centimes en crédits OpenRouter.
+Claude reste le cerveau : il comprend, planifie et rédige la réponse finale. Les tâches lourdes (résumés longs, traductions, génération de masse, extraction) sont déléguées à **DeepSeek V4 Flash** via l'outil `send-message` du serveur MCP officiel d'OpenRouter. Claude consomme peu de tokens Pro ; le modèle bon marché fait le gros du travail, facturé quelques centimes en crédits OpenRouter.
 
-**Modèle retenu : DeepSeek V4 Pro** — slug `deepseek/deepseek-v4-pro`, ~0,435 $/M tokens d'entrée et ~0,87 $/M en sortie ([fiche](https://openrouter.ai/deepseek/deepseek-v4-pro)), 10 à 25× moins cher que les modèles Claude haut de gamme, contexte 1M.
+**Modèle retenu : DeepSeek V4 Flash** — slug `deepseek/deepseek-v4-flash-0731`, 0,14 $/M tokens d'entrée et 0,28 $/M en sortie ([fiche](https://openrouter.ai/deepseek/deepseek-v4-flash-0731)), environ 35× moins cher en entrée que les modèles Claude haut de gamme, contexte 1M.
+
+⚠️ **Toujours passer `reasoning_effort: none`.** Flash réfléchit par défaut et facture cette réflexion au prix de sortie ; sans ce réglage, l'appel part en timeout ou renvoie une réponse vide.
 
 ## Prérequis
 
@@ -40,10 +42,10 @@ Le serveur expose une vingtaine d'outils. Ceux qui comptent ici :
 ## Fonctionnement
 
 1. Claude découpe la partie « lourde » de la demande.
-2. Il appelle `send-message` avec `deepseek/deepseek-v4-pro` et un prompt autonome (le modèle délégué ne voit pas la conversation).
+2. Il appelle `send-message` avec `deepseek/deepseek-v4-flash-0731`, `reasoning_effort: none`, et un prompt autonome (le modèle délégué ne voit pas la conversation).
 3. Le résultat revient à Claude, qui vérifie le champ `model`, relit, corrige et intègre.
 
-Exemple : « Résume ce document de 40 pages. Délègue chaque section à DeepSeek V4 Pro via send-message, puis fais toi-même la synthèse finale. »
+Exemple : « Résume ce document de 40 pages. Délègue chaque section à DeepSeek V4 Flash via send-message, puis fais toi-même la synthèse finale. »
 
 Astuces : suffixe `:floor` = prix minimum, `:free` = version gratuite si disponible.
 
@@ -63,8 +65,8 @@ Astuces : suffixe `:floor` = prix minimum, `:free` = version gratuite si disponi
 
 Dans une nouvelle conversation :
 
-> Utilise l'outil send-message du connecteur OpenRouter MCP avec model="deepseek/deepseek-v4-pro" et le prompt « Réponds uniquement par : DELEGATION-OK ». Affiche la réponse brute et le modèle qui a répondu.
+> Utilise l'outil send-message du connecteur OpenRouter MCP avec model="deepseek/deepseek-v4-flash-0731", reasoning_effort="none", et le prompt « Réponds uniquement par : DELEGATION-OK ». Affiche la réponse brute et le modèle qui a répondu.
 
-Attendu : `DELEGATION-OK` + `model: deepseek/deepseek-v4-pro`.
+Attendu : `DELEGATION-OK` + `model: deepseek/deepseek-v4-flash-0731`.
 
 Doc officielle : [OpenRouter MCP Server](https://openrouter.ai/docs/guides/overview/mcp-server)
