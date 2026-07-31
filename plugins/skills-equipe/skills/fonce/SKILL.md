@@ -1,6 +1,16 @@
 ---
 name: fonce
-description: Mode autonome à condition d'arrêt. Formule d'abord une condition de fin vérifiable, puis exécute la demande de bout en bout sans poser une seule question — décide seul, journalise ses hypothèses, vérifie sur le résultat réel, ne rend qu'un récap final. Économe en tokens par construction. Déclenche UNIQUEMENT sur intention explicite d'autonomie : « /fonce », « fonce », « mode autonome », « vas-y sans rien me demander », « débrouille-toi », « ne m'interromps pas », « va jusqu'au bout tout seul », « je pars, gère ». NE PAS déclencher de toi-même sur une demande ordinaire, même longue, floue ou complexe : l'autonomie totale se demande, elle ne se suppose pas.
+description: >-
+  Mode autonome à condition d'arrêt. Formule d'abord une condition de fin
+  vérifiable, puis exécute la demande de bout en bout sans poser une seule
+  question — décide seul, journalise ses hypothèses, vérifie sur le résultat
+  réel, ne rend qu'un récap final. Économe en tokens par construction.
+  Déclenche UNIQUEMENT sur intention explicite d'autonomie : « /fonce », «
+  fonce », « mode autonome », « vas-y sans rien me demander », «
+  débrouille-toi », « ne m'interromps pas », « va jusqu'au bout tout seul », «
+  je pars, gère ». NE PAS déclencher de toi-même sur une demande ordinaire,
+  même longue, floue ou complexe : l'autonomie totale se demande, elle ne se
+  suppose pas.
 ---
 
 # Mode autonome
