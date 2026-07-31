@@ -3,7 +3,7 @@ name: delegation-deepseek-openrouter
 description: >-
   Skill à activation MANUELLE uniquement. Délègue les tâches de génération
   lourdes (résumés de documents longs, traductions, extraction ou reformatage
-  de données, premiers jets volumineux) à DeepSeek V4 Pro via l'outil
+  de données, premiers jets volumineux) à DeepSeek V4 Flash via l'outil
   send-message du connecteur OpenRouter MCP, pour économiser les tokens Claude
   Pro. NE PAS déclencher automatiquement, même face à une grosse tâche de
   génération : utiliser UNIQUEMENT quand l'utilisateur le demande
@@ -36,9 +36,29 @@ AVANT tout appel `send-message`.
 
 Réduire la consommation de tokens Claude Pro. Claude reste l'orchestrateur
 (comprendre, planifier, relire, intégrer) ; les tâches de génération lourdes
-partent vers **DeepSeek V4 Pro** (`deepseek/deepseek-v4-pro`, ~0,435 $/M tokens
-d'entrée, ~0,87 $/M sortie — 10 à 25× moins cher que les modèles Claude haut
-de gamme) via l'outil `send-message` du connecteur **OpenRouter MCP**.
+partent vers **DeepSeek V4 Flash** (`deepseek/deepseek-v4-flash-0731`,
+0,14 $/M tokens d'entrée, 0,28 $/M en sortie — environ 35× moins cher en
+entrée et 90× en sortie que Claude Opus) via l'outil `send-message` du
+connecteur **OpenRouter MCP**.
+
+Flash a remplacé V4 Pro le 31/07/2026 : il est **3,1× moins cher** et le
+dépasse sur les trois indices Artificial Analysis (intelligence 49,9 contre
+44,3 ; code 69,1 contre 59,4 ; agentique 45,7 contre 36,4). Ne pas revenir à
+`deepseek-v4-pro` : il coûte plus cher pour un résultat moins bon.
+
+## Réglage obligatoire : couper le raisonnement
+
+Passer **`reasoning_effort: "none"`** à chaque appel `send-message`, et
+`max_tokens` (2000 suffit pour la plupart des sous-tâches) comme filet de
+sécurité — ce plafond couvre réflexion et réponse confondues.
+
+Flash active le raisonnement par défaut à l'effort « high ». Sur une tâche de
+reformulation, il produit alors des centaines à des milliers de tokens de
+réflexion, facturés au prix de sortie, avant la moindre ligne utile. Mesuré le
+31/07/2026 sur un même résumé : **timeout** au réglage par défaut, **1 200
+tokens de réflexion et zéro réponse** à l'effort « low », **98 tokens et une
+réponse conforme** avec le raisonnement coupé. C'est un levier de coût plus
+important que le choix du modèle lui-même.
 
 ## Prérequis
 
@@ -62,7 +82,7 @@ que `send-message` devienne disponible.
 
 ## Matrice de routage
 
-**Déléguer à DeepSeek V4 Pro** (via `send-message`) :
+**Déléguer à DeepSeek V4 Flash** (via `send-message`) :
 
 - résumés de documents longs (par section si le document est volumineux)
 - traductions
@@ -90,8 +110,13 @@ DeepSeek ») prime toujours sur cette matrice.
 
 1. Découper la demande : isoler les sous-tâches déléguables.
 2. Pour chaque sous-tâche, appeler `send-message` avec :
-   - `model` : `deepseek/deepseek-v4-pro` (variantes : `:floor` pour le prix
-     minimum, `:free` si une version gratuite existe et que la tâche le permet)
+   - `model` : `deepseek/deepseek-v4-flash-0731`
+   - `reasoning_effort` : `none` — obligatoire, voir la section ci-dessus
+   - `max_tokens` : 2000 (à ajuster si la sortie attendue est plus longue)
+   - **ne pas ajouter le suffixe `:floor`** : il route vers un fournisseur qui
+     sert le modèle en quantification fp4, donc dégradé, avec environ 88 % de
+     disponibilité sur 24 h contre 99,9 % pour l'endpoint par défaut. Les
+     0,05 $/M économisés ne valent pas ce risque.
    - un prompt **autonome** : le modèle délégué ne voit pas la conversation.
      Inclure tout le contexte nécessaire, le texte source complet, et un
      format de sortie précis (« réponds uniquement avec… »).
@@ -116,8 +141,9 @@ facturé en crédits OpenRouter (suivi sur openrouter.ai/activity).
 Demande : « Résume ce rapport de 40 pages et fais-moi une note d'une page. »
 
 1. Claude découpe le rapport en sections.
-2. `send-message` × N vers `deepseek/deepseek-v4-pro` : « Résume la section
-   suivante en 150 mots max, en français, format puces. Texte : … »
+2. `send-message` × N vers `deepseek/deepseek-v4-flash-0731`, avec
+   `reasoning_effort: none` : « Résume la section suivante en 150 mots max,
+   en français, format puces. Texte : … »
 3. Claude relit les N résumés, rédige lui-même la note finale d'une page.
 
 Coût : quelques centimes OpenRouter + une fraction des tokens Pro qu'aurait
@@ -126,6 +152,10 @@ coûté le résumé intégral par Claude.
 ## Test de validation
 
 Pour vérifier que la chaîne fonctionne, appeler `send-message` avec
-`model: deepseek/deepseek-v4-pro` et le prompt « Réponds uniquement par :
-DELEGATION-OK ». La réponse doit contenir `DELEGATION-OK` et indiquer
-`model: deepseek/deepseek-v4-pro`.
+`model: deepseek/deepseek-v4-flash-0731`, `reasoning_effort: none` et le
+prompt « Réponds uniquement par : DELEGATION-OK ». La réponse doit contenir
+`DELEGATION-OK` et indiquer `model: deepseek/deepseek-v4-flash-0731`.
+
+Si la réponse revient **vide** alors que des tokens de sortie ont été
+consommés, c'est que le raisonnement n'a pas été coupé : reprendre l'appel
+avec `reasoning_effort: none`.
