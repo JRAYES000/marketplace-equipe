@@ -17,7 +17,7 @@ Ou avec la souris : **Réglages → Capacités → Plugins → Ajouter une marke
 
 ![Écran « Ajouter une marketplace » dans Claude, avec l'URL JRAYES000/marketplace-equipe](ajouter-marketplace.png)
 
-**Pour vérifier que ça a marché :** tu dois voir `fonce`, `delegation-deepseek-openrouter`, `phrase-magique` et `parallelisation-taches` dans tes capacités.
+**Pour vérifier que ça a marché :** tu dois voir `fonce`, `delegation-deepseek-openrouter`, `phrase-magique` et `parallelisation-et-routage` dans tes capacités.
 
 ## 📦 Les skills de l'équipe
 
@@ -27,7 +27,7 @@ Une fois `skills-equipe` installé, les skills arrivent avec le paquet. Tu n'as 
 |---|---|
 | `fonce` | Le mode « je pars, tu gères ». Claude écrit d'abord noir sur blanc à quoi ressemblera « c'est fini » (un test qui passe, une page qui répond), puis il y va tout seul : aucune question, il tranche les doutes lui-même et te dit à la fin ce qu'il a supposé — tu corriges d'un mot si besoin. Il vérifie pour de vrai avant d'annoncer terminé. Tape `/fonce` suivi de ta demande. |
 | `phrase-magique` | Le mode « travail soigné ». Avant de produire quoi que ce soit, Claude te signale les limites ou les risques qu'il voit, te pose 4 questions (même si ta demande te paraît claire) et, quand c'est une petite tâche, te donne déjà un premier jet dans le même message. Ensuite il écrit noir sur blanc à quoi ressemblera un travail réussi, vérifie vraiment — il ouvre ce qu'il a produit au lieu de supposer que c'est bon — et te dit s'il a raté quelque chose. Une page de règles, pas un manuel : les 17 « phrases magiques » et les preuves qui justifient chaque règle sont rangées à côté, Claude les ouvre seulement quand tu les demandes. Tape `phrase magique` pour l'activer, `mode normal` pour l'arrêter. |
-| `parallelisation-taches` | Pour les gros lots (50 documents à résumer, 60 lignes à classer, 12 pages à auditer) : Claude découpe le travail et le confie à plusieurs assistants rapides en même temps. Beaucoup plus vite, et moins cher. Dis simplement « parallélise ça ». |
+| `parallelisation-et-routage` | Le mode « économie ». Claude arrête de tout faire lui-même : il regarde ce que tu demandes, décide quel assistant suffit (Haiku pour le mécanique, Sonnet pour le courant, Opus pour ce qui demande vraiment de réfléchir) et lui passe le travail. Pour un gros lot (50 documents à résumer, 60 lignes à classer, 12 pages à auditer), il découpe et lance plusieurs assistants rapides en même temps. Moins de tokens consommés, et plus rapide. Dis « parallélise ça », « active le routeur » ou « mode économie de tokens » ; `mode normal` pour l'arrêter. |
 | `delegation-deepseek-openrouter` | Fait faire les grosses tâches (résumés, traductions, gros volumes) par une IA moins chère. Tu économises tes messages Claude. |
 
 > **Attention avec `fonce` :** il décide seul et va jusqu'au bout. Ne le lance pas sur quelque chose que tu ne saurais pas défaire toi-même (mettre le site en ligne, envoyer un message à un client). Pour ça, décris ta demande normalement — Claude te demandera confirmation.
