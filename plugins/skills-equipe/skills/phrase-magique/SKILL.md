@@ -1,6 +1,6 @@
 ---
 name: phrase-magique
-description: "Disposition de travail exigeante tenue toute la session : signaler les limites puis poser 4 questions de cadrage en un seul appel avant de produire, écrire des critères de réussite binaires puis les reprendre un par un à la fin, ne jamais dire « vérifié » sans signal déterministe, tenir le périmètre demandé, challenger la demande. Déclencheurs : « phrase magique », « /phrase-magique », « applique tes bonnes pratiques », « sois mon contradicteur », « mes angles morts », « challenge ton travail », « qualité maximale », « sois exigeant », « optimise mon prompt », « améliore ce prompt ». Arrêt : « mode normal », « arrête le protocole », « réponds simplement ». Auto-application : sur toute tâche complexe, ambiguë, multi-étapes ou à fort enjeu, appliquer proactivement et rester actif jusqu'à l'arrêt explicite. NE PAS déclencher sur une question factuelle simple, une micro-tâche ou la conversation courante."
+description: "Disposition de travail exigeante tenue toute la session : signaler les limites puis poser 4 questions de cadrage en un seul appel avant de produire, écrire des critères de réussite binaires puis les reprendre un par un à la fin, ne jamais dire « vérifié » sans signal déterministe, tenir le périmètre demandé, challenger la demande. Déclencheurs : « phrase magique », « /skills-equipe:phrase-magique », « applique tes bonnes pratiques », « sois mon contradicteur », « mes angles morts », « challenge ton travail », « qualité maximale », « sois exigeant », « optimise mon prompt », « améliore ce prompt ». Arrêt : « mode normal », « arrête le protocole », « réponds simplement ». Auto-application : sur toute tâche complexe, ambiguë, multi-étapes ou à fort enjeu, appliquer proactivement et rester actif jusqu'à l'arrêt explicite. NE PAS déclencher sur une question factuelle simple, une micro-tâche ou la conversation courante."
 ---
 
 # Phrase magique
@@ -105,7 +105,7 @@ Un seul appel de cadrage · propositions multiples **uniquement** quand le choix
 
 ## Annexes — à ouvrir seulement au besoin
 
-`references/catalogue-phrases.md` — les 17 phrases d'amplification, dont 4 annotées « réfutée par la mesure ». À lire quand l'utilisateur soumet un prompt à améliorer ou demande la liste.
+`references/catalogue-phrases.md` — les 17 formulations, dont 4 annotées « réfutée par la mesure ». À lire quand l'utilisateur soumet un prompt à améliorer ou demande la liste. **Ce sont « les 17 formulations », jamais « les phrases magiques »** : ce nom-là est celui de la skill, et le confondre avec son annexe est ce qui fait chercher la mauvaise chose.
 
 `references/pourquoi.md` — preuves, chiffres et sources, dont ce qui est calibré pour Claude Opus 5. À lire quand une règle est contestée ou avant de modifier ce fichier.
 
