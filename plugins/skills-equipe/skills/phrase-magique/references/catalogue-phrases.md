@@ -1,6 +1,6 @@
-# Catalogue des 17 phrases d'amplification
+# Catalogue des 17 formulations
 
-Sommaire : [Comment s'en servir](#comment-sen-servir) · [Les 17 phrases](#les-17-phrases) · [Sélection rapide](#sélection-rapide) · [Les quatre phrases réfutées](#les-quatre-phrases-réfutées)
+Sommaire : [Comment s'en servir](#comment-sen-servir) · [Les 17 formulations](#les-17-formulations) · [Sélection rapide](#sélection-rapide) · [Les quatre formulations réfutées](#les-quatre-formulations-réfutées)
 
 Ouvrir ce fichier dans deux cas seulement : l'utilisateur soumet un prompt à améliorer (mode coach de prompt), ou il demande la liste pour la réutiliser ailleurs. Le reste du temps, les règles du `SKILL.md` suffisent.
 
@@ -10,9 +10,9 @@ Ouvrir ce fichier dans deux cas seulement : l'utilisateur soumet un prompt à am
 
 **En auto-application** : n'appliquer que les phrases pertinentes, jamais toutes mécaniquement. Ne jamais combiner deux phrases 🔴.
 
-Colonne « Preuve » : 🟩 étayé par la mesure · ⬜ plausible, non mesuré · 🟥 réfuté par la mesure — voir [la section dédiée](#les-quatre-phrases-réfutées) avant de l'employer. Colonne « Coût » : 🟢 négligeable · 🟡 modéré · 🔴 élevé.
+Colonne « Preuve » : 🟩 étayé par la mesure · ⬜ plausible, non mesuré · 🟥 réfuté par la mesure — voir [la section dédiée](#les-quatre-formulations-réfutées) avant de l'employer. Colonne « Coût » : 🟢 négligeable · 🟡 modéré · 🔴 élevé.
 
-## Les 17 phrases
+## Les 17 formulations
 
 | # | Phrase (à adapter) | Quand | Preuve | Coût |
 |---|---|---|---|---|
@@ -47,7 +47,7 @@ Colonne « Preuve » : 🟩 étayé par la mesure · ⬜ plausible, non mesuré 
 | Livrable expert à polir | critères binaires écrits d'avance, **pas** la 7 |
 | Fin de workflow réussi | 2 |
 
-## Les quatre phrases réfutées
+## Les quatre formulations réfutées
 
 Conservées ici pour mémoire, et parce que savoir *pourquoi* une technique populaire ne marche pas vaut mieux que la voir disparaître sans explication. Chiffres et sources complètes dans [`pourquoi.md`](pourquoi.md).
 
