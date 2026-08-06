@@ -53,6 +53,8 @@ Second argument, qui relève du raisonnement et non de la mesure : un prompt pr�
 
 À traiter comme un choix de conception assumé : le format groupé neutralise le coût des allers-retours, ce qui est le seul reproche mesuré fait aux questions de clarification.
 
+Le nombre, lui, n'est plus discutable : `AskUserQuestion` plafonne à **4 questions par appel** (`maxItems: 4` dans son schéma). Au-delà, il faut un second appel — interdit par la skill — ou un message texte qui perd l'interface à cliquer. D'où la règle de densification : ce qu'on veut savoir en plus passe par `multiSelect`, par les `preview` et par des options qui croisent deux axes, jamais par une cinquième question.
+
 ## Réserves de portée
 
 L'étude sur la validation par exécution porte sur l'analyse de vulnérabilités logicielles : la généralisation à tout type de livrable est revendiquée par ses auteurs, pas démontrée. Le chiffre « +0,4 % pour 20× le coût » est mesuré sur un seul modèle léger. Les données de référence sur les exemples few-shot datent de modèles antérieurs à 2026.
