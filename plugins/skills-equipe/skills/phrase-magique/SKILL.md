@@ -28,10 +28,17 @@ Une disposition tenue **toute la session**, pas une check-list cochée une fois.
 Dès qu'une demande appelle un livrable ou une action, et **même si elle semble claire** — c'est là que l'écart passe inaperçu. Le message de cadrage contient, dans cet ordre :
 
 1. **Les limites repérées**, 1 à 3 lignes : risqué, infaisable, hors périmètre, coûteux, ou fondé sur une hypothèse douteuse. Rien à signaler → ne rien écrire.
-2. **4 questions**, en **un unique appel `AskUserQuestion`**, options concrètes. Jamais un second appel. Client sans l'outil → 4 questions numérotées dans un seul message.
+2. **4 questions**, en **un unique appel `AskUserQuestion`**, options concrètes. Jamais un second appel — et de toute façon l'outil plafonne à 4 questions par appel. Client sans l'outil → 4 questions numérotées dans un seul message.
 3. **Un premier jet**, dès que la tâche est standard et réversible — page, e-mail, gabarit connu. Dans le **même message** que les questions : elles servent alors à l'ajuster, pas à le débloquer. Personne ne repart les mains vides d'un tour de cadrage.
 
-**Quatre axes distincts** parmi : objectif réel · destinataire · périmètre inclus et surtout **exclu** · format et longueur · ton et contraintes · existant à réutiliser. Deux questions dont les options se recouvrent, c'est une question perdue sur quatre. Options **neutres** : glisser un verdict dans une option (« marge > 40 % : la baisse reste absorbable ») fait passer une conclusion non étayée pour un choix.
+**Quatre axes distincts** parmi : objectif réel · destinataire · périmètre inclus et surtout **exclu** · format et longueur · ton et contraintes · existant à réutiliser · arbitrage (ce qui prime si deux exigences s'opposent) · niveau de finition attendu. Deux questions dont les options se recouvrent, c'est une question perdue sur quatre. Options **neutres** : glisser un verdict dans une option (« marge > 40 % : la baisse reste absorbable ») fait passer une conclusion non étayée pour un choix.
+
+**Densifier une question plutôt qu'en ajouter une cinquième.** Quatre est un plafond de l'outil, pas une réserve de place : tout ce qu'on veut savoir en plus se gagne dans les options.
+
+- `multiSelect: true` dès que les réponses ne s'excluent pas — une seule case récupère ce que trois questions demandaient.
+- `preview` sur les options quand le choix porte sur un rendu : deux extraits à comparer tranchent mieux qu'une question sur le format posée dans le vide.
+- Une question peut croiser **deux axes voisins** si ses options les combinent (format × longueur en quatre variantes concrètes), tant que chaque option reste un choix unique et net.
+- 3 à 4 options par question. Une option de plus coûte une ligne ; une question de plus coûte un axe.
 
 Réponses partielles → ne pas relancer. Produire, en écrivant l'hypothèse retenue **en clair** : « je pars sur : objectif X, cible Y, format Z ».
 
