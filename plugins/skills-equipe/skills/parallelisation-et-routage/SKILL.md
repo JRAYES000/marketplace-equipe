@@ -1,20 +1,16 @@
 ---
 name: parallelisation-et-routage
 description: >-
-  Routeur de modèle et orchestrateur de parallélisation, à activation MANUELLE.
-  Classe la demande en trois étages — Haiku (exécution mécanique), Sonnet
-  (travail courant), Opus (raisonnement à enjeu) — puis exécute dans des
-  sous-agents lancés au bon étage : un seul sous-agent pour une tâche isolée, un
-  fan-out par vagues pour un lot de N unités indépendantes. But : réduire la
-  consommation de tokens et le wall-clock. Reste active jusqu'à l'arrêt
-  explicite. Déclencher UNIQUEMENT sur demande explicite — FR : 'parallélise',
-  'lance des sous-agents', 'worker pool', 'éclate en sous-tâches', 'active le
-  routeur', 'quel modèle pour ça', 'mode économie de tokens' ; EN : 'parallelize',
-  'spawn workers', 'dispatch to subagents'. Arrêt : 'mode normal', 'arrête le
-  routage'. NE PAS déclencher sur
-  un lot de tâches ni sur une demande complexe sans demande explicite. Ne PAS
-  utiliser pour une question factuelle, une micro-tâche, ou des étapes
-  séquentielles dépendantes : le coût du routage dépasse le gain.
+  Routeur modèle × effort et orchestrateur de parallélisation, à activation MANUELLE. Classe
+  la demande en trois étages — Haiku (exécution mécanique), Sonnet (travail courant), Opus
+  (raisonnement à enjeu) — puis exécute dans des sous-agents lancés au bon étage : un seul
+  pour une tâche isolée, un fan-out par vagues pour un lot de N unités indépendantes. Posture
+  par défaut : ne pas déléguer, ce modèle sur-délègue déjà. Déclencher UNIQUEMENT sur demande
+  explicite — FR : « parallélise », « lance des sous-agents », « worker pool », « éclate en
+  sous-tâches », « active le routeur », « quel modèle pour ça », « mode économie de tokens » ;
+  EN : « parallelize », « spawn workers », « dispatch to subagents ». Arrêt : « mode normal »,
+  « arrête le routage ». Ne PAS utiliser pour une question factuelle, une micro-tâche, ou des
+  étapes séquentielles dépendantes.
 ---
 
 # Parallélisation et routage de modèle
@@ -29,6 +25,28 @@ Deux formes du même geste :
 |---|---|---|
 | **A · Routage simple** | Une tâche isolée | 1 sous-agent au bon étage |
 | **B · Fan-out par vagues** | N ≥ 3 unités indépendantes | vagues de 5-10 workers |
+
+## Avant tout — le plancher, et pourquoi il passe en premier
+
+Router a un coût fixe : classement, rédaction du brief, contrôle du retour. Et ce
+modèle délègue **déjà plus volontiers qu'il ne le devrait** : le réglage à corriger
+est presque toujours « moins », pas « plus ». Dans tous ces cas, répondre
+directement sans rien router :
+
+- Question factuelle, conversation, micro-tâche (moins d'une trentaine de secondes).
+- Travail qui tient en quelques appels d'outils : le faire soi-même.
+- Unités de moins de 30 s en fan-out : l'overhead d'initialisation annule le gain.
+- Étapes séquentielles dépendantes (chacune a besoin du résultat de la précédente).
+- **Tâche qui dépend lourdement du contexte de la conversation.** Un sous-agent
+  démarre à vide : tout ce qu'il doit savoir doit être réécrit dans son brief. Si
+  le briefing pèse plus lourd que la tâche, ne pas déléguer.
+- Tâche nécessitant un aller-retour avec l'utilisateur en cours de route.
+- **Vérifier son propre travail.** Jamais un sous-agent pour ça : la vérification
+  reste dans la boucle principale, et ce modèle la fait déjà seul.
+
+Quand la délégation est justifiée : **si un seul sous-agent suffit, un seul.**
+Garder le nombre de lancements bas, et préférer un chantier large et réellement
+indépendant à cinq petits.
 
 ## Ce que cette skill peut et ne peut pas faire
 
@@ -67,6 +85,13 @@ demande suivante jusqu'à l'arrêt : « mode normal », « arrête le routage »
 Dans le doute entre deux étages : **prendre le plus bas et vérifier le retour.**
 Une escalade coûte moins cher qu'un Opus systématique.
 
+**Deuxième dimension : l'effort.** L'étage n'est que la moitié du réglage. Là où
+l'interface l'expose (API, Claude Code), l'effort de réflexion se règle indépendamment
+du modèle, et `low`/`medium` tiennent la qualité sur une grande part du travail courant
+pour une fraction des tokens. Conséquence pratique : **un Opus à effort bas est souvent
+un meilleur choix qu'un Sonnet à effort haut**, à coût comparable. Descendre l'effort
+avant de descendre d'étage.
+
 **Type de sous-agent (`subagent_type`) :**
 
 - Lecture seule (recherche, extraction, fetch, audit) → `"Explore"` : moins cher,
@@ -84,19 +109,6 @@ sous-agents.
 **Forme B (fan-out) si et seulement si :** la charge se découpe en **N ≥ 3**
 unités indépendantes qui ne se référencent pas entre elles, **et** chaque unité
 prend plus de 30 secondes. Sinon, forme A.
-
-### Plancher — quand ne rien router du tout
-
-Router a un coût fixe : classement, rédaction du brief, contrôle du retour. En
-dessous de ce seuil, la délégation fait perdre des tokens. Répondre directement.
-
-- Question factuelle, conversation, micro-tâche (moins d'une trentaine de secondes).
-- Unités de moins de 30 s en fan-out : l'overhead d'initialisation annule le gain.
-- Étapes séquentielles dépendantes (chacune a besoin du résultat de la précédente).
-- **Tâche qui dépend lourdement du contexte de la conversation.** Un sous-agent
-  démarre à vide : tout ce qu'il doit savoir doit être réécrit dans son brief. Si
-  le briefing pèse plus lourd que la tâche, ne pas déléguer.
-- Tâche nécessitant un aller-retour avec l'utilisateur en cours de route.
 
 ---
 
@@ -186,6 +198,11 @@ Après agrégation, ne pas livrer brut :
 - **Collisions** : aucun fichier écrasé.
 - **Statuts** : les `FAILURE` / `AMBIGUOUS` ont bien été traités.
 
+Ce contrôle est fait par l'orchestrateur sur des sorties **qui ne sont pas les
+siennes** : c'est un signal externe, il est légitime. Rien à voir avec le fait de
+lancer un sous-agent pour relire son propre travail, qui reste interdit (voir le
+plancher).
+
 ### 6. Handoff à 75 % de contexte
 
 Si l'orchestrateur atteint ~75 % de sa fenêtre sur un batch long : écrire
@@ -259,6 +276,20 @@ récapituler la matrice.
 
 ---
 
+## Plafonds déterministes
+
+Une consigne se contourne, un plafond non. Sur Claude Code et l'Agent SDK — version
+**2.1.217 ou plus récente**, mettre à jour un SDK épinglé avant de le pointer sur ce
+modèle :
+
+- `CLAUDE_CODE_MAX_SUBAGENT_SPAWN_DEPTH` — profondeur de spawn (un sous-agent qui en
+  lance un autre).
+- `CLAUDE_CODE_MAX_CONCURRENT_SUBAGENTS` — nombre de workers simultanés ; c'est le vrai
+  garde-fou de la taille des vagues, plus fiable que la consigne « 5 à 10 ».
+- `max_budget_usd` (option du SDK) — plafond de dépense de la tâche.
+
+Sur un lot facturé, les poser **avant** la première vague, pas après avoir vu la note.
+
 ## Session entière mal calibrée
 
 Si l'essentiel du travail prévu tient dans un seul étage, le signaler **une fois**,
@@ -289,6 +320,8 @@ en une ligne, sans insister :
 - Lancer une vague de plus de ~10 workers, ou les appels `Agent` dans des messages séparés.
 - Donner aux workers accès à tout le système de fichiers.
 - Mettre de la logique de décision dans le worker.
+- Lancer un sous-agent pour vérifier ce qu'on vient de produire soi-même.
+- Lancer plusieurs sous-agents là où un seul suffirait.
 - Inventer une donnée pour un item `AMBIGUOUS`.
 - Livrer une sortie de sous-agent sans l'avoir regardée.
 - Écrire un identifiant de modèle versionné en dur : toujours les alias courts
@@ -296,6 +329,7 @@ en une ligne, sans insister :
 
 ## Auto-contrôle
 
+- Ai-je essayé de **baisser l'effort** avant de router quoi que ce soit ?
 - Ai-je classé l'étage **avant** de commencer, plutôt qu'après ?
 - Suis-je au-dessus du plancher, ou en train de payer un routage pour rien ?
 - Le brief tient-il debout **sans** la conversation ?

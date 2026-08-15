@@ -38,7 +38,7 @@ Affiche-la **une seule fois, en tête, sous cette forme exacte** :
 
 Puis **enchaîne immédiatement**. Tu n'attends aucune réponse, tu ne demandes pas si elle convient.
 
-Pourquoi cette forme précise : `/goal` est le mécanisme natif de Claude Code qui réévalue la condition après chaque tour et te relance tant qu'elle ne tient pas. Si le travail dépasse un tour, la personne colle cette ligne et tu repars seul, sans elle. Si elle ne la colle pas, la condition te sert quand même de définition non négociable de « terminé ». Dans les deux cas, tu n'as sollicité personne.
+Pourquoi cette forme précise : dans Claude Code, `/goal` réévalue la condition après chaque tour et relance tant qu'elle ne tient pas. Si le travail dépasse un tour, la personne colle cette ligne et tu repars seul, sans elle. Hors Claude Code — chat, Cowork — ce mécanisme n'existe pas : la ligne reste ta définition non négociable de « terminé », rien de plus, et tu ne promets pas une relance automatique qui n'aura pas lieu. Dans les deux cas, tu n'as sollicité personne.
 
 > Une condition mal écrite est la première cause de sur-travail. « Le site est mieux » n'a pas de fin. « `publier-le-site.ps1` sort en 0 et `/client?c=…` répond 200 » en a une.
 
@@ -66,7 +66,8 @@ Le budget se joue sur le nombre d'allers-retours et sur ce que tu fais entrer da
 
 **Réflexes :**
 
-- Dès que répondre suppose de parcourir plus de cinq fichiers, **délègue à un sous-agent** (`Explore`) : son contexte meurt avec lui, seule sa conclusion te revient.
+- **Régler l'effort avant de ruser sur le reste.** Là où l'interface l'expose (API, Claude Code), `low` et `medium` tiennent la qualité sur une grande part du travail courant pour une fraction des tokens ; on monte d'un cran pour le codage et l'agentique exigeants. Baisser l'effort ne raccourcit pas la réponse visible — ça, c'est la règle « ne narre pas ».
+- Investigation large — une dizaine de fichiers ou plus à parcourir pour répondre : **délègue à un sous-agent** (`Explore`), son contexte meurt avec lui et seule sa conclusion te revient. En dessous, fais-le toi-même : ce qui tient en quelques appels d'outils ne se délègue pas, et un sous-agent ne sert **jamais** à relire ton propre travail.
 - **Groupe les appels indépendants dans un seul message.** Idem pour les schémas d'outils différés : un seul `ToolSearch` avec `select:a,b,c`, jamais un par outil.
 - **Ne relis jamais un fichier que tu viens d'écrire ou d'éditer** — l'outil aurait échoué sinon.
 - Écris un fichier d'un coup plutôt qu'en cascade de petits `Edit`.
@@ -88,7 +89,7 @@ Le budget se joue sur le nombre d'allers-retours et sur ce que tu fais entrer da
 
 Rien n'est terminé sur « ça devrait marcher ». La preuve que tu as annoncée au contrat, tu l'exécutes : déployer et appeler, ouvrir la page, lancer le test, lire la réponse, purger le jeu d'essai.
 
-Toute logique non triviale laisse **un** contrôle exécutable derrière elle. Une seule passe de vérification, pas trois.
+**Celle-là, et rien de plus.** Ce modèle relit et corrige déjà son travail sans qu'on le lui demande : ajouter une passe générique « un contrôle pour toute logique non triviale » produit de la sur-vérification, coûte des tokens et n'améliore pas le résultat. Ce qui reste non négociable, c'est de ne jamais écrire « vérifié » sans avoir constaté le signal.
 
 ---
 
@@ -115,7 +116,7 @@ Ce skill est partagé au sein d'une équipe : tu ne connais pas l'appétit au ri
 
 ## 8. Cohabitation avec les autres skills
 
-- **phrase-magique** — son étape de cadrage (poser 3 à 10 questions et attendre les réponses) est **suspendue** ; le contrat d'arrêt et le bloc « Supposé » la remplacent. Ses étapes 2 à 5 restent pleinement actives : contradicteur, devoir d'alerte, auto-critique avant de livrer. Si la demande repose sur une hypothèse fausse ou porte un risque, tu le dis **en une ligne et tu exécutes quand même** la meilleure version possible — l'alerte n'est pas une demande de permission.
+- **phrase-magique** — son étape de cadrage (4 questions en un seul appel, puis attendre les réponses) est **suspendue** ; le contrat d'arrêt et le bloc « Supposé » la remplacent. Tout le reste tient : socle d'honnêteté, étiquetage des chiffres, devoir d'alerte, contradicteur, périmètre tenu, critères binaires repris à la clôture. Si la demande repose sur une hypothèse fausse ou porte un risque, tu le dis **en une ligne et tu exécutes quand même** la meilleure version possible — l'alerte n'est pas une demande de permission.
 - **ponytail** — compatible et complémentaire : ponytail gouverne la taille du diff, fonce gouverne le nombre d'allers-retours. Les deux poussent dans le même sens.
-- **`/goal`** — voir §1, c'est le prolongement naturel entre les tours. Le pairer avec le mode auto laisse tourner chaque tour sans validation d'outil.
+- **`/goal`** *(Claude Code uniquement)* — voir §1, c'est le prolongement naturel entre les tours. Le pairer avec le mode auto laisse tourner chaque tour sans validation d'outil.
 - **`/loop`** — non. Fonce n'est pas périodique, il s'arrête quand la condition tient.
