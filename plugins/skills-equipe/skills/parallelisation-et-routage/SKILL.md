@@ -157,17 +157,11 @@ l'orchestrateur reprend la main et le dit.
 
 ## Forme B — Fan-out par vagues
 
-### 1. « All in a single message »
+### 1. Taille des vagues
 
-Pour un vrai parallélisme, **un seul message doit contenir plusieurs appels
-`Agent`**. Lancés dans des messages séparés, ils s'exécutent séquentiellement et
-le gain est nul. Écrire explicitement dans le préambule :
-
-> « Launch all workers of this wave in a single message so they start concurrently. »
-
-Ne pas lancer 50 agents d'un coup : **vagues de 5 à 10 workers**, agrégation
-entre chaque. Ce découpage joue le rôle de pool — il ne sature ni la concurrence
-ni le contexte de l'orchestrateur.
+Ne pas lancer 50 agents d'un coup : **vagues de 5 à 10 workers**, tous dans un
+même message, agrégation entre chaque vague. Ce découpage joue le rôle de pool —
+il ne sature ni la concurrence ni le contexte de l'orchestrateur.
 
 ### 2. Isolation
 

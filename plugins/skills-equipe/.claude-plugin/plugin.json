@@ -1,6 +1,6 @@
 {
   "name": "skills-equipe",
-  "version": "1.8.0",
+  "version": "1.9.0",
   "description": "Les meilleures skills partagées de l'équipe : mode autonome à condition d'arrêt, qualité des réponses, parallélisation des gros lots, délégation à une IA moins chère, sobriété du code produit. Toutes à activation manuelle. Une installation, des mises à jour pour tous.",
   "author": {
     "name": "Julien Rayes"

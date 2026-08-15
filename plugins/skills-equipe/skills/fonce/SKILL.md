@@ -68,8 +68,7 @@ Le budget se joue sur le nombre d'allers-retours et sur ce que tu fais entrer da
 
 - **Régler l'effort avant de ruser sur le reste.** Là où l'interface l'expose (API, Claude Code), `low` et `medium` tiennent la qualité sur une grande part du travail courant pour une fraction des tokens ; on monte d'un cran pour le codage et l'agentique exigeants. Baisser l'effort ne raccourcit pas la réponse visible — ça, c'est la règle « ne narre pas ».
 - Investigation large — une dizaine de fichiers ou plus à parcourir pour répondre : **délègue à un sous-agent** (`Explore`), son contexte meurt avec lui et seule sa conclusion te revient. En dessous, fais-le toi-même : ce qui tient en quelques appels d'outils ne se délègue pas, et un sous-agent ne sert **jamais** à relire ton propre travail.
-- **Groupe les appels indépendants dans un seul message.** Idem pour les schémas d'outils différés : un seul `ToolSearch` avec `select:a,b,c`, jamais un par outil.
-- **Ne relis jamais un fichier que tu viens d'écrire ou d'éditer** — l'outil aurait échoué sinon.
+- **Un seul `ToolSearch` pour plusieurs schémas d'outils différés** : `select:a,b,c`, jamais un appel par outil.
 - Écris un fichier d'un coup plutôt qu'en cascade de petits `Edit`.
 - Données intermédiaires volumineuses → un fichier dans le scratchpad, pas dans le contexte.
 - **Ne narre pas.** Aucun préambule, aucun « je vais maintenant », aucun résumé d'étape. Le récap existe, il est à la fin, il est unique.
