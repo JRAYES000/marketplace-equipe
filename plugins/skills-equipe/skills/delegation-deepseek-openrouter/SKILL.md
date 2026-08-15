@@ -1,19 +1,16 @@
 ---
 name: delegation-deepseek-openrouter
 description: >-
-  Skill à activation MANUELLE uniquement. Délègue les tâches de génération
-  lourdes (résumés de documents longs, traductions, extraction ou reformatage
-  de données, premiers jets volumineux) à DeepSeek V4 Flash via l'outil
-  send-message du connecteur OpenRouter MCP, pour économiser les tokens Claude
-  Pro. NE PAS déclencher automatiquement, même face à une grosse tâche de
-  génération : utiliser UNIQUEMENT quand l'utilisateur le demande
-  explicitement — par exemple « passe par DeepSeek », « délègue à DeepSeek »,
-  « utilise le modèle bon marché », « économise mes tokens via OpenRouter »,
-  « charge la skill délégation », « /delegation-deepseek », ou quand il
-  demande d'installer ou configurer le connecteur OpenRouter MCP (« installe
-  le MCP OpenRouter ») — voir alors references/installation.md. Une fois
-  activée sur demande, appliquer la matrice de routage pour le reste de la
-  conversation.
+  Skill à activation MANUELLE uniquement. Délègue les tâches de génération lourdes (résumés de
+  documents longs, traductions, extraction ou reformatage de données, premiers jets
+  volumineux) à DeepSeek V4 Flash via l'outil send-message du connecteur OpenRouter MCP, pour
+  économiser les tokens Claude. NE PAS déclencher automatiquement, même face à une grosse
+  tâche de génération : utiliser UNIQUEMENT sur demande explicite — « passe par DeepSeek », «
+  délègue à DeepSeek », « utilise le modèle bon marché », « économise mes tokens via
+  OpenRouter », « charge la skill délégation », « /delegation-deepseek » — ou quand
+  l'utilisateur demande d'installer ou configurer le connecteur OpenRouter MCP (voir alors
+  references/installation.md). Une fois activée, appliquer la matrice de routage pour le reste
+  de la conversation.
 ---
 
 # Délégation DeepSeek via OpenRouter MCP
@@ -45,6 +42,21 @@ Flash a remplacé V4 Pro le 31/07/2026 : il est **3,1× moins cher** et le
 dépasse sur les trois indices Artificial Analysis (intelligence 49,9 contre
 44,3 ; code 69,1 contre 59,4 ; agentique 45,7 contre 36,4). Ne pas revenir à
 `deepseek-v4-pro` : il coûte plus cher pour un résultat moins bon.
+
+## Avant de déléguer : baisser l'effort
+
+L'écart de prix annoncé se mesure contre Claude à plein effort. Là où l'interface
+l'expose (API, Claude Code), `low` et `medium` tiennent la qualité sur une grande part
+du travail courant pour une fraction des tokens — sur une tâche de génération moyenne,
+ça suffit souvent et ça évite l'aller-retour, la relecture et le risque de sortie
+dégradée. La délégation garde son intérêt sur le **volume** (plusieurs milliers de mots
+à produire, un lot répétitif), pas sur une sous-tâche isolée.
+
+**Le slug est daté et périmera.** `deepseek/deepseek-v4-flash-0731` a été constaté
+valide le 31/07/2026 et n'a pas été revérifié depuis. Avant une série d'appels, passer
+par `models-list` : contrôler que le modèle est toujours servi et qu'aucun successeur
+moins cher n'est sorti. Un identifiant versionné écrit en dur dans une skill est une
+date de péremption.
 
 ## Réglage obligatoire : couper le raisonnement
 
