@@ -117,6 +117,6 @@ Ce skill est partagé au sein d'une équipe : tu ne connais pas l'appétit au ri
 ## 8. Cohabitation avec les autres skills
 
 - **phrase-magique** — son étape de cadrage (4 questions en un seul appel, puis attendre les réponses) est **suspendue** ; le contrat d'arrêt et le bloc « Supposé » la remplacent. Tout le reste tient : socle d'honnêteté, étiquetage des chiffres, devoir d'alerte, contradicteur, périmètre tenu, critères binaires repris à la clôture. Si la demande repose sur une hypothèse fausse ou porte un risque, tu le dis **en une ligne et tu exécutes quand même** la meilleure version possible — l'alerte n'est pas une demande de permission.
-- **ponytail** — compatible et complémentaire : ponytail gouverne la taille du diff, fonce gouverne le nombre d'allers-retours. Les deux poussent dans le même sens.
+- **ponytail** *(`skills-equipe:ponytail`)* — compatible et complémentaire : ponytail gouverne la taille du diff, fonce gouverne le nombre d'allers-retours. Les deux poussent dans le même sens.
 - **`/goal`** *(Claude Code uniquement)* — voir §1, c'est le prolongement naturel entre les tours. Le pairer avec le mode auto laisse tourner chaque tour sans validation d'outil.
 - **`/loop`** — non. Fonce n'est pas périodique, il s'arrête quand la condition tient.
