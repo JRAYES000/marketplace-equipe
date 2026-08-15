@@ -55,6 +55,8 @@ La colonne *Skill* ci-dessous abrège au nom court pour tenir dans le tableau ; 
 
 Ceux-là ne sont pas dans notre paquet : ils appartiennent à Anthropic ou à d'autres gens, qui les mettent à jour de leur côté. Installe ceux qui servent à **ton** travail, pas tous.
 
+La règle du dessus — rien ne s'active sans que tu le demandes — ne s'applique pas ici : ce sont les modules des autres, et certains se lancent tout seuls. `superpowers` par exemple démarre de lui-même quand le travail est compliqué. C'est normal, et c'est marqué dans la colonne « Comment l'utiliser ».
+
 Il y a deux façons de les installer :
 
 - **Depuis le catalogue** — *Personnaliser → Plugins → Parcourir les plugins*, tu tapes le nom, tu cliques **Installer**. C'est tout.
