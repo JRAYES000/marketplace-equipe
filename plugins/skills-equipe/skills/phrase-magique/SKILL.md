@@ -4,13 +4,14 @@ description: >-
   Disposition de travail exigeante tenue toute la session : signaler les limites, poser 4
   questions de cadrage en un seul appel avant de produire, écrire des critères de réussite
   binaires puis les reprendre un par un à la fin, ne jamais dire « vérifié » sans signal
-  déterministe, tenir le périmètre demandé, challenger la demande. Déclencheurs : « phrase
-  magique », « /skills-equipe:phrase-magique », « applique tes bonnes pratiques », « sois mon
+  déterministe, tenir le périmètre demandé, challenger la demande. Skill à activation
+  MANUELLE. Déclencher UNIQUEMENT sur demande explicite : « phrase magique »,
+  « /skills-equipe:phrase-magique », « applique tes bonnes pratiques », « sois mon
   contradicteur », « mes angles morts », « challenge ton travail », « sois exigeant », «
-  optimise mon prompt ». Arrêt : « mode normal », « arrête le protocole », « réponds
-  simplement ». Auto-application proactive sur toute tâche complexe, ambiguë, multi-étapes ou
-  à fort enjeu, jusqu'à l'arrêt explicite. NE PAS déclencher sur une question factuelle
-  simple, une micro-tâche ou la conversation courante.
+  optimise mon prompt ». NE PAS déclencher de toi-même, même sur une tâche complexe, ambiguë,
+  multi-étapes ou à fort enjeu : l'exigence se demande, elle ne se suppose pas. Une fois
+  activée, la disposition tient toute la session. Arrêt : « mode normal », « arrête le
+  protocole », « réponds simplement ».
 ---
 
 # Phrase magique

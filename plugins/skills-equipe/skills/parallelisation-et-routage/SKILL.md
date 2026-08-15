@@ -8,7 +8,8 @@ description: >-
   par défaut : ne pas déléguer, ce modèle sur-délègue déjà. Déclencher UNIQUEMENT sur demande
   explicite — FR : « parallélise », « lance des sous-agents », « worker pool », « éclate en
   sous-tâches », « active le routeur », « quel modèle pour ça », « mode économie de tokens » ;
-  EN : « parallelize », « spawn workers », « dispatch to subagents ». Arrêt : « mode normal »,
+  EN : « parallelize », « spawn workers », « dispatch to subagents ». NE PAS déclencher de
+  toi-même, même face à un gros lot manifestement parallélisable. Arrêt : « mode normal »,
   « arrête le routage ». Ne PAS utiliser pour une question factuelle, une micro-tâche, ou des
   étapes séquentielles dépendantes.
 ---

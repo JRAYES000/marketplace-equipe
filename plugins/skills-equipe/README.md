@@ -4,6 +4,8 @@ Plugin regroupant les meilleures skills partagées de l'équipe.
 
 ## Skills incluses
 
+**Toutes à activation manuelle.** Aucune ne se déclenche d'elle-même : chaque `description` porte la mention « activation MANUELLE » et l'interdiction explicite de s'auto-appliquer. Le plugin ne déclare aucun hook — rien ne s'installe dans la session au démarrage. C'est une règle du dépôt : une skill qui s'active sans qu'on l'ait demandée est un bug.
+
 | Skill | Rôle |
 |---|---|
 | `fonce` | Mode autonome à condition d'arrêt : formule d'abord une condition de fin vérifiable (état mesurable, preuve exécutable, borne de tours), puis exécute de bout en bout sans une seule question — décide seul, journalise ses hypothèses, exécute la seule preuve annoncée au contrat, ne rend qu'un récap final. Se prolonge entre les tours avec `/goal`. Remplace l'ancien slash command `/fonce` |
