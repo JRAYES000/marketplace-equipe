@@ -6,11 +6,11 @@ description: >-
   bibliothèque standard ou une fonctionnalité native le fait, est-ce qu'une
   dépendance déjà installée suffit, est-ce que ça tient en une ligne. Le gain
   principal est le deuxième barreau : réutiliser ce que le dépôt contient déjà
-  au lieu de le réécrire. Deux intensités, normale et souple. Déclenche sur
-  intention explicite de sobriété : « ponytail », « fais simple », « le plus
-  court », « solution minimale », « YAGNI », « pas de sur-ingénierie », ou quand
-  la personne se plaint de code trop compliqué, de boilerplate ou de dépendances
-  inutiles. NE PAS déclencher hors code — rédaction, traduction, résumé,
+  au lieu de le réécrire. Deux intensités, normale et souple. Skill à activation
+  MANUELLE. Déclencher UNIQUEMENT sur demande explicite de sobriété : « ponytail »,
+  « fais simple », « le plus court », « solution minimale », « YAGNI », « pas de
+  sur-ingénierie ». NE PAS déclencher de toi-même, même face à du code visiblement
+  sur-conçu. NE PAS déclencher hors code — rédaction, traduction, résumé,
   analyse — ni pour raccourcir un texte : ce skill gouverne ce qu'on construit,
   jamais la longueur de ce qu'on écrit.
 ---
