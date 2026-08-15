@@ -1,0 +1,85 @@
+name: Valider les skills
+
+# Une skill dont le frontmatter dépasse les limites est refusée à l'installation,
+# et personne ne le voit avant que l'équipe n'essaie de mettre à jour. Ce job
+# échoue avant la fusion plutôt que chez les gens.
+#
+# ponytail: pas de dépendance, pas de script à part. Python est déjà sur le
+# runner, PyYAML aussi.
+
+on:
+  pull_request:
+    paths:
+      - 'plugins/*/skills/**'
+      - '.github/workflows/valider-skills.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'plugins/*/skills/**'
+
+jobs:
+  valider:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Controler le frontmatter de chaque SKILL.md
+        run: |
+          python3 - <<'PY'
+          import glob, pathlib, re, sys, yaml
+
+          LIMITES = {"name": 64, "description": 1024}
+          fautes, vus = [], {}
+
+          fichiers = sorted(glob.glob("plugins/*/skills/*/SKILL.md"))
+          if not fichiers:
+              sys.exit("Aucun SKILL.md trouve : le chemin du job est faux.")
+
+          for f in fichiers:
+              texte = pathlib.Path(f).read_text(encoding="utf-8")
+              dossier = pathlib.Path(f).parent.name
+              m = re.match(r"---\n(.*?)\n---\n", texte, re.S)
+              if not m:
+                  fautes.append(f"{f} : pas de frontmatter en tete du fichier.")
+                  continue
+              try:
+                  fm = yaml.safe_load(m.group(1))
+              except yaml.YAMLError as e:
+                  fautes.append(f"{f} : frontmatter YAML illisible ({e.__class__.__name__}).")
+                  continue
+              if not isinstance(fm, dict):
+                  fautes.append(f"{f} : frontmatter vide ou mal forme.")
+                  continue
+
+              for cle, maxi in LIMITES.items():
+                  valeur = fm.get(cle)
+                  if not isinstance(valeur, str) or not valeur.strip():
+                      fautes.append(f"{f} : champ '{cle}' absent ou vide.")
+                      continue
+                  if len(valeur) > maxi:
+                      fautes.append(f"{f} : '{cle}' fait {len(valeur)} caracteres, maximum {maxi}.")
+                  if "<" in valeur and ">" in valeur:
+                      fautes.append(f"{f} : '{cle}' contient ce qui ressemble a une balise, interdit.")
+
+              nom = fm.get("name")
+              if isinstance(nom, str):
+                  if not re.fullmatch(r"[a-z0-9]+(-[a-z0-9]+)*", nom):
+                      fautes.append(f"{f} : name '{nom}' doit etre en minuscules, chiffres et tirets.")
+                  if nom != dossier:
+                      fautes.append(f"{f} : name '{nom}' differe du dossier '{dossier}'.")
+                  vus.setdefault(nom, []).append(f)
+
+              inconnues = set(fm) - {"name", "description"}
+              if inconnues:
+                  fautes.append(f"{f} : champs non reconnus {sorted(inconnues)}.")
+
+          for nom, ou in vus.items():
+              if len(ou) > 1:
+                  fautes.append(f"name '{nom}' utilise par plusieurs skills : {ou}")
+
+          for f in fautes:
+              print("KO  " + f)
+          if fautes:
+              sys.exit(f"\n{len(fautes)} probleme(s) sur {len(fichiers)} skill(s).")
+          print(f"OK  {len(fichiers)} skills valides.")
+          PY
