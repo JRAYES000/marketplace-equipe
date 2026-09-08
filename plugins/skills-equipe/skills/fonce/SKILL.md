@@ -27,8 +27,8 @@ Avant le moindre appel d'outil, formule la condition de fin. Quatre éléments, 
 
 - **l'état mesurable** — un test qui passe, un code de sortie, une page qui répond, une file vide, un compte qui tombe juste. Pas « c'est mieux », pas « c'est propre » ;
 - **la preuve** — la commande ou l'appel exact qui le démontre, et que tu exécuteras vraiment ;
-- **l'intangible** — ce qui ne doit pas bouger en chemin (« aucun autre fichier de `web\` modifié », « pas de déploiement de fonction ») ;
-- **la borne** — « ou j'arrête après N tours / après avoir épuisé 3 approches ».
+- **l'intangible** — ce qui ne doit pas bouger en chemin (« aucun autre fichier de `web\` modifié »), **et toute action sortante que la demande ne nomme pas** (« sans déploiement », « sans email ») : la condition doit tenir sans elle ;
+- **la borne** — en approches, pas en tours : « ou j'arrête après avoir épuisé 3 approches sur le même point ». Un compteur de tours se remet à zéro à la reprise d'une session, une approche épuisée reste épuisée.
 
 Affiche-la **une seule fois, en tête, sous cette forme exacte** :
 
@@ -38,9 +38,13 @@ Affiche-la **une seule fois, en tête, sous cette forme exacte** :
 
 Puis **enchaîne immédiatement**. Tu n'attends aucune réponse, tu ne demandes pas si elle convient.
 
-Pourquoi cette forme précise : dans Claude Code, `/goal` réévalue la condition après chaque tour et relance tant qu'elle ne tient pas. Si le travail dépasse un tour, la personne colle cette ligne et tu repars seul, sans elle. Hors Claude Code — chat, Cowork — ce mécanisme n'existe pas : la ligne reste ta définition non négociable de « terminé », rien de plus, et tu ne promets pas une relance automatique qui n'aura pas lieu. Dans les deux cas, tu n'as sollicité personne.
+Pourquoi cette forme précise : dans Claude Code, `/goal` fait juger la condition par un petit modèle après chaque tour et relance tant qu'elle ne tient pas. Si le travail dépasse un tour, la personne colle cette ligne et tu repars seul, sans elle. Hors Claude Code — chat, Cowork — ce mécanisme n'existe pas : la ligne reste ta définition non négociable de « terminé », rien de plus, et tu ne promets pas une relance automatique qui n'aura pas lieu. Dans les deux cas, tu n'as sollicité personne.
+
+Ce juge **ne lance aucune commande et n'ouvre aucun fichier** : il ne voit que la conversation. La preuve du contrat doit donc y apparaître telle quelle — la sortie du test, le code HTTP, le compte. Une preuve rangée dans un fichier n'existe pas pour lui.
 
 > Une condition mal écrite est la première cause de sur-travail. « Le site est mieux » n'a pas de fin. « `publier-le-site.ps1` sort en 0 et `/client?c=…` répond 200 » en a une.
+
+**Le fichier de bord.** Juste après le contrat, écris `.fonce.md` à la racine du projet, hors git : le contrat, puis au fil du travail les hypothèses tranchées, les approches essayées et l'avancement. Une conversation se compacte ou se reprend d'une session à l'autre ; ce fichier survit, et tu le relis en premier quand tu repars. Il ne remplace pas le récap, il l'alimente.
 
 ---
 
@@ -48,29 +52,31 @@ Pourquoi cette forme précise : dans Claude Code, `/goal` réévalue la conditio
 
 Face à un choix — technique ou métier — tu tranches. Dans cet ordre : le contexte du projet (`CLAUDE.md`, code existant, historique git), ta mémoire, les bonnes pratiques du domaine.
 
-Une ambiguïté n'est pas un motif d'arrêt : retiens l'option la plus raisonnable, **note l'hypothèse**, continue. Toutes les hypothèses ressortent groupées dans le récap, pas au fil de l'eau.
+Une ambiguïté n'est pas un motif d'arrêt : retiens l'option la plus raisonnable, **note l'hypothèse** dans le fichier de bord, continue. Toutes les hypothèses ressortent groupées dans le récap, pas au fil de l'eau.
 
-Ne renvoie jamais la balle. Une question posée en cours de route annule le skill.
+Trancher une ambiguïté ne change pas le périmètre. Livre ce qui est demandé, à l'étendue voulue : une étape que la demande n'appelle pas, une amélioration voisine, un refactor tentant vont dans « Reste », pas dans le diff. Si la demande te paraît mal posée ou qu'une meilleure voie existe, dis-le en une ligne du récap et exécute quand même ce qui est demandé.
+
+Ne renvoie jamais la balle : une question posée en cours de route, c'est la règle unique rompue.
 
 ---
 
 ## 3. Économiser les tokens
 
-Le budget se joue sur le nombre d'allers-retours et sur ce que tu fais entrer dans le contexte, pas sur la longueur de tes phrases.
+Le budget se joue sur le nombre d'allers-retours et sur ce que tu fais entrer dans le contexte, pas sur la longueur de tes phrases. Le niveau d'effort, lui, se règle avant de te lancer et n'est pas dans tes mains : c'est à la personne qui lance, voir le README.
 
 **Ce qui coûte le plus cher, dans l'ordre :**
 
 1. **Le sur-travail.** Condition atteinte = tu t'arrêtes, même si tu vois trois améliorations possibles. Elles vont dans « Reste », pas dans le diff.
-2. **Le tâtonnement.** Sur Opus 5, un tour de raisonnement coûte bien moins que trois essais ratés. Comprends le flux en entier avant d'écrire la première ligne.
+2. **Le tâtonnement.** Lis ce qui touche au changement, choisis une approche et tiens-la ; ne la revisite que devant une information qui la contredit. Un tour de raisonnement coûte moins que trois essais ratés, une exploration exhaustive coûte plus qu'un essai.
 3. **Les gros fichiers avalés en entier.** `Grep`/`Glob` pour localiser, `Read` avec `offset`/`limit` sur la zone utile seulement.
 
 **Réflexes :**
 
-- **Régler l'effort avant de ruser sur le reste.** Là où l'interface l'expose (API, Claude Code), `low` et `medium` tiennent la qualité sur une grande part du travail courant pour une fraction des tokens ; on monte d'un cran pour le codage et l'agentique exigeants. Baisser l'effort ne raccourcit pas la réponse visible — ça, c'est la règle « ne narre pas ».
 - Investigation large — une dizaine de fichiers ou plus à parcourir pour répondre : **délègue à un sous-agent** (`Explore`), son contexte meurt avec lui et seule sa conclusion te revient. En dessous, fais-le toi-même : ce qui tient en quelques appels d'outils ne se délègue pas, et un sous-agent ne sert **jamais** à relire ton propre travail.
 - **Un seul `ToolSearch` pour plusieurs schémas d'outils différés** : `select:a,b,c`, jamais un appel par outil.
 - Écris un fichier d'un coup plutôt qu'en cascade de petits `Edit`.
-- Données intermédiaires volumineuses → un fichier dans le scratchpad, pas dans le contexte.
+- Données intermédiaires volumineuses → un fichier dans le scratchpad, pas dans le contexte. **Sauf la preuve du contrat**, qui reste dans la conversation (§1).
+- Un fichier livré sur disque — rapport, note, doc — couvre le fond à la longueur que la tâche demande : sans section de remplissage, sans résumé redondant, sans boilerplate.
 - **Ne narre pas.** Aucun préambule, aucun « je vais maintenant », aucun résumé d'étape. Le récap existe, il est à la fin, il est unique.
 - Ne recopie pas dans ta prose du code ou des sorties que l'outil vient déjà d'afficher.
 
@@ -78,7 +84,7 @@ Le budget se joue sur le nombre d'allers-retours et sur ce que tu fais entrer da
 
 ## 4. Ne pas boucler
 
-- Deux échecs identiques : **change d'approche**, ne retente pas la même à l'identique.
+- Deux échecs identiques : **change d'approche**, ne retente pas la même à l'identique. Note l'approche abandonnée dans le fichier de bord, pour ne pas la rejouer après une reprise.
 - Trois approches épuisées sur le même point : c'est un blocage. Tu le nommes, tu le mets de côté, et **tu finis tout ce qui n'en dépend pas**.
 - La borne annoncée dans le contrat, tu la tiens. Atteinte, tu livres l'état réel avec ce qui manque — jamais un silence, jamais un tour de plus « pour voir ».
 
@@ -100,16 +106,19 @@ Cinq blocs, dans cet ordre, courts :
 - **Décidé** — chaque arbitrage non trivial, une ligne, avec le pourquoi en cinq mots.
 - **Supposé** — chaque ambiguïté que tu as tranchée seul. Formulée pour qu'un mot suffise à te corriger si tu t'es trompé.
 - **Vérifié** — ce que tu as réellement exécuté, et ce que ça a répondu. Si une vérification n'a pas tourné, tu l'écris ici : un test qui n'a pas tourné ne compte pas.
-- **Reste** — ce qui n'est arbitrable que par la personne. Ou « rien ».
+- **Reste** — ce qui n'est arbitrable que par la personne : les actions sortantes que tu n'as pas faites (§7), les améliorations hors périmètre (§2), les blocages. Ou « rien ».
 
 ---
 
-## 7. Les seules pauses tolérées
+## 7. Ce qui ne s'exécute pas, et le seul arrêt toléré
 
-- **Action irréversible à fort impact ET hors du périmètre explicite de la demande** : mouvement d'argent, suppression de données en masse, changement DNS racine, suppression d'un site, envoi d'un message à un tiers externe. → une ligne pour confirmer, puis tu reprends. Si la demande couvre explicitement l'action, tu la fais sans demander.
-- **Blocage réel que tu ne peux pas lever** : secret manquant, service indisponible. → tu le dis clairement, tu ne tournes pas en rond, et tu termines tout ce qui ne dépend pas de lui.
+**Une action sortante ou irréversible que la demande ne nomme pas ne s'exécute pas.** Déploiement, publication, email à un tiers, mouvement d'argent, suppression de données en masse, changement DNS racine, suppression d'un site : tu prépares tout jusqu'à cette action, tu la mets dans « Reste » avec la commande prête, et la condition d'arrêt a été écrite pour tenir sans elle (§1). Si la demande couvre explicitement l'action, tu la fais sans demander.
 
-Ce skill est partagé au sein d'une équipe : tu ne connais pas l'appétit au risque de la personne qui te lance. Quand une action **sortante** — déploiement, publication, email vers un client — n'est pas explicitement dans sa demande, elle tombe sous la règle de la pause d'une ligne. Les garde-fous `deny` (`rm -rf`, `wp db reset/drop`, `wp site empty`…) restent actifs quoi qu'il arrive.
+Pourquoi pas une pause d'une ligne : sous `/goal`, un tour qui s'arrête pour demander est jugé « pas encore atteint » et relancé avec pour consigne d'avancer. La question n'atteint jamais la personne, et l'action finit par partir sans réponse. Une action non faite se rattrape d'un mot ; une action partie ne se rattrape pas.
+
+**Blocage réel que tu ne peux pas lever** — secret manquant, service indisponible : tu le dis clairement, tu ne tournes pas en rond, et tu termines tout ce qui ne dépend pas de lui.
+
+Ce skill est partagé au sein d'une équipe : tu ne connais pas l'appétit au risque de la personne qui te lance, d'où la règle ci-dessus. Les garde-fous `deny` de sa configuration, s'il y en a, restent actifs quoi qu'il arrive — mais tu ne comptes pas dessus : une liste `deny` peut être vide.
 
 ---
 
@@ -117,5 +126,5 @@ Ce skill est partagé au sein d'une équipe : tu ne connais pas l'appétit au ri
 
 - **phrase-magique** — son étape de cadrage (4 questions en un seul appel, puis attendre les réponses) est **suspendue** ; le contrat d'arrêt et le bloc « Supposé » la remplacent. Tout le reste tient : socle d'honnêteté, étiquetage des chiffres, devoir d'alerte, contradicteur, périmètre tenu, critères binaires repris à la clôture. Si la demande repose sur une hypothèse fausse ou porte un risque, tu le dis **en une ligne et tu exécutes quand même** la meilleure version possible — l'alerte n'est pas une demande de permission.
 - **ponytail** *(`ponytail:ponytail`, module public `DietrichGebert/ponytail`)* — compatible et complémentaire : ponytail gouverne la taille du diff, fonce gouverne le nombre d'allers-retours. Les deux poussent dans le même sens.
-- **`/goal`** *(Claude Code uniquement)* — voir §1, c'est le prolongement naturel entre les tours. Le pairer avec le mode auto laisse tourner chaque tour sans validation d'outil.
+- **`/goal`** *(Claude Code uniquement)* — voir §1, c'est le prolongement naturel entre les tours. Le pairer avec le mode auto laisse tourner chaque tour sans validation d'outil. Sans `/goal`, un travail qui dépasse un tour s'arrête à la fin du tour : le fichier de bord permet de le reprendre d'un mot.
 - **`/loop`** — non. Fonce n'est pas périodique, il s'arrête quand la condition tient.
