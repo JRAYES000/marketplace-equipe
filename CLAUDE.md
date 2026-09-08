@@ -20,6 +20,14 @@ Ce qui reste obligatoire malgré la vitesse :
 - **Tenir le tableau du README à jour** : la version *et* la date de dernière
   mise à jour de chaque skill. La colonne *Version* est le numéro propre à
   chaque skill, pas celui du paquet.
+- **Resynchroniser le poste après le push.** Un push ne met à jour ni le clone
+  local ni le paquet installé : sans ces deux commandes, le poste garde
+  l'ancienne version sans le dire (vu le 08/09/2026 : cache en 1.5.1, GitHub
+  en 1.11.0). Redémarrer Claude ensuite.
+
+  ```bash
+  claude plugin marketplace update marketplace-equipe && claude plugin update skills-equipe@marketplace-equipe
+  ```
 
 ## Activation des skills : manuelle, toujours
 
