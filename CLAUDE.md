@@ -20,14 +20,25 @@ Ce qui reste obligatoire malgré la vitesse :
 - **Tenir le tableau du README à jour** : la version *et* la date de dernière
   mise à jour de chaque skill. La colonne *Version* est le numéro propre à
   chaque skill, pas celui du paquet.
-- **Resynchroniser le poste après le push.** Un push ne met à jour ni le clone
-  local ni le paquet installé : sans ces deux commandes, le poste garde
-  l'ancienne version sans le dire (vu le 08/09/2026 : cache en 1.5.1, GitHub
-  en 1.11.0). Redémarrer Claude ensuite.
+- **Resynchroniser après le push, deux fois.** Un push direct sur `main` ne
+  déclenche aucune synchronisation côté claude.ai : la doc officielle réserve la
+  synchronisation automatique aux PR fusionnées avec bump de version (« Direct
+  pushes to the default branch don't trigger a sync »). L'app desktop et Cowork
+  chargent cette copie serveur, jamais GitHub : sans le clic ci-dessous, tout le
+  monde garde l'ancienne version sans le dire (vu le 08/09/2026 : serveur figé
+  au 15/08, trois versions de retard).
 
-  ```bash
-  claude plugin marketplace update marketplace-equipe && claude plugin update skills-equipe@marketplace-equipe
-  ```
+  1. **Côté serveur** : dans claude.ai, Réglages → Plugins → ouvrir le plugin →
+     cliquer la source « marketplace-equipe » → onglet *Personnel* → ⋯ sur
+     l'onglet marketplace-equipe → **Rechercher des mises à jour**. Le menu
+     affiche « Commit synchronisé : <sha> » : c'est le contrôle qui tranche, il
+     doit montrer le sha qu'on vient de pousser. Le desktop suit dans les
+     20 minutes ou au redémarrage.
+  2. **Côté CLI** (clone local et paquet installé) :
+
+     ```bash
+     claude plugin marketplace update marketplace-equipe && claude plugin update skills-equipe@marketplace-equipe
+     ```
 
 ## Activation des skills : manuelle, toujours
 
