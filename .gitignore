@@ -1,0 +1,7 @@
+# Les cles ne se commitent jamais : ce depot est public.
+.env
+.env.*
+!.env.example
+
+# Scratch local
+sortants/

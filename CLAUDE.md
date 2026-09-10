@@ -40,6 +40,25 @@ Ce qui reste obligatoire malgré la vitesse :
      claude plugin marketplace update marketplace-equipe && claude plugin update skills-equipe@marketplace-equipe
      ```
 
+## Ce dépôt est public : aucune clé dedans
+
+Les clés d'API de l'équipe vivent dans `JRAYES000/claude-config` (privé), fichier
+`env/secrets.md`. Elles n'en sortent pas. Une skill qui a besoin d'un accès le lit
+dans une **variable d'environnement**, documentée dans son `SKILL.md`, avec un
+`.env.example` aux valeurs vides à côté.
+
+Deux garde-fous, et le premier ne s'installe pas tout seul :
+
+- **Hook pre-commit** — `bash scripts/installer-garde-fou.sh`, une fois par clone.
+  Un hook git ne se transmet pas avec le dépôt : sans cette commande, tu n'es pas
+  protégé. Il refuse le commit avant qu'il existe.
+- **Action `scan-secrets.yml`** — tourne à chaque push et chaque pull request, sur
+  l'arbre courant *et* sur tout l'historique. Elle attrape ce qui est passé malgré
+  tout, mais après le push : à ce moment la clé a déjà été publiée.
+
+Si une clé part quand même : **la révoquer sur le service**. Réécrire l'historique
+ne la désactive pas, la valeur a été lue.
+
 ## Activation des skills : manuelle, toujours
 
 Aucune skill de `skills-equipe` ne s'active d'elle-même. Chaque `description`
