@@ -1,0 +1,4 @@
+# Les scripts shell gardent des fins de ligne LF, meme clones sous Windows :
+# un .sh en CRLF echoue avec "bad interpreter".
+*.sh text eol=lf
+*.yml text eol=lf
