@@ -1,17 +1,23 @@
 {
   "page-claude": {
+    "author_urn": null,
+    "_source_urn": "Bloque au 11/09/2026 : LINKEDIN_GET_COMPANY_INFO repond 403 (autorisation d'organisation a valider cote LinkedIn, Julien s'en occupe). Brancher l'URN urn:li:organization:<id> ici une fois debloque -- aucune autre modification du code n'est necessaire.",
     "ton": ["sobre", "credible", "accessible", "fondateur"],
     "palette": ["#CC785C", "#934E3A", "#FBF7F1", "#2B2724"],
     "concurrents": [],
     "_source_palette": "Couleurs de marque partagees par claudeagency.fr et claudepartners.fr (variables --color-brand-500/--brand, --color-cream-50/--cream, --color-ink/--ink communes aux deux feuilles de style), verifiees le 11/09/2026 sur les deux sites en production."
   },
   "julien-agency": {
+    "author_urn": "urn:li:person:aFqu-W7ClW",
+    "_source_urn": "Verifie par Julien le 11/09/2026, a utiliser tel quel.",
     "ton": ["confiant", "direct", "pedagogue", "oriente-dirigeants"],
     "palette": ["#CC785C", "#46603F", "#7D9B76", "#FBF7F1"],
     "concurrents": [],
     "_source_palette": "Terracotta de marque (--color-brand-500) + vert distinctif propre a claudeagency.fr (--color-sand/accents #46603f et #7d9b76, absents de la feuille de style de claudepartners.fr), verifie le 11/09/2026."
   },
   "julien-partners": {
+    "author_urn": "urn:li:person:ZvLHybJZhj",
+    "_source_urn": "Verifie par Julien le 11/09/2026, a utiliser tel quel.",
     "ton": ["chaleureux", "professionnel", "facilitateur", "oriente-reseau"],
     "palette": ["#CC785C", "#9C503A", "#C6B49A", "#FBF7F1"],
     "concurrents": [],
