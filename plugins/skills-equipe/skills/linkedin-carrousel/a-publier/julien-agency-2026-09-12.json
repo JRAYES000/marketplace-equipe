@@ -1,0 +1,26 @@
+[
+  {
+    "role": "hook",
+    "titre": "Pourquoi vos meilleurs candidats disparaissent avant l'offre"
+  },
+  {
+    "role": "contenu",
+    "titre": "1. Aucun delai n'est jamais communique",
+    "texte": "Un candidat sans date de reponse suppose le pire et signe ailleurs pendant que vous deliberez."
+  },
+  {
+    "role": "contenu",
+    "titre": "2. Chaque entretien repose les memes questions",
+    "texte": "Si le second entretien redemande ce que le premier a deja etabli, le candidat en conclut que votre process n'est pas pilote -- et il n'a pas tort de s'inquieter."
+  },
+  {
+    "role": "contenu",
+    "titre": "3. Les candidats ecartes ne recoivent jamais de reponse",
+    "texte": "Un silence apres un entretien ne coute rien dans l'instant. Il coute cher au recrutement suivant, quand ce candidat ne repond meme plus a votre message."
+  },
+  {
+    "role": "contenu",
+    "titre": "Le facteur commun",
+    "texte": "Ce n'est jamais un manque de bons candidats. C'est un process qui ne decide pas assez vite pour les garder jusqu'au bout."
+  }
+]
