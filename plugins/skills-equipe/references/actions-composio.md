@@ -357,3 +357,29 @@ non par workspace.
   rendent peu probable qu'un identifiant LinkedIn brut (vanity URL ou ID numerique) soit la
   bonne forme pour cette cle, l'erreur etant systematiquement "no connected account", pas
   un probleme de format.
+
+### Verification demandee le 11/09 : le blocage touche-t-il aussi les comptes PROPRES de Julien ?
+
+**Oui, de facon confirmee -- le blocage est universel, pas specifique aux cibles tierces.**
+
+Preuve : `LINKEDIN_GET_AD_TARGETING_FACETS` (action sans `scopes` declares dans son
+schema, donnee de reference generique sans notion de compte) renvoie exactement la
+meme erreur que toutes les actions liees a un post ou un profil :
+
+```
+POST /api/v3.1/tools/execute/LINKEDIN_GET_AD_TARGETING_FACETS   body: {"arguments":{}}
+-> HTTP 400 ActionExecute_ConnectedAccountEntityIdRequired
+```
+
+La resolution du compte connecte (`user_id`/`entity_id`) est une etape prealable a
+**toute** action du toolkit `linkedin` sous cette cle, avant meme d'atteindre la logique
+propre a l'action (lecture, ecriture, compte propre ou tiers). Consequence directe : il
+est impossible de construire la partie "publication" de `linkedin-carrousel` sur une
+hypothese testee -- l'ecriture sur les propres comptes de Julien est bloquee exactement
+comme le reste, tant que le `user_id`/`entity_id` correct n'est pas connu ou que
+`connected_accounts:read` n'est pas accorde a la cle.
+
+**Consequence pour l'architecture de `linkedin-carrousel`** : construire par defaut en
+mode "composeur prepare, publication manuelle" (brouillon genere, publication faite a la
+main par Julien ou via son propre acces Composio) plutot que de batir la publication
+automatique sur une hypothese non verifiee.
