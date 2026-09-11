@@ -87,6 +87,41 @@ Confirme que l'authentification, l'URN d'auteur et le champ `commentary` marchen
 bout sur ce compte via ce canal -- le blocage est localise precisement a l'objet `images`, pas
 plus large.
 
+## Deuxieme tentative reelle, meme jour -- PDF publie techniquement, contenu visible NON CONFIRME
+
+Julien a trouve le vrai mecanisme cote Composio (teste par lui-meme pour l'upload) :
+`COMPOSIO_REMOTE_WORKBENCH` embarque un helper `upload_local_file` qui appelle lui-meme
+`/api/v3/files/upload/request` avec la cle de la session MCP en cours -- pas besoin d'une cle
+de projet Composio separee, contrairement a ce que la tentative precedente (endpoint appele a
+la main) laissait penser. Deroule dans une seule session MCP continue, comme demande (le
+`s3key` n'est valide que pour la session qui l'a genere) :
+
+1. Le PDF du carrousel (`sortants/julien-agency/...pdf`, deja rendu) a ete transfere dans le
+   bac a sable distant, decode, puis televerse via `upload_local_file` -- **reussi**, un
+   `s3key` reel obtenu.
+2. `LINKEDIN_CREATE_LINKED_IN_POST` appele dans la meme session avec `images: [{ name:
+   "carrousel.pdf", mimetype: "application/pdf", s3key: <valeur de l'etape 1> }]`, author
+   `aFqu-W7ClW`, le commentary deja redige -- **reussi**, sans erreur :
+   `{"data":{"x_restli_id":"urn:li:share:7504217733631266816"},"error":null}`.
+
+**Ce qui n'est PAS confirme** : si le PDF apparait reellement comme document/carrousel
+feuilletable sur le post, ou si LinkedIn a silencieusement ignore un type de fichier qu'il ne
+traite pas vraiment via ce champ (le point de vigilance signale par Julien lui-meme des le
+depart). Deux tentatives de verification par lecture ont echoue : `LINKEDIN_GET_POST_CONTENT`
+(`403 Forbidden`) et `LINKEDIN_LIST_REACTIONS` (`404 Entity not found`) -- mais le meme genre
+d'echec de lecture etait deja survenu sur le brouillon de test precedent, qui existait bel et
+bien (confirme par sa suppression reussie) : ce n'est donc probablement pas concluant en soi.
+Verification par URL publique non plus : LinkedIn a renvoye un code `999` (anti-bot) sur les
+tentatives d'acces non authentifie -- **non contourne**, conformement a l'interdiction de
+contourner les mecanismes anti-bot.
+
+**Le post n'a pas ete supprime** : rien dans les reponses ne signale un echec reel (pas
+d'erreur de l'API), donc le supprimer sur une simple incertitude aurait ete une action
+destructive non justifiee. **Julien a ete sollicite pour ouvrir le post lui-meme et confirmer
+ce qu'il voit reellement** (PDF/carrousel affiche, ou post texte seul) -- reponse en attente au
+moment de cette redaction. Ne pas marquer ce point comme "livre et valide" tant que cette
+confirmation n'est pas arrivee.
+
 ## Limites connues
 
 - **(2026-09-11)** Le PDF fini atterrit dans `sortants/<compte>/AAAA-MM-JJ-<slug>.pdf`,

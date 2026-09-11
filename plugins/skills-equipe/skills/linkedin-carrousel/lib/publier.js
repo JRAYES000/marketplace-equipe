@@ -103,15 +103,31 @@ async function publierCarrousel({ authorUrn, cheminPdf }) {
  * indirect, `COMPOSIO_REMOTE_WORKBENCH`/`upload_local_file`, suppose de
  * faire entrer les octets locaux dans son bac a sable distant -- tente via
  * encodage base64, bloque par le classifieur auto-mode, non contourne).
- * **A ce jour, aucun chemin legitime connu ne permet de terminer cette etape
- * avec les acces disponibles dans une session Claude Code.** A debloquer par
- * une `COMPOSIO_API_KEY` de projet couvrant a la fois `averse-cooser` et cet
- * endpoint de fichiers, ou par un mecanisme MCP equivalent que Composio
- * n'expose pas encore a ce jour.
+ * **DEBLOQUE le meme jour par Julien** : `COMPOSIO_REMOTE_WORKBENCH` embarque
+ * un helper (`upload_local_file`) qui appelle lui-meme cet endpoint de
+ * fichiers avec la cle de la session MCP en cours -- pas besoin d'une cle de
+ * projet separee (la piste ci-dessus testait l'endpoint hors du bac a sable,
+ * avec la mauvaise cle). Reessaye avec succes technique dans une seule
+ * session MCP continue (le `s3key` n'est valide que pour la session qui l'a
+ * genere) : PDF transfere dans le bac a sable, televerse, puis
+ * `LINKEDIN_CREATE_LINKED_IN_POST` appele avec `images: [{ name, mimetype:
+ * "application/pdf", s3key }]` -- **reussi sans erreur**, un `x_restli_id`
+ * obtenu. **Mais le contenu visible reel du post (le PDF apparait-il comme
+ * document/carrousel, ou a-t-il ete ignore silencieusement) n'a pas pu etre
+ * confirme** -- deux tentatives de lecture ont echoue (403, 404, meme genre
+ * d'echec deja vu sur un brouillon dont l'existence etait pourtant confirmee
+ * par ailleurs) et la verification par URL publique a ete bloquee par le
+ * mecanisme anti-bot de LinkedIn, non contournee. Voir
+ * `a-publier/README.md` et `references/etat-linkedin-20260912.md` pour le
+ * detail complet. **Cette fonction JS n'a pas ete reecrite pour utiliser
+ * cette methode** (orchestrer un appel `COMPOSIO_REMOTE_WORKBENCH` depuis
+ * Node est un chantier distinct, pas fait ici) -- l'implementation
+ * ci-dessous reste celle, confirmee cassee, du register+PUT+URN simple ; le
+ * `throw` qui suit reste donc justifie tant que ce code n'est pas reecrit.
  *
- * Point toujours non verifie (bloque par le point ci-dessus avant de pouvoir
- * l'observer) : est-ce que `images` accepte plusieurs elements a la fois
- * (necessaire pour le mode "par-diapo") ? Le nom au pluriel le suggere, ce
+ * Point toujours non verifie : est-ce que `images` accepte plusieurs
+ * elements a la fois (necessaire pour le mode "par-diapo") ? Le nom au
+ * pluriel le suggere, ce
  * n'est pas confirme.
  */
 async function televerserImageComposio({ ownerUrn, cheminImage, userId, apiKey }) {
