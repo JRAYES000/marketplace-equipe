@@ -313,3 +313,47 @@ n'est pas remplie :
    moi-meme le(s) compte(s) connecte(s) et recuperer son identifiant.
 
 Rien n'a ete publie sur LinkedIn, ni sur un compte propre ni sur celui d'un tiers.
+
+### Mise a jour du 11/09/2026 -- identifiants reels trouves, mais invalides pour cette cle
+
+Piste explorée avant de contacter Julien : relecture complète de `env/secrets.md` et de
+tout le dépôt `claude-config`, puis extension au dépôt privé `JRAYES000/visibilite-ops`
+(référencé par une mémoire de `claude-config` sans lien évident avec Composio). Ce dépôt
+contient la routine de production `routines/commentaires-linkedin.md`, qui documente
+noir sur blanc les deux comptes LinkedIn connectés à Composio pour la vague quotidienne
+de commentaires (12/jour/compte) :
+
+| Population | Compte | Identifiant Composio | `actor` |
+| --- | --- | --- | --- |
+| prestataires | Claude Partners | `linkedin_arsino-dian` | `urn:li:person:ZvLHybJZhj` |
+| dirigeants | Claude Agency | `linkedin_habe-bogue` | `urn:li:person:aFqu-W7ClW` |
+
+**Testé en lecture seule (`LINKEDIN_GET_MY_INFO`, zero effet de bord) avec les 4 valeurs
+(les deux identifiants Composio et les deux URN `actor`) sous la cle `COMPOSIO_API_KEY`
+(`ak_nz4gKAqnX4jAEOmXJ9jG`, workspace `jrayes000_workspace`) : les 4 en HTTP 404
+`ActionExecute_ConnectedAccountNotFound`.**
+
+Conclusion : ces identifiants sont reels et actifs pour la routine `visibilite-ops`, mais
+**appartiennent a un autre projet/cle Composio** que celui documente dans `env/secrets.md`
+sous le nom `COMPOSIO_API_KEY` (ajoutee le 2026-09-10, "cle nomena-linkedin-cle"). Les deux
+integrations ne partagent pas le meme espace de comptes connectes, malgre le meme
+"workspace" `jrayes000_workspace` au sens Composio -- soit parce que `visibilite-ops`
+utilise une cle differente (non presente dans `env/secrets.md`, probablement en secret
+GitHub direct du depot `visibilite-ops` ou Cloudflare Pages, cf.
+`routines-cloud-visibilite.md` : "Les cles d'envoi (Composio...) ne vivent que sur
+Cloudflare Pages"), soit parce que l'entite (`user_id`) est scopee par projet Composio et
+non par workspace.
+
+**Autres pistes explorees, sans resultat exploitable sans risque :**
+- *Endpoint d'initiation de connexion* (`COMPOSIO_INITIATE_CONNECTION`, mentionne dans le
+  `suggested_fix` de chaque erreur 404) : creerait une **nouvelle** connexion OAuth
+  LinkedIn (flux d'autorisation reel demandant une action humaine sur linkedin.com) --
+  non execute, effet de bord non maitrisable a distance.
+- *Webhooks / journal d'evenements Composio* : non explore en detail, rendu inutile par
+  la decouverte (puis l'echec) de la piste des identifiants deja notes -- la cle actuelle
+  n'a de toute facon pas de permission de lecture confirmee sur une eventuelle liste de
+  webhooks.
+- *ID LinkedIn public comme `user_id`* : hypothese non testee -- les 4 refus 404 ci-dessus
+  rendent peu probable qu'un identifiant LinkedIn brut (vanity URL ou ID numerique) soit la
+  bonne forme pour cette cle, l'erreur etant systematiquement "no connected account", pas
+  un probleme de format.
