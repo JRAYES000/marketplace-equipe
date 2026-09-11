@@ -1,0 +1,16 @@
+{
+  "julien-partners": {
+    "author_urn": "urn:li:person:ZvLHybJZhj",
+    "_source_urn": "Verifie par Julien le 11/09/2026, a utiliser tel quel.",
+    "comptes_a_surveiller": [],
+    "ton": ["chaleureux", "professionnel", "facilitateur", "oriente-reseau"],
+    "seuil_max_commentaires": 30
+  },
+  "julien-agency": {
+    "author_urn": "urn:li:person:aFqu-W7ClW",
+    "_source_urn": "Verifie par Julien le 11/09/2026, a utiliser tel quel.",
+    "comptes_a_surveiller": [],
+    "ton": ["confiant", "direct", "pedagogue", "oriente-dirigeants"],
+    "seuil_max_commentaires": 30
+  }
+}

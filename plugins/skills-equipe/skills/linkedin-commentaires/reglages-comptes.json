@@ -1,0 +1,20 @@
+{
+  "julien-partners": {
+    "actor_urn": "urn:li:person:ZvLHybJZhj",
+    "_source_urn": "Verifie par Julien le 11/09/2026, a utiliser tel quel.",
+    "comptes_cibles": [],
+    "ton": ["chaleureux", "professionnel", "facilitateur", "oriente-reseau"],
+    "seuil_max_commentaires": 30,
+    "plafond_par_jour": 12,
+    "plafond_par_cible_par_semaine": 3
+  },
+  "julien-agency": {
+    "actor_urn": "urn:li:person:aFqu-W7ClW",
+    "_source_urn": "Verifie par Julien le 11/09/2026, a utiliser tel quel.",
+    "comptes_cibles": [],
+    "ton": ["confiant", "direct", "pedagogue", "oriente-dirigeants"],
+    "seuil_max_commentaires": 30,
+    "plafond_par_jour": 12,
+    "plafond_par_cible_par_semaine": 3
+  }
+}
