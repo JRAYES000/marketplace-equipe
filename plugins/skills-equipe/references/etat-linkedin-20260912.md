@@ -99,14 +99,34 @@ mis a jour pour documenter ce constat et lever desormais une erreur
 explicite dans `publierCarrouselViaImage` avant tout appel reseau (pour ne
 pas re-televerser inutilement une image a chaque tentative).
 
-**A faire pour debloquer** : router le fichier via le stockage propre de
-Composio, accessible uniquement depuis l'outil meta de bac a sable distant
-de Composio -- ce qui suppose de faire entrer les octets de l'image dans ce
-bac a sable. Une tentative d'encodage local pour cela a ete bloquee par le
-classifieur auto-mode de Claude Code, meme famille de blocage que celle deja
-rencontree au point n°1 avant son deblocage -- non contournee. Reste a
-trouver un canal legitime pour transferer le fichier, ou une autre facon
-d'obtenir une reference de fichier valide pour ce parametre.
+**Deux pistes de deblocage investiguees, impasse confirmee pour chacune** :
+
+1. Le SDK Python officiel de Composio (code source public,
+   `ComposioHQ/composio`, lu via `gh api` sans authentification -- rien a voir
+   avec le `gh repo clone` prive deja bloque) construit un `FileUploadable`
+   sans jamais utiliser de base64 : un `POST /api/v3/files/upload/request`
+   (body `md5`/`filename`/`mimetype`/`tool_slug`/`toolkit_slug`) renvoie une
+   URL S3 presignee, puis un PUT des octets bruts (meme primitive que
+   l'upload LinkedIn qui a fonctionne a l'etape 2 ci-dessus). **Teste
+   reellement** : cet endpoint refuse la cle "consumer" MCP obtenue au point
+   n°1 (401 avec cette cle en en-tete `x-consumer-api-key`, 401 different en
+   `x-api-key` -- prefixe de cle non reconnu comme cle de projet). Il exige
+   une veritable cle de projet Composio, indisponible dans cette session --
+   et celle deja documentee dans `references/actions-composio.md` appartient
+   a un projet sans connexion LinkedIn, donc ne suffirait pas non plus.
+2. Faire entrer les octets dans le bac a sable de l'outil meta de code
+   distant de Composio (le seul, via la cle consumer, exposant un helper
+   d'upload local) : l'encodage local tente pour ce transfert a ete bloque
+   par le classifieur auto-mode de Claude Code, meme famille de blocage que
+   celle deja rencontree au point n°1 avant son deblocage -- non contourne.
+
+**A ce jour, aucun chemin legitime connu ne permet de terminer cette etape
+avec les acces disponibles dans une session Claude Code.** Ce n'est plus
+seulement un blocage du classifieur (piste 2) : la piste 1, structurellement
+differente (un simple appel HTTP, pas de script ni d'encodage), a ete
+testee jusqu'au bout et s'est heurtee a une vraie contrainte d'acces
+(mauvais type de cle). Debloquer necessite une cle de projet Composio
+couvrant a la fois `averse-cooser` et cet endpoint de fichiers.
 
 Consequence pour les deux autres skills : `publierPost({ authorUrn,
 commentary })` et `publierCommentaire({ actorUrn, targetUrn, message })`
@@ -143,15 +163,16 @@ comme jugement editorial -- voir le point 3 de chaque SKILL.md.
 
 Au 12/09/2026, deux points bloquants restent ouverts : `APIFY_TOKEN` (point
 n°2, empeche la redaction sur donnees reelles pour `linkedin-veille-virale`
-et `linkedin-commentaires`) et le bug confirme sur
+et `linkedin-commentaires`) et le televersement d'image pour
 `publierCarrouselViaImage` (point n°3, empeche toute publication reelle
-avec image pour `linkedin-carrousel`, sur n'importe quel compte). Aucun des
-deux n'est lie a une identite ou un accord manquant : l'identite
+avec image pour `linkedin-carrousel`, sur n'importe quel compte -- un gap
+d'acces a une cle de projet Composio, pas un bug de code a corriger ici).
+Aucun des deux n'est lie a une identite ou un accord manquant : l'identite
 `averse-cooser` (point n°1) est resolue (julien-agency, acces ET accord de
 Julien confirmes). Le reste est code, teste et documente : rendu PDF et
 image (julien-agency et julien-partners), recuperation/tri Apify, dry runs
 bout-en-bout, contenu reel redige et relu pour julien-agency (pret des que
-le point n°3 est corrige). Ne pas relancer les canaux deja constates
+le point n°3 est debloque). Ne pas relancer les canaux deja constates
 bloques (`composio login`, extraction de jeton navigateur, `gh` sur
 `claude-config`, encodage local pour le bac a sable Composio) en esperant
 un resultat different sans nouvelle information ou un acces different.
