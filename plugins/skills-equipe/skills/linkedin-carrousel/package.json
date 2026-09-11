@@ -5,7 +5,9 @@
   "description": "Generation de carrousels LinkedIn (PDF multi-page) a partir des templates HTML de la skill",
   "type": "commonjs",
   "scripts": {
-    "generer-pdf": "node generer-pdf.js"
+    "generer-pdf": "node generer-pdf.js",
+    "generer-images": "node generer-images.js",
+    "test": "node --test"
   },
   "dependencies": {
     "playwright": "^1.48.0"

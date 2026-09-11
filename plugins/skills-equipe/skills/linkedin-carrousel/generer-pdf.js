@@ -213,4 +213,17 @@ if (require.main === module) {
   });
 }
 
-module.exports = { genererPdf, construireDocument, slugifier, cheminSortieParDefaut, dateISODuJour };
+module.exports = {
+  genererPdf,
+  construireDocument,
+  slugifier,
+  cheminSortieParDefaut,
+  dateISODuJour,
+  // Exportes pour generer-images.js (repli image, voir lib/publier.js) : la
+  // construction d'un document a une seule diapo reutilise exactement le
+  // meme gabarit/injection que le PDF multi-page, aucune divergence de rendu
+  // entre les deux formats de sortie.
+  chargerGabarit,
+  injecterDiapo,
+  slugDepuisDiapos,
+};
