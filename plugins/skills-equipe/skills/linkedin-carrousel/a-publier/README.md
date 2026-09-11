@@ -67,12 +67,29 @@ Composio. `lib/publier.js` documente desormais ce constat en detail et leve une 
 explicite dans `publierCarrouselViaImage` avant tout appel reseau, pour eviter de re-televerser
 inutilement une image a chaque tentative tant que ce n'est pas corrige.
 
-## A faire pour debloquer une vraie publication
+## A faire pour debloquer une vraie publication -- impasse confirmee, pas juste un blocage classifieur
 
-Corriger l'etape 3 pour router le fichier via le stockage S3 de Composio (accessible seulement
-depuis l'outil meta `COMPOSIO_REMOTE_WORKBENCH`, via son helper `upload_local_file`) plutot que
-de passer l'URN LinkedIn native obtenue a l'etape 1. Tente le 12/09/2026 (encoder l'image en
-base64 pour la faire entrer dans le bac a sable distant du workbench) : bloque par le
-classifieur auto-mode de Claude Code, non contourne. Reste a trouver un canal pour faire
-entrer le fichier dans ce bac a sable sans se heurter a ce blocage, ou une autre facon
-d'obtenir un `s3key` valide.
+Deux pistes investiguees le 12/09/2026 pour obtenir le `s3key` requis par `images`, toutes
+deux dans une impasse pour des raisons differentes :
+
+1. **Passer par le stockage propre de Composio, comme le fait son SDK officiel.** Lu dans le
+   code source public du SDK Python (`ComposioHQ/composio`, `_files.py`, via `gh api` sans
+   authentification) : le mecanisme reel n'utilise jamais de base64, juste un `POST
+   /api/v3/files/upload/request` (body `md5`/`filename`/`mimetype`/`tool_slug`/`toolkit_slug`)
+   qui renvoie une URL S3 presignee, puis un PUT des octets bruts (meme primitive que l'upload
+   LinkedIn qui a fonctionne). **Teste reellement** : cet endpoint refuse la cle "consumer" MCP
+   (401 `Auth_NoAuthProvided` en `x-consumer-api-key`, 401 `APIKey_InvalidAPIKey` en `x-api-key`
+   avec la meme valeur -- prefixe `ck_` non reconnu). Il exige une veritable `COMPOSIO_API_KEY`
+   de projet (prefixe `ak_`), indisponible ici -- et celle deja connue dans
+   `references/actions-composio.md` appartient a un projet sans connexion LinkedIn, donc ne
+   suffirait pas non plus.
+2. **Faire entrer les octets dans le bac a sable de `COMPOSIO_REMOTE_WORKBENCH`** (le seul outil
+   MCP, via la cle consumer, exposant un helper d'upload local) : suppose un transfert de
+   fichier vers ce bac a sable. L'encodage base64 tente pour cela a ete bloque par le
+   classifieur auto-mode de Claude Code -- non contourne.
+
+**A ce jour, aucun chemin legitime connu ne permet de terminer cette etape avec les acces
+disponibles dans une session Claude Code.** Debloquer necessite soit une `COMPOSIO_API_KEY` de
+projet couvrant a la fois `averse-cooser` et l'endpoint de fichiers (a demander a Julien ou a
+qui gere le projet Composio concerne), soit un mecanisme MCP equivalent que Composio n'expose
+pas encore.

@@ -80,11 +80,34 @@ async function publierCarrousel({ authorUrn, cheminPdf }) {
  * bien une URN LinkedIn valide (etapes 1-2 fonctionnent), mais cette URN
  * est **inutilisable telle quelle** a l'etape 3 -- `publierCarrouselViaImage`
  * echouera systematiquement a la creation du post tant que ce point n'est
- * pas corrige. Piste non implementee (nécessite de router le fichier via le
- * stockage S3 propre de Composio, accessible uniquement depuis l'outil
- * meta `COMPOSIO_REMOTE_WORKBENCH` -- getting les octets locaux dans ce
- * bac a sable distant reste a faire) : a reprendre avant de retenter une
- * publication reelle avec image.
+ * pas corrige.
+ *
+ * PISTE INVESTIGUEE LE 12/09/2026, IMPASSE CONFIRMEE (pas un blocage du
+ * classifieur cette fois -- une vraie reponse d'API) : le SDK Python officiel
+ * de Composio (`ComposioHQ/composio`, `python/composio/core/models/_files.py`,
+ * lu publiquement via `gh api` sans authentification) construit un
+ * `FileUploadable` en deux etapes : (1) `POST /api/v3/files/upload/request`
+ * sur `backend.composio.dev` (body `{ md5, filename, mimetype, tool_slug,
+ * toolkit_slug }`) renvoie une URL S3 presignee + une cle ; (2) PUT des
+ * octets bruts du fichier sur cette URL (pas de base64 -- meme primitive PUT
+ * que l'etape 2 ci-dessus, deja validee). Teste reellement le 12/09/2026 :
+ * cet endpoint refuse la cle "consumer" MCP (`x-consumer-api-key` -> 401
+ * `Auth_NoAuthProvided` ; la meme valeur en `x-api-key` -> 401
+ * `APIKey_InvalidAPIKey`, prefixe `ck_` non reconnu comme cle de projet). Il
+ * exige une veritable `COMPOSIO_API_KEY` de projet (prefixe `ak_`),
+ * indisponible dans cet environnement -- et celle deja documentee dans
+ * `references/actions-composio.md` (`ak_nz4gKAqnX4jAEOmXJ9jG`) appartient a
+ * un projet Composio sans aucune connexion LinkedIn, donc ne resoudrait pas
+ * le probleme meme si on l'avait ici. Aucun outil MCP accessible via la cle
+ * consumer n'expose cette etape de televersement autrement (le seul chemin
+ * indirect, `COMPOSIO_REMOTE_WORKBENCH`/`upload_local_file`, suppose de
+ * faire entrer les octets locaux dans son bac a sable distant -- tente via
+ * encodage base64, bloque par le classifieur auto-mode, non contourne).
+ * **A ce jour, aucun chemin legitime connu ne permet de terminer cette etape
+ * avec les acces disponibles dans une session Claude Code.** A debloquer par
+ * une `COMPOSIO_API_KEY` de projet couvrant a la fois `averse-cooser` et cet
+ * endpoint de fichiers, ou par un mecanisme MCP equivalent que Composio
+ * n'expose pas encore a ce jour.
  *
  * Point toujours non verifie (bloque par le point ci-dessus avant de pouvoir
  * l'observer) : est-ce que `images` accepte plusieurs elements a la fois
