@@ -69,6 +69,20 @@ test('genererImageCouverture retombe sur la premiere diapo si aucune n\'a le rol
   }
 });
 
+test('le rendu local fonctionne aussi pour julien-agency (ecrit, non teste en publication reelle -- acces manquant)', async () => {
+  const dossierSortie = dossierTemporaire();
+  const cheminCouverture = path.join(dossierSortie, 'couverture.png');
+  try {
+    const resultat = await genererImageCouverture({ compte: 'julien-agency', diapos, sortie: cheminCouverture });
+    const { largeur, hauteur, tailleOctets } = lireDimensionsPng(resultat.cheminSortie);
+    assert.equal(largeur, 1080);
+    assert.equal(hauteur, 1350);
+    assert.ok(tailleOctets > 5000, `fichier suspicieusement petit (${tailleOctets} octets)`);
+  } finally {
+    fs.rmSync(dossierSortie, { recursive: true, force: true });
+  }
+});
+
 test('couverture et diapo-01 rendent le meme contenu (meme gabarit, meme diapo)', async () => {
   const dossierSortie = dossierTemporaire();
   try {

@@ -1,11 +1,11 @@
 {
   "page-claude": {
     "author_urn": null,
-    "_source_urn": "Bloque au 11/09/2026 : LINKEDIN_GET_COMPANY_INFO repond 403 (autorisation d'organisation a valider cote LinkedIn, Julien s'en occupe). Brancher l'URN urn:li:organization:<id> ici une fois debloque -- aucune autre modification du code n'est necessaire.",
-    "ton": ["sobre", "credible", "accessible", "fondateur"],
-    "palette": ["#CC785C", "#934E3A", "#FBF7F1", "#2B2724"],
+    "_source_urn": "Bloque au 11/09/2026 : LINKEDIN_GET_COMPANY_INFO repond 403 (autorisation d'organisation a valider cote LinkedIn, Julien s'en occupe).",
+    "ton": [],
+    "palette": [],
     "concurrents": [],
-    "_source_palette": "Couleurs de marque partagees par claudeagency.fr et claudepartners.fr (variables --color-brand-500/--brand, --color-cream-50/--cream, --color-ink/--ink communes aux deux feuilles de style), verifiees le 11/09/2026 sur les deux sites en production."
+    "_statut": "ABANDONNE le 12/09/2026 sur decision de Julien -- ne pas renseigner ton/palette/concurrents ici, ce serait du travail perdu. Voir SKILL.md. La structure a 3 comptes est gardee volontairement (ne pas supprimer cette entree), mais aucun contenu reel n'est du dessus tant que ce chantier n'est pas rouvert."
   },
   "julien-agency": {
     "author_urn": "urn:li:person:aFqu-W7ClW",
