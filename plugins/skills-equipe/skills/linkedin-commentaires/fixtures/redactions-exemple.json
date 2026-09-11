@@ -1,0 +1,9 @@
+{
+  "_a_propos": "Commentaires ecrits a la main pour le post 'c1' de fixtures/posts-exemple.json, un par compte (ton different a partir de reglages-comptes.json). Ce n'est PAS une generation automatique : en usage reel, c'est la session Claude qui invoque la skill qui redige, poste par poste, comme documente au point 3 du SKILL.md. Ce fichier sert uniquement a fournir un exemple concret pour le dry run (voir dry-run.js).",
+  "julien-partners": {
+    "c1": "Ce basculement du volume d'appels vers le taux de transformation, c'est exactement ce qu'on recommande quand une equipe commerciale plafonne : on gagne plus a muscler la qualite du premier contact qu'a en multiplier le nombre. Merci pour le partage, tres concret."
+  },
+  "julien-agency": {
+    "c1": "Point important pour les dirigeants qui pilotent au volume d'activite : un indicateur d'effort (nombre d'appels) n'est pas un indicateur de resultat. Le jour ou vous remplacez l'un par l'autre dans vos reportings, les priorites de l'equipe changent seules -- sans note de service."
+  }
+}

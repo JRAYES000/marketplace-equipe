@@ -1,0 +1,9 @@
+{
+  "_a_propos": "Redactions ecrites a la main pour le post 'p1' de fixtures/posts-exemple.json, une par compte (ton different a partir de reglages-comptes.json). Ce n'est PAS une generation automatique : en usage reel, c'est la session Claude qui invoque la skill qui redige, poste par poste, comme documente au point 3 du SKILL.md. Ce fichier sert uniquement a fournir un exemple concret pour le dry run (voir dry-run.js).",
+  "julien-partners": {
+    "p1": "On me demande souvent pourquoi une offre d'emploi ne rencontre personne alors qu'elle est \"bien ecrite\". Un post de Claire Fontaine cette semaine remet le doigt dessus : le blocage n'etait pas la visibilite de l'annonce, mais son contenu -- ecrit depuis la fiche de poste RH, pas depuis les vrais irritants du quotidien. Resultat apres reecriture : 6 candidatures qualifiees en 10 jours. Ca rejoint ce qu'on voit cote reseau : la bonne question n'est pas \"comment diffuser plus large\", c'est \"qui a vraiment vecu ce poste et qu'est-ce qu'il en dirait\"."
+  },
+  "julien-agency": {
+    "p1": "Un recrutement bloque 3 mois. La cause : une fiche de poste ecrite pour rassurer les RH, pas pour parler aux candidats. Une fois reecrite a partir des irritants reels du poste : 6 candidatures qualifiees en 10 jours (retour de Claire Fontaine cette semaine). Pour un dirigeant, la lecon est simple : une fiche de poste n'est pas un document de conformite interne, c'est un argumentaire de vente. Si vous ne l'avez pas teste sur un candidat reel avant publication, vous ne savez pas si elle vend quoi que ce soit."
+  }
+}

@@ -3,5 +3,9 @@
   "private": true,
   "version": "0.1.0",
   "description": "Veille des comptes suivis (Apify) et publication d'un post recycle/inspire (Composio)",
-  "type": "commonjs"
+  "type": "commonjs",
+  "scripts": {
+    "test": "node --test",
+    "dry-run": "node dry-run.js"
+  }
 }

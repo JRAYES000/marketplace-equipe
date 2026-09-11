@@ -23,11 +23,25 @@ description: "Surveille des comptes LinkedIn suivis, repere les posts qui valent
 4. `lib/publier.js` (`publierPost`) est le **seul** point d'appel qui publie
    reellement : `publierPost({ authorUrn, commentary })`. Rien d'autre dans
    le module n'ecrit sur LinkedIn.
+5. `dry-run.js` (`npm run dry-run`) execute les etapes 1-3 de bout en bout
+   sans jamais appeler `publierPost` (il n'importe meme pas `lib/publier.js`)
+   -- avec le jeu fixture de `fixtures/posts-exemple.json` tant que
+   `comptes_a_surveiller` est vide, ou avec un vrai appel Apify des que ce
+   champ est rempli et `APIFY_TOKEN` present. Ecrit le resultat (post retenu,
+   texte final, arguments qu'on passerait a `publierPost`) dans
+   `dry-run-sortie/veille-exemple.json`. `npm test` (`node --test`) verifie le
+   tri (`test/trierPosts.test.js`) et ce dry run (`test/dry-run.test.js`),
+   y compris qu'il n'importe jamais `lib/publier.js`.
 
 ## Etat au 11/09/2026 -- ce qui est pret, ce qui attend
 
 - **Pret et teste reellement** : `recupererPosts` (Apify) -- verifie avec le
   compte `julien_r` (`GET /v2/users/me` -> 200) avant construction du reste.
+- **Pret et teste de bout en bout, hors publication reelle** : la chaine
+  recuperation -> tri -> texte final, via `dry-run.js` -- un exemple concret
+  de ce que serait le post recycle/inspire (voir
+  `dry-run-sortie/veille-exemple.json`, genere par `npm run dry-run`), sans
+  qu'aucune publication reelle n'ait eu lieu.
 - **Pret, non teste par publication reelle** : `publierPost`. Les URN
   d'auteur sont fournis et verifies par Julien
   (`reglages-comptes.json` : `julien-partners` -> `urn:li:person:ZvLHybJZhj`,

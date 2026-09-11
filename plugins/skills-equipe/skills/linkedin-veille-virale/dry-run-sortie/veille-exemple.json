@@ -1,0 +1,52 @@
+{
+  "julien-partners": {
+    "compte": "julien-partners",
+    "source": "fixture (APIFY_TOKEN absent et/ou comptes_a_surveiller vide -- voir fixtures/posts-exemple.json)",
+    "nbPostsRecuperes": 4,
+    "nbPostsRetenus": 2,
+    "ecartes": [
+      "p2-carrousel",
+      "p3-trop-commente"
+    ],
+    "postChoisi": {
+      "id": "p1",
+      "auteur": "Claire Fontaine",
+      "url": "https://www.linkedin.com/posts/claire-fontaine_exemple-p1",
+      "postedAt": "2026-09-09T08:15:00.000Z",
+      "commentsCount": 14,
+      "texteOriginal": "On a mis 3 mois a debloquer un recrutement cle parce que personne n'osait dire que le poste tel que redige n'interessait personne. Le jour ou on a accepte de le reecrire a partir des vrais irritants du poste (pas de la fiche RH), 6 candidatures qualifiees en 10 jours."
+    },
+    "contenuFinal": "On me demande souvent pourquoi une offre d'emploi ne rencontre personne alors qu'elle est \"bien ecrite\". Un post de Claire Fontaine cette semaine remet le doigt dessus : le blocage n'etait pas la visibilite de l'annonce, mais son contenu -- ecrit depuis la fiche de poste RH, pas depuis les vrais irritants du quotidien. Resultat apres reecriture : 6 candidatures qualifiees en 10 jours. Ca rejoint ce qu'on voit cote reseau : la bonne question n'est pas \"comment diffuser plus large\", c'est \"qui a vraiment vecu ce poste et qu'est-ce qu'il en dirait\".",
+    "authorUrn": "urn:li:person:ZvLHybJZhj",
+    "argumentsPublierPost": {
+      "authorUrn": "urn:li:person:ZvLHybJZhj",
+      "commentary": "On me demande souvent pourquoi une offre d'emploi ne rencontre personne alors qu'elle est \"bien ecrite\". Un post de Claire Fontaine cette semaine remet le doigt dessus : le blocage n'etait pas la visibilite de l'annonce, mais son contenu -- ecrit depuis la fiche de poste RH, pas depuis les vrais irritants du quotidien. Resultat apres reecriture : 6 candidatures qualifiees en 10 jours. Ca rejoint ce qu'on voit cote reseau : la bonne question n'est pas \"comment diffuser plus large\", c'est \"qui a vraiment vecu ce poste et qu'est-ce qu'il en dirait\"."
+    },
+    "publicationReelle": "NON EFFECTUEE -- dry run uniquement, publierPost() jamais appele par ce script"
+  },
+  "julien-agency": {
+    "compte": "julien-agency",
+    "source": "fixture (APIFY_TOKEN absent et/ou comptes_a_surveiller vide -- voir fixtures/posts-exemple.json)",
+    "nbPostsRecuperes": 4,
+    "nbPostsRetenus": 2,
+    "ecartes": [
+      "p2-carrousel",
+      "p3-trop-commente"
+    ],
+    "postChoisi": {
+      "id": "p1",
+      "auteur": "Claire Fontaine",
+      "url": "https://www.linkedin.com/posts/claire-fontaine_exemple-p1",
+      "postedAt": "2026-09-09T08:15:00.000Z",
+      "commentsCount": 14,
+      "texteOriginal": "On a mis 3 mois a debloquer un recrutement cle parce que personne n'osait dire que le poste tel que redige n'interessait personne. Le jour ou on a accepte de le reecrire a partir des vrais irritants du poste (pas de la fiche RH), 6 candidatures qualifiees en 10 jours."
+    },
+    "contenuFinal": "Un recrutement bloque 3 mois. La cause : une fiche de poste ecrite pour rassurer les RH, pas pour parler aux candidats. Une fois reecrite a partir des irritants reels du poste : 6 candidatures qualifiees en 10 jours (retour de Claire Fontaine cette semaine). Pour un dirigeant, la lecon est simple : une fiche de poste n'est pas un document de conformite interne, c'est un argumentaire de vente. Si vous ne l'avez pas teste sur un candidat reel avant publication, vous ne savez pas si elle vend quoi que ce soit.",
+    "authorUrn": "urn:li:person:aFqu-W7ClW",
+    "argumentsPublierPost": {
+      "authorUrn": "urn:li:person:aFqu-W7ClW",
+      "commentary": "Un recrutement bloque 3 mois. La cause : une fiche de poste ecrite pour rassurer les RH, pas pour parler aux candidats. Une fois reecrite a partir des irritants reels du poste : 6 candidatures qualifiees en 10 jours (retour de Claire Fontaine cette semaine). Pour un dirigeant, la lecon est simple : une fiche de poste n'est pas un document de conformite interne, c'est un argumentaire de vente. Si vous ne l'avez pas teste sur un candidat reel avant publication, vous ne savez pas si elle vend quoi que ce soit."
+    },
+    "publicationReelle": "NON EFFECTUEE -- dry run uniquement, publierPost() jamais appele par ce script"
+  }
+}
