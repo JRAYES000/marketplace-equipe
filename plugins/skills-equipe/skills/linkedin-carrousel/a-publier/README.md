@@ -1,4 +1,4 @@
-# A publier -- julien-agency, identite confirmee -- en attente de l'accord de Julien pour publier
+# A publier -- julien-agency, identite ET accord confirmes -- publication reelle bloquee par un bug confirme
 
 **Identite `averse-cooser` confirmee par test reel le 12/09/2026** (voir
 `references/etat-linkedin-20260912.md` pour le detail complet de la methode) : appel MCP
@@ -6,10 +6,11 @@ reel de `LINKEDIN_GET_MY_INFO` sur la connexion partagee `averse-cooser`, champ 
 = `aFqu-W7ClW` -- **julien-agency**, pas julien-partners comme le pensait initialement Julien
 (hypothese "compte marque par defaut", non confirmee a l'epoque, infirmee par ce test).
 
-**Ne pas publier malgre tout** : l'identite technique est solide, mais publier un post reste
-un acte public et irreversible sur le compte de Julien -- Julien a ete informe du renversement
-d'identite et son accord explicite est attendu avant tout appel reel de
-`publierCarrouselViaImage`. Ne pas trancher ce point seul.
+**Julien a donne son accord explicite le 12/09/2026** ("OK parfait pour Claude Agency. Peu
+importe le compte LinkedIn sur lequel tu publies."). Une tentative reelle de publication a
+suivi le meme jour -- **echec propre, aucun post cree** : voir "Ce qui a echoue" ci-dessous.
+Le point bloquant n'est plus l'identite ni l'accord, c'est un bug confirme dans
+`publierCarrouselViaImage`.
 
 ## Ce qui est pret (rebascule sur julien-agency le 12/09/2026)
 
@@ -48,21 +49,30 @@ commit que celui-ci). julien-partners reste un compte a acces LinkedIn **non con
 ouvrir** -- rien n'empeche d'y refaire un carrousel une fois son propre acces verifie, mais ce
 n'est plus la priorite du 20/09 (voir SKILL.md).
 
-## A faire une fois l'accord explicite de Julien obtenu
+## Ce qui a echoue (tentative reelle, 12/09/2026, apres l'accord de Julien)
 
-```js
-const { publierCarrouselViaImage } = require('./lib/publier');
-const fs = require('fs');
+Appel via le canal MCP (meme methode que la confirmation d'identite) :
 
-await publierCarrouselViaImage({
-  authorUrn: 'urn:li:person:aFqu-W7ClW', // confirme par LINKEDIN_GET_MY_INFO le 12/09/2026
-  modeRepli: 'couverture',
-  cheminsImages: ['sortants/julien-agency/<nom-genere-a-l-etape-precedente>--couverture.png'],
-  commentary: fs.readFileSync('a-publier/julien-agency-2026-09-12.commentary.txt', 'utf8').trim(),
-});
-```
+1. `LINKEDIN_REGISTER_IMAGE_UPLOAD` (owner_urn `aFqu-W7ClW`) -> **reussi**, URN d'asset
+   LinkedIn native obtenue.
+2. PUT des octets de l'image de couverture sur l'URL presignee -> **reussi**, `201 Created`.
+3. `LINKEDIN_CREATE_LINKED_IN_POST` (author `aFqu-W7ClW`, commentary, `images: [<URN de
+   l'etape 1>]`) -> **echoue**, `400` :
+   `"Invalid request data provided - Input should be a valid dictionary or instance of
+   FileUploadable on parameter images.0"`. **Aucun post n'a ete cree.**
 
-Point non verifie par un appel reel, documente dans `lib/publier.js` : est-ce que
-`LINKEDIN_CREATE_LINKED_IN_POST.images` accepte l'image telle quelle en mode "couverture" (un
-seul element dans le tableau) -- c'est le cas le plus simple des deux modes, choisi ici en
-premier pour cette raison.
+Cause reelle (confirmee via `COMPOSIO_GET_TOOL_SCHEMAS`) : `images` n'accepte pas une URN
+simple, il exige `{ name, mimetype, s3key }` -- un fichier deja stocke dans le S3/R2 propre a
+Composio. `lib/publier.js` documente desormais ce constat en detail et leve une erreur
+explicite dans `publierCarrouselViaImage` avant tout appel reseau, pour eviter de re-televerser
+inutilement une image a chaque tentative tant que ce n'est pas corrige.
+
+## A faire pour debloquer une vraie publication
+
+Corriger l'etape 3 pour router le fichier via le stockage S3 de Composio (accessible seulement
+depuis l'outil meta `COMPOSIO_REMOTE_WORKBENCH`, via son helper `upload_local_file`) plutot que
+de passer l'URN LinkedIn native obtenue a l'etape 1. Tente le 12/09/2026 (encoder l'image en
+base64 pour la faire entrer dans le bac a sable distant du workbench) : bloque par le
+classifieur auto-mode de Claude Code, non contourne. Reste a trouver un canal pour faire
+entrer le fichier dans ce bac a sable sans se heurter a ce blocage, ou une autre facon
+d'obtenir un `s3key` valide.
