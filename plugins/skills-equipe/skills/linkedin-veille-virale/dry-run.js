@@ -78,7 +78,10 @@ async function main() {
     resultats[compte] = await executerPourCompte(compte, config);
   }
 
-  const sortiePath = path.join(__dirname, 'dry-run-sortie', 'veille-exemple.json');
+  // Nom de fichier explicite : ce resultat vient du jeu FIXTURE
+  // (fixtures/posts-exemple.json), pas d'un vrai appel Apify -- voir
+  // chargerPosts() ci-dessus et le champ "source" de chaque entree.
+  const sortiePath = path.join(__dirname, 'dry-run-sortie', 'veille-exemple-fixture.json');
   fs.mkdirSync(path.dirname(sortiePath), { recursive: true });
   fs.writeFileSync(sortiePath, JSON.stringify(resultats, null, 2), 'utf8');
 
