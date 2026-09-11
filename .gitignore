@@ -5,3 +5,6 @@
 
 # Scratch local
 sortants/
+
+# Dependances npm locales a une skill (package.json a cote, jamais commit)
+node_modules/

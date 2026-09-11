@@ -46,6 +46,17 @@
     background: #ECE7DD;
   }
 
+  @page {
+    size: 1080px 1350px;
+    margin: 0;
+  }
+
+  .slide, .slide * {
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+    color-adjust: exact;
+  }
+
   /* -----------------------------------------------------------------
      Gabarit de diapo carrousel LinkedIn — Claude Partners
      Dimensions fixes 1080x1350 (format document LinkedIn 4:5).
@@ -177,13 +188,14 @@
   }
 
   /* Diapo 1 ("hook") : pas de logo, fleche visible, titre plus grand (effet affiche) */
-  body[data-role="hook"] .logo { display: none; }
-  body[data-role="hook"] .swipe-hint { display: flex; }
-  body[data-role="hook"] .title { font-size: 88px; line-height: 1.05; }
+  .slide[data-role="hook"] .logo { display: none; }
+  .slide[data-role="hook"] .swipe-hint { display: flex; }
+  .slide[data-role="hook"] .title { font-size: 88px; line-height: 1.05; }
 </style>
 </head>
-<body data-role="{{ROLE}}">
-  <div class="slide">
+<body>
+<!-- SLIDE:BEGIN -->
+  <div class="slide" data-role="{{ROLE}}">
     <div class="accent-rule"></div>
     <div class="content">
       <h1 class="title">{{TITRE}}</h1>
@@ -203,5 +215,6 @@
       </div>
     </div>
   </div>
+<!-- SLIDE:END -->
 </body>
 </html>
