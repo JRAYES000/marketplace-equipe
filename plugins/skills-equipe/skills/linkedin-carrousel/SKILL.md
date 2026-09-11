@@ -39,20 +39,44 @@ liste de diapos (voir l'en-tete du script pour l'usage et la convention de nomma
 fichiers de sortie). `generer-images.js` fait le meme rendu en PNG (repli image, voir
 plus bas).
 
-## Ce qui est pret a publier des que Julien donne son accord explicite (julien-agency)
+## Tentative reelle de publication le 12/09/2026 (julien-agency, mode "couverture") -- ECHEC PROPRE, rien publie
 
-`a-publier/julien-agency-2026-09-12.json` (5 diapos, contenu reel) et
-`a-publier/julien-agency-2026-09-12.commentary.txt` (texte du post) sont rediges comme
-jugement editorial **pour julien-agency** (ton confiant/direct/pedagogue/oriente-dirigeants),
-avec leur rendu deja verifie visuellement (PDF + image de couverture 1080x1350, mode
-"couverture" choisi en premier car c'est le cas le plus simple des deux modes du repli image --
-voir `a-publier/README.md` pour la commande exacte a executer). Ce contenu n'est **pas** une
-reprise telle quelle du texte initialement pense pour julien-partners : la version
-julien-partners s'appuyait a la diapo 3 sur un angle "reseau professionnel" propre au
-positionnement facilitateur/reseau de ce compte -- retire et remplace par un angle
-cout/consequence pour l'entreprise, coherent avec julien-agency. **Ne pas executer la commande
-de publication avant l'accord explicite de Julien** (voir plus bas et `a-publier/README.md`) --
-l'identite technique est confirmee, l'autorisation de publier ne l'est pas.
+Julien a donne son accord explicite ("OK parfait pour Claude Agency. Peu importe le compte
+LinkedIn sur lequel tu publies.") apres le renversement d'identite ci-dessus. Contenu
+`a-publier/julien-agency-2026-09-12.json`/`.commentary.txt` relu avant publication : aucune
+trace residuelle de "Partners" ou de l'angle "reseau professionnel" (verifie mot a mot, et sur
+le rendu visuel des 5 diapos -- branding "CLAUDE AGENCY" correct en pied de page).
+
+Tentative reelle via le canal MCP (meme methode que la confirmation d'identite, cle consumer
+du compte Composio de nomena) :
+1. `LINKEDIN_REGISTER_IMAGE_UPLOAD` (owner_urn `aFqu-W7ClW`) -> **reussi**, `upload_url` +
+   asset URN LinkedIn natif obtenus.
+2. PUT des octets de l'image de couverture (1080x1350, PNG) sur `upload_url` -> **reussi**,
+   `201 Created`.
+3. `LINKEDIN_CREATE_LINKED_IN_POST` (author `aFqu-W7ClW`, commentary du fichier, `images:
+   [<URN de l'etape 1>]`) -> **ECHOUE**, `400` : `"Invalid request data provided - Input
+   should be a valid dictionary or instance of FileUploadable on parameter images.0"`.
+   **Aucun post n'a ete cree.**
+
+Cause reelle, confirmee via `COMPOSIO_GET_TOOL_SCHEMAS` sur `LINKEDIN_CREATE_LINKED_IN_POST` :
+le parametre `images` n'accepte pas une URN d'asset LinkedIn en chaine simple (ce que l'etape 1
+produit) -- il exige un objet `{ name, mimetype, s3key }` referencant un fichier deja stocke
+dans le S3/R2 propre a Composio. C'est une contrainte du wrapper Composio, pas de l'API
+LinkedIn native. Consequence : l'implementation actuelle de `publierCarrouselViaImage` (voir
+`lib/publier.js`) est **confirmee non fonctionnelle** pour l'etape de creation du post -- un
+garde-fou explicite y a ete ajoute (leve une erreur claire avant tout appel reseau, pour ne
+pas re-televerser inutilement une image a chaque tentative). Correction non implementee :
+router le fichier via le stockage S3 de Composio necessite `COMPOSIO_REMOTE_WORKBENCH`
+(l'unique outil MCP exposant `upload_local_file`), ce qui suppose de faire entrer les octets
+de l'image dans son bac a sable distant -- l'encodage base64 tente pour cela a ete bloque par
+le classifieur auto-mode de Claude Code (meme famille que les blocages deja documentes sur la
+construction du flux OAuth), non contourne.
+
+**linkedin-carrousel n'est donc pas livre le 12/09/2026** : le rendu (PDF, image) et
+l'identite du compte sont valides et reels, mais la publication reelle reste bloquee sur ce
+point technique precis, distinct de tout accord ou identite. A reprendre : corriger
+`publierCarrouselViaImage` pour router via le stockage Composio, ou trouver un canal
+alternatif pour faire entrer le fichier dans le bac a sable sans se heurter au classifieur.
 
 ## Limites connues
 
@@ -97,15 +121,14 @@ l'identite technique est confirmee, l'autorisation de publier ne l'est pas.
   compte julien-partners, et retest sur julien-agency pour confirmer que le meme pipeline
   fonctionne sur son propre template) : rendu net, polices chargees, 1080x1350px confirme en
   lisant le chunk IHDR du PNG, tailles de fichier coherentes -- voir
-  `test/generer-images.test.js` (`npm test`, 11 tests verts). Cote Composio,
-  `lib/publier.js` expose desormais `publierCarrouselViaImage({ authorUrn, modeRepli,
-  cheminsImages, commentary })` -- `modeRepli: "par-diapo" | "couverture"` -- qui televerse
-  reellement les PNG deja rendus (`LINKEDIN_REGISTER_IMAGE_UPLOAD` puis PUT des octets) et
-  cree le post avec `images`. **Personne ne l'appelle nulle part dans ce paquet** (verifie par
-  `test/publier-repli-image.test.js`) : elle reste inerte tant que Julien n'a pas tranche entre
-  les deux modes (ou confirme qu'il garde le depot manuel du PDF). Point non verifie par un
-  appel reel : si `LINKEDIN_CREATE_LINKED_IN_POST.images` accepte plusieurs URN a la fois
-  (necessaire pour "par-diapo") -- le nom au pluriel le suggere, non confirme.
+  `test/generer-images.test.js` (`npm test`, 12 tests verts). Cote Composio,
+  `lib/publier.js` expose `publierCarrouselViaImage({ authorUrn, modeRepli, cheminsImages,
+  commentary })` -- `modeRepli: "par-diapo" | "couverture"`. Les etapes de televersement
+  (`LINKEDIN_REGISTER_IMAGE_UPLOAD` puis PUT des octets) fonctionnent reellement (confirme le
+  12/09/2026), mais l'etape de creation du post est **confirmee non fonctionnelle** -- voir
+  "Tentative reelle de publication" plus bas pour le detail complet -- et leve desormais une
+  erreur explicite avant tout appel reseau. **Personne ne l'appelle nulle part ailleurs dans ce
+  paquet** (verifie par `test/publier-repli-image.test.js`).
 
 - **(2026-09-12) Identite `averse-cooser` -- CONFIRMEE par test reel, infirme l'hypothese initiale** :
   Premiere tentative le 12/09/2026 via le dashboard Composio de nomena (compte membre de
@@ -137,11 +160,11 @@ l'identite technique est confirmee, l'autorisation de publier ne l'est pas.
   bascule le meme jour. `julien-partners` n'a, a ce jour, aucune connexion LinkedIn partagee
   confirmee : a rouvrir si un acces reel apparait un jour pour ce compte.
 
-  Consequence : `publierPost`/`publierCommentaire`/`publierCarrouselViaImage` peuvent
-  desormais etre appelees reellement pour julien-agency avec `authorUrn:
-  urn:li:person:aFqu-W7ClW` -- **mais `publierCarrouselViaImage` ne doit pas etre appelee sans
-  l'accord explicite de Julien** (voir `a-publier/README.md`) : la confirmation technique ne
-  vaut pas autorisation de publier.
+  Consequence : `publierPost`/`publierCommentaire` peuvent desormais etre appelees reellement
+  pour julien-agency avec `authorUrn: urn:li:person:aFqu-W7ClW`. Julien a depuis donne son
+  accord explicite pour publier sur ce compte -- voir "Tentative reelle de publication" plus
+  bas : l'identite et l'accord ne sont plus le point bloquant, `publierCarrouselViaImage` l'est
+  (bug confirme, pas une question d'autorisation).
 
 Etat des lieux complet des 3 skills linkedin-* et de tout ce qui devient
 activable des que chaque blocage se leve : `references/etat-linkedin-20260912.md`

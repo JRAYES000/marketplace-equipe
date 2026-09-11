@@ -69,7 +69,7 @@ test('genererImageCouverture retombe sur la premiere diapo si aucune n\'a le rol
   }
 });
 
-test('le rendu local fonctionne aussi pour julien-agency (ecrit, non teste en publication reelle -- acces manquant)', async () => {
+test('le rendu local fonctionne aussi pour julien-agency', async () => {
   const dossierSortie = dossierTemporaire();
   const cheminCouverture = path.join(dossierSortie, 'couverture.png');
   try {

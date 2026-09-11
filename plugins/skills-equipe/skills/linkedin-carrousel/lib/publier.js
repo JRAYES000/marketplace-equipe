@@ -57,22 +57,39 @@ async function publierCarrousel({ authorUrn, cheminPdf }) {
  *
  *   1. `LINKEDIN_REGISTER_IMAGE_UPLOAD` (parametre requis `owner_urn`) --
  *      initialise un televersement natif et renvoie une URL presignee
- *      (`upload_url`) plus l'URN de l'asset image resultant. Noms de champs
- *      de la reponse non confirmes par un appel reel (le catalogue public
- *      documente les parametres d'entree, pas le detail de la sortie) --
- *      `televerserImageComposio` ci-dessous essaie plusieurs noms plausibles
- *      et echoue explicitement si aucun ne correspond, plutot que de
- *      pretendre a tort avoir recupere une URN.
+ *      (`upload_url`) plus l'URN de l'asset image resultant. CONFIRME par
+ *      appel reel le 12/09/2026 (julien-agency) : la reponse contient bien
+ *      `upload_url`/`asset_urn`, et l'appel de `LINKEDIN_REGISTER_IMAGE_UPLOAD`
+ *      via ce chemin reussit.
  *   2. Televerser les octets de l'image sur `upload_url` via une requete PUT
- *      (etape hors Composio, HTTP direct).
+ *      (etape hors Composio, HTTP direct). CONFIRME par appel reel le
+ *      12/09/2026 : `201 Created`.
  *   3. Appeler `LINKEDIN_CREATE_LINKED_IN_POST` avec son parametre optionnel
- *      `images` renseigne avec l'URN (ou les URN) obtenues a l'etape 1.
+ *      `images` renseigne avec l'URN obtenue a l'etape 1.
  *
- * Point non verifie par un appel reel : est-ce que `images` accepte plusieurs
- * URN (necessaire pour le mode "par-diapo") ? Le nom au pluriel le suggere,
- * ce n'est pas confirme. Si un appel reel un jour montre que non, le mode
- * "par-diapo" devra republier une image a la fois (plusieurs posts) ou etre
- * abandonne au profit du mode "couverture" -- pas un changement d'ici la.
+ * **ETAPE 3 CONFIRMEE CASSEE par appel reel le 12/09/2026** (julien-agency,
+ * mode "couverture", tentative de publication reelle -- aucun post cree,
+ * echec propre en amont) : `LINKEDIN_CREATE_LINKED_IN_POST.images` n'accepte
+ * PAS une URN d'asset en chaine simple. Le schema reel (recupere via
+ * `COMPOSIO_GET_TOOL_SCHEMAS` sur le canal MCP) exige, pour chaque element
+ * du tableau `images`, un objet `{ name, mimetype, s3key }` -- un fichier
+ * deja stocke dans le S3/R2 propre a Composio, pas une URN LinkedIn native.
+ * Erreur reelle obtenue : `400 "Invalid request data provided - Input
+ * should be a valid dictionary or instance of FileUploadable on parameter
+ * images.0"`. Consequence : `televerserImageComposio` ci-dessous produit
+ * bien une URN LinkedIn valide (etapes 1-2 fonctionnent), mais cette URN
+ * est **inutilisable telle quelle** a l'etape 3 -- `publierCarrouselViaImage`
+ * echouera systematiquement a la creation du post tant que ce point n'est
+ * pas corrige. Piste non implementee (nécessite de router le fichier via le
+ * stockage S3 propre de Composio, accessible uniquement depuis l'outil
+ * meta `COMPOSIO_REMOTE_WORKBENCH` -- getting les octets locaux dans ce
+ * bac a sable distant reste a faire) : a reprendre avant de retenter une
+ * publication reelle avec image.
+ *
+ * Point toujours non verifie (bloque par le point ci-dessus avant de pouvoir
+ * l'observer) : est-ce que `images` accepte plusieurs elements a la fois
+ * (necessaire pour le mode "par-diapo") ? Le nom au pluriel le suggere, ce
+ * n'est pas confirme.
  */
 async function televerserImageComposio({ ownerUrn, cheminImage, userId, apiKey }) {
   const initialisation = await executerActionComposio('LINKEDIN_REGISTER_IMAGE_UPLOAD', {
@@ -123,6 +140,27 @@ async function publierCarrouselViaImage({ authorUrn, modeRepli, cheminsImages, c
   }
   if (!commentary) throw new Error('commentary requis (texte du post).');
 
+  // CONFIRME CASSE par appel reel le 12/09/2026 (julien-agency, mode
+  // "couverture") -- voir le commentaire au-dessus de televerserImageComposio
+  // pour le detail complet (erreur reelle obtenue, schema reel recupere via
+  // COMPOSIO_GET_TOOL_SCHEMAS). LINKEDIN_CREATE_LINKED_IN_POST.images exige
+  // { name, mimetype, s3key } (stockage S3 propre a Composio), pas une URN
+  // d'asset LinkedIn simple -- la seule chose que televerserImageComposio
+  // ci-dessous sait produire. Le garde-fou est place ICI, avant tout appel
+  // reseau reel, pour ne pas re-televerser inutilement une image sur
+  // LinkedIn (etapes 1-2 fonctionnent, mais leur resultat est ensuite
+  // inutilisable) a chaque tentative tant que ce point n'est pas corrige.
+  throw new Error(
+    'Repli image (publierCarrouselViaImage) : LINKEDIN_CREATE_LINKED_IN_POST.images exige {name, mimetype, ' +
+    's3key} (stockage S3 propre a Composio), confirme par un appel reel le 12/09/2026 -- une URN ' +
+    'LinkedIn simple (ce que televerserImageComposio produit) est refusee (400 "images.0" doit ' +
+    'etre un FileUploadable). Voir le commentaire au-dessus de televerserImageComposio avant de ' +
+    'corriger et retenter.'
+  );
+
+  // eslint-disable-next-line no-unreachable -- code laisse en place, pret a
+  // reactiver des que l'etape 3 (creation du post) est corrigee pour passer
+  // par le stockage S3 de Composio plutot qu'une URN LinkedIn simple.
   const assetUrns = [];
   for (const cheminImage of cheminsImages) {
     assetUrns.push(await televerserImageComposio({ ownerUrn: authorUrn, cheminImage, userId, apiKey }));

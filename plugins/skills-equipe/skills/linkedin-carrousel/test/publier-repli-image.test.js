@@ -47,6 +47,18 @@ test('publierCarrouselViaImage exige authorUrn et commentary', async () => {
   );
 });
 
+test('publierCarrouselViaImage refuse avec des parametres valides -- confirme casse le 12/09/2026 (LINKEDIN_CREATE_LINKED_IN_POST.images exige un FileUploadable, pas une URN simple)', async () => {
+  await assert.rejects(
+    () => publierCarrouselViaImage({
+      authorUrn: 'urn:li:person:aFqu-W7ClW',
+      modeRepli: 'couverture',
+      cheminsImages: ['a.png'],
+      commentary: 'texte',
+    }),
+    /FileUploadable/
+  );
+});
+
 test('publierCarrouselViaImage n\'est jamais appelee depuis generer-pdf.js, generer-images.js ou lib/composio.js', () => {
   const racine = path.join(__dirname, '..');
   for (const relatif of ['generer-pdf.js', 'generer-images.js', 'lib/composio.js']) {
@@ -60,12 +72,15 @@ test('publierCarrouselViaImage n\'est jamais appelee depuis generer-pdf.js, gene
 
 test('dans lib/publier.js, publierCarrouselViaImage n\'est jamais appelee (seulement documentee, definie et exportee)', () => {
   const source = fs.readFileSync(path.join(__dirname, '..', 'lib', 'publier.js'), 'utf8');
+  // Un "appel" a la forme precise "publierCarrouselViaImage(" -- le nom
+  // immediatement suivi d'une parenthese ouvrante. La definition
+  // (`async function publierCarrouselViaImage(`) et les mentions en
+  // commentaire/message d'erreur ("Repli image (publierCarrouselViaImage)",
+  // sans parenthese collee juste apres) ne matchent pas ce motif.
   const lignesAvecAppel = source
     .split('\n')
-    .filter((ligne) => ligne.includes('publierCarrouselViaImage') && ligne.includes('('))
-    .filter((ligne) => !ligne.trimStart().startsWith('*'))
-    .filter((ligne) => !/^async function publierCarrouselViaImage/.test(ligne.trim()))
-    .filter((ligne) => !ligne.includes('module.exports'));
+    .filter((ligne) => /publierCarrouselViaImage\(/.test(ligne))
+    .filter((ligne) => !/^async function publierCarrouselViaImage\(/.test(ligne.trim()));
 
   assert.deepEqual(lignesAvecAppel, [], 'aucune ligne ne doit appeler publierCarrouselViaImage() dans ce fichier');
 });

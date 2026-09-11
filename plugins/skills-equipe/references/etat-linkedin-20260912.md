@@ -11,12 +11,11 @@ a une version anterieure de ce fichier, qui decrivait soit "3 comptes
 ouverts", soit julien-partners comme priorite absolue sur une hypothese non
 confirmee) :**
 - **julien-agency** : **acces Composio confirme reellement** le 12/09/2026 --
-  voir "Point n°1" ci-dessous. C'est desormais le seul compte sur lequel un
-  exemple reel de publication est possible. Carrousel pret dans
-  `linkedin-carrousel/a-publier/`, **en attente de l'accord explicite de
-  Julien avant tout appel reel** de `publierCarrouselViaImage` -- la
-  confirmation technique de l'identite ne vaut pas autorisation de publier
-  un post public irreversible.
+  voir "Point n°1" ci-dessous. Julien a donne son accord explicite pour
+  publier sur ce compte le meme jour. Une tentative reelle de publication a
+  suivi -- **echec propre, aucun post cree**, cause par un bug confirme dans
+  `publierCarrouselViaImage`, pas par l'identite ni l'accord -- voir "Point
+  n°3" ci-dessous.
 - **julien-partners** : acces Composio **non confirme** -- `averse-cooser`
   ne correspond pas a ce compte (voir plus bas). Etait presente comme
   priorite absolue avant ce test ; ce n'est plus le cas. A rouvrir si un
@@ -64,9 +63,9 @@ authentifier des appels directs au canal MCP de Composio (`initialize`, puis
 recherche/execution d'outils). Ne jamais coller la valeur de cette cle dans
 un fichier de ce depot public.
 
-## Ce qui est pret a publier des que Julien donne son accord explicite (julien-agency)
+## Point n°3 -- publication reelle du carrousel : ECHEC CONFIRME (12/09/2026, apres accord de Julien)
 
-Dans `linkedin-carrousel/a-publier/` : un carrousel reel (5 diapos,
+Contenu dans `linkedin-carrousel/a-publier/` : un carrousel reel (5 diapos,
 `julien-agency-2026-09-12.json`) et son texte de post
 (`julien-agency-2026-09-12.commentary.txt`), rediges comme jugement
 editorial pour julien-agency (ton confiant/direct/pedagogue/
@@ -74,25 +73,48 @@ oriente-dirigeants) -- pas une reprise telle quelle du texte initialement
 pense pour julien-partners : la version julien-partners s'appuyait a la
 diapo 3 sur un angle "reseau professionnel" propre au positionnement
 facilitateur/reseau de ce compte, retire et remplace par un angle
-cout/consequence pour l'entreprise. Rendu deja verifie visuellement (PDF 5
-pages + image de couverture 1080x1350, mode "couverture" choisi car c'est le
-cas le plus simple du repli image -- un seul URN d'image, pas de doute sur
-si `LINKEDIN_CREATE_LINKED_IN_POST.images` accepte un tableau a plusieurs
-elements). Voir `a-publier/README.md` pour la commande exacte
-(`publierCarrouselViaImage`, `authorUrn: urn:li:person:aFqu-W7ClW`) --
-**Julien a ete informe du renversement d'identite ; son accord explicite est
-attendu avant tout appel reel**, meme si l'identite technique est desormais
-solide -- publier reste un acte public irreversible sur son compte.
+cout/consequence pour l'entreprise. Relu integralement avant publication :
+aucune trace residuelle de "Partners". Rendu deja verifie visuellement (PDF
+5 pages + image de couverture 1080x1350, branding "Claude Agency" correct
+en pied de page de chaque diapo).
 
-Pour `linkedin-veille-virale` et `linkedin-commentaires`, il n'y a
-desormais plus qu'a appeler respectivement `publierPost({ authorUrn,
+**Tentative reelle**, canal MCP (meme methode que la confirmation
+d'identite) :
+1. `LINKEDIN_REGISTER_IMAGE_UPLOAD` -> reussi, URN d'asset LinkedIn native
+   obtenue.
+2. Televersement des octets de l'image sur l'URL presignee -> reussi,
+   `201 Created`.
+3. `LINKEDIN_CREATE_LINKED_IN_POST` (author julien-agency, commentary,
+   `images` renseigne avec l'URN de l'etape 1) -> **echoue, `400`** :
+   `images` doit contenir un objet `FileUploadable`, pas une URN simple.
+   **Aucun post n'a ete cree.**
+
+Cause reelle, confirmee en recuperant le schema exact de l'action : le
+parametre `images` de `LINKEDIN_CREATE_LINKED_IN_POST` exige, pour chaque
+element, un objet `{ name, mimetype, s3key }` referencant un fichier deja
+stocke dans le stockage de fichiers propre a Composio -- pas une URN
+LinkedIn native comme celle que l'etape 1 produit. C'est une contrainte du
+wrapper Composio, pas de l'API LinkedIn elle-meme. `lib/publier.js` a ete
+mis a jour pour documenter ce constat et lever desormais une erreur
+explicite dans `publierCarrouselViaImage` avant tout appel reseau (pour ne
+pas re-televerser inutilement une image a chaque tentative).
+
+**A faire pour debloquer** : router le fichier via le stockage propre de
+Composio, accessible uniquement depuis l'outil meta de bac a sable distant
+de Composio -- ce qui suppose de faire entrer les octets de l'image dans ce
+bac a sable. Une tentative d'encodage local pour cela a ete bloquee par le
+classifieur auto-mode de Claude Code, meme famille de blocage que celle deja
+rencontree au point n°1 avant son deblocage -- non contournee. Reste a
+trouver un canal legitime pour transferer le fichier, ou une autre facon
+d'obtenir une reference de fichier valide pour ce parametre.
+
+Consequence pour les deux autres skills : `publierPost({ authorUrn,
 commentary })` et `publierCommentaire({ actorUrn, targetUrn, message })`
-avec `urn:li:person:aFqu-W7ClW` (julien-agency) pour produire un exemple
-reel sur ce compte -- `lib/publier.js` de chaque skill est deja le point
-d'appel isole et fonctionnel (canal REST direct documente ; le canal MCP est
-maintenant accessible via la methode ci-dessus si on veut y migrer). Meme
-regle que pour le carrousel : accord explicite de Julien avant tout appel
-reel, pas seulement l'identite confirmee.
+n'ont pas ce probleme (ils ne manipulent pas de fichier) -- il suffit de les
+appeler avec `urn:li:person:aFqu-W7ClW` (julien-agency) pour produire un
+exemple reel sur ce compte, en respectant la meme regle que pour le
+carrousel (accord explicite de Julien avant tout appel reel, deja obtenu
+pour julien-agency).
 
 ## Point n°2 -- APIFY_TOKEN indisponible en session (sans lien avec Julien, toujours ouvert)
 
@@ -119,15 +141,17 @@ comme jugement editorial -- voir le point 3 de chaque SKILL.md.
 
 ## Recapitulatif
 
-Au 12/09/2026, un seul point bloquant reste ouvert (`APIFY_TOKEN`, point
-n°2) -- il empeche la redaction sur donnees reelles pour
-`linkedin-veille-virale` et `linkedin-commentaires`, mais pas la publication
-sur `linkedin-carrousel`/julien-agency, qui n'en depend pas. L'identite
-`averse-cooser` (point n°1) est resolue : julien-agency, acces confirme. Le
-reste est code, teste et documente : rendu PDF et image (julien-agency et
-julien-partners), recuperation/tri Apify, dry runs bout-en-bout, contenu reel
-pret pour julien-agency en attente de l'accord explicite de Julien pour
-publier. Ne pas relancer les canaux deja constates bloques (`composio
-login`, extraction de jeton navigateur, `gh` sur `claude-config`) en
-esperant un resultat different sans nouvelle information ou un acces
-different.
+Au 12/09/2026, deux points bloquants restent ouverts : `APIFY_TOKEN` (point
+n°2, empeche la redaction sur donnees reelles pour `linkedin-veille-virale`
+et `linkedin-commentaires`) et le bug confirme sur
+`publierCarrouselViaImage` (point n°3, empeche toute publication reelle
+avec image pour `linkedin-carrousel`, sur n'importe quel compte). Aucun des
+deux n'est lie a une identite ou un accord manquant : l'identite
+`averse-cooser` (point n°1) est resolue (julien-agency, acces ET accord de
+Julien confirmes). Le reste est code, teste et documente : rendu PDF et
+image (julien-agency et julien-partners), recuperation/tri Apify, dry runs
+bout-en-bout, contenu reel redige et relu pour julien-agency (pret des que
+le point n°3 est corrige). Ne pas relancer les canaux deja constates
+bloques (`composio login`, extraction de jeton navigateur, `gh` sur
+`claude-config`, encodage local pour le bac a sable Composio) en esperant
+un resultat different sans nouvelle information ou un acces different.
