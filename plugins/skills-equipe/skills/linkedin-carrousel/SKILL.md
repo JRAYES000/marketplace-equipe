@@ -78,6 +78,15 @@ point technique precis, distinct de tout accord ou identite. A reprendre : corri
 `publierCarrouselViaImage` pour router via le stockage Composio, ou trouver un canal
 alternatif pour faire entrer le fichier dans le bac a sable sans se heurter au classifieur.
 
+**Complement le meme jour -- le reste du pipeline texte fonctionne** : pour verifier que
+seule l'etape image pose probleme (pas le canal MCP ni l'identite en general), un appel reel
+de `LINKEDIN_CREATE_LINKED_IN_POST` **sans image**, en `lifecycleState: "DRAFT"`, a ete fait
+pour julien-agency -- cree avec succes, verifie non accessible en lecture publique (coherent
+avec un brouillon), puis supprime immediatement (`LINKEDIN_DELETE_POST`, `deleted: true`).
+Confirme que l'authentification, l'URN d'auteur et le champ `commentary` marchent de bout en
+bout sur ce compte via ce canal -- le blocage est localise precisement a l'objet `images`, pas
+plus large.
+
 ## Limites connues
 
 - **(2026-09-11)** Le PDF fini atterrit dans `sortants/<compte>/AAAA-MM-JJ-<slug>.pdf`,
