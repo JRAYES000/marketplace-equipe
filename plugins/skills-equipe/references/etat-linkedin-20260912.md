@@ -210,6 +210,31 @@ Julien sur ces textes precis, et surtout de sa confirmation sur le
 carrousel deja publie sur ce meme compte (Point n°3) avant d'enchainer
 d'autres actions de test dessus.
 
+## Point n°5 -- comptes_a_surveiller/comptes_cibles vides : pas de source existante, decision editoriale a fournir
+
+Verifie le 12/09/2026, en reponse a l'hypothese que le champ `concurrents`
+de `linkedin-carrousel/reglages-comptes.json` (mentionne pour le ton/palette
+de julien-agency) pourrait fournir des candidats naturels pour
+`comptes_a_surveiller` (veille-virale) et `comptes_cibles` (commentaires) :
+ce champ existe bien dans le schema, mais est **vide `[]`** pour les trois
+comptes (page-claude, julien-agency, julien-partners) -- jamais rempli
+depuis sa creation. Recherche etendue a l'ensemble du depot
+`skills-equipe` (SKILL.md, references, reglages) : aucune autre mention de
+comptes concurrents ou pairs LinkedIn reels n'existe nulle part.
+
+**Ce qu'il faut precisement** : une liste de profils ou pages LinkedIn
+**publics et reels** (URL exploitable par l'acteur Apify
+`harvestapi/linkedin-profile-posts` -- un handle ou un nom d'entreprise seul
+ne suffit pas) pertinents pour l'audience de chaque compte -- dirigeants et
+automatisation IA pour julien-agency, reseau et facilitation pour
+julien-partners. **C'est une decision editoriale/business, pas technique** :
+savoir qui surveiller ou sous quels posts commenter relève du jugement de
+Julien ou de Nomena. Aucun compte n'a ete devine ni ajoute ici pour combler
+ce vide -- conformement a la regle de ne jamais generer ou deviner une URL.
+Tant que cette liste n'est pas fournie, le pipeline reste verifie
+uniquement sur le profil de Julien Rayes (voir Point n°2), pas sur un
+veritable tiers.
+
 ## Recapitulatif
 
 Au 12/09/2026, aucun point bloquant "technique" majeur ne reste ouvert :
@@ -233,7 +258,10 @@ en attente d'un accord explicite de Julien sur ces textes precis, et
 surtout de sa confirmation sur le carrousel deja publie sur ce meme compte
 avant d'y enchainer d'autres actions de test. Remplir
 `comptes_a_surveiller`/`comptes_cibles` avec de vrais comptes tiers reste a
-faire avant un usage en production continu. Le reste est code, teste et
+faire avant un usage en production continu -- verifie le 12/09/2026 (Point
+n°5) qu'aucune source existante dans ce depot ne peut fournir cette liste
+automatiquement : c'est une decision editoriale a obtenir de Julien ou
+Nomena, pas un choix technique. Le reste est code, teste et
 documente : rendu PDF et image (julien-agency et julien-partners),
 recuperation/tri Apify, dry runs bout-en-bout. Ne pas relancer les canaux
 deja constates bloques (`composio login`, extraction de jeton navigateur,
