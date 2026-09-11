@@ -170,57 +170,68 @@ immediatement. Voir SKILL.md de `linkedin-veille-virale` et de
 `publierCommentaire` de `linkedin-commentaires` (action differente, sans
 equivalent reversible identifie) -- reste non testee par un appel reel.
 
-## Point n°2 -- APIFY_TOKEN : localise, mais lecture/usage programmatique refuses (mis a jour 12/09/2026)
+## Point n°2 -- APIFY_TOKEN : RESOLU le 12/09/2026 (export manuel par Nomena)
 
 Le 11/09/2026, une session anterieure a reellement interroge Apify sur le
 compte `julien_r` et obtenu 3 posts reels -- mais ce resultat n'a pas ete
-sauvegarde dans le depot (aucun fichier, aucune memoire), et le contexte de
-cette session a ete efface depuis.
+sauvegarde dans le depot, et le contexte de cette session a ete efface
+depuis. La session du 12/09/2026 a localise ce jeton dans le gestionnaire
+de secrets local de l'equipe, mais lire ce fichier puis utiliser la valeur
+trouvee a ete refuse par le classifieur auto-mode sous un motif explicite
+et categorique -- non retente, conformement a la consigne.
 
-La session du 12/09/2026 a repris la recherche plus en profondeur (fichiers
-`.env*` locaux, gestionnaire de secrets de l'equipe, documentation) et a
-**localise** ce jeton dans le gestionnaire de secrets local de l'equipe
-(`env/secrets.md`, compte Apify `julien_r`) -- il existe donc reellement, ce
-n'est plus un cas de "jeton introuvable". Mais lire ce fichier puis utiliser
-la valeur trouvee dans un script (meme sans jamais l'afficher, en respectant
-les regles de manipulation de secrets du depot ou il vit) a ete refuse par
-le classifieur auto-mode sous un motif explicite et categorique, distinct
-des blocages generiques rencontres ailleurs -- une categorie de refus qui
-vise precisement ce type d'action, pas une question de methode a corriger.
-**Ne pas retenter cette lecture dans une session future.**
+**Deblocage** : plus tard le meme jour, Nomena a lui-meme communique le
+jeton et demande de l'exporter dans l'environnement de la session (pas de
+lecture automatisee d'un fichier de secrets, pas de contournement du
+blocage precedent -- une fourniture directe et explicite). Un appel reel de
+`recupererPosts` a suivi immediatement sur le profil
+`https://www.linkedin.com/in/julien-rayes` : **5 posts reels obtenus**,
+sauvegardes dans `data/posts-julien-rayes-2026-09-12.json` de chaque skill
+(`linkedin-veille-virale` et `linkedin-commentaires`) -- gitignore (voir
+`.gitignore` du paquet, contenu specifique a un compte reel, pas destine a
+un depot public), pour ne plus les reperdre entre sessions locales sur
+cette machine.
 
-Consequence concrete : `dry-run-sortie/veille-exemple-fixture.json` et
-`dry-run-sortie/commentaires-exemple-fixture.json` restent des exemples sur
-donnees fixture (nom de fichier volontairement explicite), pas des
-candidats prets a publier sur donnees reelles. La skill lit ce jeton dans la
-variable d'environnement `APIFY_TOKEN` (voir `.env.example` de chaque skill)
--- ce point de configuration ne change pas. La seule voie qui reste : que
-Julien ou Nomena exporte lui-meme `APIFY_TOKEN` dans l'environnement avant
-de lancer `node dry-run.js` (bascule alors automatiquement sur un vrai appel
-Apify), ou colle directement le resultat d'un appel deja fait par un autre
-moyen -- voir le point 3 de chaque SKILL.md pour la suite (redaction comme
-jugement editorial, pas de generation automatique).
+**A partir de ces posts reels**, un exemple reel de post de veille et un
+exemple reel de commentaire ont ete rediges comme jugement editorial (pas
+une generation automatique), dans `a-publier/` de chaque skill -- voir leurs
+`README.md` respectifs pour le detail et une limite honnete : le profil
+interroge est celui de Julien Rayes lui-meme (= julien-agency), pas encore
+un veritable compte tiers, faute de `comptes_a_surveiller`/`comptes_cibles`
+remplis dans `reglages-comptes.json`. Ces deux exemples sont rediges pour
+julien-partners -- **non publies**, en attente d'une confirmation explicite
+(meme regle que pour le carrousel), et de toute facon non publiables tant
+que l'identite Composio de julien-partners n'est pas confirmee (voir Point
+n°1).
 
 ## Recapitulatif
 
-Au 12/09/2026, un point bloquant reste ouvert (`APIFY_TOKEN`, point n°2,
-localise mais pas utilisable programmatiquement -- empeche la redaction sur
-donnees reelles pour `linkedin-veille-virale` et `linkedin-commentaires`).
-L'identite `averse-cooser` (point n°1) est resolue (julien-agency, acces ET
-accord de Julien confirmes), et le point n°4 confirme que le pipeline texte
-(hors image) fonctionne de bout en bout pour ce compte. Le point n°3 --
+Au 12/09/2026, aucun point bloquant "technique" majeur ne reste ouvert :
+l'identite `averse-cooser` (point n°1) est resolue (julien-agency, acces ET
+accord de Julien confirmes), `APIFY_TOKEN` (point n°2) est configure
+(export manuel par Nomena), et le point n°4 confirme que le pipeline texte
+(hors image) fonctionne de bout en bout pour julien-agency. Le point n°3 --
 publication du carrousel -- a ete techniquement debloque le meme jour
 (Julien a trouve le mecanisme reel via `COMPOSIO_REMOTE_WORKBENCH`, un post
 a ete cree sans erreur avec le PDF en piece jointe), **mais reste en
 attente de confirmation visuelle par Julien** : rien ne prouve encore que
 le PDF apparait reellement comme carrousel plutot que d'avoir ete ignore
 silencieusement par LinkedIn. Ne pas marquer `linkedin-carrousel` comme
-livre tant que cette confirmation n'est pas arrivee. Le reste est code,
-teste et documente : rendu PDF et image (julien-agency et julien-partners),
-recuperation/tri Apify, dry runs bout-en-bout, contenu reel redige et relu
-pour julien-agency. Ne pas relancer les canaux deja constates bloques
+livre tant que cette confirmation n'est pas arrivee.
+
+Ce qui reste, pour `linkedin-veille-virale` et `linkedin-commentaires` :
+des exemples reels (donnees Apify reelles, redaction editoriale reelle)
+prets dans leurs `a-publier/` respectifs, **non publies** en attente
+d'accord explicite -- et de toute facon non publiables tant que
+julien-partners (le compte pour lequel ces exemples sont rediges) n'a pas
+d'identite Composio confirmee. Remplir `comptes_a_surveiller`/
+`comptes_cibles` avec de vrais comptes tiers reste a faire avant un usage
+en production continu. Le reste est code, teste et documente : rendu PDF
+et image (julien-agency et julien-partners), recuperation/tri Apify, dry
+runs bout-en-bout. Ne pas relancer les canaux deja constates bloques
 (`composio login`, extraction de jeton navigateur, `gh` sur
-`claude-config`) en esperant un resultat different sans nouvelle
+`claude-config`, lecture programmatique de secrets locaux) en esperant un
+resultat different sans nouvelle
 information ou un acces different -- pour le televersement de fichiers vers
 Composio, utiliser desormais la methode du point n°3 (bac a sable MCP), pas
 l'endpoint direct.

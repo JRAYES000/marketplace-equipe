@@ -75,25 +75,20 @@ le code ne les impose automatiquement pour l'instant.
   (Reglages -> "Sessions & API Key"), pas via `composio login`. **A faire** :
   migrer `lib/composio.js` vers ce canal quand cette skill sera reprise pour
   un usage reel.
-- **APIFY_TOKEN : localise, mais recuperation programmatique bloquee** --
-  voir "A completer avant un usage reel" ci-dessous.
+- **APIFY_TOKEN : RESOLU le 12/09/2026** -- Nomena a export le jeton
+  lui-meme dans l'environnement de la session (pas de contournement du
+  blocage documente precedemment). Meme appel reel que
+  `linkedin-veille-virale` sur `https://www.linkedin.com/in/julien-rayes` :
+  5 posts sauvegardes dans `data/posts-julien-rayes-2026-09-12.json`
+  (gitignore). Un exemple **reel** de commentaire est redige et pret dans
+  `a-publier/` -- voir son `README.md` pour le detail et la limite honnete
+  (profil interroge = Julien Rayes lui-meme, pas encore un compte tiers).
 
 ## A completer avant un usage reel
 
 - `comptes_cibles` dans `reglages-comptes.json` est vide pour les deux
-  comptes -- a remplir avec les profils/pages a suivre pour trouver des
-  posts a commenter.
-- **`APIFY_TOKEN`** : lu dans la variable d'environnement `APIFY_TOKEN` (voir
-  `.env.example`) -- rien a changer cote code. Le 12/09/2026, ce jeton a ete
-  **localise** dans le gestionnaire de secrets local de l'equipe
-  (`env/secrets.md`, compte Apify `julien_r`) -- il existe, ce n'est pas un
-  cas de jeton manquant. Mais la lecture programmatique suivie de son usage a
-  ete refusee par le classifieur auto-mode sous le motif explicite
-  **"[Credential Exploration]"** -- une categorie de blocage distincte,
-  visant precisement ce type d'action, pas un probleme de methode. **Ne pas
-  retenter cette lecture dans une session future.** Seule voie : que
-  quelqu'un (Julien ou Nomena) exporte lui-meme `APIFY_TOKEN` avant de
-  lancer `dry-run.js`, ou colle le resultat d'un appel deja fait ailleurs.
+  comptes -- a remplir avec les profils/pages a suivre pour un usage en
+  production (voir la limite notee dans `a-publier/README.md`).
 
 Etat des lieux complet des 3 skills linkedin-* et de tout ce qui devient
 activable des que chaque blocage se leve :

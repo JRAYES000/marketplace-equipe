@@ -6,5 +6,11 @@
 # Scratch local
 sortants/
 
+# Donnees reelles scrapees (posts LinkedIn de comptes reels via Apify) --
+# vivent localement pour ne pas se reperdre entre sessions, jamais commit :
+# contenu specifique a un compte reel, pas a publier dans un depot public.
+**/linkedin-veille-virale/data/
+**/linkedin-commentaires/data/
+
 # Dependances npm locales a une skill (package.json a cote, jamais commit)
 node_modules/
