@@ -100,6 +100,16 @@ le code ne les impose automatiquement pour l'instant.
 - `comptes_cibles` dans `reglages-comptes.json` est vide pour les deux
   comptes -- a remplir avec les profils/pages a suivre pour un usage en
   production (voir la limite notee dans `a-publier/README.md`).
+- **(12/09/2026) Verifie : pas de source existante pour remplir ce champ.**
+  Meme constat que `linkedin-veille-virale` : le champ `concurrents` de
+  `linkedin-carrousel/reglages-comptes.json` (piste naturelle envisagee) est
+  **vide `[]`** pour les trois comptes, jamais rempli, et aucune autre trace
+  de comptes concurrents/pairs reels n'existe dans ce depot. **Ce qu'il
+  faut** : une liste de profils/pages LinkedIn publics reels (URL
+  exploitable par Apify, pas un nom d'entreprise) sous lesquels trouver des
+  posts pertinents a commenter. **Decision editoriale/business** revenant a
+  Julien ou Nomena -- aucun compte devine ou ajoute ici pour combler ce
+  vide.
 
 Etat des lieux complet des 3 skills linkedin-* et de tout ce qui devient
 activable des que chaque blocage se leve :

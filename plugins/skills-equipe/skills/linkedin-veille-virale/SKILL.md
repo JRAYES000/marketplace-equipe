@@ -101,6 +101,22 @@ description: "Surveille des comptes LinkedIn suivis, repere les posts qui valent
 - `comptes_a_surveiller` dans `reglages-comptes.json` est vide pour les deux
   comptes -- a remplir avec les profils LinkedIn a suivre pour un usage en
   production (voir la limite notee dans `a-publier/README.md`).
+- **(12/09/2026) Verifie : pas de source existante pour remplir ce champ.**
+  Hypothese testee -- le champ `concurrents` de
+  `linkedin-carrousel/reglages-comptes.json` (mentionne pour le ton/palette)
+  aurait pu fournir des candidats naturels. Verifie : il existe dans le
+  schema mais est **vide `[]`** pour les trois comptes, y compris
+  julien-agency -- jamais rempli depuis sa creation. Aucune autre mention de
+  comptes concurrents/pairs reels n'existe ailleurs dans ce depot (recherche
+  faite sur l'ensemble de `skills-equipe`). **Ce qu'il faut, precisement** :
+  une liste de profils ou pages LinkedIn publics reels (URL exploitable par
+  l'acteur Apify `harvestapi/linkedin-profile-posts`, pas un simple nom
+  d'entreprise) pertinents pour l'audience de julien-agency
+  (dirigeants/automatisation IA) et julien-partners (reseau/facilitateurs).
+  **C'est une decision editoriale/business, pas technique** : qui surveiller
+  releve du jugement de Julien ou de Nomena, pas d'un choix a inventer ici --
+  aucun compte n'a ete devine ou ajoute pour combler ce vide. A fournir
+  avant de pouvoir tester le pipeline sur un veritable tiers.
 
 Etat des lieux complet des 3 skills linkedin-* et de tout ce qui devient
 activable des que chaque blocage se leve :
