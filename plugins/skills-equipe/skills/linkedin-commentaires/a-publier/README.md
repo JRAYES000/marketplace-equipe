@@ -1,18 +1,32 @@
-# A publier -- julien-partners, exemple reel pret, NON publie
+# A publier -- julien-agency, exemple reel pret, NON publie
 
-**Donnees reelles obtenues le 12/09/2026** via `APIFY_TOKEN` (desormais configure dans
-l'environnement, export manuel par Nomena -- voir SKILL.md et
-`references/etat-linkedin-20260912.md`) : meme appel reel que `linkedin-veille-virale` sur le
-profil `https://www.linkedin.com/in/julien-rayes` (5 posts, sauvegardes dans
+**Bascule le 12/09/2026** : cet exemple ciblait initialement julien-partners, dont l'identite
+Composio n'est pas confirmee. Julien a dit explicitement que le compte importe peu -- corrige
+pour cibler **julien-agency** (`urn:li:person:aFqu-W7ClW`), le seul compte avec un acces
+Composio reellement confirme et fonctionnel (identite `averse-cooser`, voir
+`references/etat-linkedin-20260912.md`). Le texte a ete **reecrit** dans le ton de
+julien-agency (confiant, direct, pedagogue, oriente-dirigeants), pas simplement republie sous
+un autre `actorUrn` -- voir "Texte redige" plus bas.
+
+**Donnees reelles obtenues le 12/09/2026** via `APIFY_TOKEN` (configure dans l'environnement,
+export manuel par Nomena -- voir SKILL.md) : meme appel reel que `linkedin-veille-virale` sur
+le profil `https://www.linkedin.com/in/julien-rayes` (5 posts, sauvegardes dans
 `data/posts-julien-rayes-2026-09-12.json`, gitignore -- contenu specifique a un compte reel).
 
 **Limite a noter honnetement** : `comptes_cibles` est encore vide dans
-`reglages-comptes.json` -- pas encore de veritable compte tiers configure. Le profil
-interroge est celui de Julien Rayes lui-meme (= julien-agency). Cet exemple prouve que la
-chaine recherche -> tri -> redaction -> arguments de publication fonctionne de bout en bout
-sur des donnees reelles (y compris la conservation du `shareUrn`, jamais une URN
-`urn:li:activity:`), mais ce n'est pas encore le scenario de production final. A completer :
-remplir `comptes_cibles` avec de vrais comptes a suivre.
+`reglages-comptes.json` -- pas encore de veritable compte tiers configure. Le post cible est
+celui de Julien Rayes lui-meme, qui EST julien-agency : ce commentaire serait donc, en
+pratique, julien-agency commentant son propre post -- un exemple technique valable pour
+prouver que la chaine fonctionne de bout en bout sur des donnees reelles (y compris la
+conservation du `shareUrn`, jamais une URN `urn:li:activity:`), mais pas le scenario de
+production final (commenter un veritable post tiers). A completer : remplir `comptes_cibles`
+avec de vrais comptes a suivre.
+
+**Ne pas enchainer sur ce compte avant confirmation du carrousel** : julien-agency a deja un
+post de test (le carrousel PDF, voir `linkedin-carrousel/a-publier/README.md`) en attente que
+Julien confirme son apparence reelle. Ne pas publier ce commentaire avant cette confirmation,
+pour ne pas empiler plusieurs actions de test sur le meme compte avant de savoir si la
+premiere fonctionne comme prevu.
 
 ## Post cible (reel, retenu par `trierPosts`)
 
@@ -24,25 +38,27 @@ remplir `comptes_cibles` avec de vrais comptes a suivre.
 
 ## Texte redige (jugement editorial de cette session, pas une generation automatique)
 
-`julien-partners-2026-09-12.commentary.txt` -- commentaire dans le ton de julien-partners
-(chaleureux, professionnel, facilitateur, oriente-reseau), qui renforce le point du post
-source (juger sur un test concret plutot qu'une impression) avec un angle reseau propre a
-Partners -- coherent puisque le post source parle deja de l'annuaire Claude Partners.
+`julien-agency-2026-09-12.commentary.txt` -- commentaire dans le ton de julien-agency
+(confiant, direct, pedagogue, oriente-dirigeants), qui renforce le point du post source
+(juger sur un test concret plutot qu'une impression) mais avec un angle recrutement/decision
+de dirigeant plutot que reseau (l'angle initial, ecrit pour julien-partners) -- s'adresse
+directement au dirigeant qui recrute ("pour un dirigeant qui recrute...", "ca va vous faire
+gagner du temps"), pas au facilitateur de reseau.
 
-## A faire une fois la publication confirmee
+## A faire une fois la publication confirmee (et le carrousel valide)
 
 ```js
 const { publierCommentaire } = require('./lib/publier-commentaire');
 const fs = require('fs');
 
 await publierCommentaire({
-  actorUrn: 'urn:li:person:ZvLHybJZhj', // julien-partners -- identite Composio NON confirmee, voir SKILL.md
+  actorUrn: 'urn:li:person:aFqu-W7ClW', // julien-agency -- identite Composio confirmee le 12/09/2026
   targetUrn: 'urn:li:share:7501940404297101312',
-  message: fs.readFileSync('a-publier/julien-partners-2026-09-12.commentary.txt', 'utf8').trim(),
+  message: fs.readFileSync('a-publier/julien-agency-2026-09-12.commentary.txt', 'utf8').trim(),
 });
 ```
 
-**Ne pas executer avant confirmation explicite** : julien-partners n'a a ce jour aucune
-connexion LinkedIn Composio identifiee (contrairement a julien-agency, confirmee via
-`averse-cooser`) -- ce texte est pret editorialement, pas techniquement publiable tant que ce
-point n'est pas resolu.
+**Ne pas executer maintenant** : l'identite et l'acces technique sont confirmes, mais deux
+conditions restent a lever -- (1) l'accord explicite de Julien sur ce texte precis, et (2) sa
+confirmation que le carrousel deja publie sur ce compte s'affiche comme prevu, pour ne pas
+empiler une deuxieme action de test avant d'avoir valide la premiere.

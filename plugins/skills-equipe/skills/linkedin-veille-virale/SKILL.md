@@ -84,6 +84,17 @@ description: "Surveille des comptes LinkedIn suivis, repere les posts qui valent
   la limite honnete : le profil interroge est celui de Julien Rayes
   lui-meme (= julien-agency), pas encore un veritable compte tiers, faute de
   `comptes_a_surveiller` rempli.
+- **Exemple `a-publier/` cible julien-agency, pas julien-partners** (corrige
+  le 12/09/2026) : redige initialement pour julien-partners, dont l'identite
+  Composio n'est pas confirmee ; Julien a dit explicitement que le compte
+  importe peu, donc le texte a ete **reecrit** (pas juste republie sous un
+  autre `authorUrn`) dans le ton de julien-agency (confiant, direct,
+  pedagogue, oriente-dirigeants) pour cibler `urn:li:person:aFqu-W7ClW`, le
+  seul compte avec un acces reellement confirme -- voir
+  `a-publier/README.md`. **Ne pas publier avant que Julien confirme
+  l'apparence reelle du carrousel** deja publie sur ce meme compte (voir
+  `linkedin-carrousel`) : eviter d'empiler plusieurs posts de test sur le
+  meme compte avant d'avoir valide le premier.
 
 ## A completer avant un usage reel
 
