@@ -258,3 +258,58 @@ Registre verifie des actions ("tools") enregistrees par Composio pour le toolkit
 - **Scopes OAuth** : openid, profile, w_member_social
 - **Tags Composio** : createHint, media_upload
 - **Portee compte propre / tiers** : Compte connecte : "for a native post by the authenticated LinkedIn member" -- explicitement limite au membre authentifie.
+
+## Test decisif -- LINKEDIN_CREATE_COMMENT_ON_POST
+
+**Tentative du 11/09/2026 -- BLOQUEE avant tout contact avec LinkedIn (pas d'echec definitif).**
+
+Action ciblee : `LINKEDIN_CREATE_COMMENT_ON_POST` (scopes `w_member_social`,
+`w_organization_social` ; parametres requis `actor`, `object`, `message`, `target_urn`).
+
+### Endpoint d'execution identifie
+
+`POST https://backend.composio.dev/api/v3.1/tools/execute/{tool_slug}` (documente sur
+<https://docs.composio.dev/reference/api-reference/tools/postToolsExecuteByToolSlug>,
+verifie par curl direct -- redirection 308 vers cette URL canonique). Corps JSON attendu :
+`arguments` (objet cle/valeur des parametres du tool), `connected_account_id` (optionnel),
+`user_id` (optionnel), `version` (optionnel, defaut "latest").
+
+### Blocage rencontre
+
+Appel de test en lecture seule d'abord (`LINKEDIN_GET_MY_INFO`, zero parametre, zero effet
+de bord) pour identifier le compte qui agirait -- **avant** de risquer le commentaire reel :
+
+```
+POST /api/v3.1/tools/execute/LINKEDIN_GET_MY_INFO   body: {"arguments":{}}
+-> HTTP 400 ActionExecute_ConnectedAccountEntityIdRequired
+   "User ID is required with connected account."
+```
+
+Composio exige un `user_id`/`entity_id` pour savoir quel compte connecte utiliser. Six
+valeurs plausibles testees (toutes en lecture seule, aucune n'a atteint LinkedIn) :
+`default`, `jrayes000_workspace`, `julien`, `nomena`, `nomenaf.pro@gmail.com`,
+`nomena-linkedin-cle` -- toutes en **HTTP 404 `ActionExecute_ConnectedAccountNotFound`**
+("No connected account found for user ID X for toolkit linkedin").
+
+Impossible de lister les comptes connectes pour trouver la bonne valeur :
+`GET /api/v3/connected_accounts` reste en **403** avec cette cle (permission ecriture
+seulement, pas lecture -- meme constat que dans la section "Methode de verification"
+ci-dessus).
+
+**Tentative de contournement via le dashboard web** (`dashboard.composio.dev`, sans saisie
+d'identifiants) : redirection automatique vers `login.composio.dev` -- **aucune session
+navigateur active**, donc aucune information recuperable par cette voie sans qu'un humain
+se connecte.
+
+### Etat final
+
+**Aucun appel n'a atteint l'API LinkedIn** -- tous les refus ci-dessus viennent de Composio,
+avant meme la tentative reelle. Le test du commentaire sur un post tiers n'a donc **pas ete
+execute**, ni en succes ni en echec reel. Il reste bloque tant que l'une de ces conditions
+n'est pas remplie :
+1. Julien communique le `user_id`/`entity_id` exact utilise lors de la connexion du compte
+   LinkedIn dans Composio, ou
+2. la permission `connected_accounts:read` est ajoutee a la cle pour que je puisse lister
+   moi-meme le(s) compte(s) connecte(s) et recuperer son identifiant.
+
+Rien n'a ete publie sur LinkedIn, ni sur un compte propre ni sur celui d'un tiers.
