@@ -1,0 +1,21 @@
+[
+  {
+    "role": "hook",
+    "titre": "3 signes qu'un recrutement va echouer avant meme l'entretien"
+  },
+  {
+    "role": "contenu",
+    "titre": "1. La fiche de poste copie-colle une autre annonce",
+    "texte": "Si personne dans l'equipe ne peut dire ce qui rend ce poste different d'un autre, le candidat ne le pourra pas non plus."
+  },
+  {
+    "role": "contenu",
+    "titre": "2. Le salaire n'est jamais mentionne",
+    "texte": "L'absence de fourchette n'est plus lue comme de la discretion, mais comme un signal d'alerte par la plupart des candidats qualifies."
+  },
+  {
+    "role": "contenu",
+    "titre": "3. Trois entretiens ou plus avant une offre",
+    "texte": "Chaque etape supplementaire fait perdre les meilleurs profils, deja en discussion ailleurs."
+  }
+]

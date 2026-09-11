@@ -42,14 +42,24 @@ convention de nommage des fichiers de sortie).
   repond 403 (autorisation d'organisation a valider cote LinkedIn, Julien s'en occupe) --
   brancher `urn:li:organization:<id>` une fois debloque, rien d'autre a changer.
 
-- **(2026-09-11) Repli image documente, non implemente** : contrairement au document/PDF,
-  le toolkit gere bien l'IMAGE (`LINKEDIN_REGISTER_IMAGE_UPLOAD`/`LINKEDIN_INITIALIZE_IMAGE_UPLOAD`
-  pour televerser, puis `LINKEDIN_CREATE_LINKED_IN_POST` avec son parametre optionnel
-  `images` deja present dans son schema). Deux options possibles pour un jour remplacer le
-  depot manuel -- une image par diapo (rendu PNG de chaque page, a verifier si `images`
-  accepte plusieurs URN), ou une image de couverture unique (perd le format feuilletable) --
-  detaillees dans le commentaire au-dessus de `publierCarrousel` dans `lib/publier.js`. Ni
-  l'une ni l'autre n'est codee : le choix revient a Julien.
+- **(2026-09-12) Repli image code, mais inerte tant que Julien n'a pas choisi** :
+  `generer-images.js` rend localement (Playwright, zero appel Composio, meme gabarit HTML que
+  le PDF) les deux options documentees le 11/09 :
+  - `genererImagesParDiapo` -- une image PNG 1080x1350 par diapo (option "par-diapo").
+  - `genererImageCouverture` -- une seule image PNG 1080x1350, la diapo "hook" ou la
+    premiere (option "couverture").
+  Verifie reellement en local le 12/09/2026 sur `fixtures/diapos-exemple.json` (4 diapos,
+  compte julien-partners) : rendu net, polices chargees, 1080x1350px confirme en lisant le
+  chunk IHDR du PNG, tailles de fichier coherentes (53-77 Ko) -- voir
+  `test/generer-images.test.js` (`npm test`, 4 tests verts). Cote Composio,
+  `lib/publier.js` expose desormais `publierCarrouselViaImage({ authorUrn, modeRepli,
+  cheminsImages, commentary })` -- `modeRepli: "par-diapo" | "couverture"` -- qui televerse
+  reellement les PNG deja rendus (`LINKEDIN_REGISTER_IMAGE_UPLOAD` puis PUT des octets) et
+  cree le post avec `images`. **Personne ne l'appelle nulle part dans ce paquet** (verifie par
+  `test/publier-repli-image.test.js`) : elle reste inerte tant que Julien n'a pas tranche entre
+  les deux modes (ou confirme qu'il garde le depot manuel du PDF). Point non verifie par un
+  appel reel : si `LINKEDIN_CREATE_LINKED_IN_POST.images` accepte plusieurs URN a la fois
+  (necessaire pour "par-diapo") -- le nom au pluriel le suggere, non confirme.
 
 - **(2026-09-11) Ambiguite non resolue** : la seule connexion LinkedIn active vue en MCP
   (`connect.composio.dev/~/connect/apps/linkedin`, "Shared with you") porte le nom
