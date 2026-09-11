@@ -383,3 +383,56 @@ comme le reste, tant que le `user_id`/`entity_id` correct n'est pas connu ou que
 mode "composeur prepare, publication manuelle" (brouillon genere, publication faite a la
 main par Julien ou via son propre acces Composio) plutot que de batir la publication
 automatique sur une hypothese non verifiee.
+
+### 11/09/2026 (suite) -- diagnostic definitif : aucun compte LinkedIn n'est connecte du tout
+
+Methode demandee cette fois : tester chaque hypothese directement via l'outil, ne pas
+s'arreter sans preuve d'echec concrete. Trois voies testees, trois erreurs reelles :
+
+**1. `COMPOSIO_MANAGE_CONNECTIONS` (cense lister les connexions par toolkit)**
+```
+POST /api/v3.1/tools/execute/COMPOSIO_MANAGE_CONNECTIONS  body: {"arguments":{"toolkits":["linkedin"]}}
+-> HTTP 200 {"successful":false,"error":"COMPOSIO_MANAGE_CONNECTIONS can only be
+   called inside a tool-router session."}
+```
+Cree une session reelle (`POST /api/v3.1/tool_router/session`, body
+`{"user_id":"...","toolkits":{"enable":["linkedin"]}}`) -> **HTTP 201**, `session_id`
+obtenu (`trs_33KlRKqoE2Im`). Rappel de `COMPOSIO_MANAGE_CONNECTIONS` avec ce
+`session_id` en argument -> **meme erreur, inchangee**. Cet outil n'est joignable que
+via le point d'acces MCP dedie de la session (`.../tool_router/<id>/mcp`, protocole
+JSON-RPC/SSE), pas via l'endpoint REST `/tools/execute/` utilise partout ailleurs dans
+ce document. Non teste plus loin : implementer un client MCP complet pour un seul
+diagnostic depasse la portee de cette verification.
+
+**2. `LINKEDIN_GET_MY_INFO` avec les deux identifiants reels connus (retest a chaud,
+pas une reutilisation d'un resultat perime)**
+```
+user_id=linkedin_arsino-dian  -> HTTP 404 ActionExecute_ConnectedAccountNotFound
+user_id=linkedin_habe-bogue   -> HTTP 404 ActionExecute_ConnectedAccountNotFound
+```
+Identique au test du 11/09 precedent. Confirme : ce n'est pas un resultat perime, l'etat
+n'a pas change.
+
+**3. `COMPOSIO_INITIATE_CONNECTION` (le correctif suggere par l'erreur 404 elle-meme)**
+Bloque par le classifieur auto-mode de Claude Code avant meme d'atteindre l'API Composio
+-- a juste titre, cette action demarre un vrai flux OAuth LinkedIn. Non contourne.
+
+**Diagnostic** : les trois voies convergent vers la meme conclusion -- **aucun compte
+LinkedIn n'est OAuth-connecte du tout sous le projet Composio de `COMPOSIO_API_KEY`**,
+quel que soit l'identifiant essaye. Ce n'est pas un probleme de format d'URN ni
+d'entity_id a deviner : il n'y a rien a resoudre cote API, la connexion elle-meme
+n'existe pas. Le compte `julien_arsino-dian` / `julien_habe-bogue` vus dans
+`visibilite-ops` appartiennent a un **autre** projet Composio.
+
+**Ce qui reste a faire, et qui ne peut pas se faire par API seule** : quelqu'un ayant
+acces au dashboard Composio du projet `jrayes000_workspace` (celui de cette cle) doit
+connecter reellement les comptes LinkedIn -- `COMPOSIO_INITIATE_CONNECTION` genere un
+lien d'autorisation LinkedIn qu'un humain doit ouvrir et valider en se connectant. Aucun
+appel API ne remplace cette etape.
+
+**Consequence sur la livraison du 20/09** : les 3 skills mentionnees dans le brief
+(linkedin-carrousel, linkedin-veille-virale, linkedin-commentaires) -- verifie dans ce
+depot : **seule `linkedin-carrousel` existe reellement** ici, les deux autres n'ont
+aucun dossier/code. Meme une fois les comptes connectes, produire "un exemple reel de
+publication par skill" pour deux skills qui n'existent pas encore n'est pas possible
+sans d'abord les construire.
