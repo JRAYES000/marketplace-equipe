@@ -1,0 +1,39 @@
+[
+  {
+    "id": "c1",
+    "authorName": "Ines Verlaine",
+    "shareUrn": "urn:li:share:7250100000000000001",
+    "url": "https://www.linkedin.com/posts/ines-verlaine_exemple-c1",
+    "text": "On a arrete de mesurer la performance commerciale au nombre d'appels passes. Depuis qu'on regarde le taux de rendez-vous obtenus par appel, l'equipe est plus lente sur le volume et bien meilleure sur le resultat.",
+    "postedAt": "2026-09-10T07:30:00.000Z",
+    "commentsCount": 6
+  },
+  {
+    "id": "c2-carrousel",
+    "authorName": "Thomas Vidal",
+    "shareUrn": "urn:li:share:7250100000000000002",
+    "url": "https://www.linkedin.com/posts/thomas-vidal_exemple-c2",
+    "text": "7 signaux qu'un cofondateur va partir -- carrousel",
+    "postedAt": "2026-09-10T10:00:00.000Z",
+    "commentsCount": 2,
+    "document": { "totalPageCount": 8 }
+  },
+  {
+    "id": "c3-trop-commente",
+    "authorName": "Nadia Kessler",
+    "shareUrn": "urn:li:share:7250100000000000003",
+    "url": "https://www.linkedin.com/posts/nadia-kessler_exemple-c3",
+    "text": "Fil deja tres discute sur le teletravail.",
+    "postedAt": "2026-09-09T09:00:00.000Z",
+    "commentsCount": 95
+  },
+  {
+    "id": "c4-plus-ancien",
+    "authorName": "Ines Verlaine",
+    "shareUrn": "urn:li:share:7250100000000000004",
+    "url": "https://www.linkedin.com/posts/ines-verlaine_exemple-c4",
+    "text": "Ancien post sur le meme sujet, deja depasse par c1 en date.",
+    "postedAt": "2026-08-15T07:00:00.000Z",
+    "commentsCount": 4
+  }
+]

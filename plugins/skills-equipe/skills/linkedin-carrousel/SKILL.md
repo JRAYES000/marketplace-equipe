@@ -42,6 +42,15 @@ convention de nommage des fichiers de sortie).
   repond 403 (autorisation d'organisation a valider cote LinkedIn, Julien s'en occupe) --
   brancher `urn:li:organization:<id>` une fois debloque, rien d'autre a changer.
 
+- **(2026-09-11) Repli image documente, non implemente** : contrairement au document/PDF,
+  le toolkit gere bien l'IMAGE (`LINKEDIN_REGISTER_IMAGE_UPLOAD`/`LINKEDIN_INITIALIZE_IMAGE_UPLOAD`
+  pour televerser, puis `LINKEDIN_CREATE_LINKED_IN_POST` avec son parametre optionnel
+  `images` deja present dans son schema). Deux options possibles pour un jour remplacer le
+  depot manuel -- une image par diapo (rendu PNG de chaque page, a verifier si `images`
+  accepte plusieurs URN), ou une image de couverture unique (perd le format feuilletable) --
+  detaillees dans le commentaire au-dessus de `publierCarrousel` dans `lib/publier.js`. Ni
+  l'une ni l'autre n'est codee : le choix revient a Julien.
+
 - **(2026-09-11) Ambiguite non resolue** : la seule connexion LinkedIn active vue en MCP
   (`connect.composio.dev/~/connect/apps/linkedin`, "Shared with you") porte le nom
   `averse-cooser`, partagee par `jrayes000@gmail.com` -- ne correspond a aucun des deux

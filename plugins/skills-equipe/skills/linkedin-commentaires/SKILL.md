@@ -22,6 +22,17 @@ description: "Trouve des posts LinkedIn pertinents sous des comptes cibles et pu
    d'appel qui publie reellement : `publierCommentaire({ actorUrn, targetUrn,
    message })`. `targetUrn` doit etre le `shareUrn` du post (jamais une URN
    `urn:li:activity:`, refusee par l'API).
+5. `dry-run.js` (`npm run dry-run`) execute les etapes 1-3 de bout en bout
+   sans jamais appeler `publierCommentaire` (il n'importe meme pas
+   `lib/publier-commentaire.js`) -- avec le jeu fixture de
+   `fixtures/posts-exemple.json` tant que `comptes_cibles` est vide, ou avec
+   un vrai appel Apify des que ce champ est rempli et `APIFY_TOKEN` present.
+   Ecrit le resultat (post cible, `shareUrn`, commentaire final, arguments
+   qu'on passerait a `publierCommentaire`) dans
+   `dry-run-sortie/commentaires-exemple.json`. `npm test` (`node --test`)
+   verifie le tri (`test/trierPosts.test.js`, y compris que `shareUrn` est
+   bien conserve) et ce dry run (`test/dry-run.test.js`), y compris qu'il
+   n'importe jamais `lib/publier-commentaire.js`.
 
 Plafonds par defaut dans `reglages-comptes.json` (repris des regles reelles
 deja en usage dans `visibilite-ops`, `routines/commentaires-linkedin.md`) :
@@ -34,6 +45,11 @@ le code ne les impose automatiquement pour l'instant.
 - **Pret et teste reellement** : le mecanisme de recuperation des posts
   (meme fonction Apify que `linkedin-veille-virale`, verifiee avec le compte
   `julien_r`).
+- **Pret et teste de bout en bout, hors publication reelle** : la chaine
+  recherche -> tri -> commentaire final, via `dry-run.js` -- un exemple
+  concret de ce que serait le commentaire publie (voir
+  `dry-run-sortie/commentaires-exemple.json`, genere par `npm run dry-run`),
+  sans qu'aucune publication reelle n'ait eu lieu.
 - **Pret, non teste par publication reelle** : `publierCommentaire`. URN
   d'acteur fournis et verifies par Julien (`reglages-comptes.json` :
   `julien-partners` -> `urn:li:person:ZvLHybJZhj`, `julien-agency` ->

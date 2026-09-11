@@ -39,6 +39,45 @@ async function publierCarrousel({ authorUrn, cheminPdf }) {
 }
 
 /**
+ * REPLI POSSIBLE, NON IMPLEMENTE -- documente le 11/09/2026 pour que
+ * l'information soit prete des que Julien tranche. Ne pas coder tant qu'il
+ * n'a pas choisi entre les deux options ci-dessous (ou confirme qu'il
+ * prefere garder le PDF deposé a la main).
+ *
+ * Contrairement au document/PDF (aucune action ne le gere, voir
+ * publierCarrousel ci-dessus), le toolkit `linkedin` de Composio gere bien
+ * l'IMAGE, verifie dans references/actions-composio.md (catalogue des 24
+ * actions, section LINKEDIN_REGISTER_IMAGE_UPLOAD / LINKEDIN_CREATE_LINKED_IN_POST) :
+ *
+ *   1. `LINKEDIN_REGISTER_IMAGE_UPLOAD` (parametre requis `owner_urn`) ou
+ *      `LINKEDIN_INITIALIZE_IMAGE_UPLOAD` (parametre requis `owner`) --
+ *      initialise un televersement natif et renvoie une URL presignee
+ *      (`upload_url`) plus l'URN de l'asset image resultant.
+ *   2. Televerser les octets de l'image sur `upload_url` via une requete PUT
+ *      (etape hors Composio, HTTP direct).
+ *   3. Appeler `LINKEDIN_CREATE_LINKED_IN_POST` avec son parametre optionnel
+ *      `images` renseigne avec l'URN obtenue a l'etape 1 -- ce parametre
+ *      existe deja dans le schema de l'action (a cote de `author`/`commentary`
+ *      qui sont requis), aucune action supplementaire a decouvrir.
+ *
+ * Deux formes de repli possibles avec ce mecanisme, aucune choisie pour
+ * l'instant :
+ *   (a) Une image par diapo : convertir chaque page du PDF genere par
+ *       generer-pdf.js en PNG, televerser chacune (etapes 1-2 repetees), puis
+ *       les passer toutes dans `images` du meme post -- a verifier par test
+ *       si l'action accepte plusieurs URN dans ce tableau (le nom du
+ *       parametre au pluriel le suggere, non confirme ici).
+ *   (b) Une image de couverture unique : ne televerser que le rendu de la
+ *       premiere diapo, et renvoyer vers le PDF complet via le texte du post
+ *       (`commentary`) ou un lien externe -- perd le format carrousel
+ *       feuilletable, mais publiable immediatement sans depot manuel.
+ *
+ * Ni (a) ni (b) n'est implemente ici : le choix (et son cout en temps de
+ * developpement, notamment pour (a) qui suppose un rendu PNG par page en
+ * plus du PDF) revient a Julien.
+ */
+
+/**
  * Fallback documente, non appele par defaut : resout l'URN d'un compte
  * personnel via LINKEDIN_GET_MY_INFO (ne fonctionne pas pour une
  * organisation -- utiliser LINKEDIN_GET_COMPANY_INFO dans ce cas, bloque en

@@ -3,5 +3,9 @@
   "private": true,
   "version": "0.1.0",
   "description": "Trouve des posts pertinents et publie un commentaire (Composio) pour julien-partners ou julien-agency",
-  "type": "commonjs"
+  "type": "commonjs",
+  "scripts": {
+    "test": "node --test",
+    "dry-run": "node dry-run.js"
+  }
 }

@@ -1,0 +1,56 @@
+{
+  "julien-partners": {
+    "compte": "julien-partners",
+    "source": "fixture (APIFY_TOKEN absent et/ou comptes_cibles vide -- voir fixtures/posts-exemple.json)",
+    "nbPostsRecuperes": 4,
+    "nbPostsRetenus": 2,
+    "ecartes": [
+      "c2-carrousel",
+      "c3-trop-commente"
+    ],
+    "postCible": {
+      "id": "c1",
+      "auteur": "Ines Verlaine",
+      "url": "https://www.linkedin.com/posts/ines-verlaine_exemple-c1",
+      "shareUrn": "urn:li:share:7250100000000000001",
+      "postedAt": "2026-09-10T07:30:00.000Z",
+      "commentsCount": 6,
+      "texteOriginal": "On a arrete de mesurer la performance commerciale au nombre d'appels passes. Depuis qu'on regarde le taux de rendez-vous obtenus par appel, l'equipe est plus lente sur le volume et bien meilleure sur le resultat."
+    },
+    "contenuFinal": "Ce basculement du volume d'appels vers le taux de transformation, c'est exactement ce qu'on recommande quand une equipe commerciale plafonne : on gagne plus a muscler la qualite du premier contact qu'a en multiplier le nombre. Merci pour le partage, tres concret.",
+    "actorUrn": "urn:li:person:ZvLHybJZhj",
+    "argumentsPublierCommentaire": {
+      "actorUrn": "urn:li:person:ZvLHybJZhj",
+      "targetUrn": "urn:li:share:7250100000000000001",
+      "message": "Ce basculement du volume d'appels vers le taux de transformation, c'est exactement ce qu'on recommande quand une equipe commerciale plafonne : on gagne plus a muscler la qualite du premier contact qu'a en multiplier le nombre. Merci pour le partage, tres concret."
+    },
+    "publicationReelle": "NON EFFECTUEE -- dry run uniquement, publierCommentaire() jamais appele par ce script"
+  },
+  "julien-agency": {
+    "compte": "julien-agency",
+    "source": "fixture (APIFY_TOKEN absent et/ou comptes_cibles vide -- voir fixtures/posts-exemple.json)",
+    "nbPostsRecuperes": 4,
+    "nbPostsRetenus": 2,
+    "ecartes": [
+      "c2-carrousel",
+      "c3-trop-commente"
+    ],
+    "postCible": {
+      "id": "c1",
+      "auteur": "Ines Verlaine",
+      "url": "https://www.linkedin.com/posts/ines-verlaine_exemple-c1",
+      "shareUrn": "urn:li:share:7250100000000000001",
+      "postedAt": "2026-09-10T07:30:00.000Z",
+      "commentsCount": 6,
+      "texteOriginal": "On a arrete de mesurer la performance commerciale au nombre d'appels passes. Depuis qu'on regarde le taux de rendez-vous obtenus par appel, l'equipe est plus lente sur le volume et bien meilleure sur le resultat."
+    },
+    "contenuFinal": "Point important pour les dirigeants qui pilotent au volume d'activite : un indicateur d'effort (nombre d'appels) n'est pas un indicateur de resultat. Le jour ou vous remplacez l'un par l'autre dans vos reportings, les priorites de l'equipe changent seules -- sans note de service.",
+    "actorUrn": "urn:li:person:aFqu-W7ClW",
+    "argumentsPublierCommentaire": {
+      "actorUrn": "urn:li:person:aFqu-W7ClW",
+      "targetUrn": "urn:li:share:7250100000000000001",
+      "message": "Point important pour les dirigeants qui pilotent au volume d'activite : un indicateur d'effort (nombre d'appels) n'est pas un indicateur de resultat. Le jour ou vous remplacez l'un par l'autre dans vos reportings, les priorites de l'equipe changent seules -- sans note de service."
+    },
+    "publicationReelle": "NON EFFECTUEE -- dry run uniquement, publierCommentaire() jamais appele par ce script"
+  }
+}
