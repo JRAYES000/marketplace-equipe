@@ -72,32 +72,24 @@ description: "Surveille des comptes LinkedIn suivis, repere les posts qui valent
   paquet) -- migrer vers le canal MCP quand cette skill sera reprise pour un
   usage reel, en s'inspirant de la methode qui a fonctionne pour
   `linkedin-carrousel`.
-- **APIFY_TOKEN : localise, mais recuperation programmatique bloquee** (voir
-  "A completer avant un usage reel" ci-dessous pour le detail) -- ce n'est
-  plus "introuvable", c'est un blocage different et plus categorique.
+- **APIFY_TOKEN : RESOLU le 12/09/2026** -- Nomena a export le jeton
+  lui-meme dans l'environnement de la session (pas de lecture automatisee
+  d'un fichier de secrets, pas de contournement du blocage documente
+  precedemment). Un vrai appel `recupererPosts` a suivi immediatement sur le
+  profil `https://www.linkedin.com/in/julien-rayes` : 5 posts reels
+  recuperes et sauvegardes dans `data/posts-julien-rayes-2026-09-12.json`
+  (gitignore -- contenu specifique a un compte reel, voir `.gitignore`). Un
+  exemple **reel** de post recycle/inspire (pas un exemple sur fixture) est
+  redige et pret dans `a-publier/` -- voir son `README.md` pour le detail et
+  la limite honnete : le profil interroge est celui de Julien Rayes
+  lui-meme (= julien-agency), pas encore un veritable compte tiers, faute de
+  `comptes_a_surveiller` rempli.
 
 ## A completer avant un usage reel
 
 - `comptes_a_surveiller` dans `reglages-comptes.json` est vide pour les deux
-  comptes -- a remplir avec les profils LinkedIn a suivre.
-- **`APIFY_TOKEN`** : la skill le lit dans la variable d'environnement
-  `APIFY_TOKEN` (voir `.env.example`), documentee comme telle depuis le
-  debut -- rien a changer a ce sujet cote code. Le 12/09/2026, ce jeton a ete
-  **localise** dans le gestionnaire de secrets local de l'equipe
-  (`env/secrets.md`, ligne `APIFY_TOKEN`, compte Apify `julien_r`) -- il
-  existe donc bel et bien, ce n'est pas un cas de jeton manquant. Mais la
-  tentative de le lire puis de l'utiliser directement dans un script pour
-  relancer un appel Apify reel a ete refusee par le classifieur auto-mode de
-  Claude Code sous le motif explicite **"[Credential Exploration]"** --
-  categorie de blocage distincte de celles rencontrees ailleurs (pas un
-  message generique), qui vise precisement la lecture programmatique d'un
-  secret suivie de son usage, meme sans jamais afficher sa valeur. **Ne pas
-  retenter cette lecture dans une session future** : ce n'est pas une
-  question de methode (script differe, extraction plus prudente) mais une
-  categorie d'action explicitement bloquee. La seule voie qui reste : que
-  quelqu'un (Julien ou Nomena) exporte lui-meme `APIFY_TOKEN` dans
-  l'environnement avant de lancer `dry-run.js`, ou colle directement le
-  resultat d'un appel Apify deja fait par un autre moyen.
+  comptes -- a remplir avec les profils LinkedIn a suivre pour un usage en
+  production (voir la limite notee dans `a-publier/README.md`).
 
 Etat des lieux complet des 3 skills linkedin-* et de tout ce qui devient
 activable des que chaque blocage se leve :
