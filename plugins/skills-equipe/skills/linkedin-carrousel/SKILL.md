@@ -67,3 +67,7 @@ convention de nommage des fichiers de sortie).
   identifiants Composio connus (`linkedin_arsino-dian`, `linkedin_habe-bogue`). Tant que
   Julien n'a pas confirme a qui correspond cette connexion, aucune fonction de ce dossier ne
   doit etre appelee avec un effet de bord reel sur LinkedIn.
+
+Etat des lieux complet des 3 skills linkedin-* et de tout ce qui devient
+activable des que chaque blocage se leve : `references/etat-linkedin-20260912.md`
+du paquet.
