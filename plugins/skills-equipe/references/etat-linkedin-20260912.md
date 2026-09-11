@@ -12,10 +12,11 @@ ouverts", soit julien-partners comme priorite absolue sur une hypothese non
 confirmee) :**
 - **julien-agency** : **acces Composio confirme reellement** le 12/09/2026 --
   voir "Point n°1" ci-dessous. Julien a donne son accord explicite pour
-  publier sur ce compte le meme jour. Une tentative reelle de publication du
-  carrousel a suivi -- **echec propre, aucun post cree**, cause par un bug
-  confirme dans `publierCarrouselViaImage`, pas par l'identite ni l'accord --
-  voir "Point n°3" ci-dessous. Le pipeline texte (sans image), lui, est
+  publier sur ce compte le meme jour. Une premiere tentative de publication
+  du carrousel a echoue proprement (voir "Point n°3", 1ere partie), puis une
+  seconde a reussi techniquement (post cree sans erreur, PDF en piece
+  jointe) -- **mais le contenu visible reel n'est pas confirme**, en attente
+  que Julien ouvre le post lui-meme. Le pipeline texte (sans image), lui, est
   verifie fonctionnel de bout en bout -- voir "Point n°4".
 - **julien-partners** : acces Composio **non confirme** -- `averse-cooser`
   ne correspond pas a ce compte (voir plus bas). Etait presente comme
@@ -129,6 +130,26 @@ testee jusqu'au bout et s'est heurtee a une vraie contrainte d'acces
 (mauvais type de cle). Debloquer necessite une cle de projet Composio
 couvrant a la fois `averse-cooser` et cet endpoint de fichiers.
 
+**Deblocage trouve par Julien, meme jour** : le bac a sable
+`COMPOSIO_REMOTE_WORKBENCH` d'une session MCP embarque un helper
+(`upload_local_file`) qui appelle lui-meme l'endpoint de fichiers avec la
+cle de la session MCP en cours -- pas besoin d'une cle de projet Composio
+separee, contrairement a ce que la piste 1 ci-dessus laissait penser (elle
+testait l'endpoint directement, hors du bac a sable, avec la mauvaise
+cle). Reessaye dans une seule session continue (le `s3key` n'est valide que
+pour la session qui l'a genere) : le PDF a ete transfere dans le bac a
+sable, televerse avec succes, puis `LINKEDIN_CREATE_LINKED_IN_POST` appele
+avec ce `s3key` -- **reussi sans erreur**, `x_restli_id` obtenu. **Mais** le
+contenu reellement visible du post (le PDF apparait-il comme document
+feuilletable, ou a-t-il ete ignore silencieusement) **n'a pas pu etre
+confirme** : deux tentatives de lecture ont echoue (`403`, `404` -- meme
+type d'echec deja vu sur un brouillon dont l'existence etait pourtant
+confirmee par ailleurs, donc pas forcement concluant), et la verification
+par URL publique a ete bloquee par le mecanisme anti-bot de LinkedIn (code
+`999`), non contournee. Le post n'a pas ete supprime (aucun signal
+d'echec reel), mais **n'est pas non plus marque comme livre** : Julien a
+ete sollicite pour l'ouvrir lui-meme et confirmer ce qu'il voit.
+
 Consequence pour les deux autres skills : `publierPost({ authorUrn,
 commentary })` et `publierCommentaire({ actorUrn, targetUrn, message })`
 n'ont pas ce probleme (ils ne manipulent pas de fichier) -- il suffit de les
@@ -182,21 +203,24 @@ jugement editorial, pas de generation automatique).
 
 ## Recapitulatif
 
-Au 12/09/2026, deux points bloquants restent ouverts : `APIFY_TOKEN` (point
-n°2, localise mais pas utilisable programmatiquement -- empeche la
-redaction sur donnees reelles pour `linkedin-veille-virale` et
-`linkedin-commentaires`) et le televersement d'image pour
-`publierCarrouselViaImage` (point n°3, empeche toute publication reelle
-avec image pour `linkedin-carrousel`, sur n'importe quel compte -- un gap
-d'acces a une cle de projet Composio, pas un bug de code a corriger ici).
-Aucun des deux n'est lie a une identite ou un accord manquant : l'identite
-`averse-cooser` (point n°1) est resolue (julien-agency, acces ET accord de
-Julien confirmes), et le point n°4 apporte une preuve technique
-supplementaire que le pipeline texte (hors image) fonctionne deja de bout
-en bout pour ce compte. Le reste est code, teste et documente : rendu PDF et
-image (julien-agency et julien-partners), recuperation/tri Apify, dry runs
-bout-en-bout, contenu reel redige et relu pour julien-agency (pret des que
-le point n°3 est debloque). Ne pas relancer les canaux deja constates
-bloques (`composio login`, extraction de jeton navigateur, `gh` sur
-`claude-config`, encodage local pour le bac a sable Composio) en esperant
-un resultat different sans nouvelle information ou un acces different.
+Au 12/09/2026, un point bloquant reste ouvert (`APIFY_TOKEN`, point n°2,
+localise mais pas utilisable programmatiquement -- empeche la redaction sur
+donnees reelles pour `linkedin-veille-virale` et `linkedin-commentaires`).
+L'identite `averse-cooser` (point n°1) est resolue (julien-agency, acces ET
+accord de Julien confirmes), et le point n°4 confirme que le pipeline texte
+(hors image) fonctionne de bout en bout pour ce compte. Le point n°3 --
+publication du carrousel -- a ete techniquement debloque le meme jour
+(Julien a trouve le mecanisme reel via `COMPOSIO_REMOTE_WORKBENCH`, un post
+a ete cree sans erreur avec le PDF en piece jointe), **mais reste en
+attente de confirmation visuelle par Julien** : rien ne prouve encore que
+le PDF apparait reellement comme carrousel plutot que d'avoir ete ignore
+silencieusement par LinkedIn. Ne pas marquer `linkedin-carrousel` comme
+livre tant que cette confirmation n'est pas arrivee. Le reste est code,
+teste et documente : rendu PDF et image (julien-agency et julien-partners),
+recuperation/tri Apify, dry runs bout-en-bout, contenu reel redige et relu
+pour julien-agency. Ne pas relancer les canaux deja constates bloques
+(`composio login`, extraction de jeton navigateur, `gh` sur
+`claude-config`) en esperant un resultat different sans nouvelle
+information ou un acces different -- pour le televersement de fichiers vers
+Composio, utiliser desormais la methode du point n°3 (bac a sable MCP), pas
+l'endpoint direct.

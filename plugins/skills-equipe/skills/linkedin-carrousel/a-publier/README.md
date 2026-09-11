@@ -1,4 +1,4 @@
-# A publier -- julien-agency, identite ET accord confirmes -- publication reelle bloquee par un bug confirme
+# A publier -- julien-agency, identite ET accord confirmes -- carrousel publie techniquement, contenu visible NON CONFIRME
 
 **Identite `averse-cooser` confirmee par test reel le 12/09/2026** (voir
 `references/etat-linkedin-20260912.md` pour le detail complet de la methode) : appel MCP
@@ -7,10 +7,13 @@ reel de `LINKEDIN_GET_MY_INFO` sur la connexion partagee `averse-cooser`, champ 
 (hypothese "compte marque par defaut", non confirmee a l'epoque, infirmee par ce test).
 
 **Julien a donne son accord explicite le 12/09/2026** ("OK parfait pour Claude Agency. Peu
-importe le compte LinkedIn sur lequel tu publies."). Une tentative reelle de publication a
-suivi le meme jour -- **echec propre, aucun post cree** : voir "Ce qui a echoue" ci-dessous.
-Le point bloquant n'est plus l'identite ni l'accord, c'est un bug confirme dans
-`publierCarrouselViaImage`.
+importe le compte LinkedIn sur lequel tu publies."). Une premiere tentative reelle de
+publication a echoue proprement (voir "Ce qui a echoue" ci-dessous). Une seconde tentative,
+avec la methode que Julien a trouvee lui-meme (bac a sable `COMPOSIO_REMOTE_WORKBENCH`), a
+**reussi techniquement** : `LINKEDIN_CREATE_LINKED_IN_POST` a repondu sans erreur avec un
+identifiant de post reel (`urn:li:share:7504217733631266816`). **Mais le contenu visible reel
+du post n'est pas confirme** -- voir "Deuxieme tentative" plus bas. Julien doit ouvrir le post
+lui-meme pour trancher.
 
 ## Ce qui est pret (rebascule sur julien-agency le 12/09/2026)
 
@@ -67,29 +70,43 @@ Composio. `lib/publier.js` documente desormais ce constat en detail et leve une 
 explicite dans `publierCarrouselViaImage` avant tout appel reseau, pour eviter de re-televerser
 inutilement une image a chaque tentative tant que ce n'est pas corrige.
 
-## A faire pour debloquer une vraie publication -- impasse confirmee, pas juste un blocage classifieur
+Deux pistes avaient ete investiguees le 12/09/2026 pour obtenir le `s3key` requis par
+`images`, sans succes a l'epoque :
 
-Deux pistes investiguees le 12/09/2026 pour obtenir le `s3key` requis par `images`, toutes
-deux dans une impasse pour des raisons differentes :
+1. Appeler `POST /api/v3/files/upload/request` directement (comme le fait le SDK officiel de
+   Composio en interne) : refuse la cle "consumer" MCP (401), exige une veritable
+   `COMPOSIO_API_KEY` de projet, indisponible.
+2. Faire entrer les octets dans le bac a sable de `COMPOSIO_REMOTE_WORKBENCH` : l'encodage
+   tente pour ce transfert avait ete bloque par le classifieur auto-mode.
 
-1. **Passer par le stockage propre de Composio, comme le fait son SDK officiel.** Lu dans le
-   code source public du SDK Python (`ComposioHQ/composio`, `_files.py`, via `gh api` sans
-   authentification) : le mecanisme reel n'utilise jamais de base64, juste un `POST
-   /api/v3/files/upload/request` (body `md5`/`filename`/`mimetype`/`tool_slug`/`toolkit_slug`)
-   qui renvoie une URL S3 presignee, puis un PUT des octets bruts (meme primitive que l'upload
-   LinkedIn qui a fonctionne). **Teste reellement** : cet endpoint refuse la cle "consumer" MCP
-   (401 `Auth_NoAuthProvided` en `x-consumer-api-key`, 401 `APIKey_InvalidAPIKey` en `x-api-key`
-   avec la meme valeur -- prefixe `ck_` non reconnu). Il exige une veritable `COMPOSIO_API_KEY`
-   de projet (prefixe `ak_`), indisponible ici -- et celle deja connue dans
-   `references/actions-composio.md` appartient a un projet sans connexion LinkedIn, donc ne
-   suffirait pas non plus.
-2. **Faire entrer les octets dans le bac a sable de `COMPOSIO_REMOTE_WORKBENCH`** (le seul outil
-   MCP, via la cle consumer, exposant un helper d'upload local) : suppose un transfert de
-   fichier vers ce bac a sable. L'encodage base64 tente pour cela a ete bloque par le
-   classifieur auto-mode de Claude Code -- non contourne.
+## Deuxieme tentative (12/09/2026) -- methode trouvee par Julien, publication reussie techniquement
 
-**A ce jour, aucun chemin legitime connu ne permet de terminer cette etape avec les acces
-disponibles dans une session Claude Code.** Debloquer necessite soit une `COMPOSIO_API_KEY` de
-projet couvrant a la fois `averse-cooser` et l'endpoint de fichiers (a demander a Julien ou a
-qui gere le projet Composio concerne), soit un mecanisme MCP equivalent que Composio n'expose
-pas encore.
+Julien a identifie que `COMPOSIO_REMOTE_WORKBENCH` embarque un helper (`upload_local_file`)
+qui appelle lui-meme l'endpoint de fichiers avec la cle de la session MCP en cours -- pas
+besoin d'une cle de projet separee (la piste 1 ci-dessus testait l'endpoint hors du bac a
+sable, avec la mauvaise cle). Deroule dans une seule session MCP continue (le `s3key` n'est
+valide que pour la session qui l'a genere) :
+
+1. Le PDF du carrousel a ete transfere dans le bac a sable, decode, puis televerse via
+   `upload_local_file` -- **reussi**, un `s3key` reel obtenu (cette fois, l'encodage necessaire
+   au transfert n'a pas ete bloque -- contrairement a la tentative precedente).
+2. `LINKEDIN_CREATE_LINKED_IN_POST` appele dans la meme session avec `images: [{ name:
+   "carrousel.pdf", mimetype: "application/pdf", s3key: <valeur> }]`, author `aFqu-W7ClW`,
+   le commentary de `julien-agency-2026-09-12.commentary.txt` -- **reussi sans erreur** :
+   `{"data":{"x_restli_id":"urn:li:share:7504217733631266816"},"error":null}`.
+
+**Ce qui n'est PAS confirme** : si le PDF apparait reellement comme document/carrousel
+feuilletable sur le post, ou si LinkedIn l'a silencieusement ignore (le point de vigilance
+signale par Julien lui-meme des le depart -- l'action gere peut-etre des images seules).
+Verifications tentees et non concluantes :
+- `LINKEDIN_GET_POST_CONTENT` -> `403 Forbidden`.
+- `LINKEDIN_LIST_REACTIONS` -> `404 Entity not found`.
+- (Le meme type d'echec de lecture etait deja survenu sur un brouillon de test dont
+  l'existence etait pourtant confirmee par ailleurs -- ces echecs de lecture via l'API ne
+  sont donc probablement pas concluants en soi, dans un sens comme dans l'autre.)
+- Verification par URL publique -> bloquee par le mecanisme anti-bot de LinkedIn (`999`),
+  **non contournee**.
+
+**Le post n'a pas ete supprime** (aucune erreur reelle signalee, donc pas de motif de
+suppression), mais **n'est pas marque comme livre**. Julien doit ouvrir le post lui-meme et
+confirmer ce qu'il voit reellement avant que ce chantier soit considere termine.
