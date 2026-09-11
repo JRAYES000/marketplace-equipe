@@ -198,11 +198,17 @@ une generation automatique), dans `a-publier/` de chaque skill -- voir leurs
 `README.md` respectifs pour le detail et une limite honnete : le profil
 interroge est celui de Julien Rayes lui-meme (= julien-agency), pas encore
 un veritable compte tiers, faute de `comptes_a_surveiller`/`comptes_cibles`
-remplis dans `reglages-comptes.json`. Ces deux exemples sont rediges pour
-julien-partners -- **non publies**, en attente d'une confirmation explicite
-(meme regle que pour le carrousel), et de toute facon non publiables tant
-que l'identite Composio de julien-partners n'est pas confirmee (voir Point
-n°1).
+remplis dans `reglages-comptes.json`.
+
+**Corrige le meme jour** : ces deux exemples ciblaient initialement
+julien-partners. Julien a rappele que le compte importe peu et que
+julien-agency (acces confirme) doit etre cible en priorite -- les textes
+ont ete **reecrits** (pas juste republies sous un autre URN) dans le ton de
+julien-agency pour `urn:li:person:aFqu-W7ClW`. Techniquement publiables des
+maintenant, mais **non publies** : en attente d'un accord explicite de
+Julien sur ces textes precis, et surtout de sa confirmation sur le
+carrousel deja publie sur ce meme compte (Point n°3) avant d'enchainer
+d'autres actions de test dessus.
 
 ## Recapitulatif
 
@@ -221,16 +227,18 @@ livre tant que cette confirmation n'est pas arrivee.
 
 Ce qui reste, pour `linkedin-veille-virale` et `linkedin-commentaires` :
 des exemples reels (donnees Apify reelles, redaction editoriale reelle)
-prets dans leurs `a-publier/` respectifs, **non publies** en attente
-d'accord explicite -- et de toute facon non publiables tant que
-julien-partners (le compte pour lequel ces exemples sont rediges) n'a pas
-d'identite Composio confirmee. Remplir `comptes_a_surveiller`/
-`comptes_cibles` avec de vrais comptes tiers reste a faire avant un usage
-en production continu. Le reste est code, teste et documente : rendu PDF
-et image (julien-agency et julien-partners), recuperation/tri Apify, dry
-runs bout-en-bout. Ne pas relancer les canaux deja constates bloques
-(`composio login`, extraction de jeton navigateur, `gh` sur
-`claude-config`, lecture programmatique de secrets locaux) en esperant un
+cibles sur **julien-agency** (corrige le 12/09/2026, l'identite technique
+est confirmee), prets dans leurs `a-publier/` respectifs, **non publies**
+en attente d'un accord explicite de Julien sur ces textes precis, et
+surtout de sa confirmation sur le carrousel deja publie sur ce meme compte
+avant d'y enchainer d'autres actions de test. Remplir
+`comptes_a_surveiller`/`comptes_cibles` avec de vrais comptes tiers reste a
+faire avant un usage en production continu. Le reste est code, teste et
+documente : rendu PDF et image (julien-agency et julien-partners),
+recuperation/tri Apify, dry runs bout-en-bout. Ne pas relancer les canaux
+deja constates bloques (`composio login`, extraction de jeton navigateur,
+`gh` sur `claude-config`, lecture programmatique de secrets locaux) en
+esperant un
 resultat different sans nouvelle
 information ou un acces different -- pour le televersement de fichiers vers
 Composio, utiliser desormais la methode du point n°3 (bac a sable MCP), pas

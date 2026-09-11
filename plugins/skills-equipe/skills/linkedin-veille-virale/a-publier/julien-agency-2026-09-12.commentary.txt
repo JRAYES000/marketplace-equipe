@@ -1,0 +1,5 @@
+Une equipe a teste dix outils gratuits ce week-end sur une tache reelle a rendre -- pas un essai, un livrable avec une echeance et quelqu'un qui l'attend. Aucun retenu : aucun n'egalait ce qui tournait deja en interne.
+
+C'est le test qui manque avant d'adopter un nouvel outil dans votre entreprise. On compare des demos, des avis, parfois un essai gratuit de quinze jours -- rarement un vrai livrable, sur une tache qui compte, avec une date.
+
+La regle est simple : ne jugez jamais un outil sur ce qu'il sait faire en demo. Jugez-le sur ce que vous aviez reellement a rendre cette semaine.
