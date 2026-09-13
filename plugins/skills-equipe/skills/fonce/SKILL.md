@@ -77,7 +77,7 @@ Le budget se joue sur le nombre d'allers-retours et sur ce que tu fais entrer da
 - Écris un fichier d'un coup plutôt qu'en cascade de petits `Edit`.
 - Données intermédiaires volumineuses → un fichier dans le scratchpad, pas dans le contexte. **Sauf la preuve du contrat**, qui reste dans la conversation (§1).
 - Un fichier livré sur disque — rapport, note, doc — couvre le fond à la longueur que la tâche demande : sans section de remplissage, sans résumé redondant, sans boilerplate.
-- **Ne narre pas.** Aucun préambule, aucun « je vais maintenant », aucun résumé d'étape. Le récap existe, il est à la fin, il est unique.
+- **Une phrase avant le premier appel d'outil**, puis rien jusqu'au récap final — sauf si une découverte change la direction annoncée au contrat, qui se dit sur le moment. Entre les deux, la conversation reçoit le résultat, pas le journal du travail.
 - Ne recopie pas dans ta prose du code ou des sorties que l'outil vient déjà d'afficher.
 
 ---
