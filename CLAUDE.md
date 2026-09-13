@@ -20,21 +20,38 @@ Ce qui reste obligatoire malgré la vitesse :
 - **Tenir le tableau du README à jour** : la version *et* la date de dernière
   mise à jour de chaque skill. La colonne *Version* est le numéro propre à
   chaque skill, pas celui du paquet.
-- **Resynchroniser après le push, deux fois.** Un push direct sur `main` ne
+- **Resynchroniser après le push, en trois temps.** Un push direct sur `main` ne
   déclenche aucune synchronisation côté claude.ai : la doc officielle réserve la
   synchronisation automatique aux PR fusionnées avec bump de version (« Direct
-  pushes to the default branch don't trigger a sync »). L'app desktop et Cowork
-  chargent cette copie serveur, jamais GitHub : sans le clic ci-dessous, tout le
+  pushes to the default branch don't trigger a sync »). Le réglage « Synchroniser
+  automatiquement » du menu ne change rien à ça : il était actif le 13/09/2026 et
+  le serveur pointait quand même 30 commits en arrière. L'app desktop et Cowork
+  chargent cette copie serveur, jamais GitHub : sans les clics ci-dessous, tout le
   monde garde l'ancienne version sans le dire (vu le 08/09/2026 : serveur figé
   au 15/08, trois versions de retard).
 
-  1. **Côté serveur** : dans claude.ai, Réglages → Plugins → ouvrir le plugin →
-     cliquer la source « marketplace-equipe » → onglet *Personnel* → ⋯ sur
-     l'onglet marketplace-equipe → **Rechercher des mises à jour**. Le menu
-     affiche « Commit synchronisé : <sha> » : c'est le contrôle qui tranche, il
-     doit montrer le sha qu'on vient de pousser. Le desktop suit dans les
-     20 minutes ou au redémarrage.
-  2. **Côté CLI** (clone local et paquet installé) :
+  1. **Côté serveur, la marketplace** : dans claude.ai, Réglages → Plugins →
+     bouton **Ajouter** (en haut à droite) → **Gérer les marketplaces** → ⋯ sur la
+     ligne `marketplace-equipe` → **Rechercher des mises à jour**. La ligne affiche
+     « Commit synchronisé : <sha> » : c'est le contrôle qui tranche, il doit
+     montrer le sha qu'on vient de pousser.
+
+     La fiche du plugin ne mène plus nulle part : « depuis marketplace-equipe » y
+     est du texte inerte, pas un lien, et son menu ⋯ n'offre que « Modifier avec
+     Claude » et « Supprimer ». Passer par *Ajouter*, pas par la fiche.
+
+  2. **Côté serveur, le plugin installé** — l'étape que tout le monde saute.
+     Synchroniser la marketplace fait avancer le pointeur du dépôt, **pas** la
+     version installée. Rouvrir la fiche du plugin et lire sa ligne d'en-tête
+     (`<version> · <n> compétences`). Si la version n'a pas bougé, même après un
+     rechargement complet de la page : **basculer l'interrupteur du plugin sur
+     arrêt, puis sur marche**. La fiche repasse alors à la version poussée. Le
+     desktop suit dans les 20 minutes ou au redémarrage.
+
+     Vu le 13/09/2026 : marketplace passée à `84cc70d`, plugin resté à `1.13.0`
+     avec 4 skills sur 7 pendant tout ce temps — et rien à l'écran ne le signalait.
+
+  3. **Côté CLI** (clone local et paquet installé) :
 
      ```bash
      claude plugin marketplace update marketplace-equipe && claude plugin update skills-equipe@marketplace-equipe
