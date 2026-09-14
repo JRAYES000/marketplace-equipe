@@ -13,25 +13,25 @@ const {
  * 2 hashtags en fin, aucune formulation interdite. Sert de base saine a
  * partir de laquelle chaque test d'echec introduit UNE seule violation.
  */
-const BROUILLON_CONFORME = `Pourquoi vos meilleurs candidats disparaissent-ils avant meme de recevoir votre offre ?
+const BROUILLON_CONFORME = `Pourquoi vos meilleurs candidats disparaissent-ils avant même de recevoir votre offre ?
 
-Rarement pour le salaire. Le plus souvent, ils partent pendant que votre process hesite encore, et personne ne s'en rend compte avant le refus.
+Rarement pour le salaire. Le plus souvent, ils partent pendant que votre process hésite encore, et personne ne s'en rend compte avant le refus.
 
 🧭 **Trois signes** reviennent, encore et encore, chez les entreprises qui perdent leurs meilleurs profils avant l'offre.
 
-📅 Aucun delai n'est jamais communique. Un candidat sans date de reponse suppose le pire et signe ailleurs.
+📅 Aucun délai n'est jamais communiqué. Un candidat sans date de réponse suppose le pire et signe ailleurs.
 
-🔁 Le meme entretien se rejoue deux fois. Si le second redemande ce que le premier savait deja, le message envoye est clair : personne ne pilote ce process.
+🔁 Le même entretien se rejoue deux fois. Si le second redemande ce que le premier savait déjà, le message envoyé est clair : personne ne pilote ce process.
 
-🤐 Les candidats ecartes n'ont jamais de reponse. Un silence ne coute rien aujourd'hui. Il coute le prochain candidat, qui ne repondra meme plus a votre message la prochaine fois.
+🤐 Les candidats écartés n'ont jamais de réponse. Un silence ne coûte rien aujourd'hui. Il coûte le prochain candidat, qui ne répondra même plus à votre message la prochaine fois.
 
-Le vrai cout n'est pas le poste vacant un mois de plus. C'est la reputation qui se construit, entretien apres entretien, chez des gens qui finissent toujours par se parler entre eux.
+Le vrai coût n'est pas le poste vacant un mois de plus. C'est la réputation qui se construit, entretien après entretien, chez des gens qui finissent toujours par se parler entre eux.
 
-Une seule chose a changer suffit souvent : fixer une date de reponse a chaque etape, et la tenir vraiment, meme quand la decision n'est pas encore prise.
+Une seule chose à changer suffit souvent : fixer une date de réponse à chaque étape, et la tenir vraiment, même quand la décision n'est pas encore prise.
 
-Le candidat qui reste a rarement recu la meilleure offre du marche. Il a recu, le **plus vite** possible, une reponse claire sur ou il en etait.
+Le candidat qui reste a rarement reçu la meilleure offre du marché. Il a reçu, le **plus vite** possible, une réponse claire sur où il en était.
 
-Et vous, sur votre dernier recrutement : combien de jours se sont ecoules entre deux nouvelles envoyees au candidat ?
+Et vous, sur votre dernier recrutement : combien de jours se sont écoulés entre deux nouvelles envoyées au candidat ?
 
 #recrutement #rh`;
 
@@ -85,8 +85,8 @@ test('refuse un post de 1200 caracteres (sous 1300) -- cas demande', () => {
 
 test('refuse une accroche sans point d\'interrogation dans les 140 premiers caracteres', () => {
   const brouillon = BROUILLON_CONFORME.replace(
-    'Pourquoi vos meilleurs candidats disparaissent-ils avant meme de recevoir votre offre ?',
-    'Vos meilleurs candidats disparaissent avant meme de recevoir votre offre, presque toujours en silence.'
+    'Pourquoi vos meilleurs candidats disparaissent-ils avant même de recevoir votre offre ?',
+    'Vos meilleurs candidats disparaissent avant même de recevoir votre offre, presque toujours en silence.'
   );
   assert.throws(() => validerEtConvertirPost(brouillon), /aucun point d'interrogation/);
 });
@@ -139,7 +139,7 @@ test('refuse un chiffre sans source attachee -- cas demande', () => {
 test('accepte un chiffre avec sa source attachee', () => {
   const brouillon = BROUILLON_CONFORME.replace(
     'Rarement pour le salaire.',
-    '42% des candidats partent avant l\'offre (source : etude interne verifiable).'
+    '42% des candidats partent avant l\'offre (source : étude interne vérifiable).'
   );
   assert.doesNotThrow(() => validerEtConvertirPost(brouillon));
 });
@@ -149,7 +149,7 @@ test('n\'accuse pas a tort l\'annee ecrite a l\'interieur de sa propre citation'
   // comme un autre pour la regex -- il ne doit pas exiger une SECONDE source.
   const brouillon = BROUILLON_CONFORME.replace(
     'Rarement pour le salaire.',
-    "26% des TPE-PME francaises utilisent deja l'IA (source : France Num, 2025)."
+    "26% des TPE-PME françaises utilisent déjà l'IA (source : France Num, 2025)."
   );
   assert.doesNotThrow(() => validerEtConvertirPost(brouillon));
 });

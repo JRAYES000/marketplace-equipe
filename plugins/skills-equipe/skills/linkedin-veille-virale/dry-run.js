@@ -21,6 +21,7 @@
 const fs = require('fs');
 const path = require('path');
 const { trierPosts, recupererPosts } = require('./lib/veille');
+const { validerAccents } = require('./lib/valider-orthographe');
 const reglages = require('./reglages-comptes.json');
 const reglageScore = require('./reglage-score.json');
 const { abonnes: abonnesReels } = require('./abonnes-comptes.json');
@@ -69,7 +70,16 @@ async function executerPourCompte(compte, config) {
 
   const choisi = retenus[0];
   const redactionsCompte = redactionsExemple[compte] || {};
-  const contenuFinal = redactionsCompte[choisi.id] || null;
+  let contenuFinal = redactionsCompte[choisi.id] || null;
+  let erreurOrthographe = null;
+  if (contenuFinal) {
+    try {
+      validerAccents(contenuFinal);
+    } catch (erreur) {
+      erreurOrthographe = erreur.message;
+      contenuFinal = null;
+    }
+  }
 
   return {
     compte,
@@ -87,6 +97,7 @@ async function executerPourCompte(compte, config) {
       texteOriginal: choisi.text,
     },
     contenuFinal,
+    erreurOrthographe,
     authorUrn: config.author_urn,
     argumentsPublierPost: contenuFinal
       ? { authorUrn: config.author_urn, commentary: contenuFinal }

@@ -15,6 +15,8 @@
  * en caracteres Unicode gras se fait ICI, au dernier moment, jamais avant.
  */
 
+const { validerAccents } = require('./valider-orthographe');
+
 const CARACTERES_ACCENTUES = /[àâäéèêëîïôöùûüÿçñÀÂÄÉÈÊËÎÏÔÖÙÛÜŸÇÑ]/;
 
 const LONGUEUR_MIN = 1300;
@@ -242,6 +244,7 @@ function validerEtConvertirPost(brouillon) {
   validerHashtags(texteFinal);
   validerInterdits(texteFinal);
   validerChiffreSource(texteFinal);
+  validerAccents(texteFinal);
   return texteFinal;
 }
 
@@ -254,6 +257,7 @@ module.exports = {
   validerHashtags,
   validerInterdits,
   validerChiffreSource,
+  validerAccents,
   LONGUEUR_MIN,
   LONGUEUR_MAX,
   FENETRE_ACCROCHE,

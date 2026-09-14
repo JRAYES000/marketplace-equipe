@@ -3,13 +3,13 @@
   "julien-partners": {
     "c1": {
       "genre": "vraie_question",
-      "texte": "Bon, ca rejoint une conversation qu'on a eue en reseau la semaine derniere sur ce meme sujet. Vous l'avez mesure sur combien de temps avant de trancher pour de bon ?"
+      "texte": "Bon, ça rejoint une conversation qu'on a eue en réseau la semaine dernière sur ce même sujet. Vous l'avez mesuré sur combien de temps avant de trancher pour de bon ?"
     }
   },
   "julien-agency": {
     "c1": {
       "genre": "information_chiffree",
-      "texte": "Sur ce type de bascule, le taux de rendez-vous grimpe en moyenne de 20% des le premier trimestre. Un indicateur d'effort ne dit jamais s'il y a un resultat derriere."
+      "texte": "Sur ce type de bascule, le taux de rendez-vous grimpe en moyenne de 20% dès le premier trimestre. Un indicateur d'effort ne dit jamais s'il y a un résultat derrière."
     }
   }
 }

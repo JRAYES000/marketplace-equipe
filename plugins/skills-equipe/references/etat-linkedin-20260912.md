@@ -537,6 +537,100 @@ sur le principe -- mais la redaction elle-meme doit simplement ecrire un francai
 accente des la premiere frappe, ce qui n'a pas ete fait jusqu'ici. A surveiller a chaque nouvelle
 redaction, dans les 3 skills.
 
+## Point n°13 -- 4 commentaires reecrits sans anecdote, inventaire des accents, garde-fou dans les 3 skills (15/09/2026)
+
+### 1. Les 4 commentaires refuses, reecrits sans attendre Julien
+
+Julien a tranche : ne pas suspendre le livrable du 20 a une anecdote que Julien n'aura peut-etre
+pas le temps de fournir. Les 4 commentaires refuses par `validerAffirmationExperience` (Point
+n°12) ont ete **reecrits dans un genre sans experience personnelle**, en s'appuyant sur le texte
+reel de chaque post cible (relu integralement pour chacun) :
+- **Theophile Burnet** -> `information_chiffree` conserve, mais avec un vrai chiffre : 84% des
+  developpeurs utilisent l'IA en 2025 contre 76% en 2024 (Stack Overflow Developer Survey 2025)
+  -- page reellement ouverte (`WebFetch`) et citation exacte relue, pas un chiffre de memoire ni
+  "de chez un client".
+- **Florent Pontiac** -> `vraie_question` (question reelle sur les choix de structure du site
+  livre au club de rugby, sans pretendre l'avoir concu).
+- **Valentin Muller** -> `desaccord_argumente` (argument sur le fond -- tests automatises des le
+  depart vs verification manuelle a posteriori -- sans "on a livre" ni "chez nous").
+- **Jean Zendji** -> `vraie_question` (question reelle sur le systeme de tri par regles qu'il
+  decrit, sans raconter de mission similaire).
+
+`histoire_vecue` reste en reserve, genre non utilise sur les 5 -- deviation assumee et a ecrire
+dans le mail du 20 : **3 genres sur 4 couverts** (`vraie_question` x3, `information_chiffree` x1,
+`desaccord_argumente` x1). Les 5 repassent reellement par `validerCommentaire` (contre le code,
+pas suppose) : **5/5 ACCEPTE**. Detail complet dans `linkedin-commentaires/a-publier/README.md`.
+
+### 2. Inventaire des accents manquants -- carrousel du 14/09 deja publie (julien-agency, v2)
+
+Demande explicite : ne rien corriger, fournir l'inventaire pour trancher. Compte precis, croise
+entre le module automatique (`detecterMotsSansAccent`) et une relecture manuelle complete mot par
+mot des 10 diapos + du texte du post (`a-publier/julien-agency-2026-09-14-v2.json` et
+`.commentary.txt`, aucun des deux fichiers modifie) :
+
+**Diapos (titre + texte de chaque diapo, 223 mots au total)** -- 34 occurrences reelles, 26
+attrapees par le module automatique :
+| Diapo | Mots concernes (forme actuelle -> correcte) |
+| --- | --- |
+| 1 (hook) | aucun |
+| 2 | reperer->repérer, ou->où, elle-meme->elle-même (3) |
+| 3 | delai->délai, communique->communiqué, reponse->réponse, deliberez->délibérez (4) |
+| 4 | meme->même, deja->déjà, pilote->piloté ["process non pilote" = participe, pas le nom] (3) |
+| 5 | ecartes->écartés, reponse->réponse, apres->après, coute->coûte (x2), repondra->répondra (6) |
+| 6 | decideurs->décideurs, delai->délai, decision->décision, a->à (4) |
+| 7 | criteres->critères, recoit->reçoit, differents->différents (3) |
+| 8 | a->à, etape->étape, reponse->réponse, decision->décision (4) |
+| 9 | deliberez->délibérez, deja->déjà (2) |
+| 10 | a->à (x2), reponse->réponse, etape->étape, ca->ça (5) |
+
+**Texte du post (261 mots)** -- 34 occurrences reelles, 27 attrapees par le module automatique :
+meme->même (x4), hesite->hésite, deja->déjà (x2), a->à (x4 : "à l'ancienne", "à votre", "à
+changer", "à chaque"), delai->délai, communique->communiqué, reponse->réponse (x4), envoye->envoyé,
+ecartes->écartés, coute->coûte (x2), repondra->répondra, cout->coût, reputation->réputation,
+apres->après, etape->étape, decision->décision, recu->reçu (x2), marche->marché, ou->où,
+etait->était, ecoules->écoulés, envoyees->envoyées.
+
+**Total : ~68 occurrences sur 484 mots, soit environ 1 mot sur 7.** Les 15 occurrences non
+attrapees automatiquement (a/à, ou/où, pilote/piloté, communique/communiqué, reperer/repérer,
+marche/marché) sont toutes des mots grammaticalement ambigus (verbe conjugue correct sans accent
+vs participe/preposition qui en exige un) -- exclus du garde-fou automatique pour ne pas produire
+de faux positifs, mais reels a l'oeil humain.
+
+**Visibilite : immediate, pas marginale.** A cette densite (~1 mot sur 7), le texte se lit
+d'emblee comme redige sans accents plutot que comme comportant quelques coquilles isolees --
+c'est le cas sur la quasi-totalite des phrases des diapos comme du post, pas concentre sur un
+passage precis qu'on pourrait corriger localement.
+
+**Cause probable identifiee** : `lib/valider-post.js` refuse a raison tout accent A L'INTERIEUR
+d'un passage en **gras** (aucune forme Unicode grasse accentuee n'existe -- rendu casse sinon).
+Cette regle, propre au gras, semble avoir ete etendue par erreur a l'ensemble du texte lors de la
+redaction -- hypothese plausible, non confirmee autrement.
+
+**Decision a prendre par Julien, non tranchee ici** : republier proprement (6 jours restants,
+post en ligne depuis quelques heures seulement) ou laisser en l'etat. Rien corrige ni supprime
+dans `a-publier/` en attendant.
+
+### 3. Garde-fou d'accents ajoute dans les 3 skills
+
+`lib/valider-orthographe.js` (nouveau, duplique dans les 3 paquets -- pas de code partage entre
+skills dans ce depot) : `validerAccents(texte)` refuse tout mot d'une **liste fermee** de mots
+toujours accentues en francais standard (ete/été, deja/déjà, meme/même, delai/délai, etc. --
+liste complete dans le fichier). Heuristique **volontairement imparfaite** : mots ambigus selon
+le contexte grammatical ("a"/"à", "ou"/"où", "pilote"/"piloté", "communique"/"communiqué",
+"marche"/"marché") exclus pour eviter des faux positifs sur du texte deja correct -- sur
+l'incident reel ci-dessus, la liste fermee attrape 53 occurrences sur 68 (78%).
+
+Branche : `linkedin-carrousel/lib/valider-diapos.js` (chaque diapo) et
+`lib/valider-post.js` (texte final du post) ; `linkedin-commentaires/lib/valider-commentaire.js`
+(`validerCommentaire`) ; `linkedin-veille-virale/dry-run.js` (`contenuFinal`, seul validateur de
+contenu de ce paquet jusqu'ici -- il n'en avait aucun). Bug reel trouve et corrige au passage
+dans `linkedin-commentaires` (deja documente Point n°12) : `\b` en JavaScript ne reconnait pas
+les lettres accentuees, corrige avec des frontieres Unicode `\p{L}`/`\p{N}`.
+
+Toutes les fixtures de test des 3 paquets (deja sans accents, meme probleme) corrigees en
+consequence. Tests totaux apres cette session : `linkedin-carrousel` 55/55, `linkedin-commentaires`
+40/40, `linkedin-veille-virale` 21/21.
+
 ## Recapitulatif
 
 Au 12/09/2026, aucun point bloquant "technique" majeur ne reste ouvert :

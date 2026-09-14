@@ -200,7 +200,30 @@ convertit et refuse (code de sortie 1, jamais un simple avertissement) :
   2 emojis colles, 1200 caracteres, chiffre sans source, etc.) -- tous verts, sortie reelle
   capturee, pas une description.
 
-### C. Cinq regles d'usage (section 2 du brief) -- etat au 14/09/2026
+### C. Accents manquants -- `lib/valider-orthographe.js` (ajoute le 15/09/2026)
+
+**Incident reel** : le carrousel du 14/09/2026 (julien-agency, `a-publier/julien-agency-2026-09-14-v2.*`),
+**deja publie et confirme en ligne** (voir "Deuxieme tentative reelle" plus haut), s'est revele
+integralement redige sans accents -- ~68 occurrences sur 484 mots (diapos + texte du post,
+soit environ 1 mot sur 7), au premier coup d'oeil pour tout lecteur francophone, pas un defaut
+marginal. Meme constat sur les 5 commentaires et l'exemple de `linkedin-veille-virale` prepares
+le meme jour. **Cause probable identifiee** : `convertirGras` (section B) refuse a raison tout
+accent DANS un passage en gras (aucune forme Unicode grasse accentuee n'existe) -- cette regle,
+propre au gras, semble avoir ete etendue par erreur a l'ensemble du texte lors de la redaction.
+
+`lib/valider-orthographe.js` (`validerAccents`) refuse desormais tout texte contenant un mot
+d'une **liste fermee** de mots qui portent TOUJOURS un accent en francais standard (ete/été,
+deja/déjà, meme/même, delai/délai, reponse/réponse, etc. -- liste complete dans le fichier).
+Heuristique volontairement imparfaite : les mots ambigus selon le contexte grammatical
+("a"/"à", "ou"/"où", "pilote"/"piloté", "communique"/"communiqué") sont EXCLUS pour eviter des
+faux positifs sur du texte deja correct -- sur l'incident reel, la liste fermee attrape 53 des
+68 occurrences reelles (diapos : 26/34, texte du post : 27/34), le reste exige un jugement
+humain. Appele depuis `validerDiapos` (chaque diapo) et `validerEtConvertirPost` (texte final du
+post) -- refus, jamais un avertissement, comme le reste des garde-fous. `test/valider-orthographe.test.js`
+verifie le mecanisme et confirme le nombre reel d'occurrences sur le carrousel deja publie (sans
+le corriger -- ce fichier reste en l'etat, decision de republication a prendre par Julien).
+
+### D. Cinq regles d'usage (section 2 du brief) -- etat au 14/09/2026
 
 1. **Phrase de lancement** : faite, voir en tete de ce fichier et dans le README du paquet.
 2. **Point de situation en 3 lignes** : fait, `node etat.js [compte]` (voir en tete de ce
