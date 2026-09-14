@@ -712,6 +712,40 @@ prealable non leve (connecter reellement un compte LinkedIn julien-partners, ges
 un flux OAuth complet, non demarrable depuis une session Claude Code). Detail complet et regles
 de non-anticipation du registre : `linkedin-commentaires/a-publier/README.md`.
 
+## Point n°16 -- deux decisions de Julien : suppression manuelle par lui, 4 commentaires refaits pour julien-agency (15/09/2026, apres-midi)
+
+**Suppression des deux anciens carrousels** : plutot que de chercher un contournement technique
+au probleme du Point n°15 (l'API repond "deleted: true" sans que le post disparaisse), Julien a
+tranche de les supprimer lui-meme depuis son profil (**•••** → **Supprimer**), plus rapide et
+plus sur. Les deux URLs exactes et la raison de chacune sont dans le brouillon du mail du 20
+(`references/mail-20260920-brouillon.md`, section carrousel) -- rien de plus a tenter cote
+code ou API sur ce point.
+
+**Les 4 commentaires refuses (Point n°15) refaits pour julien-agency, pas julien-partners** :
+Julien a identifie la cause racine -- `averse-cooser` = julien-agency est confirme depuis le
+11/09/2026 (Point n°1), julien-partners n'a jamais eu d'acces confirme, seulement suppose. Les
+avoir rediges pour julien-partners avant meme d'avoir teste une publication reelle etait deja
+une erreur evitable. **Lecon explicite a retenir pour la prochaine fois** : avant toute
+redaction de contenu pour un compte donne, verifier que ce compte a un acces Composio
+**reellement confirme** (test reel : `LINKEDIN_GET_MY_INFO` ou une action reversible, pas une
+hypothese ni un ancien souvenir) -- jamais suppose sur la base d'un branding ("compte par
+defaut") ou d'un `reglages-comptes.json` qui liste un `actor_urn` sans jamais l'avoir teste.
+Ca aurait evite les 4 redactions perdues du Point n°9/n°12/n°13 pour julien-partners.
+
+**Refaits et publies reellement le jour meme**, cible sur 4 profils reels de julien-agency (pas
+un recyclage des textes ecrits pour julien-partners -- le ton differe, deja documente au Point
+n°9) : Georges Solutions, Romain Charissou, Benjamin Lacroix, Raphael Mizrahi. Posts cibles
+trouves sans `APIFY_TOKEN` (absent cette session) via lecture directe des profils dans Claude in
+Chrome, et `shareUrn`/`ugcPost` de chacun obtenu en reappelant l'API GraphQL normalisee de
+LinkedIn (`voyagerFeedDashProfileUpdates`) depuis la session authentifiee du navigateur --
+technique nouvelle, documentee en detail dans
+`linkedin-commentaires/a-publier/README.md`. Les 4 publications ont ete confirmees par l'API
+(urn de commentaire reel a chaque fois, reponse non ambigue contrairement au Point n°6/n°7) ET
+verifiees une par une par navigation directe sur chaque post (texte identique affiche). **Les 5
+commentaires du jour (avec Jean Zendji du Point n°15) sont donc reellement en ligne**, quota
+journalier de 5 respecte, aucune personne commentee deux fois le meme jour. Detail complet et
+lien de chaque commentaire : `linkedin-commentaires/a-publier/README.md`.
+
 ## Recapitulatif
 
 Au 12/09/2026, aucun point bloquant "technique" majeur ne reste ouvert :

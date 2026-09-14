@@ -1,0 +1,46 @@
+[
+  {
+    "compte": "julien-agency",
+    "postId": "7502065436709208064",
+    "auteurCible": "Georges Solutions",
+    "urlPost": "https://www.linkedin.com/feed/update/urn:li:activity:7502065436709208064/",
+    "shareUrn": "urn:li:share:7502065435425624065",
+    "fraicheurHeures": 168,
+    "genre": "vraie_question",
+    "texte": "Le point qui me semble le plus dur à industrialiser, ce n'est pas la relance automatique, c'est la qualification. Comment votre système distingue-t-il un prospect tiède d'un prospect prêt à signer avant de déclencher la relance, et sur quels signaux se base-t-il pour éviter de relancer au mauvais moment ?",
+    "commentUrn": "urn:li:comment:(urn:li:activity:7502065436709208064,7505353694805278720)"
+  },
+  {
+    "compte": "julien-agency",
+    "postId": "7485756946306801664",
+    "auteurCible": "Romain Charissou",
+    "urlPost": "https://www.linkedin.com/feed/update/urn:li:activity:7485756946306801664/",
+    "shareUrn": "urn:li:ugcPost:7485756945753153537",
+    "fraicheurHeures": 720,
+    "genre": "vraie_question",
+    "texte": "Est-ce que ce genre de bascule vous oblige à revoir une partie du contenu de vos formations Excel et IA en cours d'année, ou c'est plutôt un ajustement ponctuel sur une slide ? Et pour les clients qui utilisaient l'argument \"c'est pas encore disponible en France\" pour repousser un projet IA, comment relancez-vous la conversation maintenant que l'excuse a disparu ?",
+    "commentUrn": "urn:li:comment:(urn:li:ugcPost:7485756945753153537,7505353826015707136)"
+  },
+  {
+    "compte": "julien-agency",
+    "postId": "7475427556272472064",
+    "auteurCible": "Benjamin Lacroix",
+    "urlPost": "https://www.linkedin.com/feed/update/urn:li:activity:7475427556272472064/",
+    "shareUrn": "urn:li:share:7475233744883286017",
+    "fraicheurHeures": 1440,
+    "genre": "desaccord_argumente",
+    "texte": "Le chiffrage en semaines de développement et en euros d'infrastructure masque à mon avis la vraie variable : qui maintient l'outil dans six mois, quand la responsable d'agence change de poste ou que le prestataire n'est plus disponible ? Pour une entreprise de 25 salariés, un outil sur mesure sans plan de transfert de compétence redevient souvent un nouveau Google Sheet, juste plus coûteux à faire évoluer. La vraie économie n'est pas dans le développement initial, elle est dans la capacité de l'entreprise à faire vivre l'outil seule après coup.",
+    "commentUrn": "urn:li:comment:(urn:li:activity:7475427556272472064,7505353923155759104)"
+  },
+  {
+    "compte": "julien-agency",
+    "postId": "7478126544679374848",
+    "auteurCible": "Raphael Mizrahi",
+    "urlPost": "https://www.linkedin.com/feed/update/urn:li:activity:7478126544679374848/",
+    "shareUrn": "urn:li:share:7478126543928557568",
+    "fraicheurHeures": 1440,
+    "genre": "vraie_question",
+    "texte": "Vous dites avoir été architecte de systèmes de support automatisés qui fonctionnent bien : concrètement, qu'est-ce qui différencie un agent IA qui comprend vraiment le problème d'un agent qui accuse juste réception poliment ? Et à partir de combien d'échanges ratés considérez-vous qu'il faut basculer sur un humain plutôt que de laisser l'IA insister ?",
+    "commentUrn": "urn:li:comment:(urn:li:activity:7478126544679374848,7505354114898419712)"
+  }
+]

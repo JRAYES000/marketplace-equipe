@@ -169,9 +169,14 @@ publication reelle tentee sur les 5 le meme jour (canal Composio/MCP retrouve, v
 `linkedin-carrousel/SKILL.md`) : **1/5 reussi** (Jean Zendji, julien-agency, confirme API et
 navigateur reel), **4/5 refuses proprement** (`403 Forbidden: Viewer/Actor is unauthorized
 agent`) -- l'identite julien-partners n'est toujours pas reellement connectee cote Composio
-(confirme, pas suppose). Les 5 passent reellement `validerCommentaire` (forme, genre,
-experience non sourcee, accents) -- le blocage restant est un prealable d'acces, pas un
-probleme de contenu. Voir `a-publier/README.md` pour le detail complet et le statut de chacun.
+(confirme, pas suppose). **Lecon retenue (Point n°16, `etat-linkedin-20260912.md`)** : les 4
+avaient ete rediges pour julien-partners sur une hypothese jamais testee, alors que
+`averse-cooser` = julien-agency est confirme depuis le 11/09 -- toujours verifier l'acces
+Composio d'un compte par un appel reel avant de rediger du contenu pour lui, jamais le
+supposer. **Meme jour, apres-midi** : les 4 refuses ont ete reecrits pour 4 profils reels de
+julien-agency (Georges Solutions, Romain Charissou, Benjamin Lacroix, Raphael Mizrahi) et
+publies reellement, confirmes API + navigateur pour chacun -- **les 5 commentaires du jour sont
+en ligne**. Voir `a-publier/README.md` pour le detail complet et le statut de chacun.
 
 ### Sortie reelle des 5 cas de refus demandes
 

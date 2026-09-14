@@ -17,7 +17,7 @@ Bonjour,
 Voici le point sur le chantier des trois skills LinkedIn (carrousel, commentaires, veille
 virale), avec les liens vers tout ce qui est prêt.
 
-## Carrousel — republié, mais trois versions restent visibles
+## Carrousel — republié, deux anciennes versions à supprimer toi-même
 
 Le premier carrousel publié le 14/09 contenait un vrai défaut : le texte (diapos et post) était
 en ligne sans accents — environ 68 mots sur 484 concernés (près d'un mot sur sept), dont 9
@@ -28,52 +28,64 @@ C'est fait : [voir le nouveau
 carrousel](https://www.linkedin.com/posts/julien-rayes_pourquoi-vos-meilleurs-candidats-disparaissent-ils-activity-7505338063762534401-bkxp)
 — confirmé en ligne, 10 pages, accents corrects vérifiés diapo par diapo.
 
-**Point non résolu, à trancher** : la suppression des deux anciennes versions (12/09 à 5 diapos,
-14/09 à accents fautifs) a été tentée deux fois. Dans les deux cas, l'outil de suppression a
-répondu "supprimé" alors que les deux posts sont restés parfaitement visibles et lisibles
-(vérifié directement dans le navigateur, pas un problème de cache). **Trois carrousels sont donc
-actuellement visibles sur le profil.** Cause non identifiée à ce stade — je n'ai pas voulu
-insister sans comprendre pourquoi, pour éviter d'aggraver la situation. `[A COMPLETER]` décision :
-retenter la suppression autrement, ou assumer les trois versions comme historique visible en
-attendant.
+**La suppression automatique des deux anciennes versions a échoué** : l'outil a répondu
+"supprimé" deux fois de suite pour chacun des deux posts, mais les deux sont restés parfaitement
+visibles et lisibles (vérifié directement dans le navigateur, pas un problème de cache). Plutôt
+que de chercher un contournement technique, le plus rapide et le plus sûr est que tu les
+supprimes toi-même depuis ton profil (**•••** sur le post → **Supprimer**) :
 
-## Commentaires — un publié, quatre bloqués sur un accès manquant
+- [Carrousel du 12/09](https://www.linkedin.com/posts/julien-rayes_carrouselpdf-activity-7505146405649559552-m6yM)
+  — 5 diapos seulement, non conforme au brief (10 diapos attendues), nom de fichier resté
+  "carrouselpdf" au lieu d'un titre lisible.
+- [Carrousel du 14/09](https://www.linkedin.com/posts/julien-rayes_pourquoi-vos-meilleurs-candidats-disparaissent-ils-activity-7505170085091840000-6DCd)
+  — texte publié sans accents (le défaut corrigé ci-dessus), remplacé par la version du 15/09.
 
-Cinq commentaires réels ont été rédigés, validés par le code, et **relus et validés par moi** :
-[voir le détail des cinq
-commentaires](https://github.com/JRAYES000/marketplace-equipe/blob/main/plugins/skills-equipe/skills/linkedin-commentaires/a-publier/README.md)
-(texte intégral, compte, post ciblé, genre, pour chacun).
+`[A COMPLETER]` une fois les deux supprimés par toi : confirmation que le profil n'affiche plus
+que la version du 15/09.
 
-Une fois mon GO donné, la publication a été tentée sur les cinq : [le commentaire chez Jean
+## Commentaires — cinq publiés, tous sur le compte Claude Agency
+
+Les quatre premiers commentaires avaient été écrits pour le compte Claude Partners, sur
+l'hypothèse (non vérifiée) que ce compte était connecté à notre outil de publication. Il ne
+l'est pas — les quatre ont été refusés proprement par LinkedIn (compte non autorisé), sans rien
+publier de cassé. Plutôt que d'attendre une connexion externe, les quatre ont été **réécrits
+pour quatre profils réels de la liste Claude Agency** (le seul compte réellement connecté à ce
+jour) et publiés :
+
+- [Georges Solutions](https://www.linkedin.com/feed/update/urn:li:activity:7502065436709208064/)
+  — question réelle sur la qualification des prospects avant relance automatique.
+- [Romain Charissou](https://www.linkedin.com/feed/update/urn:li:activity:7485756946306801664/)
+  — question réelle sur l'impact de l'arrivée des IA Overviews de Google en France sur ses
+  formations.
+- [Benjamin Lacroix](https://www.linkedin.com/feed/update/urn:li:activity:7475427556272472064/)
+  — désaccord argumenté sur le vrai coût (maintenance, pas développement) d'un outil sur mesure
+  pour une PME.
+- [Raphael Mizrahi](https://www.linkedin.com/feed/update/urn:li:activity:7478126544679374848/)
+  — question réelle sur ce qui distingue un bon support automatisé d'un mauvais.
+
+Avec [le commentaire chez Jean
 Zendji](https://www.linkedin.com/posts/jean-zendji-zenfia_arr%C3%AAtez-de-vouloir-r%C3%A9pondre-%C3%A0-tous-vos-avis-activity-7504102064814268416-FPQV)
-est réellement en ligne (compte Claude Agency). **Les quatre autres (compte Claude Partners)
-ont été refusés proprement par LinkedIn** — ce compte n'est en réalité pas connecté à notre
-outil de publication, malgré ce qu'on pensait. Rien n'est cassé côté contenu : le jour où ce
-compte sera réellement connecté (geste ponctuel de connexion, pas un problème de code), les
-quatre partent immédiatement, ils sont déjà écrits et validés.
+publié plus tôt dans la journée, **les cinq commentaires du jour sont réellement en ligne**,
+tous sur des personnes distinctes (aucune ne recommente deux fois le même jour). Détail complet
+: [voir le
+README](https://github.com/JRAYES000/marketplace-equipe/blob/main/plugins/skills-equipe/skills/linkedin-commentaires/a-publier/README.md).
 
 **Déviation assumée sur la fraîcheur** : le brief demande de commenter des posts de moins de
-4h. Sur les 16 comptes validés, un seul passage réel a trouvé 2 posts frais (0.9h et 1.2h) ;
-les 3 autres commentaires s'appuient sur les posts les plus récents disponibles, hors fenêtre
-(71.4h, 72.2h, 74.5h), faute de matière plus fraîche au moment du passage. Pas caché : 2 sur 5
-respectent la règle des 4h, 3 sur 5 non.
+4h. Aucun des cinq comptes Claude Agency retenus aujourd'hui n'avait publié dans cette fenêtre
+au moment du passage — les posts ciblés vont de 72h (Jean Zendji) à environ 2 mois (Benjamin
+Lacroix, Raphael Mizrahi), le plus récent restant celui de Georges Solutions (une semaine). Pas
+caché : **0 sur 5 respectent la règle des 4h** aujourd'hui, faute d'activité assez récente parmi
+les 8 comptes Claude Agency validés. Chaque commentaire reste ancré dans le contenu réel et
+récent du post, ce n'est pas la fraîcheur qui a été sacrifiée sur le fond, seulement le délai.
 
 **Déviation assumée sur les genres** : le brief prévoit quatre genres de commentaire, dont
-"histoire vécue". Un premier brouillon dans ce genre inventait une expérience professionnelle
-qui n'a jamais eu lieu — repéré avant publication, corrigé en réécrivant les commentaires
-concernés dans un genre qui ne demande aucune expérience personnelle. Répartition finale sur
-les cinq : deux questions réelles, une information chiffrée, deux désaccords argumentés sur le
-fond — trois genres sur quatre ; "histoire vécue" reste en réserve pour le jour où une anecdote
-réelle sera disponible, plutôt que d'en forcer une.
-
-**Une correction faite en relecture** : un chiffre cité (adoption de l'IA chez les
-développeurs) déformait sa source — la formulation initiale laissait entendre un usage
-quotidien alors que le chiffre mesurait l'adoption/l'intention d'usage. Remplacé par le chiffre
-de la même étude qui mesure réellement l'usage quotidien, pour que le commentaire dise
-exactement ce que la source dit.
-
-`[A COMPLETER]` **Liens des quatre commentaires restants** — dès que le compte Claude Partners
-est connecté (voir plus bas).
+"histoire vécue". Aucun des cinq ne l'utilise aujourd'hui — "histoire vécue" reste en réserve
+pour le jour où une anecdote réelle sera disponible, plutôt que d'en inventer une (un premier
+brouillon dans ce genre, écarté le 14/09, avait justement inventé une expérience professionnelle
+qui n'a jamais eu lieu). Répartition finale sur les cinq : trois questions réelles
+(Georges Solutions, Romain Charissou, Raphael Mizrahi), deux désaccords argumentés sur le fond
+(Jean Zendji, Benjamin Lacroix) — deux genres sur quatre, faute de matière pour sourcer un vrai
+chiffre ou une vraie anecdote sur ce lot précis de comptes et de posts.
 
 ## Veille — trois posts adaptés, prêts à publier
 
@@ -90,14 +102,17 @@ Stratégies — pages ouvertes et lues, pas de chiffre de mémoire).
 `[A COMPLETER]` **Lien(s) des posts réellement publiés sur LinkedIn** — en attente du GO. Règle
 à respecter au moment de publier : trois maximum, jamais deux le même jour.
 
-## Compte Claude Partners — à connecter réellement
+## Compte Claude Partners — à connecter réellement pour l'utiliser un jour
 
-Le carrousel et le commentaire ci-dessus sont publiés sur le compte Claude Agency, seul compte
-réellement connecté à notre outil de publication à ce jour. Le compte Claude Partners ne l'est
-pas, malgré ce qu'on pensait jusqu'ici — quatre commentaires prêts (voir ci-dessus) et une
-partie du travail de veille en dépendent. Il faut une connexion réelle (autorisation LinkedIn
-complète, un geste ponctuel) plutôt qu'une simple clé — je ne peux pas la démarrer moi-même
-depuis mon environnement de travail actuel. `[A COMPLETER]` qui s'en charge et quand.
+Tout ce qui est publié à ce jour (carrousel, cinq commentaires) l'est sur le compte Claude
+Agency, seul compte réellement connecté à notre outil de publication. Le compte Claude Partners
+ne l'est pas, malgré ce qu'on pensait jusqu'ici (voir plus haut, les quatre premiers commentaires
+avaient été écrits pour ce compte avant qu'on s'en aperçoive). Ce n'est plus bloquant pour le
+livrable du 20 — le contenu a été redirigé sur Claude Agency — mais ça le reste pour utiliser
+Claude Partners un jour (commentaires ou veille sur ce compte). Il faut une connexion réelle
+(autorisation LinkedIn complète, un geste ponctuel) plutôt qu'une simple clé — je ne peux pas la
+démarrer moi-même depuis mon environnement de travail actuel. `[A COMPLETER]` qui s'en charge et
+quand, si Claude Partners doit servir plus tard.
 
 ## Notion — bloqué sur le partage de la page parente
 
@@ -126,10 +141,11 @@ Trois phrases suffisent, dans Claude Code :
 ## Arbitrage
 
 Aucune des trois skills n'a été sacrifiée : les trois ont un livrable réel et publié à ce jour
-(carrousel en ligne, un commentaire en ligne, trois posts de veille prêts). Les points encore
+(carrousel en ligne, cinq commentaires en ligne, trois posts de veille prêts). Les points encore
 ouverts ne dépendent plus du travail sur les skills elles-mêmes, mais de trois gestes externes,
-tous identifiés précisément : connecter réellement le compte Claude Partners, partager la page
-Notion, et trancher sur le sort des deux anciennes versions du carrousel.
+tous identifiés précisément : supprimer toi-même les deux anciennes versions du carrousel,
+partager la page Notion, et décider si le compte Claude Partners doit être connecté pour un
+usage futur.
 
 N'hésite pas à revenir vers moi si tu veux qu'on creuse un point en particulier.
 
