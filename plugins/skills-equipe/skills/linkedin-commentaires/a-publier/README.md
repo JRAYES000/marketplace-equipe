@@ -48,13 +48,13 @@ passage reel donne :
 
 ## Les 5 commentaires -- etat final
 
-| # | Compte | Auteur cible | Fraicheur | Genre final | Resultat `validerCommentaire` |
-| --- | --- | --- | --- | --- | --- |
-| 1 | julien-partners | Virginie Caurraze | 0.9h (frais) | vraie_question | **ACCEPTE** (inchange depuis le 14/09) |
-| 2 | julien-partners | Theophile Burnet | 1.2h (frais) | information_chiffree | **ACCEPTE** -- reecrit : chiffre reel sourcable (Stack Overflow Developer Survey 2025), plus de claim client |
-| 3 | julien-partners | Florent Pontiac | 71.4h (hors fenetre) | vraie_question | **ACCEPTE** -- reecrit : question reelle sur le site livre, plus de "client sportif" invente |
-| 4 | julien-partners | Valentin Muller | 74.5h (hors fenetre) | desaccord_argumente | **ACCEPTE** -- reecrit : argument sur le fond, plus de "on a livre" |
-| 5 | julien-agency | Jean Zendji | 72.2h (hors fenetre) | vraie_question | **ACCEPTE** -- reecrit : question reelle sur le systeme de tri, plus de "client hotelier" invente (l'incident signale par Julien) |
+| # | Compte | Auteur cible | Lien du post | Fraicheur | Genre final | Resultat `validerCommentaire` |
+| --- | --- | --- | --- | --- | --- | --- |
+| 1 | julien-partners | Virginie Caurraze | [lien](https://www.linkedin.com/posts/virginie-caurraze_autoentrepreneur-risquesprofessionnels-accueilstagiaire-activity-7505178899685744640-z2Yd) | 0.9h (frais) | vraie_question | **ACCEPTE** (inchange depuis le 14/09) |
+| 2 | julien-partners | Theophile Burnet | [lien](https://www.linkedin.com/posts/th%C3%A9ophile-burnet_voici-les-40-raccourcis-claude-code-la-plupart-activity-7505173186687299584-Fsu-) | 1.2h (frais) | information_chiffree | **ACCEPTE** -- reecrit : chiffre reel sourcable (Stack Overflow Developer Survey 2025), plus de claim client |
+| 3 | julien-partners | Florent Pontiac | [lien](https://www.linkedin.com/posts/florent-pontiac_carcassonne-xiii-billetterie-boutique-activity-7504114241730408448-SNx6) | 71.4h (hors fenetre) | vraie_question | **ACCEPTE** -- reecrit : question reelle sur le site livre, plus de "client sportif" invente |
+| 4 | julien-partners | Valentin Muller | [lien](https://www.linkedin.com/posts/valentin--muller_je-code-100-avec-lia-depuis-plus-dun-an-activity-7504067127067205632-NOpA) | 74.5h (hors fenetre) | desaccord_argumente | **ACCEPTE** -- reecrit : argument sur le fond, plus de "on a livre" |
+| 5 | julien-agency | Jean Zendji | [lien](https://www.linkedin.com/posts/jean-zendji-zenfia_arr%C3%AAtez-de-vouloir-r%C3%A9pondre-%C3%A0-tous-vos-avis-activity-7504102064814268416-FPQV) | 72.2h (hors fenetre) | vraie_question | **ACCEPTE** -- reecrit : question reelle sur le systeme de tri, plus de "client hotelier" invente (l'incident signale par Julien) |
 
 Texte complet de chaque commentaire dans `commentaires-2026-09-14.json` (champ `texte`).
 
