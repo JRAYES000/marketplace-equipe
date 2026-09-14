@@ -160,9 +160,22 @@ inviter un e-mail externe sur une page (confirme par recherche) -- le partage en
 avec `contact@claudeagency.fr` devra se faire a la main, une fois, via le bouton "Share" de
 l'interface. Le script imprime l'URL exacte de la page pour ce geste.
 
-**Non execute a ce jour** : aucun appel reel n'a ete fait contre l'API Notion, faute de jeton
-disponible dans cette session -- ce code n'a donc pas encore ete verifie de bout en bout contre
-la vraie API, seule sa forme est conforme a la documentation officielle consultee le 14/09/2026.
+**Mise a jour du 14/09/2026, jeton recu -- nouveau blocage reel, different de l'absence de
+jeton** : `NOTION_TOKEN` fonctionne (`POST /v1/search` repond 200), mais **aucune page
+ordinaire n'est partagee avec cette integration** -- seulement 3 bases de donnees existantes
+(prospects/CRM, avec des donnees personnelles reelles de tiers : e-mails, telephones -- jamais
+copiees ni referencees ici au-dela de ce simple constat). Une integration Notion "interne" ne
+voit que ce qui lui a ete explicitement partage via le bouton "Share" d'une page -- **`POST
+/v1/databases` exige un `parent.page_id` valide, et aucun n'est disponible dans ce qui est
+partage aujourd'hui.** Je n'ai ni devine un ID de page, ni rattache les nouvelles bases a une
+des bases de prospects existantes (aucun rapport avec ce travail, et ce serait polluer les
+donnees de quelqu'un d'autre).
+
+**A faire par Julien ou Nomena, dans Notion** : ouvrir (ou creer) une page destinee a ce
+chantier, cliquer "Share" en haut a droite, ajouter l'integration Notion utilisee ici par son
+nom, puis donner l'ID de cette page (visible dans son URL) pour `NOTION_PARENT_PAGE_ID`. Des
+que fait, `creer-page-notion.js` peut tourner tel quel dans les deux skills -- rien d'autre a
+changer cote code.
 
 ## Exemple reel attendu le 20/09 -- BLOQUE sur un point technique different, pas contourne
 
