@@ -17,27 +17,40 @@ Bonjour,
 Voici le point sur le chantier des trois skills LinkedIn (carrousel, commentaires, veille
 virale), avec les liens vers tout ce qui est prêt.
 
-## Carrousel — republication en cours
+## Carrousel — republié, mais trois versions restent visibles
 
 Le premier carrousel publié le 14/09 contenait un vrai défaut : le texte (diapos et post) était
 en ligne sans accents — environ 68 mots sur 484 concernés (près d'un mot sur sept), dont 9
 directement dans les titres, en gros caractères. Visible au premier coup d'œil, pas un détail.
 **Décision prise : republier proprement plutôt que laisser en l'état.**
 
-Le contenu est corrigé et le PDF déjà régénéré via le pipeline réel (10 diapos, vérifiées une
-par une : accents corrects, mise en page intacte). Reste la publication effective et le retrait
-des deux anciens posts (celui du 14/09 à accents fautifs, et celui du 12/09 — 5 diapos, jamais
-conforme au brief — qui n'ont pas leur place sur le profil).
+C'est fait : [voir le nouveau
+carrousel](https://www.linkedin.com/posts/julien-rayes_pourquoi-vos-meilleurs-candidats-disparaissent-ils-activity-7505338063762534401-bkxp)
+— confirmé en ligne, 10 pages, accents corrects vérifiés diapo par diapo.
 
-`[A COMPLETER]` **Lien du nouveau carrousel** — publication en attente d'un canal technique
-(voir note ci-dessous).
+**Point non résolu, à trancher** : la suppression des deux anciennes versions (12/09 à 5 diapos,
+14/09 à accents fautifs) a été tentée deux fois. Dans les deux cas, l'outil de suppression a
+répondu "supprimé" alors que les deux posts sont restés parfaitement visibles et lisibles
+(vérifié directement dans le navigateur, pas un problème de cache). **Trois carrousels sont donc
+actuellement visibles sur le profil.** Cause non identifiée à ce stade — je n'ai pas voulu
+insister sans comprendre pourquoi, pour éviter d'aggraver la situation. `[A COMPLETER]` décision :
+retenter la suppression autrement, ou assumer les trois versions comme historique visible en
+attendant.
 
-## Commentaires — cinq relus et validés, GO donné
+## Commentaires — un publié, quatre bloqués sur un accès manquant
 
-Cinq commentaires réels sont rédigés, validés par le code, et **relus et validés par moi** :
+Cinq commentaires réels ont été rédigés, validés par le code, et **relus et validés par moi** :
 [voir le détail des cinq
 commentaires](https://github.com/JRAYES000/marketplace-equipe/blob/main/plugins/skills-equipe/skills/linkedin-commentaires/a-publier/README.md)
 (texte intégral, compte, post ciblé, genre, pour chacun).
+
+Une fois mon GO donné, la publication a été tentée sur les cinq : [le commentaire chez Jean
+Zendji](https://www.linkedin.com/posts/jean-zendji-zenfia_arr%C3%AAtez-de-vouloir-r%C3%A9pondre-%C3%A0-tous-vos-avis-activity-7504102064814268416-FPQV)
+est réellement en ligne (compte Claude Agency). **Les quatre autres (compte Claude Partners)
+ont été refusés proprement par LinkedIn** — ce compte n'est en réalité pas connecté à notre
+outil de publication, malgré ce qu'on pensait. Rien n'est cassé côté contenu : le jour où ce
+compte sera réellement connecté (geste ponctuel de connexion, pas un problème de code), les
+quatre partent immédiatement, ils sont déjà écrits et validés.
 
 **Déviation assumée sur la fraîcheur** : le brief demande de commenter des posts de moins de
 4h. Sur les 16 comptes validés, un seul passage réel a trouvé 2 posts frais (0.9h et 1.2h) ;
@@ -59,8 +72,8 @@ quotidien alors que le chiffre mesurait l'adoption/l'intention d'usage. Remplac�
 de la même étude qui mesure réellement l'usage quotidien, pour que le commentaire dise
 exactement ce que la source dit.
 
-`[A COMPLETER]` **Lien(s) des commentaires réellement publiés sur LinkedIn** — GO donné,
-publication en attente d'un canal technique (voir note ci-dessous).
+`[A COMPLETER]` **Liens des quatre commentaires restants** — dès que le compte Claude Partners
+est connecté (voir plus bas).
 
 ## Veille — trois posts adaptés, prêts à publier
 
@@ -77,13 +90,14 @@ Stratégies — pages ouvertes et lues, pas de chiffre de mémoire).
 `[A COMPLETER]` **Lien(s) des posts réellement publiés sur LinkedIn** — en attente du GO. Règle
 à respecter au moment de publier : trois maximum, jamais deux le même jour.
 
-## Canal de publication — en cours de rétablissement
+## Compte Claude Partners — à connecter réellement
 
-Le carrousel corrigé et les cinq commentaires validés n'ont pas encore été publiés
-techniquement : l'accès qui permet de publier réellement sur LinkedIn (côté Composio) n'est
-plus actif dans la session de travail actuelle. Nomena doit reconnecter l'accès (même méthode
-que le 14/09) avant que ces publications puissent se faire. Rien d'autre ne bloque — le contenu
-est prêt des deux côtés.
+Le carrousel et le commentaire ci-dessus sont publiés sur le compte Claude Agency, seul compte
+réellement connecté à notre outil de publication à ce jour. Le compte Claude Partners ne l'est
+pas, malgré ce qu'on pensait jusqu'ici — quatre commentaires prêts (voir ci-dessus) et une
+partie du travail de veille en dépendent. Il faut une connexion réelle (autorisation LinkedIn
+complète, un geste ponctuel) plutôt qu'une simple clé — je ne peux pas la démarrer moi-même
+depuis mon environnement de travail actuel. `[A COMPLETER]` qui s'en charge et quand.
 
 ## Notion — bloqué sur le partage de la page parente
 
@@ -111,11 +125,11 @@ Trois phrases suffisent, dans Claude Code :
 
 ## Arbitrage
 
-Aucune des trois skills n'a été sacrifiée : les trois ont un livrable réel à ce jour (carrousel
-corrigé et prêt à republier, cinq commentaires relus et validés, trois posts de veille adaptés
-sur données réelles). Les points encore ouverts ne dépendent plus du travail sur les skills
-elles-mêmes, mais de deux accès externes : le canal de publication LinkedIn (Nomena) et le
-partage de la page Notion (Nomena également).
+Aucune des trois skills n'a été sacrifiée : les trois ont un livrable réel et publié à ce jour
+(carrousel en ligne, un commentaire en ligne, trois posts de veille prêts). Les points encore
+ouverts ne dépendent plus du travail sur les skills elles-mêmes, mais de trois gestes externes,
+tous identifiés précisément : connecter réellement le compte Claude Partners, partager la page
+Notion, et trancher sur le sort des deux anciennes versions du carrousel.
 
 N'hésite pas à revenir vers moi si tu veux qu'on creuse un point en particulier.
 

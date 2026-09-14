@@ -1,4 +1,4 @@
-# Cinq commentaires reels -- 5/5 valides par le code ET relus par Julien, GO donne (15/09/2026)
+# Cinq commentaires reels -- 1/5 reellement publie, 4/5 bloques sur l'identite julien-partners (15/09/2026)
 
 **Historique du 14/09/2026** : Julien a repere qu'un commentaire ("client hotelier") inventait
 une mission jamais realisee -- publie sous son identite reelle, qu'il ne relit pas, ca
@@ -48,9 +48,24 @@ sourcee, accents) -- verifie contre le code, pas suppose.
 Produits en faisant reellement tourner le pipeline (`trouverPosts` reel sur les 16 comptes
 valides par Julien, `trierPosts`, `filtrerPostsFrais`, redaction manuelle par la session Claude
 comme prevu au point 3 du SKILL.md) -- voir `commentaires-2026-09-14.json` pour le detail complet
-(post cible, `shareUrn`, genre, texte). **Aucun appel a `publierCommentaire` n'a ete fait a ce
-jour** -- GO obtenu, mais aucun canal Composio/MCP ni extension Chrome disponible dans la
-session du 15/09/2026 pour executer l'appel reel (voir "Pret a publier" plus bas).
+(post cible, `shareUrn`, genre, texte).
+
+**15/09/2026, publication reelle tentee sur les 5 -- resultat reel, pas suppose** : le canal
+Composio/MCP a ete retrouve (voir `linkedin-carrousel/SKILL.md`, section republication du
+15/09, pour la methode precise). `LINKEDIN_CREATE_COMMENT_ON_POST` appele reellement sur les 5 :
+
+- **Jean Zendji (julien-agency) : PUBLIE REELLEMENT**, confirme par l'API
+  (`urn:li:comment:(urn:li:activity:7504102064814268416,7505342737219526656)`) ET par
+  navigation reelle sur le post cible (commentaire visible, "2m", texte integral identique).
+  Enregistre dans `data/registre-commentaires.json` apres cette confirmation, pas avant.
+- **Virginie Caurraze, Theophile Burnet, Florent Pontiac, Valentin Muller (julien-partners) :
+  REFUSES, proprement** -- `403 Forbidden: Viewer/Actor is unauthorized agent` pour les 4,
+  echec net et identique a chaque fois. Confirme ce qui etait deja documente comme "non
+  confirme" depuis le 12/09 (`references/etat-linkedin-20260912.md`, Point n°1) : la connexion
+  Composio reellement active (`averse-cooser`) correspond a julien-agency
+  (`urn:li:person:aFqu-W7ClW`), **pas** a julien-partners
+  (`urn:li:person:ZvLHybJZhj`) -- aucun compte julien-partners n'est reellement connecte a ce
+  jour. Rien de publie pour ces 4, echec propre (403 net), pas un etat ambigu.
 
 ## Deviation assumee -- fraicheur, a ecrire dans le mail du 20
 
@@ -82,31 +97,34 @@ passage reel donne :
 
 Texte complet de chaque commentaire dans `commentaires-2026-09-14.json` (champ `texte`).
 
-## Pret a publier -- GO obtenu, canal technique manquant
+## Etat final -- 1/5 publie, 4/5 bloques sur une identite non connectee
 
-**GO de Julien acquis d'avance pour les cinq** (15/09/2026, une fois les deux corrections
-ci-dessus traitees) -- plus besoin de redemander avant de publier. Rien n'a ete publie a ce
-jour : cette session n'a ni acces Composio/MCP ni extension Claude in Chrome connectee (meme
-blocage que pour le carrousel, voir `linkedin-carrousel/a-publier/README.md`).
+| # | Auteur cible | Compte | Resultat reel |
+| --- | --- | --- | --- |
+| 1 | Virginie Caurraze | julien-partners | **NON PUBLIE** -- 403 Forbidden (identite julien-partners non connectee) |
+| 2 | Theophile Burnet | julien-partners | **NON PUBLIE** -- meme cause |
+| 3 | Florent Pontiac | julien-partners | **NON PUBLIE** -- meme cause |
+| 4 | Valentin Muller | julien-partners | **NON PUBLIE** -- meme cause |
+| 5 | Jean Zendji | julien-agency | **PUBLIE REELLEMENT**, confirme API + navigateur |
 
-**A faire des que le canal est disponible**, un par un, dans le respect des regles suivantes :
-- **Jamais deux commentaires a la meme personne le meme jour** -- non applicable ici (5 auteurs
-  distincts), mais a verifier via `enregistrerCommentairePublie`/`validerQuotaJournalier` a
-  chaque prochain lancement de la skill.
-- **Enregistrer chaque publication reelle** immediatement apres succes, pas avant :
+**Ce qui reste a faire, et par qui** : connecter reellement un compte LinkedIn julien-partners
+cote Composio (Julien ou Nomena -- flux OAuth, non demarrable depuis une session Claude Code,
+bloque a raison par le classifieur auto-mode) avant de pouvoir publier les 4 commentaires
+restants. Le code et le GO de Julien n'attendent que ca -- rien d'autre a corriger cote texte
+ou garde-fous.
 
+Pour publier les 4 restants une fois l'identite connectee :
 ```js
 const { publierCommentaire } = require('../lib/publier-commentaire');
 const { enregistrerCommentairePublie } = require('../lib/registre');
 
-// Pour chaque commentaire de commentaires-2026-09-14.json, dans l'ordre :
 const resultat = await publierCommentaire({
-  actorUrn: '<selon le compte -- voir reglages-comptes.json>',
+  actorUrn: 'urn:li:person:ZvLHybJZhj', // julien-partners, une fois reellement connecte
   targetUrn: '<shareUrn>',
   message: '<texte>',
 });
-// Seulement si publierCommentaire reussit reellement :
-enregistrerCommentairePublie(compte, { date: new Date().toISOString().slice(0, 10), auteurCible, postId });
+// Seulement si publierCommentaire reussit reellement (pas un simple appel sans erreur) :
+enregistrerCommentairePublie('julien-partners', { date: new Date().toISOString().slice(0, 10), auteurCible, postId });
 ```
 
 Ne jamais appeler `enregistrerCommentairePublie` par anticipation -- le registre doit refleter

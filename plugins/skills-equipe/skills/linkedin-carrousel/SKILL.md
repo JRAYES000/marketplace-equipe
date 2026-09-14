@@ -328,6 +328,47 @@ Voir `references/audit-brief-20260914-v3.md` pour le detail complet, skill par s
 ce qui reste non conforme au brief integral en dehors de `linkedin-carrousel`
 (`linkedin-veille-virale`, `linkedin-commentaires`, obligations transverses).
 
+## Republication reelle du carrousel corrige -- 15/09/2026, methode d'acces enfin documentee precisement
+
+Le carrousel corrige (accents, voir plus haut) a ete **republie reellement** le 15/09/2026 :
+[urn:li:activity:7505338063762534401](https://www.linkedin.com/posts/julien-rayes_pourquoi-vos-meilleurs-candidats-disparaissent-ils-activity-7505338063762534401-bkxp)
+-- confirme en ligne via navigateur reel (Nomena) : **10 pages**, diapo 1 lisible, accents
+corrects verifies visuellement sur plusieurs diapos, URL confirmee par deux methodes
+independantes (attribut `data-urn` du DOM + "Copy link to post").
+
+**Methode d'acces reelle, precisee (les sessions precedentes documentaient le mauvais
+endroit)** : ce n'est PAS une cle API de projet PLATFORM (`dashboard.composio.dev`, `ak_...`,
+reservee aux admins d'organisation -- piste testee et ecartee a tort comme seule option le
+15/09 avant correction). La bonne cle vit cote **compte personnel Nomena**, surface **"FOR
+YOU"** de Composio (bouton "Switch" en haut a gauche de `connect.composio.dev` ou
+`dashboard.composio.dev` -- les deux domaines pointent vers la meme appli) -> Reglages du
+compte (bas de la barre laterale une fois en mode FOR YOU) -> **"Sessions & API Key"** ->
+cle `ck_...`, header `x-consumer-api-key`, creee le 11/09/2026. Endpoint MCP :
+`https://connect.composio.dev/mcp` (JSON-RPC 2.0 standard sur HTTP, `initialize` puis
+`tools/call`, `Mcp-Session-Id` renvoye a l'`initialize` et a repasser dans les appels
+suivants). `COMPOSIO_REMOTE_WORKBENCH` (sandbox Python persistant) fournit `proxy_execute`
+(appel direct a l'API LinkedIn) et a servi pour les 4 etapes du document (init upload, PUT des
+octets, verification du statut, creation du post) -- memes etapes que le 14/09.
+
+**Suppression des deux anciens posts : ECHEC, malgre un signal API positif -- pas declare
+"fait" a tort.** `LINKEDIN_DELETE_POST` (action native, format `post_urn` attendu :
+`urn:li:share:<id>`, PAS `urn:li:activity:<id>` -- rejete en 400 `UGC_VALIDATIONS_FAILED` sous
+ce dernier format, meme identifiant numerique reutilisable entre les deux formats) a repondu
+`{"deleted": true}` a **deux reprises**, sur les deux anciens posts (14/09 et 12/09). **Les
+deux sont pourtant restes visibles en ligne**, verifie par navigation directe sur leurs
+permalinks reels apres chaque tentative (contenu integral toujours affiche, document toujours
+consultable, le post du 12/09 affiche meme "1 comment - 1 repost"). Le signal `successful:
+true` de cette action n'est donc **pas fiable pour confirmer une suppression** sur ce compte --
+symetrique du probleme deja documente pour la publication (Point n°8 de
+`references/etat-linkedin-20260912.md`) : ecriture confirmee uniquement par lecture reelle,
+jamais par le code de retour de l'API. **Aucune tentative supplementaire relancee** (cause
+inconnue -- API Documents pas forcement geree comme un post standard par ce endpoint de
+suppression -- a investiguer avant de reessayer). **Consequence : trois carrousels restent
+visibles sur le profil a ce jour** (celui du 12/09 a 5 diapos non conforme, celui du 14/09 a
+accents fautifs, et le nouveau du 15/09 correct) -- decision de Julien a reprendre sur la suite
+(reessayer la suppression autrement, ou les laisser et l'assumer comme historique de
+versions).
+
 ## Limites connues
 
 - **(2026-09-14, corrige suite au brief du 10/09)** Le nom de fichier de sortie n'est plus
