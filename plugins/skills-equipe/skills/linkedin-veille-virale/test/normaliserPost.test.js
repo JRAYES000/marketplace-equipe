@@ -14,6 +14,7 @@ const BRUT_EXEMPLE = {
   author: {
     name: 'Exemple Auteur',
     linkedinUrl: 'https://www.linkedin.com/in/exemple-auteur',
+    publicIdentifier: 'exemple-auteur',
   },
   postedAt: {
     timestamp: 1789117351726,
@@ -21,15 +22,18 @@ const BRUT_EXEMPLE = {
     postedAgoShort: '3d',
   },
   shareUrn: 'urn:li:share:7504102064151674880',
-  engagement: { id: '7504102064814268416', likes: 3, comments: 2, shares: 0 },
+  engagement: { id: '7504102064814268416', likes: 3, comments: 2, shares: 1 },
 };
 
 test('normalise la forme reelle Apify vers la forme plate attendue par trierPosts/dry-run.js', () => {
   const post = normaliserPost(BRUT_EXEMPLE);
   assert.equal(post.authorName, 'Exemple Auteur');
+  assert.equal(post.authorPublicIdentifier, 'exemple-auteur');
   assert.equal(post.text, "Texte du post d'exemple.");
   assert.equal(post.postedAt, '2026-09-11T09:02:31.726Z');
   assert.equal(post.commentsCount, 2);
+  assert.equal(post.reactionsCount, 3);
+  assert.equal(post.sharesCount, 1);
   assert.equal(post.shareUrn, 'urn:li:share:7504102064151674880');
   assert.equal(post.id, '7504102064814268416');
 });

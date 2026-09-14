@@ -154,13 +154,20 @@ racine du paquet, copiee dans `comptes_a_surveiller` des deux comptes de
 `reglages-comptes.json`). Methode complete et tableau des 10 profils :
 `references/comptes-a-surveiller-veille-20260914.md`.
 
-**Reste a faire** : le score d'engagement du brief
-(`(reactions + 3*commentaires + 5*partages) / abonnes`) n'est toujours pas code dans `trierPosts`.
-Le passage de veille reel avec cette liste n'a pas pu etre lance ce jour -- `APIFY_TOKEN` absent
-de cette session (le jeton avait ete exporte manuellement par Nomena dans une session precedente,
-non persiste entre sessions par conception, voir Point n°2 de `references/etat-linkedin-20260912.md`).
-A relancer avec `npm run dry-run` des que le jeton est fourni a nouveau -- le pipeline est pret,
-seule la donnee manque.
+## Score d'engagement code, passage reel execute -- 14/09/2026 (meme jour, session suivante)
+
+`trierPosts` calcule desormais le score du brief -- `(reactions + 3*commentaires + 5*partages) /
+abonnes` -- via `calculerScore`, et ne garde un post que s'il depasse `seuil_score` ET a moins de
+`fenetre_jours` (7 par defaut). Coefficients/seuil/fenetre dans `reglage-score.json` (fichier de
+reglage, pas en dur dans le code). Les abonnes par auteur (l'acteur Apify ne les renvoie jamais
+dans la reponse d'un post) viennent de `abonnes-comptes.json`, cle = `authorPublicIdentifier`.
+Un post dont l'auteur n'a pas d'abonnes connus est ecarte, jamais suppose a score 0. Trie par
+score decroissant.
+
+Passage reel execute avec `APIFY_TOKEN` fourni pour une session (jamais persiste) : **35 posts
+recuperes sur les 10 comptes, 15 retenus**. Detail complet, seuil calibre sur la distribution
+reelle observee, et export local (Notion toujours bloque) : Point n°11 de
+`references/etat-linkedin-20260912.md`.
 
 Etat des lieux complet des 3 skills linkedin-* et de tout ce qui devient
 activable des que chaque blocage se leve :

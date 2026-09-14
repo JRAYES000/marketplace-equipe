@@ -444,6 +444,61 @@ jeton avait ete exporte manuellement par Nomena dans une session precedente, non
 sessions par conception). A relancer avec `npm run dry-run` (ou `recupererPosts` directement) des
 que le jeton est fourni a nouveau -- pipeline pret, seule la donnee manque.
 
+## Point n°11 -- score d'engagement code, passage de veille reel execute (14/09/2026, session suivante)
+
+Julien a fourni `APIFY_TOKEN` pour cette seule session (jamais persiste dans un fichier, comme
+convenu -- meme discipline que le 12/09/2026 avec Nomena).
+
+**Score code dans `lib/veille.js`** : nouvelle fonction `calculerScore(post, { coefficients,
+abonnesParIdentifiant })`, formule exacte du brief. Coefficients et seuil dans un fichier de
+reglage dedie, `reglage-score.json` (pas en dur dans le code) : `{ coefficients: { reactions: 1,
+commentaires: 3, partages: 5 }, seuil_score: 0.003, fenetre_jours: 7 }`. Verifie sur un
+echantillon reel de post (`emollick`, 1638 likes/173 commentaires/95 partages, 429 587 abonnes) :
+l'acteur Apify ne renvoie **jamais** le nombre d'abonnes de l'auteur dans la reponse d'un post
+(confirme sur la reponse brute complete) -- `abonnes-comptes.json` (nouveau fichier, cle =
+`authorPublicIdentifier` type `"emollick"`) sert de source pour ce chiffre, avec les valeurs
+deja verifiees au Point n°10, horodatees. `trierPosts` ecarte desormais un post dont l'auteur n'a
+pas d'abonnes connus, plutot que de lui pretendre un score de 0 ou de l'inclure sans verification
+-- et trie par score decroissant (le meilleur candidat en premier), plus par date : coherent avec
+`dry-run.js`/SKILL.md qui prennent toujours `retenus[0]` comme candidat choisi.
+
+**Seuil calibre sur donnees reelles, pas devine** : distribution des scores sur l'echantillon
+reel du jour (35 posts, 10 comptes, fenetre "week") allant de 0,00026 a 0,0164, avec un ecart net
+entre le 15e post (0,0043) et le 16e (0,0018) -- seuil pose a 0,003 dans cet ecart, retient
+naturellement environ 40% de l'echantillon. Note explicite dans `reglage-score.json` : a
+recalibrer si les passages suivants montrent trop/trop peu de candidats, jamais en abaissant le
+seuil juste pour remplir un quota (regle explicite du brief).
+
+**Passage de veille reel execute** (`node dry-run.js` avec `APIFY_TOKEN`, 10 comptes de
+`comptes-a-surveiller.txt`, `maxPosts: 5` par compte, fenetre Apify "week") : **35 posts
+recuperes, 15 retenus** (43%) apres carrousels/seuil/fraicheur. Meilleur candidat identique pour
+les deux comptes (meme liste surveillee) : un post de Justin Welsh du 11/09/2026 ("One of the
+best business hacks is being your own biggest cheerleader..."), 1340 commentaires, score
+0,01644 -- tres au-dessus du seuil. Les 15 posts retenus couvrent 5 des 10 comptes surveilles
+(Justin Welsh, Matt Wolfe, Jason Feifer, Codie Sanchez, Ethan Mollick) ; les 5 autres (Allie K.
+Miller, Dharmesh Shah, Sahil Bloom, Amy Porterfield, et une partie des posts des comptes
+ci-dessus) sont passes sous le seuil ou hors fenetre cette semaine-la -- pas un signe d'erreur,
+juste la realite de cette semaine precise (voir la note du SKILL.md sur les passages a vide
+possibles).
+
+**Notion : toujours bloque, ecrit en local a la place (conforme a la demande)**. `NOTION_TOKEN`
+et `NOTION_PARENT_PAGE_ID` toujours absents cette session -- rien relance de ce cote, en attente
+de Julien (meme blocage que Point n°9 de `linkedin-commentaires`). Les 15 posts retenus, avec les
+colonnes calculables du schema Notion du brief (titre, lien d'origine, auteur, abonnes, date
+d'origine, reactions, commentaires, partages, score), ecrits localement dans
+`linkedin-veille-virale/data/veille-resultats-reels-20260914.json` (gitignore, contenu reel de
+comptes tiers -- jamais commit dans ce depot public, meme regle que les autres donnees Apify
+reelles de ce paquet). Les colonnes qui relevent d'un jugement editorial (Sujet, Format, redaction
+recyclee) ne sont pas remplies : pas de generation automatique en JS, conforme au point 3 du
+SKILL.md -- a faire par la session Claude qui choisit reellement de recycler un post donne.
+
+**Tests** : 18/18 verts apres refonte (`npm test` dans `linkedin-veille-virale`), y compris 6
+nouveaux tests sur `calculerScore`/`trierPosts` (formule exacte, abonnes inconnus exclus plutot
+que suppose a 0, seuil, fenetre de fraicheur, tri par score). `fixtures/posts-exemple.json` et
+`fixtures/abonnes-exemple.json` mis a jour en consequence (ancien fixture ne portait ni
+`authorPublicIdentifier` ni `reactionsCount`/`sharesCount`, aurait rendu tout score `null` sous
+la nouvelle logique).
+
 ## Recapitulatif
 
 Au 12/09/2026, aucun point bloquant "technique" majeur ne reste ouvert :

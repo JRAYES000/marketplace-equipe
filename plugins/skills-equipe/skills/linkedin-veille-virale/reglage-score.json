@@ -1,0 +1,10 @@
+{
+  "_note": "Score = (reactions*coefficients.reactions + commentaires*coefficients.commentaires + partages*coefficients.partages) / abonnes de l'auteur (voir abonnes-comptes.json). Un post n'est retenu que s'il depasse seuil_score ET a moins de fenetre_jours. seuil_score calibre le 14/09/2026 sur un echantillon reel de 35 posts (les 10 comptes de comptes-a-surveiller.txt, fenetre 'week') : scores repartis de 0,00026 a 0,0164, coupure choisie dans l'ecart net observe entre le 15e (0,0043) et le 16e (0,0018) post par score decroissant -- garde environ 40% de l'echantillon comme 'digne d'une reaction', pas une valeur arbitraire. A recalibrer si les passages reels suivants montrent trop ou trop peu de candidats retenus (le brief interdit explicitement de baisser le seuil juste pour remplir un quota -- annoncer 'une seule proposition cette semaine' plutot que d'abaisser ce chiffre).",
+  "coefficients": {
+    "reactions": 1,
+    "commentaires": 3,
+    "partages": 5
+  },
+  "seuil_score": 0.003,
+  "fenetre_jours": 7
+}

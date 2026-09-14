@@ -1,0 +1,16 @@
+{
+  "_note": "Nombre d'abonnes par compte de comptes-a-surveiller.txt, lu directement sur chaque profil LinkedIn (jamais recopie d'un article tiers). Cle = authorPublicIdentifier tel que renvoye par l'acteur Apify harvestapi/linkedin-profile-posts (ex. \"emollick\"), pas l'URL complete. Voir references/comptes-a-surveiller-veille-20260914.md pour la methode. A rafraichir periodiquement -- ces chiffres bougent.",
+  "_capture_date": "2026-09-14",
+  "abonnes": {
+    "alliekmiller": 1673689,
+    "emollick": 429587,
+    "dharmesh": 1194280,
+    "justinwelsh": 879917,
+    "codiesanchez": 605541,
+    "noahkagan": 108190,
+    "sahilbloom": 722282,
+    "jasonfeifer": 264954,
+    "matt-wolfe-30841712": 11761,
+    "amyporterfield": 41147
+  }
+}
