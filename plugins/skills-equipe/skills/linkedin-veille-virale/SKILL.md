@@ -96,6 +96,31 @@ description: "Surveille des comptes LinkedIn suivis, repere les posts qui valent
   `linkedin-carrousel`) : eviter d'empiler plusieurs posts de test sur le
   meme compte avant d'avoir valide le premier.
 
+## Page Notion "Veille & posts" -- code pret, en attente du jeton (14/09/2026)
+
+Prepare en avance de `linkedin-commentaires` (priorite 2 en cours), a la demande explicite de
+Julien : tout ce qui ne depend pas de la cle Notion est ecrit des maintenant.
+
+**Clarification** : cle d'integration Notion dans `env/secrets.md` (meme methode que
+`APIFY_TOKEN`), appel direct a `api.notion.com` -- pas le connecteur OAuth de claude.ai.
+
+`lib/notion.js` : `creerBaseVeilleEtPosts` (schema exact des 19 colonnes du brief, y compris
+`Score` en propriete formule Notion native : `(Reactions + 3*Commentaires + 5*Partages) /
+Abonnes`), `creerVuesParCompte` (les 3 vues filtrees demandees, une par compte),
+`recupererEntreesRecentes` (requete l'API pour la fenetre demandee) et **`calculerBilan`** --
+la commande "bilan" du brief (analyse 30 jours, formats/sujets les plus performants par
+compte), ecrite en fonction PURE testable sans reseau (`test/notion-bilan.test.js`, 3 tests,
+tous verts) pour rester verifiable independamment de la disponibilite de l'API. `creer-page-notion.js`
+(CLI) cree la base et les 3 vues d'un coup des que `NOTION_TOKEN`/`NOTION_PARENT_PAGE_ID` sont
+disponibles.
+
+**Limite verifiee, pas contournee** : l'API Notion publique n'a aucun endpoint pour inviter un
+e-mail externe -- le partage avec `contact@claudeagency.fr` reste un geste manuel, une fois,
+via "Share" (le script imprime l'URL de la page pour ce geste).
+
+**Non execute contre l'API reelle** : faute de jeton dans cette session -- forme conforme a la
+documentation Notion consultee le 14/09/2026, comportement reel non encore verifie.
+
 ## A completer avant un usage reel
 
 - `comptes_a_surveiller` dans `reglages-comptes.json` est vide pour les deux

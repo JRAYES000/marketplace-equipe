@@ -141,13 +141,29 @@ pas invente), avec positionnement observe et une suggestion de repartition par t
 deux comptes. **A valider ou corriger par Julien** ; une fois fait, copier les URLs retenues
 dans `reglages-comptes.json`.
 
-## Connecteur Notion -- absent de cette session
+## Page Notion -- code pret, en attente du jeton (mis a jour le 14/09/2026)
 
-Verifie (recherche d'outils differes) : aucun outil `notion` charge dans cette session. La
-page Notion demandee par le brief (colonnes Compte/personne visee/lien/date/texte/genre, puis
-suivi a 3 jours) ne peut pas etre creee tant qu'un membre de l'equipe n'a pas installe ce
-connecteur (voir le README racine de `marketplace-equipe` pour la procedure). **Prochain point
-a trancher avec Julien**, comme demande.
+**Clarification importante** : ce n'est pas le connecteur OAuth "Notion" de claude.ai
+(Reglages -> Parcourir -> Notion -> Connecter) qu'il faut ici -- Julien fournit une **cle
+d'integration Notion** dans `env/secrets.md` (meme depot et methode que `APIFY_TOKEN`), a
+utiliser en appel direct a l'API `api.notion.com` via `fetch`, pas via un outil MCP. Nomena
+l'exportera dans l'environnement (`NOTION_TOKEN`) -- jamais lue directement par cette session.
+
+`lib/notion.js` est ecrit et pret : `creerBaseCommentaires` (schema exact des colonnes du
+brief : Titre, Compte, Personne visee, Lien du post, Date, Texte du commentaire, Genre, puis
+les 5 colonnes de suivi a 3 jours) et `creerVueComparaisonHebdomadaire` (la vue "nombre de
+commentaires de la semaine cote a cote avec les courbes de vues de profil/demandes de
+contact"). `creer-page-notion.js` (CLI) execute les deux d'un coup des que `NOTION_TOKEN` et
+`NOTION_PARENT_PAGE_ID` sont dans l'environnement.
+
+**Limite verifiee, pas contournee** : l'API Notion publique n'expose aucun endpoint pour
+inviter un e-mail externe sur une page (confirme par recherche) -- le partage en modification
+avec `contact@claudeagency.fr` devra se faire a la main, une fois, via le bouton "Share" de
+l'interface. Le script imprime l'URL exacte de la page pour ce geste.
+
+**Non execute a ce jour** : aucun appel reel n'a ete fait contre l'API Notion, faute de jeton
+disponible dans cette session -- ce code n'a donc pas encore ete verifie de bout en bout contre
+la vraie API, seule sa forme est conforme a la documentation officielle consultee le 14/09/2026.
 
 ## Exemple reel attendu le 20/09 -- BLOQUE, pas contourne
 
