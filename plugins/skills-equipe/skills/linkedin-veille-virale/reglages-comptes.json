@@ -2,14 +2,38 @@
   "julien-partners": {
     "author_urn": "urn:li:person:ZvLHybJZhj",
     "_source_urn": "Verifie par Julien le 11/09/2026, a utiliser tel quel.",
-    "comptes_a_surveiller": [],
+    "comptes_a_surveiller": [
+      "https://www.linkedin.com/in/alliekmiller/",
+      "https://www.linkedin.com/in/emollick/",
+      "https://www.linkedin.com/in/dharmesh/",
+      "https://www.linkedin.com/in/justinwelsh/",
+      "https://www.linkedin.com/in/codiesanchez/",
+      "https://www.linkedin.com/in/noahkagan/",
+      "https://www.linkedin.com/in/sahilbloom/",
+      "https://www.linkedin.com/in/jasonfeifer/",
+      "https://www.linkedin.com/in/matt-wolfe-30841712/",
+      "https://www.linkedin.com/in/amyporterfield/"
+    ],
+    "_source_comptes_a_surveiller": "Liste unique partagee avec julien-agency (le brief demande une seule liste pour les comptes), choisie et verifiee le 14/09/2026 -- voir comptes-a-surveiller.txt et references/comptes-a-surveiller-veille-20260914.md.",
     "ton": ["chaleureux", "professionnel", "facilitateur", "oriente-reseau"],
     "seuil_max_commentaires": 30
   },
   "julien-agency": {
     "author_urn": "urn:li:person:aFqu-W7ClW",
     "_source_urn": "Verifie par Julien le 11/09/2026, a utiliser tel quel.",
-    "comptes_a_surveiller": [],
+    "comptes_a_surveiller": [
+      "https://www.linkedin.com/in/alliekmiller/",
+      "https://www.linkedin.com/in/emollick/",
+      "https://www.linkedin.com/in/dharmesh/",
+      "https://www.linkedin.com/in/justinwelsh/",
+      "https://www.linkedin.com/in/codiesanchez/",
+      "https://www.linkedin.com/in/noahkagan/",
+      "https://www.linkedin.com/in/sahilbloom/",
+      "https://www.linkedin.com/in/jasonfeifer/",
+      "https://www.linkedin.com/in/matt-wolfe-30841712/",
+      "https://www.linkedin.com/in/amyporterfield/"
+    ],
+    "_source_comptes_a_surveiller": "Liste unique partagee avec julien-partners (le brief demande une seule liste pour les comptes), choisie et verifiee le 14/09/2026 -- voir comptes-a-surveiller.txt et references/comptes-a-surveiller-veille-20260914.md.",
     "ton": ["confiant", "direct", "pedagogue", "oriente-dirigeants"],
     "seuil_max_commentaires": 30
   }
