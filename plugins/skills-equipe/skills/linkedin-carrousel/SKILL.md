@@ -124,7 +124,12 @@ confirmation n'est pas arrivee.
 
 ## Limites connues
 
-- **(2026-09-11)** Le PDF fini atterrit dans `sortants/<compte>/AAAA-MM-JJ-<slug>.pdf`,
+- **(2026-09-14, corrige suite au brief du 10/09)** Le nom de fichier de sortie n'est plus
+  `AAAA-MM-JJ-<slug>.pdf` mais `sortants/<compte>/<Titre lisible en francais>.pdf` -- sans
+  date ni numero, casse et accents conserves -- car LinkedIn affiche ce nom sous le post
+  publie et il doit se lire comme un vrai titre, pas comme un identifiant technique. Voir
+  `generer-pdf.js` (fonction `nomFichierDepuisTitre`) pour le detail de la regle.
+- **(2026-09-11)** Le PDF fini atterrit dans `sortants/<compte>/<Titre lisible>.pdf`,
   mais rien ne le fait passer de la a la publication reelle sur LinkedIn : aucun dossier
   surveille, aucun point d'entree. Verifie a cette date : `sortants/instagram/` du depot
   `visibilite-ops` est vide (juste `.gitkeep`), et son pipeline de brouillons
