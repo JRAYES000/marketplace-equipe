@@ -86,10 +86,59 @@ echouer.
   vrai", "top", "merci du partage", etc.) -- refus explicite, testes.
 - **Genre coherent avec le contenu** : `information_chiffree` exige un chiffre dans le texte,
   `vraie_question` exige que le texte se termine par "?" -- les deux testes en echec.
+- **Aucune experience personnelle non sourcee** (ajoute le 14/09/2026, pendant exact de "aucun
+  chiffre sans source" du carrousel) : un commentaire qui affirme a la premiere personne
+  ("on"/"nous"/"j'ai") avoir vecu une experience professionnelle concrete (client, mission,
+  equipe de N personnes, resultat obtenu) est **refuse**, sauf si `anecdoteSourcee: true` est
+  passe explicitement -- ce que seule une confirmation reelle de Julien autorise. Voir "Genre
+  histoire_vecue" plus bas pour la procedure complete et pourquoi ce garde-fou existe.
 - **Limite assumee, pas contournee** : "orthographe irreprochable" et le rythme voulu par le
   brief ("un mot parle en tete, un fragment sans verbe") sont des qualites de redaction, pas des
   formes mecaniquement verifiables -- aucun garde-fou ne les impose, c'est a la session qui
-  redige de les tenir.
+  redige de les tenir. **Attention neanmoins verifiee reellement absente le 14/09/2026** : les
+  premiers commentaires/posts prepares dans ce paquet et dans `linkedin-carrousel`/
+  `linkedin-veille-virale` etaient integralement sans accents (pas un artefact d'affichage,
+  confirme sur les octets du fichier) -- corrige dans les fichiers pas encore publies ce jour-la,
+  mais **reste a surveiller a chaque nouvelle redaction** : ecrire un francais correctement
+  accentue des la premiere frappe, pas une passe de correction a part.
+
+## Genre "histoire_vecue" : ne jamais inventer une experience de Julien (14/09/2026)
+
+**Incident reel** : un commentaire prepare le 14/09/2026 pour Jean Zendji affirmait "On a mis en
+place un tri similaire chez un client hotelier l'an dernier" -- une mission qui n'a jamais existe,
+inventee pour remplir le genre. Julien a signale le probleme avant publication : ce commentaire
+serait parti sous son identite reelle, qu'il ne relit pas avant publication -- si un lecteur
+demande un detail sur ce client, Julien est piege publiquement sur son propre profil. Le brief
+interdit deja d'inventer un chiffre pour la meme raison (regle "aucun chiffre sans source") ;
+inventer une experience entiere est plus grave, pas moins.
+
+**Trois pistes evaluees, une tranchee** :
+1. *(retenue)* La skill ne redige jamais seule ce genre : avant d'ecrire un commentaire
+   "histoire_vecue" (ou toute affirmation d'experience dans un autre genre), la session qui
+   redige doit d'abord obtenir une anecdote REELLE de Julien ou Nomena -- pas la deviner, pas
+   l'inventer meme "plausible". Sans anecdote confirmee, elle choisit un autre genre plutot que
+   de forcer celui-ci. Cout d'implementation nul (aucune infrastructure nouvelle), coherent avec
+   le fait qu'un humain est deja dans la boucle a chaque redaction (point 4 ci-dessus).
+2. *(ecartee pour l'instant)* Un fichier d'anecdotes reelles alimente par Julien a l'avance,
+   consulte par la skill. Solution plus systematique, mais cout de maintenance reel pour Julien
+   (il doit ecrire et tenir ce fichier a jour) sans gain immediat : aujourd'hui ce fichier serait
+   vide, donc le comportement se reduit exactement a la piste 1 (proposer un autre genre, regle 4
+   du brief : jamais planter/echouer a vide sans dire quoi faire). A reconsiderer si Julien
+   souhaite un jour pre-ecrire des anecdotes pour accelerer la redaction.
+3. *(ecartee)* Remplacer le genre par une observation generale assumee, sans "je/on" factuel.
+   Ecartee parce qu'elle redefinirait unilateralement un genre que Julien a explicitement nomme
+   et valide dans son brief ("histoire vecue" implique justement un vecu reel) -- ce n'est pas a
+   la skill de decider seule que ce genre ne peut jamais exister sous sa forme prevue.
+
+**Garde-fou automatique correspondant, code** : `lib/valider-commentaire.js`
+(`validerAffirmationExperience`) refuse tout commentaire, **quel que soit son genre declare**,
+qui combine un pronom de premiere personne (on/nous/j'ai/notre) et du vocabulaire d'experience
+professionnelle (client, mission, equipe de N, livre/deploye/mis en place/implemente/accompagne,
+resultat) dans la meme phrase -- sauf `anecdoteSourcee: true`, que seule la personne qui redige
+peut poser, et seulement apres confirmation reelle de Julien. Heuristique, pas une preuve
+(comme "aucun chiffre sans source" : aucune regle mecanique ne peut verifier qu'une anecdote a
+vraiment eu lieu, seul un humain le peut) -- teste sur le cas reel du 14/09/2026 et sur un cas
+d'observation generale qui ne doit pas etre accuse a tort (`test/valider-commentaire.test.js`).
 
 ### Sortie reelle des 5 cas de refus demandes
 
@@ -110,7 +159,7 @@ $ node -e "require('./lib/valider-commentaire').validerCommentaire({texte:'On a 
 Commentaire refuse : genre "information_chiffree" declare mais aucun chiffre trouve dans le texte.
 ```
 
-`node --test` : 27 tests, tous verts (`lib/valider-commentaire.js` : 13, `lib/planifier-commentaires.js` : 5, `dry-run.js` : 4, `trierPosts` : 5).
+`node --test` : 37 tests, tous verts (mis a jour le 14/09/2026 avec le garde-fou "experience non sourcee" -- voir "Genre histoire_vecue" plus haut).
 
 ## Cinq regles d'usage (brief du 10/09/2026, section 2) -- etat au 14/09/2026
 

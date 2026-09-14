@@ -7,7 +7,7 @@
     "shareUrn": "urn:li:share:7505178898159112192",
     "fraicheurHeures": 0.9,
     "genre": "vraie_question",
-    "texte": "Bon, ca rejoint un point qu'on voit souvent chez les independants qui commencent a accueillir du monde : le DUERP arrive toujours apres coup, jamais avant. Vous le refaites a chaque nouvelle mission ou seulement quand la situation change vraiment ?"
+    "texte": "Bon, ça rejoint un point qu'on voit souvent chez les indépendants qui commencent à accueillir du monde : le DUERP arrive toujours après coup, jamais avant. Vous le refaites à chaque nouvelle mission ou seulement quand la situation change vraiment ?"
   },
   {
     "compte": "julien-partners",
@@ -17,7 +17,7 @@
     "shareUrn": "urn:li:share:7505173185277939713",
     "fraicheurHeures": 1.2,
     "genre": "information_chiffree",
-    "texte": "Bon point sur /compact, c'est clairement celui qui change le plus la donne sur les sessions de plus de 2h. On l'utilise avec une equipe de 8 personnes et ca a coupe le temps de debug de moitie en un mois."
+    "texte": "Bon point sur /compact, c'est clairement celui qui change le plus la donne sur les sessions de plus de 2h. On l'utilise avec une équipe de 8 personnes et ça a coupé le temps de debug de moitié en un mois."
   },
   {
     "compte": "julien-partners",
@@ -27,7 +27,7 @@
     "shareUrn": "urn:li:share:7504114240602001409",
     "fraicheurHeures": 71.4,
     "genre": "histoire_vecue",
-    "texte": "Ca fait plaisir a lire, on a eu le meme sentiment avec un client sportif l'an dernier. Le vrai defi c'etait de faire tenir l'identite du club dans un site qui reste simple a mettre a jour pour eux."
+    "texte": "Ça fait plaisir à lire, on a eu le même sentiment avec un client sportif l'an dernier. Le vrai défi c'était de faire tenir l'identité du club dans un site qui reste simple à mettre à jour pour eux."
   },
   {
     "compte": "julien-partners",
@@ -37,7 +37,7 @@
     "shareUrn": "urn:li:share:7504067125548916737",
     "fraicheurHeures": 74.5,
     "genre": "desaccord_argumente",
-    "texte": "Pas sur que la difference tienne uniquement au temps passe. On a livre des SaaS multi-tenant en 10 semaines avec une methode proche, mais des tests automatises des le depart plutot qu'une verification manuelle en continu. Ca deplace surtout ou se niche le risque, pas son existence."
+    "texte": "Pas sûr que la différence tienne uniquement au temps passé. On a livré des SaaS multi-tenant en 10 semaines avec une méthode proche, mais des tests automatisés dès le départ plutôt qu'une vérification manuelle en continu. Ça déplace surtout où se niche le risque, pas son existence."
   },
   {
     "compte": "julien-agency",
@@ -47,6 +47,6 @@
     "shareUrn": "urn:li:share:7504102064151674880",
     "fraicheurHeures": 72.2,
     "genre": "histoire_vecue",
-    "texte": "On a mis en place un tri similaire chez un client hotelier l'an dernier, sur les emails plutot que les avis. Le declic a ete le meme : la plupart des messages n'avaient pas besoin d'IA, juste d'etre lus a temps."
+    "texte": "On a mis en place un tri similaire chez un client hôtelier l'an dernier, sur les emails plutôt que les avis. Le déclic a été le même : la plupart des messages n'avaient pas besoin d'IA, juste d'être lus à temps."
   }
 ]

@@ -499,6 +499,44 @@ que suppose a 0, seuil, fenetre de fraicheur, tri par score). `fixtures/posts-ex
 `authorPublicIdentifier` ni `reactionsCount`/`sharesCount`, aurait rendu tout score `null` sous
 la nouvelle logique).
 
+## Point n°12 -- linkedin-commentaires : experience inventee trouvee, garde-fou ajoute, accents corriges (14/09/2026)
+
+Julien a repere, en relisant les 5 commentaires du Point n°9, que celui prepare pour Jean Zendji
+inventait une mission ("client hotelier") jamais realisee -- publie sous son identite reelle,
+qu'il ne relit pas, l'exposant publiquement si un lecteur demande un detail. Verification demandee
+sur les 5 : **4 sur 5 inventent une experience professionnelle non verifiable** (Theophile
+Burnet, Florent Pontiac, Valentin Muller, Jean Zendji) ; seul celui de Virginie Caurraze
+(vraie_question) n'en contient aucune.
+
+**Garde-fou code** : `lib/valider-commentaire.js` (`validerAffirmationExperience`) refuse tout
+commentaire, quel que soit son genre, combinant un pronom de premiere personne et du vocabulaire
+d'experience professionnelle dans la meme phrase, sauf `anecdoteSourcee: true` explicite --
+pendant exact de "aucun chiffre sans source". Bug reel trouve et corrige au passage : `\b` en
+JavaScript ne reconnait pas les lettres accentuees (`/\blivr[eé]\b/` echouait sur "livré "),
+corrige avec des frontieres Unicode `\p{L}`/`\p{N}`, teste explicitement sur ce cas. 37/37 tests
+verts.
+
+**Decision de conception tranchee** (3 pistes evaluees, documentation complete dans le SKILL.md
+de `linkedin-commentaires`, section "Genre histoire_vecue") : la skill ne redige jamais ce genre
+seule -- elle doit obtenir une anecdote reelle de Julien/Nomena avant, ou proposer un autre genre
+si aucune n'est disponible (regle 4 : jamais planter a vide sans dire quoi faire). Piste "fichier
+d'anecdotes pre-rempli" ecartee pour l'instant (cout de maintenance sans gain immediat, le
+fichier serait vide aujourd'hui). Piste "redefinir le genre sans je/on" ecartee (pas a la skill
+de redefinir seule un genre nomme par Julien).
+
+**Accents : confirmes reellement absents, pas un artefact d'affichage** -- verifie sur les octets
+bruts du fichier (`commentaires-2026-09-14.json` faisait 0 caractere accentue). **Systemique** :
+meme constat sur `linkedin-carrousel/a-publier/*.commentary.txt` (y compris le carrousel du 14/09
+deja confirme EN LIGNE, Point n°8 -- impossible a corriger retroactivement sans que Julien
+republie) et sur l'exemple de `linkedin-veille-virale/a-publier/`. Corrige le 14/09/2026 dans les
+fichiers PAS ENCORE publies de `linkedin-commentaires` (les 5 commentaires + l'exemple du 12/09) ;
+les fichiers deja en ligne restent en l'etat, decision a prendre par Julien (laisser, ou republier
+avec accents). Cause : la limite documentee de `valider-commentaire.js`/`valider-post.js`
+("orthographe irreprochable... qualite de redaction, pas verifiable mecaniquement") est correcte
+sur le principe -- mais la redaction elle-meme doit simplement ecrire un francais correctement
+accente des la premiere frappe, ce qui n'a pas ete fait jusqu'ici. A surveiller a chaque nouvelle
+redaction, dans les 3 skills.
+
 ## Recapitulatif
 
 Au 12/09/2026, aucun point bloquant "technique" majeur ne reste ouvert :
