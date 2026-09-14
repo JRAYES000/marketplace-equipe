@@ -55,10 +55,12 @@ function etatPourCompte(compte, config) {
 
   const resultats = dernierFichierResultatsReels();
   if (resultats) {
-    const aRediger = (resultats.posts || []).filter((p) => /a rediger/.test(p.etat || '')).length;
+    const total = (resultats.posts || []).length;
+    const aRediger = (resultats.posts || []).filter((p) => /^a rediger/.test(p.etat || '')).length;
+    const redigesRecemment = total - aRediger;
     lignes.push(
       `Dernier passage de veille reel connu (${resultats.genere_le}) : ${resultats.nb_recuperes} posts ` +
-      `recuperes, ${resultats.nb_retenus} retenus, ${aRediger} encore "a rediger" -- aucun n'a ete adapte en post.`
+      `recuperes, ${resultats.nb_retenus} retenus, ${redigesRecemment} deja rediges en post, ${aRediger} encore "a rediger".`
     );
   } else {
     lignes.push(
