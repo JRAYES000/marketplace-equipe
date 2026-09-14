@@ -143,3 +143,13 @@ test('accepte un chiffre avec sa source attachee', () => {
   );
   assert.doesNotThrow(() => validerEtConvertirPost(brouillon));
 });
+
+test('n\'accuse pas a tort l\'annee ecrite a l\'interieur de sa propre citation', () => {
+  // Regression : "2025" dans "(source : France Num, 2025)" est un chiffre
+  // comme un autre pour la regex -- il ne doit pas exiger une SECONDE source.
+  const brouillon = BROUILLON_CONFORME.replace(
+    'Rarement pour le salaire.',
+    "26% des TPE-PME francaises utilisent deja l'IA (source : France Num, 2025)."
+  );
+  assert.doesNotThrow(() => validerEtConvertirPost(brouillon));
+});

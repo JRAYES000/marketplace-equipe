@@ -277,6 +277,52 @@ l'offre.pdf`, 10 pages verifiees). **Non publie** -- aucun "GO" recu pour cet ac
 irreversible sur ce second carrousel. Detail complet dans
 `references/audit-brief-20260914-v3.md` et `linkedin-carrousel/SKILL.md`.
 
+## Point n°7 -- publication reelle du second carrousel conforme (14/09/2026)
+
+Suite au Point n°6 : garde-fous automatiques ajoutes a `linkedin-carrousel` (structure et
+ecriture, voir `SKILL.md`), puis, avant tout GO, recherche d'une statistique reelle sourcable
+sur l'adoption de l'IA par les TPE-PME francaises (demande explicite de Julien, 10 minutes
+maximum) :
+
+**Chiffre trouve, source primaire reellement ouverte et lue** : 26 % des TPE-PME francaises
+declarent utiliser au moins un outil d'IA en 2025 (contre 13 % en 2024) -- France Num,
+Direction generale des Entreprises (ministere de l'Economie), *Barometre France Num 2025*,
+publie septembre 2025. URL ouverte directement (`curl`, HTML brut lu, pas un extrait de
+moteur de recherche) : `https://www.francenum.gouv.fr/guides-et-conseils/strategie-numerique/comprendre-le-numerique/barometre-france-num-2025-le`
+-- citation exacte trouvee dans la page : « Le nombre de TPE PME qui ont indique avoir recours
+a des solutions d'intelligence artificielle a double en un an, et atteint 26 %. »
+
+Chiffre integre au post via le pipeline reel (`generer-post.js`, pas a la main) : bug reel
+trouve et corrige a cette occasion dans `lib/valider-post.js` (`validerChiffreSource`) --
+l'annee ecrite a l'interieur de sa propre citation, ex. `(source : France Num, 2025)`, etait
+elle-meme detectee comme "chiffre sans source" et bouclait sur son propre refus ; corrige en
+elargissant la fenetre de detection pour regarder aussi en arriere, pas seulement en avant
+(voir tests `valider-post.test.js`).
+
+**Publication reelle executee** (memes 4 etapes que le Point n°6, nouvelle session MCP) :
+1. `POST /rest/documents?action=initializeUpload` -> `urn:li:document:D5610AQFhGep7UlLEHw`.
+2. PUT des octets du PDF (81 693 octets, `Pourquoi vos meilleurs candidats disparaissent-ils
+   avant l'offre.pdf`, 10 diapos) sur l'URL presignee -> `201`.
+3. `GET /rest/documents/<urn>` -> `status: AVAILABLE`, confirme aussi par `HEAD` sur
+   `downloadUrl` (`Content-Length: 81693`, `Content-Type: application/pdf`, taille identique
+   au fichier local).
+4. `POST /rest/posts` (author `urn:li:person:aFqu-W7ClW`, commentary valide par
+   `generer-post.js`, `content.media.id` = l'URN ci-dessus) -> **`successful: true`, `error:
+   ''`, corps vide** -- exactement le meme comportement que le Point n°6 : LinkedIn renvoie
+   l'ID reel dans l'en-tete HTTP `x-restli-id` d'une reponse `201` a corps vide, non expose par
+   `proxy_execute` en cas de succes. **Aucun ID de post n'a pu etre extrait.**
+
+**Tentative de recuperation par lecture** : `GET /rest/posts?q=author&author=...` (finder,
+lecture seule) -> `403 ACCESS_DENIED` (`partnerApiPostsExternal.FINDER-author`) -- confirme
+le meme constat que Julien lui-meme : les lectures sont normalement en echec sur ce compte
+(droits ecriture seule), pas un signal d'echec de la publication.
+
+**Aucune nouvelle tentative relancee** (risque de doublon si l'appel a reellement fonctionne,
+memes precautions que le Point n°6). **Statut : NON CONFIRME**, comme le Point n°6 -- Julien
+doit ouvrir son propre profil pour verifier. Deux posts (Point n°6 : 5 diapos, non conforme au
+brief ; Point n°7 : 10 diapos, conforme) sont potentiellement en attente de cette meme
+confirmation, sans certitude qu'aucun, l'un ou les deux existent reellement.
+
 ## Recapitulatif
 
 Au 12/09/2026, aucun point bloquant "technique" majeur ne reste ouvert :
