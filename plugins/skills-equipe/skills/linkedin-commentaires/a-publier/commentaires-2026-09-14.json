@@ -17,7 +17,7 @@
     "shareUrn": "urn:li:share:7505173185277939713",
     "fraicheurHeures": 1.2,
     "genre": "information_chiffree",
-    "texte": "Ça rejoint un chiffre qui interroge : 84% des développeurs utilisent déjà l'IA au quotidien (Stack Overflow, 2025), contre 76% un an plus tôt. La vraie différence se joue justement sur ces raccourcis de pilotage de session, pas sur le modèle utilisé."
+    "texte": "Ça rejoint un chiffre qui interroge : 51% des développeurs professionnels utilisent déjà l'IA quotidiennement dans leur travail (Stack Overflow, 2025). La vraie différence se joue justement sur ces raccourcis de pilotage de session, pas sur le modèle utilisé."
   },
   {
     "compte": "julien-partners",
@@ -46,7 +46,7 @@
     "urlPost": "https://www.linkedin.com/posts/jean-zendji-zenfia_arr%C3%AAtez-de-vouloir-r%C3%A9pondre-%C3%A0-tous-vos-avis-activity-7504102064814268416-FPQV",
     "shareUrn": "urn:li:share:7504102064151674880",
     "fraicheurHeures": 72.2,
-    "genre": "vraie_question",
-    "texte": "Le tri par règles avant tout appel à un modèle est le bon réflexe, ça évite bien des surprises. Sur les avis ambigus qui ne rentrent dans aucune des deux catégories, la règle reste l'arbitrage humain systématique, ou il existe un second niveau de filtre ?"
+    "genre": "desaccord_argumente",
+    "texte": "Le tri en deux catégories simplifie peut-être trop la priorité. Un avis qui reste une opinion mais devient très visible, beaucoup de vues ou de réactions, mérite sans doute une réponse rapide aussi, même sans réclamation concrète derrière. Le critère du risque n'est pas que la nature du problème, c'est aussi l'audience qui le lit."
   }
 ]

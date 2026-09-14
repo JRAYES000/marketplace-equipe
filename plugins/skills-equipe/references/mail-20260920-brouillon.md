@@ -17,23 +17,25 @@ Bonjour,
 Voici le point sur le chantier des trois skills LinkedIn (carrousel, commentaires, veille
 virale), avec les liens vers tout ce qui est prêt.
 
-## Carrousel — publié
+## Carrousel — republication en cours
 
-Le carrousel est en ligne : [voir le post
-carrousel](https://www.linkedin.com/posts/julien-rayes_pourquoi-vos-meilleurs-candidats-disparaissent-ils-activity-7505170085091840000-6DCd)
-— 10 diapos, le PDF est consultable directement dans le post (lecteur de document LinkedIn),
-pas besoin d'un second lien.
+Le premier carrousel publié le 14/09 contenait un vrai défaut : le texte (diapos et post) était
+en ligne sans accents — environ 68 mots sur 484 concernés (près d'un mot sur sept), dont 9
+directement dans les titres, en gros caractères. Visible au premier coup d'œil, pas un détail.
+**Décision prise : republier proprement plutôt que laisser en l'état.**
 
-**Point de vigilance signalé, pas caché** : le texte du carrousel (diapos et post) est en ligne
-sans accents — environ 68 mots sur 484 sont concernés (soit près d'un mot sur sept), dont 9
-directement dans les titres des diapos, affichés en gros caractères. C'est visible au premier
-coup d'œil, pas un détail. `[A COMPLETER]` décision prise avant l'envoi de ce mail : republié
-proprement, ou laissé tel quel — et pourquoi.
+Le contenu est corrigé et le PDF déjà régénéré via le pipeline réel (10 diapos, vérifiées une
+par une : accents corrects, mise en page intacte). Reste la publication effective et le retrait
+des deux anciens posts (celui du 14/09 à accents fautifs, et celui du 12/09 — 5 diapos, jamais
+conforme au brief — qui n'ont pas leur place sur le profil).
 
-## Commentaires — cinq prêts à publier
+`[A COMPLETER]` **Lien du nouveau carrousel** — publication en attente d'un canal technique
+(voir note ci-dessous).
 
-Cinq commentaires réels sont rédigés et validés (règles de forme, de fond, et anti-invention
-d'expérience) : [voir le détail des cinq
+## Commentaires — cinq relus et validés, GO donné
+
+Cinq commentaires réels sont rédigés, validés par le code, et **relus et validés par moi** :
+[voir le détail des cinq
 commentaires](https://github.com/JRAYES000/marketplace-equipe/blob/main/plugins/skills-equipe/skills/linkedin-commentaires/a-publier/README.md)
 (texte intégral, compte, post ciblé, genre, pour chacun).
 
@@ -46,11 +48,19 @@ respectent la règle des 4h, 3 sur 5 non.
 **Déviation assumée sur les genres** : le brief prévoit quatre genres de commentaire, dont
 "histoire vécue". Un premier brouillon dans ce genre inventait une expérience professionnelle
 qui n'a jamais eu lieu — repéré avant publication, corrigé en réécrivant les commentaires
-concernés dans un genre qui ne demande aucune expérience personnelle (question réelle ou
-désaccord argumenté sur le fond). Les cinq commentaires couvrent donc trois genres sur quatre ;
-le genre "histoire vécue" reste en réserve pour le jour où une anecdote réelle sera disponible.
+concernés dans un genre qui ne demande aucune expérience personnelle. Répartition finale sur
+les cinq : deux questions réelles, une information chiffrée, deux désaccords argumentés sur le
+fond — trois genres sur quatre ; "histoire vécue" reste en réserve pour le jour où une anecdote
+réelle sera disponible, plutôt que d'en forcer une.
 
-`[A COMPLETER]` **Lien(s) des commentaires réellement publiés sur LinkedIn** — en attente du GO.
+**Une correction faite en relecture** : un chiffre cité (adoption de l'IA chez les
+développeurs) déformait sa source — la formulation initiale laissait entendre un usage
+quotidien alors que le chiffre mesurait l'adoption/l'intention d'usage. Remplacé par le chiffre
+de la même étude qui mesure réellement l'usage quotidien, pour que le commentaire dise
+exactement ce que la source dit.
+
+`[A COMPLETER]` **Lien(s) des commentaires réellement publiés sur LinkedIn** — GO donné,
+publication en attente d'un canal technique (voir note ci-dessous).
 
 ## Veille — trois posts adaptés, prêts à publier
 
@@ -66,6 +76,14 @@ Stratégies — pages ouvertes et lues, pas de chiffre de mémoire).
 
 `[A COMPLETER]` **Lien(s) des posts réellement publiés sur LinkedIn** — en attente du GO. Règle
 à respecter au moment de publier : trois maximum, jamais deux le même jour.
+
+## Canal de publication — en cours de rétablissement
+
+Le carrousel corrigé et les cinq commentaires validés n'ont pas encore été publiés
+techniquement : l'accès qui permet de publier réellement sur LinkedIn (côté Composio) n'est
+plus actif dans la session de travail actuelle. Nomena doit reconnecter l'accès (même méthode
+que le 14/09) avant que ces publications puissent se faire. Rien d'autre ne bloque — le contenu
+est prêt des deux côtés.
 
 ## Notion — bloqué sur le partage de la page parente
 
@@ -94,9 +112,10 @@ Trois phrases suffisent, dans Claude Code :
 ## Arbitrage
 
 Aucune des trois skills n'a été sacrifiée : les trois ont un livrable réel à ce jour (carrousel
-publié, cinq commentaires prêts, trois posts de veille adaptés sur données réelles). Le seul
-point encore ouvert ne dépend plus du travail sur les skills elles-mêmes, mais du partage de la
-page Notion, en cours.
+corrigé et prêt à republier, cinq commentaires relus et validés, trois posts de veille adaptés
+sur données réelles). Les points encore ouverts ne dépendent plus du travail sur les skills
+elles-mêmes, mais de deux accès externes : le canal de publication LinkedIn (Nomena) et le
+partage de la page Notion (Nomena également).
 
 N'hésite pas à revenir vers moi si tu veux qu'on creuse un point en particulier.
 
