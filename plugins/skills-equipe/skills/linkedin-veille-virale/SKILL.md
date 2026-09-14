@@ -118,8 +118,30 @@ disponibles.
 e-mail externe -- le partage avec `contact@claudeagency.fr` reste un geste manuel, une fois,
 via "Share" (le script imprime l'URL de la page pour ce geste).
 
-**Non execute contre l'API reelle** : faute de jeton dans cette session -- forme conforme a la
-documentation Notion consultee le 14/09/2026, comportement reel non encore verifie.
+**Mise a jour du 14/09/2026, jeton recu -- nouveau blocage** : `NOTION_TOKEN` fonctionne, mais
+aucune page ordinaire n'est partagee avec cette integration (seulement des bases de donnees
+existantes sans rapport, non modifiees) -- `POST /v1/databases` exige un `parent.page_id`
+valide, indisponible aujourd'hui. Detail complet et marche a suivre dans le SKILL.md de
+`linkedin-commentaires` (meme blocage, memes deux skills). **A faire par Julien/Nomena** :
+partager une page Notion avec l'integration (bouton "Share"), puis fournir son ID pour
+`NOTION_PARENT_PAGE_ID`.
+
+**Non execute a ce stade, pour cette raison** : `creerBaseVeilleEtPosts` n'a pas ete lance
+contre l'API reelle -- sa forme est conforme a la documentation consultee, mais son
+comportement reel reste a verifier des qu'une page parente sera disponible.
+
+## Alerte non corrigee -- meme bug de schema que linkedin-commentaires probable ici
+
+Le 14/09/2026, le premier appel reel de `linkedin-commentaires` contre l'acteur Apify
+`harvestapi/linkedin-profile-posts` a revele que la forme reelle des donnees (`author.name`,
+`content`, `postedAt.date` imbrique, `engagement.comments`) ne correspond pas a la forme plate
+supposee par le code (`authorName`, `text`, `postedAt` chaine directe, `commentsCount`) --
+jamais detecte avant faute d'avoir teste contre de vraies donnees (seulement contre une
+fixture deja ecrite dans la forme supposee). Corrige dans `linkedin-commentaires/lib/trouver-posts.js`
+(fonction `normaliserPost`, voir son SKILL.md). **`lib/veille.js` de ce paquet-ci utilise tres
+probablement la meme hypothese de schema, non verifiee ni corrigee ici** -- hors perimetre du
+14/09 (priorite au carrousel puis aux commentaires), mais **a corriger avant tout premier appel
+reel** de `recupererPosts`/`trierPosts` sur ce paquet, avec la meme methode.
 
 ## A completer avant un usage reel
 

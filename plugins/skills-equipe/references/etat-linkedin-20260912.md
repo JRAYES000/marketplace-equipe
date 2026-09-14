@@ -380,6 +380,40 @@ d'incertitude technique, il existe bel et bien.
 
 **A transmettre a Julien** : les deux liens ci-dessus, cliquables, avec leur statut respectif.
 
+## Point n°9 -- linkedin-commentaires : premier appel reel, bug de schema trouve et corrige, 5 commentaires prets (14/09/2026)
+
+`APIFY_TOKEN` et `NOTION_TOKEN` recus. Premier appel reel de `trouverPosts` (16 comptes valides
+par Julien, voir `references/comptes-cibles-proposition-20260914.md`) : **bug reel trouve** --
+la forme des donnees renvoyees par l'acteur Apify (`author.name`, `content`, `postedAt.date`
+imbrique, `engagement.comments`) ne correspondait pas a la forme plate supposee par
+`lib/trouver-posts.js` (`authorName`, `text`, `postedAt`, `commentsCount`), jamais detecte car
+seule une fixture ecrite dans la forme supposee avait ete testee jusqu'ici. **Corrige**
+(fonction `normaliserPost`, avec tests de non-regression sur un echantillon reel anonymise).
+
+**Resultat du passage reel, une fois corrige** : `julien-partners` (8 comptes) -> 12 posts
+recuperes, 2 frais (<4h : 0.9h et 1.2h, auteurs distincts). `julien-agency` (8 comptes) -> 2
+posts recuperes, tous deux du meme auteur, aucun frais (le plus recent : 72.2h).
+
+**Cinq commentaires reels rediges et valides** (`linkedin-commentaires/a-publier/
+commentaires-2026-09-14.json` + `README.md`) : 2 respectent la fenetre de 4h, 3 non (71-75h),
+faute de posts plus recents disponibles parmi les comptes valides -- **deviation ecrite
+explicitement, pas cachee**, comme demande. Chacun valide reellement par
+`lib/valider-commentaire.js` (2-4 phrases, sans emoji/lien/puce, genre coherent). **Aucune
+publication reelle -- en attente du GO de Julien.**
+
+**Notion : jeton valide, mais aucune page partagee avec l'integration.** `POST /v1/search`
+repond 200 mais ne renvoie que des lignes de 3 bases de donnees existantes sans rapport avec ce
+chantier (prospects/CRM, donnees personnelles reelles de tiers -- jamais copiees ici au-dela de
+ce constat, ni utilisees comme parent pour les nouvelles bases). Aucune page ordinaire
+n'est partagee : impossible de creer les bases "Veille & posts"/"Commentaires"
+(`POST /v1/databases` exige un `parent.page_id` valide). **A faire par Julien/Nomena** :
+partager une page Notion dediee avec l'integration (bouton "Share"), donner son ID pour
+`NOTION_PARENT_PAGE_ID`.
+
+**Alerte non corrigee** : `linkedin-veille-virale/lib/veille.js` utilise tres probablement la
+meme hypothese de schema perimee que le bug trouve ci-dessus -- non verifie ni corrige ce jour
+(hors priorite), a faire avant son premier appel reel.
+
 ## Recapitulatif
 
 Au 12/09/2026, aucun point bloquant "technique" majeur ne reste ouvert :

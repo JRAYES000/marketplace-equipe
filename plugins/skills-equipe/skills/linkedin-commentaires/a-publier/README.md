@@ -1,64 +1,46 @@
-# A publier -- julien-agency, exemple reel pret, NON publie
+# Cinq commentaires reels -- prets, non publies (14/09/2026)
 
-**Bascule le 12/09/2026** : cet exemple ciblait initialement julien-partners, dont l'identite
-Composio n'est pas confirmee. Julien a dit explicitement que le compte importe peu -- corrige
-pour cibler **julien-agency** (`urn:li:person:aFqu-W7ClW`), le seul compte avec un acces
-Composio reellement confirme et fonctionnel (identite `averse-cooser`, voir
-`references/etat-linkedin-20260912.md`). Le texte a ete **reecrit** dans le ton de
-julien-agency (confiant, direct, pedagogue, oriente-dirigeants), pas simplement republie sous
-un autre `actorUrn` -- voir "Texte redige" plus bas.
+Produits en faisant reellement tourner le pipeline (`trouverPosts` reel sur les 16 comptes
+valides par Julien, `trierPosts`, `filtrerPostsFrais`, redaction manuelle par la session Claude
+comme prevu au point 3 du SKILL.md, puis `validerCommentaire` reel) -- voir
+`commentaires-2026-09-14.json` pour le detail complet (post cible, `shareUrn`, genre, texte).
+**Aucun appel a `publierCommentaire` n'a ete fait.**
 
-**Donnees reelles obtenues le 12/09/2026** via `APIFY_TOKEN` (configure dans l'environnement,
-export manuel par Nomena -- voir SKILL.md) : meme appel reel que `linkedin-veille-virale` sur
-le profil `https://www.linkedin.com/in/julien-rayes` (5 posts, sauvegardes dans
-`data/posts-julien-rayes-2026-09-12.json`, gitignore -- contenu specifique a un compte reel).
+## Deviation assumee -- fraicheur, a ecrire dans le mail du 20
 
-**Limite a noter honnetement** : `comptes_cibles` est encore vide dans
-`reglages-comptes.json` -- pas encore de veritable compte tiers configure. Le post cible est
-celui de Julien Rayes lui-meme, qui EST julien-agency : ce commentaire serait donc, en
-pratique, julien-agency commentant son propre post -- un exemple technique valable pour
-prouver que la chaine fonctionne de bout en bout sur des donnees reelles (y compris la
-conservation du `shareUrn`, jamais une URN `urn:li:activity:`), mais pas le scenario de
-production final (commenter un veritable post tiers). A completer : remplir `comptes_cibles`
-avec de vrais comptes a suivre.
+Le brief exige la priorite aux posts de **moins de 4h**. Sur les 16 comptes valides, un seul
+passage reel donne :
+- **julien-partners** : 2 posts frais trouves (0.9h et 1.2h), sur des auteurs distincts
+  (Virginie Caurraze, Theophile Burnet) -- utilises en priorite.
+- Pour completer a 5 commentaires au total (le nombre demande comme exemple reel du 20/09),
+  **3 commentaires supplementaires s'appuient sur les posts les plus recents disponibles,
+  hors fenetre de 4h** (71.4h, 72.2h et 74.5h) -- aucun post plus frais n'existait, a l'heure
+  du passage, parmi les auteurs distincts des 16 comptes valides. Conformement a l'instruction
+  explicite de Julien ("ne baisse pas la barre en silence"), cet ecart est ecrit ici, pas
+  cache : **2/5 commentaires respectent la regle des 4h, 3/5 non**, faute de matiere plus
+  fraiche disponible au moment du passage.
+- Un seul compte cible sur les 8 de `julien-agency` a produit un post dans la semaine
+  ecoulee (Jean Zendji, 2 posts) -- les 7 autres n'ont rien publie recemment. Consequence :
+  un seul commentaire a pu etre prepare pour julien-agency aujourd'hui (quota de 5/jour tres
+  loin d'etre sature, mais rien d'autre a commenter dans les donnees recuperees).
 
-**Ne pas enchainer sur ce compte avant confirmation du carrousel** : julien-agency a deja un
-post de test (le carrousel PDF, voir `linkedin-carrousel/a-publier/README.md`) en attente que
-Julien confirme son apparence reelle. Ne pas publier ce commentaire avant cette confirmation,
-pour ne pas empiler plusieurs actions de test sur le meme compte avant de savoir si la
-premiere fonctionne comme prevu.
+## Les 5 commentaires
 
-## Post cible (reel, retenu par `trierPosts`)
+| # | Compte | Auteur cible | Fraicheur | Genre | Lien du post |
+| --- | --- | --- | --- | --- | --- |
+| 1 | julien-partners | Virginie Caurraze | 0.9h (frais) | vraie_question | [lien](https://www.linkedin.com/posts/virginie-caurraze_autoentrepreneur-risquesprofessionnels-accueilstagiaire-activity-7505178899685744640-z2Yd) |
+| 2 | julien-partners | Theophile Burnet | 1.2h (frais) | information_chiffree | [lien](https://www.linkedin.com/posts/th%C3%A9ophile-burnet_voici-les-40-raccourcis-claude-code-la-plupart-activity-7505173186687299584-Fsu-) |
+| 3 | julien-partners | Florent Pontiac | 71.4h (hors fenetre) | histoire_vecue | [lien](https://www.linkedin.com/posts/florent-pontiac_carcassonne-xiii-billetterie-boutique-activity-7504114241730408448-SNx6) |
+| 4 | julien-partners | Valentin Muller | 74.5h (hors fenetre) | desaccord_argumente | [lien](https://www.linkedin.com/posts/valentin--muller_je-code-100-avec-lia-depuis-plus-dun-an-activity-7504067127067205632-NOpA) |
+| 5 | julien-agency | Jean Zendji | 72.2h (hors fenetre) | histoire_vecue | [lien](https://www.linkedin.com/posts/jean-zendji-zenfia_arr%C3%AAtez-de-vouloir-r%C3%A9pondre-%C3%A0-tous-vos-avis-activity-7504102064814268416-FPQV) |
 
-- Auteur : Julien Rayes (julien-agency), post du 2026-09-05.
-- Sujet : comment verifier qu'un prestataire IA sait vraiment faire (badge de l'annuaire
-  Claude Partners, teste sur 20 situations reelles, score a partir de 75/100).
-- `shareUrn` : `urn:li:share:7501940404297101312` (voir
-  `data/posts-julien-rayes-2026-09-12.json`, `id: 7501940405106679808`).
+Texte complet de chaque commentaire dans `commentaires-2026-09-14.json` (champ `texte`), deja
+valide par `lib/valider-commentaire.js` -- 2-4 phrases, aucun emoji/lien/puce, genre coherent
+avec le contenu (chiffre present pour Theophile Burnet, question reelle pour Virginie Caurraze).
 
-## Texte redige (jugement editorial de cette session, pas une generation automatique)
+## En attente du GO de Julien
 
-`julien-agency-2026-09-12.commentary.txt` -- commentaire dans le ton de julien-agency
-(confiant, direct, pedagogue, oriente-dirigeants), qui renforce le point du post source
-(juger sur un test concret plutot qu'une impression) mais avec un angle recrutement/decision
-de dirigeant plutot que reseau (l'angle initial, ecrit pour julien-partners) -- s'adresse
-directement au dirigeant qui recrute ("pour un dirigeant qui recrute...", "ca va vous faire
-gagner du temps"), pas au facilitateur de reseau.
-
-## A faire une fois la publication confirmee (et le carrousel valide)
-
-```js
-const { publierCommentaire } = require('./lib/publier-commentaire');
-const fs = require('fs');
-
-await publierCommentaire({
-  actorUrn: 'urn:li:person:aFqu-W7ClW', // julien-agency -- identite Composio confirmee le 12/09/2026
-  targetUrn: 'urn:li:share:7501940404297101312',
-  message: fs.readFileSync('a-publier/julien-agency-2026-09-12.commentary.txt', 'utf8').trim(),
-});
-```
-
-**Ne pas executer maintenant** : l'identite et l'acces technique sont confirmes, mais deux
-conditions restent a lever -- (1) l'accord explicite de Julien sur ce texte precis, et (2) sa
-confirmation que le carrousel deja publie sur ce compte s'affiche comme prevu, pour ne pas
-empiler une deuxieme action de test avant d'avoir valide la premiere.
+Rien n'a ete publie. Pour publier reellement un de ces 5 commentaires : `publierCommentaire({
+actorUrn: <selon le compte>, targetUrn: <shareUrn ci-dessus>, message: <texte> })`, puis
+`enregistrerCommentairePublie(compte, { date, auteurCible, postId })` pour que le quota
+journalier en tienne compte des le prochain lancement.
