@@ -266,10 +266,29 @@ l'en-tête HTTP `x-restli-id` d'une réponse `201` à corps vide, non exposé pa
 en cas de succès). Une tentative de lecture (`GET /rest/posts?q=author`) a échoué en `403`,
 cohérent avec les droits écriture seule de ce compte, pas un signal d'échec.
 
-**Aucune nouvelle tentative relancée** pour éviter un doublon. **Statut : NON CONFIRMÉ**,
-comme le premier carrousel. Julien doit ouvrir son propre profil pour vérifier lequel des deux
-posts (5 diapos non conforme, 10 diapos conforme) existe réellement, l'un, l'autre, les deux,
-ou aucun. Détail complet dans `references/etat-linkedin-20260912.md` (Point n°7).
+**Aucune nouvelle tentative relancée** pour éviter un doublon.
+
+**CONFIRMÉ le 14/09/2026, par navigateur réel** (pas par l'API, en échec normal sur ce compte
+en lecture) : consultation directe de `linkedin.com/in/julien-rayes` via Claude in Chrome
+(session LinkedIn authentifiée de Nomena — l'usage normal pour vérifier un post, pas un
+contournement anti-bot). **Les deux carrousels sont réellement en ligne et s'affichent comme
+des documents feuilletables** :
+
+- **Carrousel du 14/09 (10 diapos, conforme au brief)** :
+  `https://www.linkedin.com/posts/julien-rayes_pourquoi-vos-meilleurs-candidats-disparaissent-ils-activity-7505170085091840000-6DCd`
+  — diapo 1 vérifiée à l'écran identique au rendu local (accroche, flèche "BALAYEZ", numéro
+  01), texte du post identique à celui validé par `generer-post.js` (chiffre France Num
+  inclus).
+- **Carrousel du 12/09 (5 diapos, non conforme au brief — voir Point A de l'audit)** :
+  `https://www.linkedin.com/posts/julien-rayes_carrouselpdf-activity-7505146405649559552-m6yM`
+  — existe également, contrairement à l'incertitude qui pesait dessus depuis le 12/09.
+
+**Ce que ça tranche** : la publication réelle via l'API Documents de LinkedIn fonctionne bel et
+bien — `successful: true` + corps vide + lecture 403 sont la signature normale d'un succès sur
+ce compte, pas un doute à lever à chaque fois. Détail complet dans
+`references/etat-linkedin-20260912.md` (Points n°7 et n°8). **Ce point est maintenant livré et
+confirmé** pour le carrousel du 14/09 — reste à Julien de décider du sort du carrousel du 12/09
+(non conforme mais bien réel).
 
 Le nombre de diapos (5), les mots par diapo (jusqu'a 29) et l'absence totale de gras/emojis du
 carrousel du 12/09 ci-dessus **auraient ete refuses** par ces memes garde-fous s'ils avaient
