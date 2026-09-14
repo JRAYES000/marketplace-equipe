@@ -410,9 +410,15 @@ n'est partagee : impossible de creer les bases "Veille & posts"/"Commentaires"
 partager une page Notion dediee avec l'integration (bouton "Share"), donner son ID pour
 `NOTION_PARENT_PAGE_ID`.
 
-**Alerte non corrigee** : `linkedin-veille-virale/lib/veille.js` utilise tres probablement la
-meme hypothese de schema perimee que le bug trouve ci-dessus -- non verifie ni corrige ce jour
-(hors priorite), a faire avant son premier appel reel.
+**Alerte corrigee le 14/09/2026** (session suivante, hors priorite Notion) : confirmee --
+`linkedin-veille-virale/lib/veille.js` avait bien la meme hypothese de schema perimee que le
+bug trouve ci-dessus dans `linkedin-commentaires` (fixtures deja ecrites dans la forme plate,
+jamais teste contre un item brut reel). Corrige de la meme facon : `normaliserPost` ajoutee et
+appliquee dans `recupererPosts`, exportee, avec les 3 memes tests de non-regression (forme
+reelle Apify, `document.totalPageCount` conserve, champs absents sans plantage) dans
+`test/normaliserPost.test.js`. A verifier malgre tout au premier appel reel de ce paquet (non
+encore fait, contrairement a `linkedin-commentaires`), au cas ou l'acteur renverrait un
+troisieme ecart de forme non repere par ce correctif.
 
 ## Recapitulatif
 
