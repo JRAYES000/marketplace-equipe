@@ -3,18 +3,20 @@
     "actor_urn": "urn:li:person:ZvLHybJZhj",
     "_source_urn": "Verifie par Julien le 11/09/2026, a utiliser tel quel.",
     "comptes_cibles": [],
+    "_comptes_cibles_proposition": "Vide en attente de decision editoriale de Julien -- voir references/comptes-cibles-proposition-20260914.md (8 profils reels verifies, suggestion de repartition par ton).",
     "ton": ["chaleureux", "professionnel", "facilitateur", "oriente-reseau"],
     "seuil_max_commentaires": 30,
-    "plafond_par_jour": 12,
-    "plafond_par_cible_par_semaine": 3
+    "plafond_par_jour": 5,
+    "_plafond_par_jour_note": "Corrige le 14/09/2026 : 12 etait l'ancienne convention reprise de visibilite-ops, le brief integral impose 5/jour. Desormais fait respecter par lib/planifier-commentaires.js (validerQuotaJournalier), pas seulement documente."
   },
   "julien-agency": {
     "actor_urn": "urn:li:person:aFqu-W7ClW",
     "_source_urn": "Verifie par Julien le 11/09/2026, a utiliser tel quel.",
     "comptes_cibles": [],
+    "_comptes_cibles_proposition": "Vide en attente de decision editoriale de Julien -- voir references/comptes-cibles-proposition-20260914.md (8 profils reels verifies, suggestion de repartition par ton).",
     "ton": ["confiant", "direct", "pedagogue", "oriente-dirigeants"],
     "seuil_max_commentaires": 30,
-    "plafond_par_jour": 12,
-    "plafond_par_cible_par_semaine": 3
+    "plafond_par_jour": 5,
+    "_plafond_par_jour_note": "Corrige le 14/09/2026 : 12 etait l'ancienne convention reprise de visibilite-ops, le brief integral impose 5/jour. Desormais fait respecter par lib/planifier-commentaires.js (validerQuotaJournalier), pas seulement documente."
   }
 }

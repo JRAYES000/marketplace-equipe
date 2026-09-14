@@ -1,116 +1,178 @@
 ---
 name: linkedin-commentaires
-description: "Trouve des posts LinkedIn pertinents sous des comptes cibles et publie un commentaire redige sur mesure, pour julien-partners ou julien-agency"
+description: "Trouve des posts LinkedIn recents et frais (<4h) sous des comptes cibles et redige un commentaire sur mesure, dans l'un des quatre genres du brief, pour julien-partners ou julien-agency. Activation MANUELLE uniquement : ne se declenche jamais d'elle-meme, seulement sur demande explicite (ex. 'fais les commentaires du jour', 'commentaires LinkedIn pour julien-agency')."
 ---
 
 # linkedin-commentaires
 
+**Activation MANUELLE uniquement.** Cette skill ne se lance jamais d'elle-meme -- seulement sur
+demande explicite.
+
+**Phrase de lancement** : « les commentaires du jour ».
+Variantes probables : « fais les commentaires du jour », « commentaires LinkedIn pour
+julien-agency/julien-partners », « lance la veille commentaires », « qu'est-ce qu'on commente
+aujourd'hui ».
+
+**Point de situation** : lancer `node etat.js [compte]` avant toute chose -- affiche en trois
+lignes le dernier commentaire publie, le quota du jour deja utilise, et l'etat des comptes
+cibles. Propose un repli si rien n'est configure (jamais les mains vides).
+
 ## Ce que fait la skill
 
 1. `lib/trouver-posts.js` (`trouverPosts`) interroge l'acteur Apify
-   `harvestapi/linkedin-profile-posts` sur les comptes listes dans
-   `comptes_cibles` de `reglages-comptes.json`. **Champ obligatoire :
-   `targetUrls`, pas `profiles`** -- avec `profiles` l'acteur renvoie zero
-   post sans aucune erreur.
-2. `trierPosts` ecarte les carrousels (repere : `document.totalPageCount`
-   present -- commenter dessus reviendrait a commenter un post non lu) et les
-   posts au-dela de `seuil_max_commentaires`.
-3. La session Claude qui invoque cette skill lit les posts retenus et
-   **ecrit elle-meme** le commentaire, dans le ton de
-   `reglages-comptes.json` -- ce n'est pas une generation automatique en JS.
-4. `lib/publier-commentaire.js` (`publierCommentaire`) est le **seul** point
-   d'appel qui publie reellement : `publierCommentaire({ actorUrn, targetUrn,
-   message })`. `targetUrn` doit etre le `shareUrn` du post (jamais une URN
-   `urn:li:activity:`, refusee par l'API).
-5. `dry-run.js` (`npm run dry-run`) execute les etapes 1-3 de bout en bout
+   `harvestapi/linkedin-profile-posts` sur les comptes listes dans `comptes_cibles` de
+   `reglages-comptes.json`. **Champ obligatoire : `targetUrls`, pas `profiles`** -- avec
+   `profiles` l'acteur renvoie zero post sans aucune erreur.
+2. `trierPosts` ecarte les carrousels (repere : `document.totalPageCount` present -- commenter
+   dessus reviendrait a commenter un post non lu) et les posts au-dela de
+   `seuil_max_commentaires`, trie par date decroissante.
+3. `lib/planifier-commentaires.js` (`filtrerPostsFrais`) ne garde que les posts publies il y a
+   **moins de 4 heures** -- priorite a la fraicheur, jamais a la popularite, comme l'exige le
+   brief. `validerQuotaJournalier` refuse un nouveau commentaire si le quota du jour (5, voir
+   plus bas) est atteint, ou si la meme personne a deja ete commentee aujourd'hui.
+4. La session Claude qui invoque cette skill lit les posts retenus et **ecrit elle-meme** le
+   commentaire, dans le ton de `reglages-comptes.json`, en choisissant l'un des quatre genres du
+   brief -- ce n'est pas une generation automatique en JS.
+5. `lib/valider-commentaire.js` (`validerCommentaire`) **refuse** (jamais un avertissement) tout
+   brouillon hors des regles de forme (2-4 phrases, pas de puces/emoji/lien) ou dont le genre
+   declare ne correspond pas au contenu (voir "Garde-fous" plus bas).
+6. `lib/publier-commentaire.js` (`publierCommentaire`) est le **seul** point d'appel qui publie
+   reellement : `publierCommentaire({ actorUrn, targetUrn, message })`. `targetUrn` doit etre le
+   `shareUrn` du post (jamais une URN `urn:li:activity:`, refusee par l'API).
+7. Une fois un commentaire reellement publie, `lib/registre.js` (`enregistrerCommentairePublie`)
+   l'ajoute a `data/registre-commentaires.json` (gitignore) -- c'est ce registre qui fait
+   respecter le quota journalier d'un lancement de la skill a l'autre.
+8. `dry-run.js` (`npm run dry-run` ou `node dry-run.js`) execute les etapes 1-5 de bout en bout
    sans jamais appeler `publierCommentaire` (il n'importe meme pas
-   `lib/publier-commentaire.js`) -- avec le jeu fixture de
-   `fixtures/posts-exemple.json` tant que `comptes_cibles` est vide, ou avec
-   un vrai appel Apify des que ce champ est rempli et `APIFY_TOKEN` present.
-   Ecrit le resultat (post cible, `shareUrn`, commentaire final, arguments
-   qu'on passerait a `publierCommentaire`) dans
-   `dry-run-sortie/commentaires-exemple-fixture.json` -- nom de fichier
-   volontairement explicite : **c'est un exemple sur donnees fixture, pas un
-   candidat pret a publier sur donnees reelles** (voir "A completer avant un
-   usage reel" ci-dessous). `npm test` (`node --test`) verifie le tri
-   (`test/trierPosts.test.js`, y compris que `shareUrn` est bien conserve) et
-   ce dry run (`test/dry-run.test.js`), y compris qu'il n'importe jamais
+   `lib/publier-commentaire.js`) -- avec le jeu fixture de `fixtures/posts-exemple.json` tant
+   que `comptes_cibles` est vide, ou avec un vrai appel Apify des que ce champ est rempli et
+   `APIFY_TOKEN` present. `npm test` (`node --test`) verifie chaque garde-fou individuellement
+   (voir plus bas) et ce dry run de bout en bout, y compris qu'il n'importe jamais
    `lib/publier-commentaire.js`.
 
-Plafonds par defaut dans `reglages-comptes.json` (repris des regles reelles
-deja en usage dans `visibilite-ops`, `routines/commentaires-linkedin.md`) :
-12 commentaires par jour et par compte, 3 au maximum sous la meme cible par
-semaine -- a faire respecter par la session qui invoque la skill, rien dans
-le code ne les impose automatiquement pour l'instant.
+## Garde-fous automatiques (14/09/2026) -- refus explicite, pas un avertissement
 
-## Etat au 12/09/2026 -- ce qui est pret, ce qui attend
+Priorite 2 (apres `linkedin-carrousel`, livre et confirme). Les regles de la section 6 du brief
+sont desormais codees en garde-fous qui refusent, testes un par un avec un cas reel qui doit
+echouer.
 
-- **Pret et teste reellement** : le mecanisme de recuperation des posts
-  (meme fonction Apify que `linkedin-veille-virale`, verifiee avec le compte
-  `julien_r`).
-- **Pret et teste de bout en bout, hors publication reelle** : la chaine
-  recherche -> tri -> commentaire final, via `dry-run.js` -- un exemple
-  concret de ce que serait le commentaire publie (voir
-  `dry-run-sortie/commentaires-exemple-fixture.json`, genere par
-  `npm run dry-run`), sans qu'aucune publication reelle n'ait eu lieu.
+### Structure et frequence -- `lib/planifier-commentaires.js`
+
+- **Fraicheur** : `filtrerPostsFrais` ne garde que les posts de moins de 4h, tries du plus
+  recent au plus ancien. Un post de 5h est exclu -- teste reellement
+  (`test/planifier-commentaires.test.js`).
+- **Quota journalier (5/jour)** et **jamais deux fois la meme personne le meme jour** :
+  `validerQuotaJournalier`, verifie contre `data/registre-commentaires.json` (le registre reel
+  des commentaires deja publies, pas une simple limite documentee).
+- Corrige a cette occasion : `reglages-comptes.json` portait encore l'ancien plafond de 12/jour
+  (convention reprise de `visibilite-ops`) ; le brief integral impose 5 -- corrige et desormais
+  fait respecter par le code, pas seulement documente.
+
+### Contenu du commentaire -- `lib/valider-commentaire.js`
+
+- **2 a 4 phrases**, refus hors de cette fourchette (teste avec 1 et avec 5 phrases).
+- **Aucune puce/liste numerotee, aucun emoji, aucun lien** -- chacun teste avec un cas reel qui
+  echoue.
+- **Commentaires vides refuses** : liste de formulations creuses ("super post", "tellement
+  vrai", "top", "merci du partage", etc.) -- refus explicite, testes.
+- **Genre coherent avec le contenu** : `information_chiffree` exige un chiffre dans le texte,
+  `vraie_question` exige que le texte se termine par "?" -- les deux testes en echec.
+- **Limite assumee, pas contournee** : "orthographe irreprochable" et le rythme voulu par le
+  brief ("un mot parle en tete, un fragment sans verbe") sont des qualites de redaction, pas des
+  formes mecaniquement verifiables -- aucun garde-fou ne les impose, c'est a la session qui
+  redige de les tenir.
+
+### Sortie reelle des 5 cas de refus demandes
+
+```
+$ node -e "require('./lib/planifier-commentaires').validerQuotaJournalier([{date:'2026-09-14',auteurCible:'urn:li:person:a'},{date:'2026-09-14',auteurCible:'urn:li:person:b'},{date:'2026-09-14',auteurCible:'urn:li:person:c'},{date:'2026-09-14',auteurCible:'urn:li:person:d'},{date:'2026-09-14',auteurCible:'urn:li:person:e'}],{auteurCible:'urn:li:person:nouveau'})"
+Commentaire refuse : quota journalier atteint (5/5 deja publies aujourd'hui pour ce compte).
+
+$ node -e "require('./lib/valider-commentaire').validerCommentaire({texte:'Super post !',genre:'histoire_vecue'})"
+Commentaire refuse : formulation vide detectee ("Super post !") -- ca ne rapporte rien et ca se voit, comme le dit le brief.
+
+$ node -e "require('./lib/valider-commentaire').validerCommentaire({texte:'Bon point, ca rejoint ce qu on a vu chez un client 👍.',genre:'histoire_vecue'})"
+Commentaire refuse : aucun emoji autorise.
+
+$ node -e "require('./lib/valider-commentaire').validerCommentaire({texte:'Interessant.',genre:'histoire_vecue'})"
+Commentaire refuse : 1 phrase(s) detectee(s), attendu entre 2 et 4.
+
+$ node -e "require('./lib/valider-commentaire').validerCommentaire({texte:'On a vu ca aussi chez nous. Ca a vraiment aide.',genre:'information_chiffree'})"
+Commentaire refuse : genre "information_chiffree" declare mais aucun chiffre trouve dans le texte.
+```
+
+`node --test` : 27 tests, tous verts (`lib/valider-commentaire.js` : 13, `lib/planifier-commentaires.js` : 5, `dry-run.js` : 4, `trierPosts` : 5).
+
+## Cinq regles d'usage (brief du 10/09/2026, section 2) -- etat au 14/09/2026
+
+1. **Phrase de lancement** : faite, voir en tete de ce fichier et dans le README du paquet.
+2. **Point de situation en 3 lignes** : fait, `node etat.js [compte]`.
+3. **Lecture des chiffres depuis une capture d'ecran, jamais de saisie manuelle** : **a du sens
+   ici** (contrairement a `linkedin-carrousel`), vu les colonnes de suivi a 3 jours prevues sur
+   la page Notion (J'aime, reponses, vues de profil, demandes de contact -- section 6 du brief).
+   **Non implemente a ce stade** : aucune page Notion n'existe encore (connecteur absent de
+   cette session, voir plus bas), donc rien a lire par capture d'ecran pour l'instant -- a faire
+   des que la page existe.
+4. **Rien ne plante a vide** : `validerCommentaire`/`validerQuotaJournalier` refusent avec un
+   message explicite (jamais une exception brute) ; `etat.js` et `dry-run.js` gerent le cas
+   "rien de disponible" avec un message qui dit quoi faire (voir regle 5).
+5. **Jamais les mains vides** : `dry-run.js` et `etat.js` proposent un repli concret des que
+   rien n'est disponible (aucun post frais, aucun compte cible, quota atteint) -- teste
+   reellement (voir sortie CLI plus bas). Le champ `comptes_cibles` vide n'a pas ete laisse tel
+   quel non plus : une proposition argumentee de 8 comptes reels existe (voir "Comptes cibles"
+   ci-dessous) plutot qu'un blocage silencieux.
+
+**Sortie reelle de `node dry-run.js` a ce jour (comptes_cibles vide, donnees fixture datees,
+donc hors fenetre de fraicheur reelle)** :
+```
+"repli": "Aucun post de moins de 4h trouve parmi les 2 post(s) retenus pour julien-partners.
+Repli propose : reessayer au prochain passage (2 par jour prevus), ou, si le delai presse,
+commenter malgre tout le plus recent disponible en signalant explicitement qu'il depasse la
+fenetre de fraicheur -- decision a valider par Julien, pas automatique."
+```
+
+## Comptes cibles -- proposition argumentee, pas un champ vide
+
+`comptes_cibles` est vide dans `reglages-comptes.json` pour les deux comptes : c'est une
+decision editoriale qui revient a Julien, pas a moi. Mais "jamais les mains vides" (regle 5)
+s'applique aussi ici : voir `references/comptes-cibles-proposition-20260914.md` pour **8
+profils LinkedIn francais reels, actifs, verifies un par un** (ouverts et lus via navigateur,
+pas invente), avec positionnement observe et une suggestion de repartition par ton entre les
+deux comptes. **A valider ou corriger par Julien** ; une fois fait, copier les URLs retenues
+dans `reglages-comptes.json`.
+
+## Connecteur Notion -- absent de cette session
+
+Verifie (recherche d'outils differes) : aucun outil `notion` charge dans cette session. La
+page Notion demandee par le brief (colonnes Compte/personne visee/lien/date/texte/genre, puis
+suivi a 3 jours) ne peut pas etre creee tant qu'un membre de l'equipe n'a pas installe ce
+connecteur (voir le README racine de `marketplace-equipe` pour la procedure). **Prochain point
+a trancher avec Julien**, comme demande.
+
+## Exemple reel attendu le 20/09 -- BLOQUE, pas contourne
+
+Le brief demande cinq commentaires reels rediges (postes reels, cibles reelles). **Ce point
+reste bloque tant que `comptes_cibles` est vide** : sans compte cible valide par Julien, il n'y
+a pas de posts tiers reels et frais a commenter, et je n'ai pas recupere les posts des 8
+candidats proposes ci-dessus par moi-meme -- les cibler avant validation reviendrait a agir sur
+une decision editoriale que je n'ai pas le mandat de prendre seul. **Des que Julien valide (ou
+corrige) la liste**, la chaine est prete de bout en bout (garde-fous testes, pipeline
+fonctionnel sur donnees fixture) pour produire les cinq commentaires reels sans autre chantier
+technique.
+
+## Etat au 12/09/2026 -- ce qui restait pret, ce qui attendait (avant les garde-fous du 14/09)
+
 - **Identite confirmee, `publierCommentaire` utilisable pour julien-agency** :
-  `averse-cooser` correspond a `urn:li:person:aFqu-W7ClW` (julien-agency),
-  confirme le 12/09/2026 par appel reel -- voir SKILL.md de
-  `linkedin-carrousel` et `references/etat-linkedin-20260912.md`.
-  `julien-partners` reste **non confirme**.
-- **Pipeline de publication texte verifie reellement (action voisine), mais
-  pas `publierCommentaire` lui-meme** : le 12/09/2026, un appel reel de
-  `LINKEDIN_CREATE_LINKED_IN_POST` en `lifecycleState: "DRAFT"` a confirme
-  que l'authentification et l'URN de julien-agency fonctionnent de bout en
-  bout via le canal MCP (cree, verifie non public, puis supprime -- voir
-  SKILL.md de `linkedin-veille-virale`). **`publierCommentaire` utilise une
-  action differente** (`LINKEDIN_CREATE_COMMENT_ON_POST`), qui n'a pas
-  d'equivalent "brouillon" dans son schema -- un commentaire est visible des
-  sa creation, donc pas de test sans effet de bord reel identifie pour cette
-  action precise. Elle reste donc **non testee par un appel reel**, meme si
-  la confiance dans le canal/l'identite a augmente.
-- **Canal reellement fonctionnel : MCP, via une cle d'acces "consumer"**
-  (pas le canal REST documente jusqu'ici dans `lib/composio.js`) -- obtenue
-  dans les reglages d'un compte Composio membre de l'equipe de Julien
-  (Reglages -> "Sessions & API Key"), pas via `composio login`. **A faire** :
-  migrer `lib/composio.js` vers ce canal quand cette skill sera reprise pour
-  un usage reel.
-- **APIFY_TOKEN : RESOLU le 12/09/2026** -- Nomena a export le jeton
-  lui-meme dans l'environnement de la session (pas de contournement du
-  blocage documente precedemment). Meme appel reel que
-  `linkedin-veille-virale` sur `https://www.linkedin.com/in/julien-rayes` :
-  5 posts sauvegardes dans `data/posts-julien-rayes-2026-09-12.json`
-  (gitignore). Un exemple **reel** de commentaire est redige et pret dans
-  `a-publier/` -- voir son `README.md` pour le detail et la limite honnete
-  (profil interroge = Julien Rayes lui-meme, pas encore un compte tiers).
-- **Exemple `a-publier/` cible julien-agency, pas julien-partners** (corrige
-  le 12/09/2026) : redige initialement pour julien-partners, dont l'identite
-  Composio n'est pas confirmee ; Julien a dit explicitement que le compte
-  importe peu, donc le texte a ete **reecrit** (pas juste republie sous un
-  autre `actorUrn`) dans le ton de julien-agency (confiant, direct,
-  pedagogue, oriente-dirigeants) pour cibler `urn:li:person:aFqu-W7ClW`, le
-  seul compte avec un acces reellement confirme -- voir
-  `a-publier/README.md`. **Ne pas publier avant que Julien confirme
-  l'apparence reelle du carrousel** deja publie sur ce meme compte (voir
-  `linkedin-carrousel`) : eviter d'empiler plusieurs actions de test sur le
-  meme compte avant d'avoir valide la premiere.
+  `urn:li:person:aFqu-W7ClW`, confirme par appel reel -- voir SKILL.md de `linkedin-carrousel`
+  et `references/etat-linkedin-20260912.md`. `julien-partners` reste **non confirme**.
+- **`publierCommentaire` reste non testee par un appel reel** : elle utilise
+  `LINKEDIN_CREATE_COMMENT_ON_POST`, qui n'a pas d'equivalent "brouillon" -- un commentaire est
+  visible des sa creation. Le canal MCP/l'identite ont ete confirmes fonctionnels sur une action
+  voisine (creation de post), pas sur celle-ci precisement.
+- **Canal reellement fonctionnel : MCP, via une cle d'acces "consumer"** (pas le canal REST de
+  `lib/composio.js`, ecrit avant que ce canal MCP soit decouvert). **A faire** : migrer
+  `lib/composio.js` vers ce canal avant toute publication reelle.
+- **APIFY_TOKEN : RESOLU** -- export manuel par Nomena dans l'environnement de la session.
 
-## A completer avant un usage reel
-
-- `comptes_cibles` dans `reglages-comptes.json` est vide pour les deux
-  comptes -- a remplir avec les profils/pages a suivre pour un usage en
-  production (voir la limite notee dans `a-publier/README.md`).
-- **(12/09/2026) Verifie : pas de source existante pour remplir ce champ.**
-  Meme constat que `linkedin-veille-virale` : le champ `concurrents` de
-  `linkedin-carrousel/reglages-comptes.json` (piste naturelle envisagee) est
-  **vide `[]`** pour les trois comptes, jamais rempli, et aucune autre trace
-  de comptes concurrents/pairs reels n'existe dans ce depot. **Ce qu'il
-  faut** : une liste de profils/pages LinkedIn publics reels (URL
-  exploitable par Apify, pas un nom d'entreprise) sous lesquels trouver des
-  posts pertinents a commenter. **Decision editoriale/business** revenant a
-  Julien ou Nomena -- aucun compte devine ou ajoute ici pour combler ce
-  vide.
-
-Etat des lieux complet des 3 skills linkedin-* et de tout ce qui devient
-activable des que chaque blocage se leve :
+Etat des lieux complet des 3 skills linkedin-* :
 `references/etat-linkedin-20260912.md` du paquet.
