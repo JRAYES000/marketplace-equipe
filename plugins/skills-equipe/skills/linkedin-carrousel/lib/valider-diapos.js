@@ -17,6 +17,8 @@
  * d'ecriture, pas un garde-fou automatisable.
  */
 
+const { validerAccents } = require('./valider-orthographe');
+
 const DIAPOS_MIN = 8;
 const DIAPOS_MAX = 12;
 const DIAPOS_DEFAUT = 10;
@@ -70,6 +72,11 @@ function validerDiapos(diapos) {
         `maximum autorise ${MOTS_MAX_PAR_DIAPO}. Raccourcissez le texte de cette diapo -- la ` +
         `police ne doit jamais etre reduite pour faire rentrer un texte trop long.`
       );
+    }
+    try {
+      validerAccents(texteAffiche);
+    } catch (erreur) {
+      throw new Error(`Carrousel refuse : diapo n°${index + 1} ("${diapo.titre || ''}") -- ${erreur.message}`);
     }
   });
 }

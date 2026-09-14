@@ -154,6 +154,18 @@ racine du paquet, copiee dans `comptes_a_surveiller` des deux comptes de
 `reglages-comptes.json`). Methode complete et tableau des 10 profils :
 `references/comptes-a-surveiller-veille-20260914.md`.
 
+## Accents manquants -- garde-fou ajoute le 15/09/2026
+
+`lib/valider-orthographe.js` (`validerAccents`) refuse tout texte contenant un mot d'une liste
+fermee de mots toujours accentues en francais standard -- meme mecanisme que
+`linkedin-carrousel`/`linkedin-commentaires` (voir leurs SKILL.md pour le detail complet et
+l'incident qui l'a motive : le carrousel deja publie le 14/09 s'est revele integralement sans
+accents). Ce paquet-ci n'avait **aucun validateur de contenu avant publication** : `dry-run.js`
+appelle desormais `validerAccents` sur `contenuFinal` (la redaction du post recycle) -- si elle
+echoue, `contenuFinal` et `argumentsPublierPost` deviennent `null` (`erreurOrthographe` porte le
+detail) plutot que de laisser passer un texte fautif. L'exemple `a-publier/julien-agency-2026-09-12.commentary.txt`,
+lui aussi integralement sans accents, corrige le meme jour.
+
 ## Score d'engagement code, passage reel execute -- 14/09/2026 (meme jour, session suivante)
 
 `trierPosts` calcule desormais le score du brief -- `(reactions + 3*commentaires + 5*partages) /

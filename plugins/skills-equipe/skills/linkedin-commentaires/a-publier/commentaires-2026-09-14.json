@@ -17,7 +17,7 @@
     "shareUrn": "urn:li:share:7505173185277939713",
     "fraicheurHeures": 1.2,
     "genre": "information_chiffree",
-    "texte": "Bon point sur /compact, c'est clairement celui qui change le plus la donne sur les sessions de plus de 2h. On l'utilise avec une équipe de 8 personnes et ça a coupé le temps de debug de moitié en un mois."
+    "texte": "Ça rejoint un chiffre qui interroge : 84% des développeurs utilisent déjà l'IA au quotidien (Stack Overflow, 2025), contre 76% un an plus tôt. La vraie différence se joue justement sur ces raccourcis de pilotage de session, pas sur le modèle utilisé."
   },
   {
     "compte": "julien-partners",
@@ -26,8 +26,8 @@
     "urlPost": "https://www.linkedin.com/posts/florent-pontiac_carcassonne-xiii-billetterie-boutique-activity-7504114241730408448-SNx6",
     "shareUrn": "urn:li:share:7504114240602001409",
     "fraicheurHeures": 71.4,
-    "genre": "histoire_vecue",
-    "texte": "Ça fait plaisir à lire, on a eu le même sentiment avec un client sportif l'an dernier. Le vrai défi c'était de faire tenir l'identité du club dans un site qui reste simple à mettre à jour pour eux."
+    "genre": "vraie_question",
+    "texte": "Rendu propre, plutôt du sur-mesure qu'un template habillé pour l'occasion. Sur un club comme celui-ci, qu'est-ce qui a le plus pesé dans les choix de structure du site : la billetterie, l'identité visuelle, ou autre chose ?"
   },
   {
     "compte": "julien-partners",
@@ -37,7 +37,7 @@
     "shareUrn": "urn:li:share:7504067125548916737",
     "fraicheurHeures": 74.5,
     "genre": "desaccord_argumente",
-    "texte": "Pas sûr que la différence tienne uniquement au temps passé. On a livré des SaaS multi-tenant en 10 semaines avec une méthode proche, mais des tests automatisés dès le départ plutôt qu'une vérification manuelle en continu. Ça déplace surtout où se niche le risque, pas son existence."
+    "texte": "Pas sûr que la différence tienne uniquement au temps passé. Le vrai clivage se joue plutôt sur la présence ou non de tests automatisés et d'une revue systématique dès le départ, plutôt qu'une vérification manuelle a posteriori. Ça déplace surtout où se niche le risque, pas son existence."
   },
   {
     "compte": "julien-agency",
@@ -46,7 +46,7 @@
     "urlPost": "https://www.linkedin.com/posts/jean-zendji-zenfia_arr%C3%AAtez-de-vouloir-r%C3%A9pondre-%C3%A0-tous-vos-avis-activity-7504102064814268416-FPQV",
     "shareUrn": "urn:li:share:7504102064151674880",
     "fraicheurHeures": 72.2,
-    "genre": "histoire_vecue",
-    "texte": "On a mis en place un tri similaire chez un client hôtelier l'an dernier, sur les emails plutôt que les avis. Le déclic a été le même : la plupart des messages n'avaient pas besoin d'IA, juste d'être lus à temps."
+    "genre": "vraie_question",
+    "texte": "Le tri par règles avant tout appel à un modèle est le bon réflexe, ça évite bien des surprises. Sur les avis ambigus qui ne rentrent dans aucune des deux catégories, la règle reste l'arbitrage humain systématique, ou il existe un second niveau de filtre ?"
   }
 ]

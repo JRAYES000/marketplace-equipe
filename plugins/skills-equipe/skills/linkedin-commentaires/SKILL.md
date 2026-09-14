@@ -92,15 +92,16 @@ echouer.
   equipe de N personnes, resultat obtenu) est **refuse**, sauf si `anecdoteSourcee: true` est
   passe explicitement -- ce que seule une confirmation reelle de Julien autorise. Voir "Genre
   histoire_vecue" plus bas pour la procedure complete et pourquoi ce garde-fou existe.
-- **Limite assumee, pas contournee** : "orthographe irreprochable" et le rythme voulu par le
-  brief ("un mot parle en tete, un fragment sans verbe") sont des qualites de redaction, pas des
-  formes mecaniquement verifiables -- aucun garde-fou ne les impose, c'est a la session qui
-  redige de les tenir. **Attention neanmoins verifiee reellement absente le 14/09/2026** : les
-  premiers commentaires/posts prepares dans ce paquet et dans `linkedin-carrousel`/
-  `linkedin-veille-virale` etaient integralement sans accents (pas un artefact d'affichage,
-  confirme sur les octets du fichier) -- corrige dans les fichiers pas encore publies ce jour-la,
-  mais **reste a surveiller a chaque nouvelle redaction** : ecrire un francais correctement
-  accentue des la premiere frappe, pas une passe de correction a part.
+- **Accents manquants, controle PARTIEL ajoute le 15/09/2026** (`lib/valider-orthographe.js`,
+  `validerAccents`, appele par `validerCommentaire`) : les 5 premiers commentaires reels
+  s'etaient reveles integralement sans accents le 14/09 (pas un artefact d'affichage, confirme
+  sur les octets du fichier) -- meme constat sur `linkedin-carrousel` (y compris du contenu deja
+  publie) et `linkedin-veille-virale`. Refuse desormais tout texte contenant un mot d'une liste
+  fermee de mots toujours accentues en francais standard -- imparfait par construction (mots
+  ambigus comme "a"/"à" ou "ou"/"où" volontairement exclus, risque de faux positif trop eleve),
+  mais mieux qu'aucun controle. **Limite restante, assumee** : le rythme voulu par le brief ("un
+  mot parle en tete, un fragment sans verbe") reste une qualite de redaction non verifiable
+  mecaniquement -- c'est a la session qui redige de le tenir.
 
 ## Genre "histoire_vecue" : ne jamais inventer une experience de Julien (14/09/2026)
 
@@ -140,6 +141,27 @@ peut poser, et seulement apres confirmation reelle de Julien. Heuristique, pas u
 vraiment eu lieu, seul un humain le peut) -- teste sur le cas reel du 14/09/2026 et sur un cas
 d'observation generale qui ne doit pas etre accuse a tort (`test/valider-commentaire.test.js`).
 
+**Resolu le 14/09/2026, sans attendre d'anecdote de Julien** (il ne relit rien et ne repond pas
+toujours vite -- le livrable du 20 ne peut pas dependre de sa disponibilite) : les 4 commentaires
+refuses ont ete **reecrits dans un genre qui ne demande aucune experience personnelle**, pas mis
+en attente indefiniment.
+- Theophile Burnet -> `information_chiffree`, mais avec un **vrai chiffre public sourcable**
+  (84% des developpeurs utilisent l'IA en 2025 contre 76% en 2024, Stack Overflow Developer
+  Survey 2025 -- page reellement ouverte et lue, citation exacte verifiee), jamais un chiffre
+  "de chez un client".
+- Florent Pontiac -> `vraie_question` : question reelle sur le site livre (structure, choix de
+  design), sans pretendre l'avoir concu.
+- Valentin Muller -> `desaccord_argumente` : argument sur le fond (tests automatises vs
+  verification manuelle a posteriori), sans "on a livre" ni "chez nous".
+- Jean Zendji -> `vraie_question` : question reelle sur le systeme de tri qu'il decrit, sans
+  raconter une mission similaire.
+
+Les 5 commentaires couvrent desormais **3 genres sur 4** (`vraie_question` x3, `information_chiffree`
+x1, `desaccord_argumente` x1) -- `histoire_vecue` reste en reserve pour le jour ou Julien fournira
+une anecdote reelle, deviation assumee et ecrite ici pour le mail du 20/09. Les 5 passent
+reellement `validerCommentaire` (forme, genre, experience non sourcee, accents) -- voir
+`a-publier/README.md` pour le detail complet et le statut de chacun.
+
 ### Sortie reelle des 5 cas de refus demandes
 
 ```
@@ -159,7 +181,7 @@ $ node -e "require('./lib/valider-commentaire').validerCommentaire({texte:'On a 
 Commentaire refuse : genre "information_chiffree" declare mais aucun chiffre trouve dans le texte.
 ```
 
-`node --test` : 37 tests, tous verts (mis a jour le 14/09/2026 avec le garde-fou "experience non sourcee" -- voir "Genre histoire_vecue" plus haut).
+`node --test` : 40 tests, tous verts (mis a jour le 15/09/2026 avec le garde-fou "accents manquants" -- voir plus haut).
 
 ## Cinq regles d'usage (brief du 10/09/2026, section 2) -- etat au 14/09/2026
 

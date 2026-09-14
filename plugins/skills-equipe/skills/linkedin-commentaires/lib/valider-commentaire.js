@@ -5,15 +5,23 @@
  * + regles d'ecriture generales de la section 3). Refus explicite -- jamais
  * un simple avertissement -- des qu'une regle est violee.
  *
- * Limite assumee, pour ne rien inventer : "orthographe irreprochable" et "un
- * mot parlé en tete, un fragment sans verbe" (le rythme humain voulu par le
- * brief) sont des qualites de REDACTION, pas des formes verifiables par une
- * regle mecanique -- aucun controle automatique ne les impose ici. Ce qui EST
- * verifie automatiquement : la longueur (2-4 phrases), l'absence de puces/
- * emoji/lien, l'absence de formulation vide connue, et la coherence du genre
- * declare avec le contenu (chiffre present pour "information_chiffree",
- * question reelle pour "vraie_question").
+ * Limite assumee, pour ne rien inventer : "un mot parlé en tete, un fragment
+ * sans verbe" (le rythme humain voulu par le brief) reste une qualite de
+ * REDACTION, pas une forme verifiable par une regle mecanique -- aucun
+ * controle automatique ne l'impose ici. "Orthographe irreprochable", en
+ * revanche, a desormais un controle PARTIEL (voir `validerAccents` plus bas
+ * et `lib/valider-orthographe.js`) depuis que les 5 premiers commentaires
+ * reels de ce paquet se sont reveles integralement sans accents le
+ * 14/09/2026 -- controle imparfait (liste fermee de mots), mais mieux
+ * qu'aucun. Ce qui EST verifie automatiquement : la longueur (2-4 phrases),
+ * l'absence de puces/emoji/lien, l'absence de formulation vide connue, la
+ * coherence du genre declare avec le contenu (chiffre present pour
+ * "information_chiffree", question reelle pour "vraie_question"), l'absence
+ * d'experience personnelle non sourcee, et desormais les accents manquants
+ * les plus frequents.
  */
+
+const { validerAccents } = require('./valider-orthographe');
 
 const PHRASES_MIN = 2;
 const PHRASES_MAX = 4;
@@ -188,6 +196,7 @@ function validerCommentaire({ texte, genre, anecdoteSourcee = false }) {
   validerFormeGenerale(texte);
   validerGenre(texte, genre);
   validerAffirmationExperience(texte, anecdoteSourcee);
+  validerAccents(texte);
 }
 
 module.exports = {

@@ -5,12 +5,12 @@ const assert = require('node:assert/strict');
 const { validerCommentaire } = require('../lib/valider-commentaire');
 
 test('accepte un commentaire conforme, genre "information_chiffree"', () => {
-  const texte = "Bon sujet. Sur ce type de projet, un delai de 4 a 6 semaines avant le premier resultat visible revient souvent.";
+  const texte = "Bon sujet. Sur ce type de projet, un délai de 4 à 6 semaines avant le premier résultat visible revient souvent.";
   assert.doesNotThrow(() => validerCommentaire({ texte, genre: 'information_chiffree' }));
 });
 
 test('accepte un commentaire conforme, genre "vraie_question"', () => {
-  const texte = "Interessant. Vous avez teste ca sur des equipes de combien de personnes ?";
+  const texte = "Intéressant. Vous avez testé ça sur des équipes de combien de personnes ?";
   assert.doesNotThrow(() => validerCommentaire({ texte, genre: 'vraie_question' }));
 });
 
@@ -94,7 +94,7 @@ test('refuse un texte vide', () => {
 });
 
 test('refuse une affirmation a la premiere personne sur un client sans source -- cas reel trouve le 14/09/2026', () => {
-  const texte = "On a mis en place un tri similaire chez un client hotelier l'an dernier. Le declic a ete le meme, ca a vraiment aide.";
+  const texte = "On a mis en place un tri similaire chez un client hôtelier l'an dernier. Le déclic a été le même, ça a vraiment aidé.";
   assert.throws(
     () => validerCommentaire({ texte, genre: 'histoire_vecue' }),
     /affirmation a la premiere personne sur une experience/
@@ -110,7 +110,7 @@ test('refuse une affirmation sur une equipe/un resultat chiffre sans source -- m
 });
 
 test('accepte la meme affirmation si anecdoteSourcee: true -- confirmee par Julien avant redaction', () => {
-  const texte = "On a mis en place un tri similaire chez un client hotelier l'an dernier. Le declic a ete le meme, ca a vraiment aide.";
+  const texte = "On a mis en place un tri similaire chez un client hôtelier l'an dernier. Le déclic a été le même, ça a vraiment aidé.";
   assert.doesNotThrow(() => validerCommentaire({ texte, genre: 'histoire_vecue', anecdoteSourcee: true }));
 });
 
@@ -126,6 +126,6 @@ test('detecte l\'affirmation meme avec des mots accentues -- piege \\b/\\w trouv
 });
 
 test("n'accuse pas a tort une observation generale sans experience personnelle revendiquee", () => {
-  const texte = "Ca rejoint un point qu'on voit souvent chez les independants qui commencent a embaucher. Vous le refaites a chaque mission ?";
+  const texte = "Ça rejoint un point qu'on voit souvent chez les indépendants qui commencent à embaucher. Vous le refaites à chaque mission ?";
   assert.doesNotThrow(() => validerCommentaire({ texte, genre: 'vraie_question' }));
 });
