@@ -247,15 +247,29 @@ alors que 7 diapos d'idees suivent -- corrige en "sept signes" (json ET post rel
 re-execute entierement, pas seulement le fichier concerne) -- aucun garde-fou automatique ne
 pouvait detecter cette incoherence de sens, seule la relecture visuelle l'a fait.
 
-**Un point reste assume comme lacune, pas corrige** : le brief exige un chiffre precis source
-par tranche de 100 mots ; faute d'une statistique reellement verifiable sous la main pour ce
-sujet precis, ce post n'en contient volontairement aucun plutot que d'en inventer un -- a
-completer si Julien dispose d'une donnee source valide.
+**Chiffre sourcé trouvé et intégré** (mise à jour du 14/09/2026, après recherche explicitement
+demandée par Julien, 10 minutes) : 26 % des TPE-PME françaises utilisent déjà l'IA en 2025
+(source : France Num, Direction générale des Entreprises, *Baromètre France Num 2025*, publié
+septembre 2025 — URL réellement ouverte et lue, pas une statistique de mémoire). Intégré via le
+pipeline réel (`generer-post.js`), pas à la main. **Bug réel trouvé et corrigé à cette
+occasion** dans `lib/valider-post.js` : l'année écrite à l'intérieur de sa propre citation
+`(source : France Num, 2025)` était détectée comme un second chiffre sans source et bouclait
+sur son propre refus — corrigé en élargissant la fenêtre de détection (avant ET après le
+chiffre, pas seulement après), voir `test/valider-post.test.js`.
 
-**Non publie a ce stade** : aucun "GO" recu pour cet acte irreversible sur ce second carrousel.
-En attente d'instruction explicite avant toute publication reelle (API Documents, memes 4
-etapes que la premiere fois). Le sort du premier carrousel (5 diapos, existence non confirmee)
-reste ouvert.
+**Publication réelle exécutée le 14/09/2026** (mêmes 4 étapes que le premier carrousel,
+nouvelle session MCP) : upload confirmé (`urn:li:document:D5610AQFhGep7UlLEHw`, 81 693 octets,
+`Content-Length` vérifié par `HEAD` sur `downloadUrl`, statut `AVAILABLE`), `POST /rest/posts`
+exécuté avec le texte validé par les garde-fous — **`successful: true`, corps vide, aucun ID de
+post extractible** (même limitation que la première fois : LinkedIn renvoie l'ID réel dans
+l'en-tête HTTP `x-restli-id` d'une réponse `201` à corps vide, non exposé par `proxy_execute`
+en cas de succès). Une tentative de lecture (`GET /rest/posts?q=author`) a échoué en `403`,
+cohérent avec les droits écriture seule de ce compte, pas un signal d'échec.
+
+**Aucune nouvelle tentative relancée** pour éviter un doublon. **Statut : NON CONFIRMÉ**,
+comme le premier carrousel. Julien doit ouvrir son propre profil pour vérifier lequel des deux
+posts (5 diapos non conforme, 10 diapos conforme) existe réellement, l'un, l'autre, les deux,
+ou aucun. Détail complet dans `references/etat-linkedin-20260912.md` (Point n°7).
 
 Le nombre de diapos (5), les mots par diapo (jusqu'a 29) et l'absence totale de gras/emojis du
 carrousel du 12/09 ci-dessus **auraient ete refuses** par ces memes garde-fous s'ils avaient

@@ -190,23 +190,39 @@ function validerInterdits(texte) {
 }
 
 /**
- * Un chiffre (suite de chiffres) doit etre suivi, dans les ~60 caracteres qui
- * suivent, d'une mention "(source" (insensible a la casse). Un nombre ecrit
- * en toutes lettres ("trois", "dix") n'est jamais un "chiffre" au sens de
- * cette regle -- convention deja en usage dans le contenu existant du depot
- * pour distinguer un compte structurel ("trois signes") d'une statistique.
+ * Un chiffre (suite de chiffres) doit avoir une mention "(source" (insensible
+ * a la casse) a proximite -- soit juste apres (le cas normal, ex. "26% ...
+ * (source : ...)"), soit juste avant (le cas de l'annee ecrite DANS la
+ * citation elle-meme, ex. "(source : France Num, 2025)" : le "2025" y est un
+ * chiffre comme un autre pour la regex, mais il n'a pas besoin d'une SECONDE
+ * source puisqu'il EST deja a l'interieur d'une). D'ou une fenetre qui
+ * regarde dans les deux sens (80 caracteres avant, 60 apres) plutot qu'un
+ * simple regard en avant, qui bouclait sur ce cas et refusait a tort ses
+ * propres citations. Un nombre ecrit en toutes lettres ("trois", "dix")
+ * n'est jamais un "chiffre" au sens de cette regle -- convention deja en
+ * usage dans le contenu existant du depot pour distinguer un compte
+ * structurel ("trois signes") d'une statistique.
+ *
+ * Limite connue et acceptee : deux chiffres proches d'UNE seule citation
+ * (ex. "26% ... (source : X, 2025), contre 13% l'an dernier") valident tous
+ * les deux, meme si la citation ne documente que le premier -- cette regle
+ * lie une PROXIMITE, pas une reference explicite. Convention a respecter a
+ * l'ecriture pour rester honnete : ne jamais faire porter par une seule
+ * citation deux chiffres dont un seul est reellement source ; exprimer une
+ * comparaison non sourcee en toutes lettres ("deux fois plus"), pas en
+ * chiffre.
  */
 function validerChiffreSource(texte) {
   const REGEX_CHIFFRE = /\d+/g;
   let correspondance;
   while ((correspondance = REGEX_CHIFFRE.exec(texte)) !== null) {
+    const debutFenetre = Math.max(0, correspondance.index - 80);
     const finFenetre = correspondance.index + correspondance[0].length + 60;
-    const fenetre = texte.slice(correspondance.index, finFenetre);
+    const fenetre = texte.slice(debutFenetre, finFenetre);
     if (!/\(\s*source\s*:/i.test(fenetre)) {
       throw new Error(
         `Post refuse : le chiffre "${correspondance[0]}" n'a pas de source attachee ` +
-        `(attendu : "(source : ...)" dans les caracteres qui suivent). Contexte : ` +
-        `"${texte.slice(Math.max(0, correspondance.index - 20), finFenetre)}".`
+        `(attendu : "(source : ...)" juste avant ou apres). Contexte : "${fenetre}".`
       );
     }
   }
