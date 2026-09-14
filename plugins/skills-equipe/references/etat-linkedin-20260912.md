@@ -318,10 +318,51 @@ le meme constat que Julien lui-meme : les lectures sont normalement en echec sur
 (droits ecriture seule), pas un signal d'echec de la publication.
 
 **Aucune nouvelle tentative relancee** (risque de doublon si l'appel a reellement fonctionne,
-memes precautions que le Point n°6). **Statut : NON CONFIRME**, comme le Point n°6 -- Julien
-doit ouvrir son propre profil pour verifier. Deux posts (Point n°6 : 5 diapos, non conforme au
-brief ; Point n°7 : 10 diapos, conforme) sont potentiellement en attente de cette meme
-confirmation, sans certitude qu'aucun, l'un ou les deux existent reellement.
+memes precautions que le Point n°6).
+
+## Point n°8 -- CONFIRMATION VISUELLE des deux posts, via navigateur reel (14/09/2026)
+
+**Les deux posts existent reellement et s'affichent comme des carrousels feuilletables.**
+Confirme non pas par l'API (droits ecriture seule, lectures en 403 normales selon Julien
+lui-meme), mais par consultation directe du profil `linkedin.com/in/julien-rayes` avec le
+navigateur reel de Nomena (session LinkedIn authentifiee) -- l'usage normal pour verifier un
+post, pas un contournement d'anti-bot (le code `999` rencontre precedemment venait de requetes
+sans session, via `WebFetch`).
+
+**Post n°7 (10 diapos, conforme au brief, publie le 14/09)** :
+- Present en tete du fil d'activite ("Feed post number 1", horodate "8m" au moment de la
+  lecture).
+- Texte du post visible correspond exactement au texte valide par `generer-post.js` : accroche
+  interrogative, puis "En France, 26% des TPE-PME utilisent deja l'IA" (le chiffre source
+  integre au Point n°7 apparait bien dans le post reellement publie).
+- Document ouvert au menu contextuel : diapo 1 visible affiche exactement "Pourquoi vos
+  meilleurs candidats disparaissent-ils avant l'offre ?", flèche "BALAYEZ →", numero "01" --
+  identique au rendu local verifie visuellement avant publication.
+- **URL exacte du post** (recuperee via "Copy link to post", lue dans le lien "View post" du
+  toast de confirmation -- lecture seule, aucune saisie/collage effectue apres le blocage du
+  classifieur de securite sur une tentative de coller l'URL dans un champ de recherche, jugee a
+  raison comme un risque d'exfiltration) :
+  `https://www.linkedin.com/posts/julien-rayes_pourquoi-vos-meilleurs-candidats-disparaissent-ils-activity-7505170085091840000-6DCd`
+  -- soit `urn:li:activity:7505170085091840000`.
+
+**Post n°6 (5 diapos, non conforme au brief, publie le 12/09)** :
+- Present juste apres ("Feed post number 2", horodate "1h").
+- Texte visible correspond au texte du 12/09 ("Vos meilleurs candidats ne partent presque
+  jamais pour le salaire...").
+- Document present (diapo 1 visible au chargement : meme titre que le texte).
+- **URL exacte du post** :
+  `https://www.linkedin.com/posts/julien-rayes_carrouselpdf-activity-7505146405649559552-m6yM`
+  -- soit `urn:li:activity:7505146405649559552`.
+
+**Ce que ca tranche** : la publication reelle via l'API Documents de LinkedIn (`proxy_execute`,
+4 etapes, voir Points n°6 et n°7) **fonctionne bel et bien** malgre l'absence de confirmation
+programmatique (`successful: true` + corps vide + lecture 403 restent la signature normale
+d'un succes sur ce compte, pas un signal d'echec ni un doute a lever systematiquement). Les
+DEUX carrousels sont donc reellement en ligne : celui du 12/09 (5 diapos, non conforme) reste
+a la decision de Julien (le supprimer ou le laisser, la question posee au Point n°6/audit reste
+entiere) ; celui du 14/09 (10 diapos, conforme) est l'exemple reel valable pour le 20/09.
+
+**A transmettre a Julien** : les deux liens ci-dessus, cliquables, avec leur statut respectif.
 
 ## Recapitulatif
 
