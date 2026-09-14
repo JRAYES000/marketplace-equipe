@@ -1,0 +1,51 @@
+[
+  {
+    "role": "hook",
+    "titre": "Pourquoi vos meilleurs candidats disparaissent-ils avant l'offre ?"
+  },
+  {
+    "role": "contenu",
+    "titre": "Ce que vous repartez avec",
+    "texte": "Trois signes concrets pour reperer ou votre process de recrutement perd ses meilleurs candidats, avant de perdre l'offre elle-meme."
+  },
+  {
+    "role": "contenu",
+    "titre": "1. Aucun delai n'est jamais communique",
+    "texte": "Un candidat sans date de reponse suppose le pire et signe ailleurs pendant que vous deliberez encore."
+  },
+  {
+    "role": "contenu",
+    "titre": "2. Le meme entretien se rejoue deux fois",
+    "texte": "Un second entretien qui redemande ce que le premier savait deja donne l'impression d'un process non pilote."
+  },
+  {
+    "role": "contenu",
+    "titre": "3. Les candidats ecartes n'ont aucune reponse",
+    "texte": "Un silence apres un entretien ne coute rien aujourd'hui. Il coute le prochain candidat, qui ne repondra plus."
+  },
+  {
+    "role": "contenu",
+    "titre": "4. Trop de decideurs, aucun pilote",
+    "texte": "Quand cinq personnes doivent donner leur avis sans delai fixe, la decision n'appartient plus a personne."
+  },
+  {
+    "role": "contenu",
+    "titre": "5. Aucune grille commune entre entretiens",
+    "texte": "Chaque recruteur juge sur ses propres criteres, alors le candidat recoit trois avis differents pour un seul poste."
+  },
+  {
+    "role": "contenu",
+    "titre": "6. Le silence s'allonge a chaque etape",
+    "texte": "Trois jours de reponse au premier tour deviennent dix jours au second, puis plus rien avant la decision finale."
+  },
+  {
+    "role": "contenu",
+    "titre": "7. La contre-offre arrive avant vous",
+    "texte": "Pendant que vous deliberez en interne, l'employeur actuel du candidat propose deja une augmentation pour le garder."
+  },
+  {
+    "role": "contenu",
+    "titre": "Une seule chose a changer",
+    "texte": "Fixez une date de reponse a chaque etape et tenez-la. C'est ca qui retient un candidat, pas le salaire."
+  }
+]

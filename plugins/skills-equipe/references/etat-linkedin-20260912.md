@@ -235,6 +235,48 @@ Tant que cette liste n'est pas fournie, le pipeline reste verifie
 uniquement sur le profil de Julien Rayes (voir Point n°2), pas sur un
 veritable tiers.
 
+## Point n°6 -- tentative via l'API Documents de LinkedIn (13/09/2026) et second carrousel conforme (14/09/2026)
+
+**Jamais documente jusqu'ici dans ce fichier -- comble un trou factuel, sans prejuger du
+verdict.** Julien a confirme, apres le Point n°3 ci-dessus, que le post cree via le champ
+`images` de `LINKEDIN_CREATE_LINKED_IN_POST` (`urn:li:share:7504217733631266816`) **n'a
+jamais existe reellement** : LinkedIn l'a accepte en apparence puis rejete silencieusement,
+ce champ etant fait pour des photos, pas des PDF. Rien a supprimer.
+
+Julien a alors trouve et fait executer le mecanisme reel, l'API Documents de LinkedIn, appelee
+directement via `proxy_execute` dans `COMPOSIO_REMOTE_WORKBENCH` (Composio n'a pas d'action
+dediee pour cette porte) :
+1. `POST /rest/documents?action=initializeUpload` (owner `urn:li:person:aFqu-W7ClW`) ->
+   reussi, URN `urn:li:document:D5610AQGLNLi1e4Aj1A` obtenue.
+2. Upload des octets du PDF sur l'URL presignee (PUT simple, sans jeton) -> reussi.
+3. `GET /rest/documents/<urn>` (URN encodee) -> statut `AVAILABLE` confirme, `Content-Length`
+   verifie par HEAD.
+4. `POST /rest/posts` (`content.media.id` = l'URN du document, author julien-agency,
+   commentary du carrousel du 12/09, en-tetes `Linkedin-Version: 202608` et
+   `X-Restli-Protocol-Version: 2.0.0`) -> **`successful: true`, `error: ''`, corps vide.**
+   LinkedIn renvoie l'ID du post reel dans l'en-tete HTTP `x-restli-id` d'une reponse `201`
+   a corps vide -- `proxy_execute` ne semble pas exposer les en-tetes de reponse en cas de
+   succes (confirme qu'il les expose bien en cas d'erreur, via un test 403 distinct). **Aucun
+   identifiant de post n'a donc pu etre extrait automatiquement.**
+
+**Etat reel : toujours NON CONFIRME.** Le succes technique apparent de l'etape 4 est
+exactement le meme type de signal (`successful: true`, pas d'erreur) que celui du Point n°3,
+qui s'est revele ne correspondre a aucun post reel. Aucune nouvelle tentative n'a ete
+relancee (risque de doublon si le premier appel a reellement fonctionne). Julien doit ouvrir
+son propre profil pour trancher -- la lecture via l'API reste peu fiable pour ce compte
+(droits ecriture seule, 403 normaux en lecture selon Julien lui-meme). **Ne pas marquer ce
+point comme "livre" tant que cette confirmation visuelle n'est pas arrivee.**
+
+**14/09/2026 -- decision de Julien sur ce point** : ne rien supprimer tant que l'existence
+n'est pas confirmee. Un second carrousel, conforme au brief integral du 10/09 (10 diapos,
+25 mots max par diapo, regles d'ecriture completes -- gras, emojis, longueur, accroche
+interrogative, sans tiret long), a ete produit comme exemple reel du 20/09 :
+`a-publier/julien-agency-2026-09-14-v2.json` + `.commentary.txt`, PDF genere reellement
+(`sortants/julien-agency/Pourquoi vos meilleurs candidats disparaissent-ils avant
+l'offre.pdf`, 10 pages verifiees). **Non publie** -- aucun "GO" recu pour cet acte
+irreversible sur ce second carrousel. Detail complet dans
+`references/audit-brief-20260914-v3.md` et `linkedin-carrousel/SKILL.md`.
+
 ## Recapitulatif
 
 Au 12/09/2026, aucun point bloquant "technique" majeur ne reste ouvert :
