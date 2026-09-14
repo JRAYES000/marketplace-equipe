@@ -27,8 +27,7 @@ const { chromium } = require('playwright');
 const {
   chargerGabarit,
   injecterDiapo,
-  slugDepuisDiapos,
-  dateISODuJour,
+  titreDepuisDiapos,
 } = require('./generer-pdf');
 
 const SKILL_DIR = __dirname;
@@ -61,14 +60,14 @@ async function rendreDiapoEnPng({ navigateur, compte, diapo, index, cheminSortie
   }
 }
 
-function dossierSortieParDefaut(compte, diapos, date = new Date()) {
-  const base = `${dateISODuJour(date)}-${slugDepuisDiapos(diapos)}`;
-  return path.join(SORTANTS_DIR, compte, `${base}--images-par-diapo`);
+function dossierSortieParDefaut(compte, diapos) {
+  const base = titreDepuisDiapos(diapos);
+  return path.join(SORTANTS_DIR, compte, `${base} - images par diapo`);
 }
 
-function cheminCouvertureParDefaut(compte, diapos, date = new Date()) {
-  const base = `${dateISODuJour(date)}-${slugDepuisDiapos(diapos)}`;
-  return path.join(SORTANTS_DIR, compte, `${base}--couverture.png`);
+function cheminCouvertureParDefaut(compte, diapos) {
+  const base = titreDepuisDiapos(diapos);
+  return path.join(SORTANTS_DIR, compte, `${base} - couverture.png`);
 }
 
 /**
