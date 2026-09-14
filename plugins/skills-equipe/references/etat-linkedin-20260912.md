@@ -673,6 +673,45 @@ session pour executer `publierCommentaire` reellement. A faire des que le canal 
 disponible, un par un, avec enregistrement reel via `enregistrerCommentairePublie` apres
 CHAQUE succes (jamais par anticipation). 40/40 tests verts.
 
+## Point n°15 -- Carrousel republie reellement, suppression des anciens en echec malgre l'API (15/09/2026)
+
+Bonne cle trouvee (voir `references/actions-composio.md`, section "15/09/2026" pour la methode
+precise -- couche "FOR YOU" de Composio, pas la couche PLATFORM cherchee d'abord a tort).
+Sequence complete rejouee dans une session MCP continue :
+
+1. **Publication reelle reussie et confirmee** : nouveau document LinkedIn
+   (`urn:li:document:D5610AQHzlrDn3R-Xag`), post cree
+   (`urn:li:activity:7505338063762534401`). Confirme en ligne par navigateur reel (Nomena) :
+   **10 pages, diapo 1 lisible, accents corrects** verifies visuellement sur plusieurs diapos,
+   URL confirmee par deux methodes independantes.
+2. **Suppression des deux anciens posts : signal API positif, realite negative.**
+   `LINKEDIN_DELETE_POST` a repondu `{"deleted": true}` deux fois de suite sur chacun des deux
+   anciens posts (`urn:li:share:7505170085091840000` et `urn:li:share:7505146405649559552` --
+   format `share` requis, `activity` rejete en 400). **Les deux sont pourtant restes
+   entierement visibles et lisibles** apres chaque tentative, verifie par navigation reelle sur
+   leurs permalinks (pas un cache : rechargement force, contenu integral affiche, un des deux
+   avec "1 comment - 1 repost" toujours present). **Pas declare "fait" malgre le signal API** --
+   le meme principe qui a servi a confirmer la publication du 14/09 (ne jamais faire confiance
+   au code de retour seul sur ce compte) s'applique aussi aux suppressions.
+
+**Etat reel du profil a ce jour : trois carrousels visibles** -- celui du 12/09 (5 diapos, non
+conforme), celui du 14/09 (accents fautifs), et le nouveau du 15/09 (conforme). Cause de
+l'echec de suppression non investiguee plus loin ce jour (pourrait etre specifique aux posts
+crees via l'API Documents, par opposition a un post texte simple) -- aucune nouvelle tentative
+relancee sans clarifier d'abord. Decision a prendre par Julien : reessayer la suppression par
+une autre voie, ou assumer les trois versions comme un historique visible.
+
+**Publication reelle des 5 commentaires, meme session** : 1/5 reussi (Jean Zendji, julien-agency
+-- `urn:li:comment:(urn:li:activity:7504102064814268416,7505342737219526656)`, confirme API et
+navigateur reel), **4/5 refuses proprement** (`403 Forbidden: Viewer/Actor is unauthorized
+agent`) pour Virginie Caurraze, Theophile Burnet, Florent Pontiac, Valentin Muller -- tous les 4
+cibles depuis le compte julien-partners. Confirme ce que le Point n°1 disait deja depuis le
+12/09 : seule l'identite julien-agency (`averse-cooser`) est reellement connectee cote
+Composio ; julien-partners ne l'est toujours pas. Pas un echec du code ni du contenu -- un vrai
+prealable non leve (connecter reellement un compte LinkedIn julien-partners, geste qui demande
+un flux OAuth complet, non demarrable depuis une session Claude Code). Detail complet et regles
+de non-anticipation du registre : `linkedin-commentaires/a-publier/README.md`.
+
 ## Recapitulatif
 
 Au 12/09/2026, aucun point bloquant "technique" majeur ne reste ouvert :

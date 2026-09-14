@@ -417,6 +417,40 @@ n'a pas change.
 Bloque par le classifieur auto-mode de Claude Code avant meme d'atteindre l'API Composio
 -- a juste titre, cette action demarre un vrai flux OAuth LinkedIn. Non contourne.
 
+### 15/09/2026 -- le client MCP juge "hors de portee" ci-dessus, implemente reellement
+
+Correction importante : ce qui precede parlait du **tool-router de la couche PLATFORM**
+(`dashboard.composio.dev`, sessions `trs_...`) -- une impasse reelle, mais **pas le seul canal
+MCP disponible**. Il existe une seconde surface, **"FOR YOU"** (bouton "Switch" en haut a
+gauche de `connect.composio.dev`/`dashboard.composio.dev`, memes domaines), avec sa **propre**
+cle -- Reglages du compte personnel -> **"Sessions & API Key"** -> cle `ck_...`, header
+`x-consumer-api-key` (a ne jamais confondre avec la cle `ak_...` de la couche PLATFORM, qui,
+elle, exige un admin d'organisation et ne sert a rien ici).
+
+Client MCP minimal implemente en Node (`fetch` + parsing SSE simple), contre
+`https://connect.composio.dev/mcp` :
+```
+POST https://connect.composio.dev/mcp
+headers: Content-Type: application/json ; Accept: application/json, text/event-stream ;
+         x-consumer-api-key: <cle ck_...>
+body: {"jsonrpc":"2.0","id":1,"method":"initialize","params":{"protocolVersion":"2024-11-05","capabilities":{},"clientInfo":{"name":"...","version":"1.0.0"}}}
+-> 200, reponse SSE ("event: message\ndata: {...}"), en-tete reponse "Mcp-Session-Id: <uuid>"
+   a repasser en en-tete "Mcp-Session-Id" sur tous les appels suivants de la meme session.
+```
+Puis `notifications/initialized` (notification, sans `id`), puis `tools/list` /
+`tools/call` classiques (protocole MCP standard, rien de proprietaire Composio a ce niveau).
+**Fonctionne reellement, teste** : `COMPOSIO_GET_TOOL_SCHEMAS`, `COMPOSIO_REMOTE_WORKBENCH`
+(sandbox Python avec `proxy_execute`/`run_composio_tool`/`upload_local_file`) et
+`COMPOSIO_MULTI_EXECUTE_TOOL` (pour appeler directement un outil natif connu, ex.
+`LINKEDIN_DELETE_POST`, sans repasser par `COMPOSIO_SEARCH_TOOLS`). Voir
+`linkedin-carrousel/SKILL.md`, section republication du 15/09, pour un exemple reel complet
+(publication d'un document + tentative de suppression).
+
+**A ne pas reproduire sans relire d'abord ceci** : perdre du temps sur `dashboard.composio.dev`
+/ API Keys / admin-only (couche PLATFORM) est le piege exact dans lequel une session est
+tombee le 15/09 avant de trouver la bonne surface -- toujours commencer par "FOR YOU" pour tout
+besoin d'acces MCP consumer.
+
 **Diagnostic** : les trois voies convergent vers la meme conclusion -- **aucun compte
 LinkedIn n'est OAuth-connecte du tout sous le projet Composio de `COMPOSIO_API_KEY`**,
 quel que soit l'identifiant essaye. Ce n'est pas un probleme de format d'URN ni

@@ -164,11 +164,14 @@ quotidien (51% des developpeurs professionnels, meme enquete). (2) repartition d
 rééquilibree (Jean Zendji vers `desaccord_argumente`). Les 5 commentaires couvrent desormais
 **3 genres sur 4** (`vraie_question` x2, `information_chiffree` x1, `desaccord_argumente` x2)
 -- `histoire_vecue` reste en reserve pour le jour ou Julien fournira une anecdote reelle,
-deviation assumee et ecrite pour le mail du 20/09. **GO donne par Julien pour les cinq** une
-fois ces corrections faites -- publication reelle en attente d'un canal Composio/MCP
-disponible (aucun dans la session du 15/09/2026). Les 5 passent reellement `validerCommentaire`
-(forme, genre, experience non sourcee, accents) -- voir `a-publier/README.md` pour le detail
-complet et le statut de chacun.
+deviation assumee et ecrite pour le mail du 20/09. **GO donne par Julien pour les cinq**, puis
+publication reelle tentee sur les 5 le meme jour (canal Composio/MCP retrouve, voir
+`linkedin-carrousel/SKILL.md`) : **1/5 reussi** (Jean Zendji, julien-agency, confirme API et
+navigateur reel), **4/5 refuses proprement** (`403 Forbidden: Viewer/Actor is unauthorized
+agent`) -- l'identite julien-partners n'est toujours pas reellement connectee cote Composio
+(confirme, pas suppose). Les 5 passent reellement `validerCommentaire` (forme, genre,
+experience non sourcee, accents) -- le blocage restant est un prealable d'acces, pas un
+probleme de contenu. Voir `a-publier/README.md` pour le detail complet et le statut de chacun.
 
 ### Sortie reelle des 5 cas de refus demandes
 
