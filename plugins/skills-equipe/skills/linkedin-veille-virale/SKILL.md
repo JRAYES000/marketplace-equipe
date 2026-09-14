@@ -212,6 +212,20 @@ recuperes sur les 10 comptes, 15 retenus**. Detail complet, seuil calibre sur la
 reelle observee, et export local (Notion toujours bloque) : Point n°11 de
 `references/etat-linkedin-20260912.md`.
 
+## Trois premiers posts adaptes sur donnees reelles -- 15/09/2026
+
+Jusqu'ici, aucun des 15 candidats retenus le 14/09/2026 n'avait ete redige en post (etape 3 de
+"Ce que fait la skill" -- jugement editorial, pas une generation automatique). Fait le 15/09/2026 :
+3 posts adaptes, choisis parmi les meilleurs scores avec une matiere reellement adaptable
+(Justin Welsh, Jason Feifer, Codie A. Sanchez) -- **adaptes, pas traduits** : angle et structure
+du post source conserves, exemples et chiffres remplaces par des references francaises reelles
+verifiees individuellement (Insee, Bpi France Le Lab/Rexecode, Strategies -- pages ouvertes et
+lues, pas de chiffre de memoire). Passes reellement par les garde-fous d'ecriture de
+`linkedin-carrousel` (`validerEtConvertirPost`) et `validerAccents`, bien que non natifs a ce
+paquet -- demande explicite pour ce livrable. Detail complet, post source note pour chacun,
+dans `a-publier/README.md`. Aucune publication reelle -- en attente du GO de Julien, regle
+"trois maximum, jamais deux le meme jour" a respecter au moment de publier.
+
 Etat des lieux complet des 3 skills linkedin-* et de tout ce qui devient
 activable des que chaque blocage se leve :
 `references/etat-linkedin-20260912.md` du paquet.
