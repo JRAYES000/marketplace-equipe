@@ -631,6 +631,48 @@ Toutes les fixtures de test des 3 paquets (deja sans accents, meme probleme) cor
 consequence. Tests totaux apres cette session : `linkedin-carrousel` 55/55, `linkedin-commentaires`
 40/40, `linkedin-veille-virale` 21/21.
 
+## Point n°14 -- Carrousel republie (contenu pret), commentaires : GO de Julien obtenu, canal bloque (15/09/2026)
+
+### Carrousel
+
+Decision de Julien : republier proprement plutot que laisser en ligne sans accents (68/484
+mots, dont 9 dans des titres en grand format -- trop visible pour etre assume). Fait :
+- Source corrigee (`a-publier/julien-agency-2026-09-14-v2.json` et `.brouillon.txt`), repassee
+  par `generer-post.js`/`generer-pdf.js` reels -- pas une correction a la main.
+- PDF regenere (10 diapos), **verifie visuellement page par page** (images rendues et
+  inspectees une a une) : accents corrects partout, mise en page et branding intacts.
+- Test de non-regression mis a jour (`test/valider-orthographe.test.js`) : verifiait
+  l'incident, verifie desormais son absence (0 mot sans accent, contre >20 attendu avant).
+  55/55 tests verts.
+
+**Bloque avant la publication reelle** : cette session n'a ni acces Composio/MCP ni extension
+Chrome connectee (`tabs_context_mcp` -> "Browser extension is not connected"). Les etapes 3 a 6
+(publier via l'API Documents, verifier en ligne via navigateur, supprimer l'ancien post du
+14/09 puis celui du 12/09) restent a faire par quelqu'un disposant de cet acces -- **a demander
+a Nomena** : reconnecter l'extension Claude in Chrome, ou reprendre la cle consumer depuis son
+dashboard Composio (meme methode que le 14/09, voir Point n°6 de ce fichier).
+
+### Commentaires -- relecture de Julien, deux corrections, GO acquis
+
+Julien a relu les 5 commentaires et valide le fond de 4 sur 5, avec deux reserves traitees :
+1. **Chiffre du commentaire Theophile Burnet corrige** : la version initiale ("84% des
+   developpeurs utilisent deja l'IA au quotidien") deformait la source Stack Overflow 2025, qui
+   mesure "using or planning to use AI tools" (adoption/intention), pas un usage quotidien.
+   Rouvert la page source : elle donne aussi "51% of professional developers use AI tools
+   daily" -- chiffre remplace pour correspondre exactement a ce qu'il pretend mesurer.
+2. **Repartition des genres rééquilibree** : le commentaire Jean Zendji, initialement
+   `vraie_question`, rebascule en `desaccord_argumente` (nuance reelle sur le tri en 2
+   categories du post source, sans forcer -- Florent Pontiac, post de remerciement client,
+   ne s'y pretait pas sans inventer un desaccord). Repartition finale : `vraie_question` x2,
+   `information_chiffree` x1, `desaccord_argumente` x2, `histoire_vecue` x0 -- deviation
+   assumee (anecdote reelle jamais fournie), a ecrire dans le mail du 20.
+
+**GO donne par Julien pour les cinq, d'avance** -- plus besoin de redemander avant de publier.
+Meme blocage technique que le carrousel : aucun canal Composio/MCP disponible dans cette
+session pour executer `publierCommentaire` reellement. A faire des que le canal est
+disponible, un par un, avec enregistrement reel via `enregistrerCommentairePublie` apres
+CHAQUE succes (jamais par anticipation). 40/40 tests verts.
+
 ## Recapitulatif
 
 Au 12/09/2026, aucun point bloquant "technique" majeur ne reste ouvert :

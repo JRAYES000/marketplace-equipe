@@ -153,14 +153,22 @@ en attente indefiniment.
   design), sans pretendre l'avoir concu.
 - Valentin Muller -> `desaccord_argumente` : argument sur le fond (tests automatises vs
   verification manuelle a posteriori), sans "on a livre" ni "chez nous".
-- Jean Zendji -> `vraie_question` : question reelle sur le systeme de tri qu'il decrit, sans
-  raconter une mission similaire.
+- Jean Zendji -> `vraie_question` initialement, rebascule `desaccord_argumente` le 15/09/2026
+  apres relecture de Julien (nuance reelle sur le tri en 2 categories du post source, pour
+  rediversifier -- pas force).
 
-Les 5 commentaires couvrent desormais **3 genres sur 4** (`vraie_question` x3, `information_chiffree`
-x1, `desaccord_argumente` x1) -- `histoire_vecue` reste en reserve pour le jour ou Julien fournira
-une anecdote reelle, deviation assumee et ecrite ici pour le mail du 20/09. Les 5 passent
-reellement `validerCommentaire` (forme, genre, experience non sourcee, accents) -- voir
-`a-publier/README.md` pour le detail complet et le statut de chacun.
+**Relecture de Julien le 15/09/2026, deux corrections avant le GO** : (1) le chiffre du
+commentaire Theophile Burnet deformait la source Stack Overflow ("using or planning to use"
+confondu avec "au quotidien") -- remplace par le chiffre qui mesure reellement l'usage
+quotidien (51% des developpeurs professionnels, meme enquete). (2) repartition des genres
+rééquilibree (Jean Zendji vers `desaccord_argumente`). Les 5 commentaires couvrent desormais
+**3 genres sur 4** (`vraie_question` x2, `information_chiffree` x1, `desaccord_argumente` x2)
+-- `histoire_vecue` reste en reserve pour le jour ou Julien fournira une anecdote reelle,
+deviation assumee et ecrite pour le mail du 20/09. **GO donne par Julien pour les cinq** une
+fois ces corrections faites -- publication reelle en attente d'un canal Composio/MCP
+disponible (aucun dans la session du 15/09/2026). Les 5 passent reellement `validerCommentaire`
+(forme, genre, experience non sourcee, accents) -- voir `a-publier/README.md` pour le detail
+complet et le statut de chacun.
 
 ### Sortie reelle des 5 cas de refus demandes
 
