@@ -130,7 +130,7 @@ partager une page Notion avec l'integration (bouton "Share"), puis fournir son I
 contre l'API reelle -- sa forme est conforme a la documentation consultee, mais son
 comportement reel reste a verifier des qu'une page parente sera disponible.
 
-## Alerte non corrigee -- meme bug de schema que linkedin-commentaires probable ici
+## Bug de schema corrige -- 14/09/2026
 
 Le 14/09/2026, le premier appel reel de `linkedin-commentaires` contre l'acteur Apify
 `harvestapi/linkedin-profile-posts` a revele que la forme reelle des donnees (`author.name`,
@@ -138,32 +138,29 @@ Le 14/09/2026, le premier appel reel de `linkedin-commentaires` contre l'acteur 
 supposee par le code (`authorName`, `text`, `postedAt` chaine directe, `commentsCount`) --
 jamais detecte avant faute d'avoir teste contre de vraies donnees (seulement contre une
 fixture deja ecrite dans la forme supposee). Corrige dans `linkedin-commentaires/lib/trouver-posts.js`
-(fonction `normaliserPost`, voir son SKILL.md). **`lib/veille.js` de ce paquet-ci utilise tres
-probablement la meme hypothese de schema, non verifiee ni corrigee ici** -- hors perimetre du
-14/09 (priorite au carrousel puis aux commentaires), mais **a corriger avant tout premier appel
-reel** de `recupererPosts`/`trierPosts` sur ce paquet, avec la meme methode.
+(fonction `normaliserPost`). **Meme correctif applique ici, meme jour, session suivante** :
+`lib/veille.js` exporte desormais `normaliserPost` et l'applique dans `recupererPosts`, avec les
+memes 3 tests de non-regression (`test/normaliserPost.test.js`). A verifier malgre tout au
+premier appel reel de ce paquet (pas encore fait), au cas ou l'acteur renverrait un ecart de
+forme non couvert par ce correctif.
 
-## A completer avant un usage reel
+## comptes_a_surveiller renseigne -- 14/09/2026
 
-- `comptes_a_surveiller` dans `reglages-comptes.json` est vide pour les deux
-  comptes -- a remplir avec les profils LinkedIn a suivre pour un usage en
-  production (voir la limite notee dans `a-publier/README.md`).
-- **(12/09/2026) Verifie : pas de source existante pour remplir ce champ.**
-  Hypothese testee -- le champ `concurrents` de
-  `linkedin-carrousel/reglages-comptes.json` (mentionne pour le ton/palette)
-  aurait pu fournir des candidats naturels. Verifie : il existe dans le
-  schema mais est **vide `[]`** pour les trois comptes, y compris
-  julien-agency -- jamais rempli depuis sa creation. Aucune autre mention de
-  comptes concurrents/pairs reels n'existe ailleurs dans ce depot (recherche
-  faite sur l'ensemble de `skills-equipe`). **Ce qu'il faut, precisement** :
-  une liste de profils ou pages LinkedIn publics reels (URL exploitable par
-  l'acteur Apify `harvestapi/linkedin-profile-posts`, pas un simple nom
-  d'entreprise) pertinents pour l'audience de julien-agency
-  (dirigeants/automatisation IA) et julien-partners (reseau/facilitateurs).
-  **C'est une decision editoriale/business, pas technique** : qui surveiller
-  releve du jugement de Julien ou de Nomena, pas d'un choix a inventer ici --
-  aucun compte n'a ete devine ou ajoute pour combler ce vide. A fournir
-  avant de pouvoir tester le pipeline sur un veritable tiers.
+**Rempli.** 10 influenceurs americains reels sur l'IA appliquee au business/PME/independants,
+choisis et verifies un par un (handle exact + nombre d'abonnes actuel, profil LinkedIn reellement
+ouvert -- jamais devine), decision editoriale tranchee seule sur delegation explicite de Julien.
+Liste unique, partagee entre `julien-agency` et `julien-partners` (`comptes-a-surveiller.txt` a la
+racine du paquet, copiee dans `comptes_a_surveiller` des deux comptes de
+`reglages-comptes.json`). Methode complete et tableau des 10 profils :
+`references/comptes-a-surveiller-veille-20260914.md`.
+
+**Reste a faire** : le score d'engagement du brief
+(`(reactions + 3*commentaires + 5*partages) / abonnes`) n'est toujours pas code dans `trierPosts`.
+Le passage de veille reel avec cette liste n'a pas pu etre lance ce jour -- `APIFY_TOKEN` absent
+de cette session (le jeton avait ete exporte manuellement par Nomena dans une session precedente,
+non persiste entre sessions par conception, voir Point n°2 de `references/etat-linkedin-20260912.md`).
+A relancer avec `npm run dry-run` des que le jeton est fourni a nouveau -- le pipeline est pret,
+seule la donnee manque.
 
 Etat des lieux complet des 3 skills linkedin-* et de tout ce qui devient
 activable des que chaque blocage se leve :

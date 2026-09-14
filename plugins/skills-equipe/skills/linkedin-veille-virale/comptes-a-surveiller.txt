@@ -1,0 +1,23 @@
+# comptes_a_surveiller -- linkedin-veille-virale
+#
+# Liste unique, partagee entre les comptes suivis par cette skill (julien-agency,
+# julien-partners). 10 influenceurs americains reels sur l'IA appliquee au business,
+# la croissance et les outils pour independants/petites entreprises -- choisis et
+# verifies le 14/09/2026 (voir references/comptes-a-surveiller-veille-20260914.md
+# pour la methode et le detail de chaque profil).
+#
+# Format simple : une URL LinkedIn par ligne, lignes vides et lignes commencant par
+# # ignorees si ce fichier est lu par du code un jour. Pour l'instant, source de
+# verite editoriale -- copiee telle quelle dans comptes_a_surveiller de
+# reglages-comptes.json (les deux comptes partagent la meme liste).
+
+https://www.linkedin.com/in/alliekmiller/
+https://www.linkedin.com/in/emollick/
+https://www.linkedin.com/in/dharmesh/
+https://www.linkedin.com/in/justinwelsh/
+https://www.linkedin.com/in/codiesanchez/
+https://www.linkedin.com/in/noahkagan/
+https://www.linkedin.com/in/sahilbloom/
+https://www.linkedin.com/in/jasonfeifer/
+https://www.linkedin.com/in/matt-wolfe-30841712/
+https://www.linkedin.com/in/amyporterfield/

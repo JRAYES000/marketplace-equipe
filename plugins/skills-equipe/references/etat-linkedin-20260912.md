@@ -420,6 +420,30 @@ reelle Apify, `document.totalPageCount` conserve, champs absents sans plantage) 
 encore fait, contrairement a `linkedin-commentaires`), au cas ou l'acteur renverrait un
 troisieme ecart de forme non repere par ce correctif.
 
+## Point n°10 -- comptes_a_surveiller renseigne : 10 influenceurs americains, decision editoriale tranchee seule (14/09/2026)
+
+Julien a delegue explicitement cette decision editoriale ("tranche et note ton raisonnement"),
+plutot que de la remonter comme un blocage. 10 profils LinkedIn reels choisis et **verifies un
+par un** (handle exact + nombre d'abonnes actuel, ouverture reelle du profil via navigateur
+authentifie -- jamais devine) : Allie K. Miller, Ethan Mollick, Dharmesh Shah, Justin Welsh,
+Codie Sanchez, Noah Kagan, Sahil Bloom, Jason Feifer, Matt Wolfe, Amy Porterfield. Detail complet
+de la methode (recherche, filtre nationalite verifie un par un -- plusieurs noms frequemment
+cites ont ete ecartes car canadiens ou francais --, filtre pertinence business/PME) et tableau
+des abonnes dans `references/comptes-a-surveiller-veille-20260914.md`.
+
+Copie dans `comptes-a-surveiller.txt` (fichier texte simple, source de verite editoriale) et dans
+`comptes_a_surveiller` des deux comptes de `linkedin-veille-virale/reglages-comptes.json` --
+liste **unique, partagee** entre `julien-agency` et `julien-partners` (contrairement aux 8+8 de
+`linkedin-commentaires`, conforme a ce que demande le brief pour la veille).
+
+**Non fait ce jour, note honnetement** : le score d'engagement du brief
+(`(reactions + 3*commentaires + 5*partages) / abonnes`) reste absent de `trierPosts` -- confirme
+par l'audit v3 (section 6). Le passage de veille reel avec cette liste n'a pas pu etre lance
+(`APIFY_TOKEN` absent de cette session -- pas dans l'environnement, pas dans un `.env` local ; le
+jeton avait ete exporte manuellement par Nomena dans une session precedente, non persiste entre
+sessions par conception). A relancer avec `npm run dry-run` (ou `recupererPosts` directement) des
+que le jeton est fourni a nouveau -- pipeline pret, seule la donnee manque.
+
 ## Recapitulatif
 
 Au 12/09/2026, aucun point bloquant "technique" majeur ne reste ouvert :
