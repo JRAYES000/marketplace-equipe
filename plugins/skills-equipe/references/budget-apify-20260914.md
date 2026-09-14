@@ -46,21 +46,46 @@ laquelle cette session n'a pas acces. **Ne pas presenter une estimation comme un
 facture reel** dans le mail du 20 -- seul le tableau de bord Apify fait foi.
 
 **Ce qui est tracable depuis le code et les references du depot** (donc une borne basse
-verifiable, pas le total reel) : deux appels reels a `trouverPosts` sont documentes dans
-`references/etat-linkedin-20260912.md` et les SKILL.md de `linkedin-veille-virale` et
-`linkedin-commentaires`, tous les deux le 12/09/2026, sur le profil
-`https://www.linkedin.com/in/julien-rayes`, `maxPosts: 5` chacun (un pour chaque skill) :
+verifiable, pas le total reel) -- **mis a jour le 15/09/2026** avec les deux passages reels
+survenus le 14/09/2026, absents de la version precedente de ce fichier (ecrite avant eux, verifie
+par `git log`) :
 
+**12/09/2026** -- deux appels reels a `trouverPosts` sur le profil
+`https://www.linkedin.com/in/julien-rayes`, `maxPosts: 5` chacun (un pour chaque skill) :
 ```
 2 appels x 5 posts = 10 posts factures au plus
-10 posts x (2 $ / 1000 posts) = 0,02 $
 ```
 
-Les fichiers de resultat (`data/posts-julien-rayes-2026-09-12.json`) sont gitignores et
-n'existent plus sur cette machine au moment de cette redaction -- ce calcul s'appuie sur la
-documentation ecrite a l'epoque (nombre de posts recuperes note dans les SKILL.md), pas sur
-une relecture directe des fichiers. **A confirmer aupres de la console Apify pour le chiffre
-exact a mettre dans le mail du 20.**
+**14/09/2026, `linkedin-commentaires`** -- premier appel reel sur les 16 comptes valides par
+Julien (8 par marque) : `julien-partners` -> 12 posts recuperes, `julien-agency` -> 2 posts
+recuperes (Point n°9 de `etat-linkedin-20260912.md`) :
+```
+12 + 2 = 14 posts factures
+```
+
+**14/09/2026, `linkedin-veille-virale`** -- premier appel reel sur les 10 comptes americains
+(`comptes-a-surveiller.txt`), confirme directement dans `data/veille-resultats-reels-20260914.json`
+(`nb_recuperes: 35`) :
+```
+35 posts factures
+```
+
+**Total trace depuis le code, au 15/09/2026** :
+```
+10 + 14 + 35 = 59 posts factures au plus
+59 posts x (2 $ / 1000 posts) = 0,118 $ (arrondi 0,12 $)
+```
+
+Toujours tres largement sous les 50 € (moins de 0,3 % du budget total, avant conversion en
+euros). Les fichiers de resultat du 12/09
+(`data/posts-julien-rayes-2026-09-12.json`) sont gitignores et n'existent plus sur cette
+machine -- ce sous-total s'appuie sur la documentation ecrite a l'epoque, pas sur une relecture
+directe. Les fichiers du 14/09 (`data/veille-reelle-20260914.json`,
+`data/veille-resultats-reels-20260914.json`) existent encore sur cette machine au moment de
+cette mise a jour et ont ete relus directement pour le chiffre ci-dessus.
+
+**A confirmer aupres de la console Apify pour le montant exact a mettre dans le mail du 20** --
+ce total reste une borne basse calculee, pas un releve de facturation.
 
 ## Ce qui reste a faire avant de lancer la recuperation reelle
 
