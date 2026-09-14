@@ -1,52 +1,84 @@
 {
   "julien-partners": {
     "compte": "julien-partners",
-    "source": "fixture (APIFY_TOKEN absent et/ou comptes_a_surveiller vide -- voir fixtures/posts-exemple.json)",
-    "nbPostsRecuperes": 4,
-    "nbPostsRetenus": 2,
+    "source": "apify-reel",
+    "nbPostsRecuperes": 35,
+    "nbPostsRetenus": 15,
     "ecartes": [
-      "p2-carrousel",
-      "p3-trop-commente"
+      "7504243910907564032",
+      "7504231629624614913",
+      "7504900996662292480",
+      "7504578746679640064",
+      "7504779354657280000",
+      "7503878715400024064",
+      "7503534106585235456",
+      "7503147618500243456",
+      "7502780730603769856",
+      "7504227262301376512",
+      "7505230968446705664",
+      "7504509436418265088",
+      "7505234905308602368",
+      "7504147702264283137",
+      "7504871760446779392",
+      "7503785463032360960",
+      "7503086666119581696",
+      "7503019922784997377",
+      "7503444861996531713",
+      "7502787798287171584"
     ],
     "postChoisi": {
-      "id": "p1",
-      "auteur": "Claire Fontaine",
-      "url": "https://www.linkedin.com/posts/claire-fontaine_exemple-p1",
-      "postedAt": "2026-09-09T08:15:00.000Z",
-      "commentsCount": 14,
-      "texteOriginal": "On a mis 3 mois a debloquer un recrutement cle parce que personne n'osait dire que le poste tel que redige n'interessait personne. Le jour ou on a accepte de le reecrire a partir des vrais irritants du poste (pas de la fiche RH), 6 candidatures qualifiees en 10 jours."
+      "id": "7504143803625218049",
+      "auteur": "Justin Welsh",
+      "url": "https://www.linkedin.com/posts/justinwelsh_one-of-the-best-business-hacks-is-being-your-activity-7504143803625218049-bQCf",
+      "postedAt": "2026-09-11T11:48:23.034Z",
+      "commentsCount": 1340,
+      "score": 0.01643791403052788,
+      "texteOriginal": "One of the best business hacks is being your own biggest cheerleader.\n\nTrust me, you're going to need it.\n\nWhen you're just starting out, very few people will believe in you.\n\nMaybe your spouse.\nMaybe your friends.\nMaybe your family.\n\nMaybe.\n\nSo you better believe in yourself enough for all of them.\n\nTalk confidently.\nToot your own horn.\nWear your own merch.\nCelebrate the wins nobody else cares about.\n\nYou might feel a little ridiculous.\n\nGood.\n\nBecause one day, if things work out, something funny happens:\n\nEveryone who doubted you suddenly remembers being incredibly supportive.\n\n\"I always knew.\"\n\"I could see it coming!\"\n\nSure.\n\nThe most important part of self-belief is that it keeps you in the game long enough to get good.\n\nThen you *actually* have to get good.\n\nIt took me a decade to figure those things out while building my one-person business to $15M in profit.\n\nI broke down everything I learned in a free 30-page guide to solopreneurship.\n\nHundreds of articles, hours of voice notes, and interviews with successful builders compressed into something you can read in 30 minutes.\n\nFree here: https://buff.ly/aDit80i"
     },
-    "contenuFinal": "On me demande souvent pourquoi une offre d'emploi ne rencontre personne alors qu'elle est \"bien ecrite\". Un post de Claire Fontaine cette semaine remet le doigt dessus : le blocage n'etait pas la visibilite de l'annonce, mais son contenu -- ecrit depuis la fiche de poste RH, pas depuis les vrais irritants du quotidien. Resultat apres reecriture : 6 candidatures qualifiees en 10 jours. Ca rejoint ce qu'on voit cote reseau : la bonne question n'est pas \"comment diffuser plus large\", c'est \"qui a vraiment vecu ce poste et qu'est-ce qu'il en dirait\".",
+    "contenuFinal": null,
     "authorUrn": "urn:li:person:ZvLHybJZhj",
-    "argumentsPublierPost": {
-      "authorUrn": "urn:li:person:ZvLHybJZhj",
-      "commentary": "On me demande souvent pourquoi une offre d'emploi ne rencontre personne alors qu'elle est \"bien ecrite\". Un post de Claire Fontaine cette semaine remet le doigt dessus : le blocage n'etait pas la visibilite de l'annonce, mais son contenu -- ecrit depuis la fiche de poste RH, pas depuis les vrais irritants du quotidien. Resultat apres reecriture : 6 candidatures qualifiees en 10 jours. Ca rejoint ce qu'on voit cote reseau : la bonne question n'est pas \"comment diffuser plus large\", c'est \"qui a vraiment vecu ce poste et qu'est-ce qu'il en dirait\"."
-    },
+    "argumentsPublierPost": null,
     "publicationReelle": "NON EFFECTUEE -- dry run uniquement, publierPost() jamais appele par ce script"
   },
   "julien-agency": {
     "compte": "julien-agency",
-    "source": "fixture (APIFY_TOKEN absent et/ou comptes_a_surveiller vide -- voir fixtures/posts-exemple.json)",
-    "nbPostsRecuperes": 4,
-    "nbPostsRetenus": 2,
+    "source": "apify-reel",
+    "nbPostsRecuperes": 35,
+    "nbPostsRetenus": 15,
     "ecartes": [
-      "p2-carrousel",
-      "p3-trop-commente"
+      "7504779354657280000",
+      "7504900996662292480",
+      "7504578746679640064",
+      "7504231629624614913",
+      "7504243910907564032",
+      "7503785463032360960",
+      "7505234905308602368",
+      "7504871760446779392",
+      "7504509436418265088",
+      "7504147702264283137",
+      "7503086666119581696",
+      "7505230968446705664",
+      "7502787798287171584",
+      "7503444861996531713",
+      "7503019922784997377",
+      "7503878715400024064",
+      "7503534106585235456",
+      "7502780730603769856",
+      "7504227262301376512",
+      "7503147618500243456"
     ],
     "postChoisi": {
-      "id": "p1",
-      "auteur": "Claire Fontaine",
-      "url": "https://www.linkedin.com/posts/claire-fontaine_exemple-p1",
-      "postedAt": "2026-09-09T08:15:00.000Z",
-      "commentsCount": 14,
-      "texteOriginal": "On a mis 3 mois a debloquer un recrutement cle parce que personne n'osait dire que le poste tel que redige n'interessait personne. Le jour ou on a accepte de le reecrire a partir des vrais irritants du poste (pas de la fiche RH), 6 candidatures qualifiees en 10 jours."
+      "id": "7504143803625218049",
+      "auteur": "Justin Welsh",
+      "url": "https://www.linkedin.com/posts/justinwelsh_one-of-the-best-business-hacks-is-being-your-activity-7504143803625218049-bQCf",
+      "postedAt": "2026-09-11T11:48:23.034Z",
+      "commentsCount": 1340,
+      "score": 0.01643791403052788,
+      "texteOriginal": "One of the best business hacks is being your own biggest cheerleader.\n\nTrust me, you're going to need it.\n\nWhen you're just starting out, very few people will believe in you.\n\nMaybe your spouse.\nMaybe your friends.\nMaybe your family.\n\nMaybe.\n\nSo you better believe in yourself enough for all of them.\n\nTalk confidently.\nToot your own horn.\nWear your own merch.\nCelebrate the wins nobody else cares about.\n\nYou might feel a little ridiculous.\n\nGood.\n\nBecause one day, if things work out, something funny happens:\n\nEveryone who doubted you suddenly remembers being incredibly supportive.\n\n\"I always knew.\"\n\"I could see it coming!\"\n\nSure.\n\nThe most important part of self-belief is that it keeps you in the game long enough to get good.\n\nThen you *actually* have to get good.\n\nIt took me a decade to figure those things out while building my one-person business to $15M in profit.\n\nI broke down everything I learned in a free 30-page guide to solopreneurship.\n\nHundreds of articles, hours of voice notes, and interviews with successful builders compressed into something you can read in 30 minutes.\n\nFree here: https://buff.ly/aDit80i"
     },
-    "contenuFinal": "Un recrutement bloque 3 mois. La cause : une fiche de poste ecrite pour rassurer les RH, pas pour parler aux candidats. Une fois reecrite a partir des irritants reels du poste : 6 candidatures qualifiees en 10 jours (retour de Claire Fontaine cette semaine). Pour un dirigeant, la lecon est simple : une fiche de poste n'est pas un document de conformite interne, c'est un argumentaire de vente. Si vous ne l'avez pas teste sur un candidat reel avant publication, vous ne savez pas si elle vend quoi que ce soit.",
+    "contenuFinal": null,
     "authorUrn": "urn:li:person:aFqu-W7ClW",
-    "argumentsPublierPost": {
-      "authorUrn": "urn:li:person:aFqu-W7ClW",
-      "commentary": "Un recrutement bloque 3 mois. La cause : une fiche de poste ecrite pour rassurer les RH, pas pour parler aux candidats. Une fois reecrite a partir des irritants reels du poste : 6 candidatures qualifiees en 10 jours (retour de Claire Fontaine cette semaine). Pour un dirigeant, la lecon est simple : une fiche de poste n'est pas un document de conformite interne, c'est un argumentaire de vente. Si vous ne l'avez pas teste sur un candidat reel avant publication, vous ne savez pas si elle vend quoi que ce soit."
-    },
+    "argumentsPublierPost": null,
     "publicationReelle": "NON EFFECTUEE -- dry run uniquement, publierPost() jamais appele par ce script"
   }
 }

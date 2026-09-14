@@ -26,11 +26,14 @@ function normaliserPost(brut) {
     id: brut.id,
     authorName: brut.author && brut.author.name,
     authorUrl: brut.author && brut.author.linkedinUrl,
+    authorPublicIdentifier: brut.author && brut.author.publicIdentifier,
     shareUrn: brut.shareUrn,
     url: brut.linkedinUrl,
     text: brut.content,
     postedAt: brut.postedAt && brut.postedAt.date,
     commentsCount: brut.engagement && brut.engagement.comments,
+    reactionsCount: brut.engagement && brut.engagement.likes,
+    sharesCount: brut.engagement && brut.engagement.shares,
     document: brut.document,
   };
 }
@@ -66,17 +69,54 @@ async function recupererPosts({
 }
 
 /**
- * Tri : ecarte les carrousels (repere mecanique : document.totalPageCount
- * present dans la reponse de l'acteur -- leur contenu vit dans les pages, pas
- * dans le texte du post) et les posts au-dela du seuil de commentaires
- * configure (au-dela, un fil est deja trop encombre pour y gagner en
- * visibilite). Le reste est trie du plus recent au plus ancien.
+ * Score d'engagement du brief (section 5) :
+ * (reactions + coeff_commentaires*commentaires + coeff_partages*partages) / abonnes.
+ * `abonnesParIdentifiant` associe `authorPublicIdentifier` (ex. "emollick") au nombre
+ * d'abonnes de ce compte -- l'acteur Apify ne renvoie jamais ce chiffre dans la reponse
+ * d'un post, verifie sur un echantillon reel le 14/09/2026 (voir
+ * references/comptes-a-surveiller-veille-20260914.md pour la source de ces chiffres).
+ * Renvoie `null` (jamais 0, qui se confondrait avec un vrai score nul) si les abonnes du
+ * compte sont inconnus -- le post est alors ecarte par `trierPosts`, pas score a 0.
  */
-function trierPosts(posts, { maxCommentaires = 30 } = {}) {
-  return posts
-    .filter((post) => !(post.document && typeof post.document.totalPageCount === 'number'))
-    .filter((post) => (post.commentsCount ?? 0) <= maxCommentaires)
-    .sort((a, b) => new Date(b.postedAt || 0) - new Date(a.postedAt || 0));
+function calculerScore(post, { coefficients, abonnesParIdentifiant }) {
+  const abonnes = abonnesParIdentifiant && abonnesParIdentifiant[post.authorPublicIdentifier];
+  if (!abonnes) return null;
+  const reactions = post.reactionsCount ?? 0;
+  const commentaires = post.commentsCount ?? 0;
+  const partages = post.sharesCount ?? 0;
+  const numerateur =
+    reactions * coefficients.reactions +
+    commentaires * coefficients.commentaires +
+    partages * coefficients.partages;
+  return numerateur / abonnes;
 }
 
-module.exports = { recupererPosts, trierPosts, normaliserPost };
+/**
+ * Tri : ecarte les carrousels (repere mecanique : document.totalPageCount present
+ * dans la reponse de l'acteur -- leur contenu vit dans les pages, pas dans le texte
+ * du post), puis ne garde que les posts a la fois plus frais que `fenetreJours` et
+ * dont le score d'engagement (voir calculerScore) depasse `seuilScore` -- les deux
+ * conditions du brief (section 5), pas l'une ou l'autre. Un post dont l'auteur n'a
+ * pas d'abonnes connus dans `abonnesParIdentifiant` est ecarte plutot que suppose
+ * "assez bon" ou "pas assez bon". Le reste est trie par score decroissant : le
+ * meilleur candidat a recycler en premier (dry-run.js/SKILL.md choisissent toujours
+ * `retenus[0]`).
+ */
+function trierPosts(
+  posts,
+  { seuilScore, coefficients, fenetreJours = 7, abonnesParIdentifiant = {}, maintenant = new Date() } = {}
+) {
+  return posts
+    .filter((post) => !(post.document && typeof post.document.totalPageCount === 'number'))
+    .filter((post) => {
+      if (!post.postedAt) return false;
+      const ageJours = (maintenant - new Date(post.postedAt)) / (1000 * 60 * 60 * 24);
+      return ageJours >= 0 && ageJours <= fenetreJours;
+    })
+    .map((post) => ({ post, score: calculerScore(post, { coefficients, abonnesParIdentifiant }) }))
+    .filter(({ score }) => score !== null && score > seuilScore)
+    .sort((a, b) => b.score - a.score)
+    .map(({ post, score }) => ({ ...post, score }));
+}
+
+module.exports = { recupererPosts, trierPosts, normaliserPost, calculerScore };

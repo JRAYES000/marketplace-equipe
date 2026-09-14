@@ -2,35 +2,46 @@
   {
     "id": "p1",
     "authorName": "Claire Fontaine",
+    "authorPublicIdentifier": "claire-fontaine",
     "url": "https://www.linkedin.com/posts/claire-fontaine_exemple-p1",
     "text": "On a mis 3 mois a debloquer un recrutement cle parce que personne n'osait dire que le poste tel que redige n'interessait personne. Le jour ou on a accepte de le reecrire a partir des vrais irritants du poste (pas de la fiche RH), 6 candidatures qualifiees en 10 jours.",
     "postedAt": "2026-09-09T08:15:00.000Z",
     "commentsCount": 14,
-    "reactionsCount": 132
+    "reactionsCount": 132,
+    "sharesCount": 8
   },
   {
     "id": "p2-carrousel",
     "authorName": "Marc Dubreuil",
+    "authorPublicIdentifier": "marc-dubreuil",
     "url": "https://www.linkedin.com/posts/marc-dubreuil_exemple-p2",
     "text": "5 erreurs qui tuent une levee de fonds -- carrousel",
     "postedAt": "2026-09-10T09:00:00.000Z",
     "commentsCount": 3,
+    "reactionsCount": 200,
+    "sharesCount": 20,
     "document": { "totalPageCount": 6 }
   },
   {
-    "id": "p3-trop-commente",
+    "id": "p3-score-sous-seuil",
     "authorName": "Sophie Aline",
+    "authorPublicIdentifier": "sophie-aline",
     "url": "https://www.linkedin.com/posts/sophie-aline_exemple-p3",
     "text": "Fil deja tres discute sur le management a distance.",
     "postedAt": "2026-09-08T12:00:00.000Z",
-    "commentsCount": 87
+    "commentsCount": 87,
+    "reactionsCount": 40,
+    "sharesCount": 2
   },
   {
-    "id": "p4-plus-ancien",
+    "id": "p4-trop-vieux",
     "authorName": "Claire Fontaine",
+    "authorPublicIdentifier": "claire-fontaine",
     "url": "https://www.linkedin.com/posts/claire-fontaine_exemple-p4",
-    "text": "Ancien post sur le meme sujet, deja depasse par p1 en date.",
+    "text": "Ancien post sur le meme sujet, hors fenetre de fraicheur de 7 jours.",
     "postedAt": "2026-08-20T08:00:00.000Z",
-    "commentsCount": 5
+    "commentsCount": 5,
+    "reactionsCount": 300,
+    "sharesCount": 15
   }
 ]

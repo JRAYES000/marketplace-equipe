@@ -22,24 +22,46 @@ const fs = require('fs');
 const path = require('path');
 const { trierPosts, recupererPosts } = require('./lib/veille');
 const reglages = require('./reglages-comptes.json');
+const reglageScore = require('./reglage-score.json');
+const { abonnes: abonnesReels } = require('./abonnes-comptes.json');
 const postsFixture = require('./fixtures/posts-exemple.json');
+const abonnesExemple = require('./fixtures/abonnes-exemple.json');
 const redactionsExemple = require('./fixtures/redactions-exemple.json');
+
+// Date de reference fixe pour le jeu fixture, pour que la fenetre de fraicheur (7 jours)
+// reste deterministe quelle que soit la date reelle d'execution -- les posts fixture ont
+// ete dates autour du 09-10/09/2026 pour ce scenario.
+const MAINTENANT_FIXTURE = new Date('2026-09-14T12:00:00.000Z');
 
 async function chargerPosts(config) {
   const urls = config.comptes_a_surveiller || [];
   if (process.env.APIFY_TOKEN && urls.length > 0) {
-    return { source: 'apify-reel', posts: await recupererPosts({ profileUrls: urls }) };
+    return {
+      source: 'apify-reel',
+      posts: await recupererPosts({ profileUrls: urls }),
+      abonnesParIdentifiant: abonnesReels,
+      maintenant: new Date(),
+    };
   }
   return {
     source: 'fixture (APIFY_TOKEN absent et/ou comptes_a_surveiller vide -- voir fixtures/posts-exemple.json)',
     posts: postsFixture,
+    abonnesParIdentifiant: abonnesExemple,
+    maintenant: MAINTENANT_FIXTURE,
   };
 }
 
 async function executerPourCompte(compte, config) {
-  const { source, posts } = await chargerPosts(config);
-  const retenus = trierPosts(posts, { maxCommentaires: config.seuil_max_commentaires });
-  const ecartes = posts.filter((p) => !retenus.includes(p)).map((p) => p.id);
+  const { source, posts, abonnesParIdentifiant, maintenant } = await chargerPosts(config);
+  const retenus = trierPosts(posts, {
+    seuilScore: reglageScore.seuil_score,
+    coefficients: reglageScore.coefficients,
+    fenetreJours: reglageScore.fenetre_jours,
+    abonnesParIdentifiant,
+    maintenant,
+  });
+  const idsRetenus = new Set(retenus.map((p) => p.id));
+  const ecartes = posts.filter((p) => !idsRetenus.has(p.id)).map((p) => p.id);
 
   if (retenus.length === 0) {
     return { compte, source, nbPostsRecuperes: posts.length, retenus: [], ecartes, choisi: null };
@@ -61,6 +83,7 @@ async function executerPourCompte(compte, config) {
       url: choisi.url,
       postedAt: choisi.postedAt,
       commentsCount: choisi.commentsCount,
+      score: choisi.score,
       texteOriginal: choisi.text,
     },
     contenuFinal,
