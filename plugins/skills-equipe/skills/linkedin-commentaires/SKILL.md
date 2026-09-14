@@ -61,6 +61,15 @@ echouer.
 - **Fraicheur** : `filtrerPostsFrais` ne garde que les posts de moins de 4h, tries du plus
   recent au plus ancien. Un post de 5h est exclu -- teste reellement
   (`test/planifier-commentaires.test.js`).
+  **A savoir avant de lancer la skill en usage courant** (pas seulement une excuse pour le
+  passage du 14/09/2026, verifie ce jour-la sur les 16 comptes reels) : la regle des 4h
+  suppose un vivier de comptes suffisamment actifs pour qu'il y ait TOUJOURS quelque chose de
+  frais au moment du passage. Sur 8 comptes par marque, un compte qui ne publie qu'une ou deux
+  fois par semaine ne garantit rien -- un passage donne legitimement 0 post frais si aucun des
+  8 n'a publie dans les 4 heures precedentes, sans que ce soit un signe de panne. Plus la liste
+  de comptes est active (plusieurs posts/semaine chacun), plus la fenetre de 4h a des chances
+  de donner quelque chose ; avec des comptes qui publient rarement, le repli documente (poster
+  le plus recent disponible, deviation ecrite) sera la norme plutot que l'exception.
 - **Quota journalier (5/jour)** et **jamais deux fois la meme personne le meme jour** :
   `validerQuotaJournalier`, verifie contre `data/registre-commentaires.json` (le registre reel
   des commentaires deja publies, pas une simple limite documentee).
@@ -172,10 +181,42 @@ des bases de prospects existantes (aucun rapport avec ce travail, et ce serait p
 donnees de quelqu'un d'autre).
 
 **A faire par Julien ou Nomena, dans Notion** : ouvrir (ou creer) une page destinee a ce
-chantier, cliquer "Share" en haut a droite, ajouter l'integration Notion utilisee ici par son
-nom, puis donner l'ID de cette page (visible dans son URL) pour `NOTION_PARENT_PAGE_ID`. Des
-que fait, `creer-page-notion.js` peut tourner tel quel dans les deux skills -- rien d'autre a
-changer cote code.
+chantier, cliquer "..." en haut a droite -> "Connexions" -> ajouter l'integration Notion
+utilisee ici par son nom, puis donner l'ID de cette page (visible dans son URL) pour
+`NOTION_PARENT_PAGE_ID`. Des que fait, `creer-page-notion.js` peut tourner tel quel dans les
+deux skills -- rien d'autre a changer cote code.
+
+**Garde-fou verifie sur ce cas precis (regle 4 du brief, "rien ne plante a vide")** :
+`creer-page-notion.js` et `lib/notion.js` ne remontent plus jamais l'exception brute de
+l'API -- chaque echec connu est traduit en message qui dit quoi faire et ou. Teste reellement,
+sortie reelle capturee :
+```
+$ node creer-page-notion.js                                    # NOTION_PARENT_PAGE_ID absent
+NOTION_PARENT_PAGE_ID manquant. A definir dans l'environnement (meme methode que NOTION_TOKEN
+et APIFY_TOKEN, voir .env.example) : c'est l'ID de la page Notion, deja partagee avec
+l'integration (bouton "..." de la page -> "Connexions" -> ajouter l'integration), sous
+laquelle creer cette base -- copiez-le depuis l'URL de la page (le bloc de 32 caracteres
+apres le dernier tiret).
+
+$ NOTION_PARENT_PAGE_ID=x node creer-page-notion.js             # NOTION_TOKEN absent
+NOTION_TOKEN manquant (variable d'environnement ou parametre notionToken).
+
+$ NOTION_TOKEN=<valide> NOTION_PARENT_PAGE_ID=<id-invalide-ou-non-partage> node creer-page-notion.js
+Page ou base introuvable pour NOTION_PARENT_PAGE_ID -- deux causes possibles : (1) l'ID est
+invalide (copiez-le depuis l'URL de la page Notion, le bloc de 32 caracteres apres le dernier
+tiret) ; (2) la page existe mais n'est PAS partagee avec cette integration -- ouvrez la page
+dans Notion, bouton "..." en haut a droite -> "Connexions" -> ajoutez l'integration par son
+nom, puis relancez.
+
+$ NOTION_TOKEN=<invalide> ... node creer-page-notion.js         # jeton invalide/expire (401)
+NOTION_TOKEN invalide ou expire. Verifiez sa valeur dans Notion -> Parametres et membres ->
+Connexions -> votre integration -> "Afficher le jeton secret", et reexportez-la dans
+l'environnement.
+```
+**Bug reel corrige au passage** : la premiere version etiquetait a tort l'absence de
+`NOTION_TOKEN` comme une erreur "reseau" (le `try/catch` autour de `fetch` interceptait aussi
+l'exception synchrone levee avant tout appel reseau) -- corrige, avec test de non-regression
+(`test/notion-erreurs.test.js`, meme correction repliquee dans `linkedin-veille-virale`).
 
 ## Exemple reel attendu le 20/09 -- BLOQUE sur un point technique different, pas contourne
 
