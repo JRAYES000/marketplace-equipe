@@ -276,16 +276,23 @@ des documents feuilletables** :
 
 - **Carrousel du 14/09 (10 diapos, conforme au brief)** :
   `https://www.linkedin.com/posts/julien-rayes_pourquoi-vos-meilleurs-candidats-disparaissent-ils-activity-7505170085091840000-6DCd`
-  — diapo 1 vérifiée à l'écran identique au rendu local (accroche, flèche "BALAYEZ", numéro
-  01), texte du post identique à celui validé par `generer-post.js` (chiffre France Num
-  inclus).
+  — **document ouvert et inspecté** : la barre du lecteur affiche "10 pages" (confirme le
+  compte exact) et le nom de fichier "Pourquoi vos meilleurs candidats disparaissent-ils
+  ava..." (tronqué à l'affichage, cohérent avec le nom réel). Diapo 1 pleinement lisible, sans
+  troncature ni défaut de rendu, identique au rendu local (accroche, flèche "BALAYEZ", numéro
+  01). Texte du post identique à celui validé par `generer-post.js` (chiffre France Num
+  inclus). URL confirmée par deux méthodes indépendantes (lien du toast "Copy link to post",
+  et attribut `data-urn` du DOM lu via `javascript_tool`) — jamais via le presse-papiers.
 - **Carrousel du 12/09 (5 diapos, non conforme au brief — voir Point A de l'audit)** :
   `https://www.linkedin.com/posts/julien-rayes_carrouselpdf-activity-7505146405649559552-m6yM`
   — existe également, contrairement à l'incertitude qui pesait dessus depuis le 12/09.
 
-**Ce que ça tranche** : la publication réelle via l'API Documents de LinkedIn fonctionne bel et
-bien — `successful: true` + corps vide + lecture 403 sont la signature normale d'un succès sur
-ce compte, pas un doute à lever à chaque fois. Détail complet dans
+**Méthode API Documents de LinkedIn : VALIDÉE.** Les deux carrousels tentés par
+`proxy_execute` (4 étapes) sont réellement en ligne, corrects (bon nombre de pages, bon
+contenu). Le signal ambigu obtenu à chaque fois côté API (`successful: true`, corps vide,
+lecture 403 sur `GET /rest/posts`) **est la signature normale d'un succès sur ce compte**
+(droits écriture seule) — pas un signal d'échec, pas un doute à lever systématiquement par une
+vérification navigateur à chaque publication future. Détail complet dans
 `references/etat-linkedin-20260912.md` (Points n°7 et n°8). **Ce point est maintenant livré et
 confirmé** pour le carrousel du 14/09 — reste à Julien de décider du sort du carrousel du 12/09
 (non conforme mais bien réel).
