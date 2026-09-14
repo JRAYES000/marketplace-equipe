@@ -1,6 +1,6 @@
 ---
 name: linkedin-veille-virale
-description: "Surveille des comptes LinkedIn suivis, repere les posts qui valent une reaction et publie un post recycle/inspire pour julien-partners ou julien-agency"
+description: "Surveille des comptes LinkedIn suivis, repere les posts qui valent une reaction (score d'engagement reel) et redige un post recycle/inspire pour julien-partners ou julien-agency. Activation MANUELLE uniquement : ne se declenche jamais d'elle-meme, seulement sur demande explicite (ex. 'fais la veille du jour', 'cherche un post a recycler pour julien-agency', 'veille LinkedIn')."
 ---
 
 # linkedin-veille-virale
@@ -35,6 +35,37 @@ description: "Surveille des comptes LinkedIn suivis, repere les posts qui valent
    ci-dessous). `npm test` (`node --test`) verifie le tri
    (`test/trierPosts.test.js`) et ce dry run (`test/dry-run.test.js`), y
    compris qu'il n'importe jamais `lib/publier.js`.
+
+## Cinq regles d'usage (brief du 10/09/2026, section 2) -- etat au 15/09/2026
+
+Ajoute le 15/09/2026 -- cette section n'existait pas, trouve par l'audit du meme jour alors que
+les deux autres skills linkedin-* l'avaient deja.
+
+1. **Phrase de lancement** : « fais la veille du jour », « cherche un post a recycler pour
+   julien-agency » (voir aussi les variantes dans la description en tete de ce fichier).
+2. **Point de situation en 3 lignes** : `node etat.js [compte]` -- lit le dernier passage de
+   veille reel connu sur disque (`data/veille-resultats-reels-*.json`, gitignore) et les posts
+   adaptes deja prets dans `a-publier/`, jamais de donnee inventee.
+3. **Lecture des chiffres depuis une capture d'ecran, jamais de saisie manuelle** : **sans objet
+   pour l'instant, assume explicitement plutot que fait a moitie** -- meme justification que les
+   deux autres skills linkedin-* : cette skill ne suit encore aucune metrique post-publication
+   (vues, reactions sur un post deja recycle). A reprendre le jour ou un tableau de suivi est
+   construit.
+4. **Rien ne plante a vide** : `recupererPosts`/`trierPosts` refusent avec un message explicite
+   (jamais une exception brute) si `APIFY_TOKEN` manque ou si `profileUrls` est vide ; les
+   erreurs Notion (`messageErreurNotion`, `lib/notion.js`) traduisent chaque echec connu en
+   message actionnable. `etat.js` gere le cas "aucun compte surveille, aucun post pret" (voir
+   regle 5).
+5. **Jamais les mains vides** : `etat.js` propose un repli concret (`node dry-run.js` sur le jeu
+   fixture) des que `comptes_a_surveiller` est vide et qu'aucun post adapte n'existe pour un
+   compte -- teste reellement :
+   ```
+   $ node etat.js julien-partners
+   10 compte(s) surveille(s) configure(s) dans reglages-comptes.json (comptes_a_surveiller).
+   Dernier passage de veille reel connu (...) : 35 posts recuperes, 15 retenus, ... encore "a rediger".
+   ... post(s) adapte(s) pret(s) dans a-publier/ pour julien-partners : ...
+   Publication reelle sur LinkedIn : aucun registre tenu par cette skill -- verifier aupres de Julien ...
+   ```
 
 ## Etat au 12/09/2026 -- ce qui est pret, ce qui attend
 
