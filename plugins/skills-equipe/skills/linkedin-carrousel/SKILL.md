@@ -122,6 +122,38 @@ ce qu'il voit reellement** (PDF/carrousel affiche, ou post texte seul) -- repons
 moment de cette redaction. Ne pas marquer ce point comme "livre et valide" tant que cette
 confirmation n'est pas arrivee.
 
+## Second exemple reel (2026-09-14) -- carrousel conforme a 10 diapos
+
+Le brief integral du 10/09 impose 8 a 12 diapos (10 par defaut) ; le carrousel du 12/09
+ci-dessus n'en a que 5 et deux de ses diapos depassaient meme la limite de 25 mots. Julien a
+tranche : ne pas supprimer le premier post (son existence reelle n'est toujours pas confirmee
+visuellement), et produire un second carrousel conforme comme exemple reel du 20/09.
+
+- `a-publier/julien-agency-2026-09-14-v2.json` -- 10 diapos (hook interrogatif, diapo "gain",
+  7 diapos "une idee chacune", diapo finale "une action"), toutes verifiees a 25 mots maximum,
+  aucun tiret long.
+- `a-publier/julien-agency-2026-09-14-v2.commentary.txt` -- texte du post applique les regles
+  d'ecriture du brief (section 3), verifie par script : 1413 caracteres (fourchette
+  1300-1900), accroche interrogative de 87 caracteres, 4 emojis en tete de bloc, 2 passages en
+  gras unicode sans accent, 2 hashtags en fin de texte, aucune formulation interdite. **Un
+  point reste assume comme lacune** : le brief exige un chiffre precis source par tranche de
+  100 mots ; faute d'une statistique reellement verifiable sous la main pour ce sujet precis,
+  ce post n'en contient volontairement aucun plutot que d'en inventer un -- a completer si
+  Julien dispose d'une donnee source valide.
+- PDF genere reellement via `generer-pdf.js` (pas simule) : `sortants/julien-agency/Pourquoi
+  vos meilleurs candidats disparaissent-ils avant l'offre.pdf`, 10 pages confirmees, 81 564
+  octets, nom de fichier conforme a la nouvelle convention (titre lisible, sans date ni
+  numero).
+- **Non publie a ce stade** : aucun "GO" recu pour cet acte irreversible sur ce second
+  carrousel. En attente d'instruction explicite avant toute publication reelle.
+- Le sort du premier carrousel (5 diapos) reste ouvert -- a trancher une fois son existence
+  confirmee par Julien depuis son propre profil.
+
+Voir `references/audit-brief-20260914-v3.md` pour le detail complet, skill par skill, de tout
+ce qui reste non conforme au brief integral (regles d'usage, garde-fous automatiques
+d'ecriture/structure non codes, mention "activation MANUELLE" absente, ligne README manquante,
+etc.).
+
 ## Limites connues
 
 - **(2026-09-14, corrige suite au brief du 10/09)** Le nom de fichier de sortie n'est plus
