@@ -1,9 +1,21 @@
 ---
 name: linkedin-carrousel
-description: "Composer et publier des carrousels LinkedIn pour Claude Agency (acces confirme le 12/09) et Claude Partners (acces non confirme) -- la page Claude est abandonnee pour l'instant"
+description: "Composer et publier des carrousels LinkedIn pour Claude Agency (acces confirme le 12/09) et Claude Partners (acces non confirme) -- la page Claude est abandonnee pour l'instant. Activation MANUELLE uniquement : ne se declenche jamais d'elle-meme, seulement sur demande explicite (ex. 'fais-moi un carrousel', 'genere le carrousel du jour', 'carrousel LinkedIn sur <sujet>')."
 ---
 
 # linkedin-carrousel
+
+**Activation MANUELLE uniquement.** Cette skill ne se lance jamais d'elle-meme -- seulement sur
+demande explicite.
+
+**Phrase de lancement** : « fais-moi un carrousel ».
+Variantes probables : « genere le carrousel du jour », « carrousel LinkedIn sur <sujet> »,
+« carrousel pour julien-agency/julien-partners », « prepare le carrousel de la semaine ».
+
+**Point de situation** : lancer `node etat.js [compte]` avant toute chose -- affiche en trois
+lignes le dernier carrousel genere, les brouillons en attente de rendu, et l'etat de
+publication reelle (jamais suivi automatiquement, a verifier aupres de Julien). Propose un
+repli si rien n'est en attente (jamais les mains vides).
 
 ## Perimetre au 12/09/2026 (renverse le meme jour par un test reel -- ne pas revenir a la version precedente)
 
@@ -122,37 +134,136 @@ ce qu'il voit reellement** (PDF/carrousel affiche, ou post texte seul) -- repons
 moment de cette redaction. Ne pas marquer ce point comme "livre et valide" tant que cette
 confirmation n'est pas arrivee.
 
-## Second exemple reel (2026-09-14) -- carrousel conforme a 10 diapos
+## Cinq regles d'usage (brief du 10/09/2026, section 2) -- etat au 14/09/2026
 
-Le brief integral du 10/09 impose 8 a 12 diapos (10 par defaut) ; le carrousel du 12/09
-ci-dessus n'en a que 5 et deux de ses diapos depassaient meme la limite de 25 mots. Julien a
-tranche : ne pas supprimer le premier post (son existence reelle n'est toujours pas confirmee
-visuellement), et produire un second carrousel conforme comme exemple reel du 20/09.
+1. **Phrase de lancement** : faite, voir en tete de ce fichier et dans le README du paquet.
+2. **Point de situation en 3 lignes** : fait, `node etat.js [compte]` (voir en tete de ce
+   fichier).
+3. **Lecture des chiffres depuis une capture d'ecran, jamais de saisie manuelle** : **sans objet
+   pour l'instant, assume explicitement plutot que fait a moitie**. Cette regle vise le suivi
+   de performance d'un post deja publie (vues, reactions) -- `linkedin-carrousel` ne fait que
+   generer et publier, il ne suit encore aucune metrique post-publication. A reprendre le jour
+   ou un tableau de suivi (Notion ou autre) est construit pour cette skill.
+4. **Rien ne plante a vide** : fait pour les cas reels de cette skill -- `validerDiapos` refuse
+   avec un message explicite (jamais une exception brute) sur une liste vide ou hors bornes,
+   `chargerGabarit` fait de meme sur un compte inconnu, et `etat.js` gere explicitement le cas
+   "aucun brouillon nulle part" (voir regle 5). `reglages-comptes.json` existe mais **n'est lu
+   par aucun code** de cette skill a ce jour (verifie) -- rien a proteger de ce cote, le
+   compte/gabarit vient toujours de l'argument CLI.
+5. **Jamais les mains vides** : fait, `etat.js` propose un repli concret (reprendre
+   `fixtures/diapos-exemple.json` ou un sujet deja publie sous un angle propre au compte) des
+   qu'aucun brouillon ni carrousel n'existe pour un compte -- teste reellement sur
+   `page-claude` (aucun contenu a ce jour), voir sortie plus bas.
 
-- `a-publier/julien-agency-2026-09-14-v2.json` -- 10 diapos (hook interrogatif, diapo "gain",
-  7 diapos "une idee chacune", diapo finale "une action"), toutes verifiees a 25 mots maximum,
-  aucun tiret long.
-- `a-publier/julien-agency-2026-09-14-v2.commentary.txt` -- texte du post applique les regles
-  d'ecriture du brief (section 3), verifie par script : 1413 caracteres (fourchette
-  1300-1900), accroche interrogative de 87 caracteres, 4 emojis en tete de bloc, 2 passages en
-  gras unicode sans accent, 2 hashtags en fin de texte, aucune formulation interdite. **Un
-  point reste assume comme lacune** : le brief exige un chiffre precis source par tranche de
-  100 mots ; faute d'une statistique reellement verifiable sous la main pour ce sujet precis,
-  ce post n'en contient volontairement aucun plutot que d'en inventer un -- a completer si
-  Julien dispose d'une donnee source valide.
-- PDF genere reellement via `generer-pdf.js` (pas simule) : `sortants/julien-agency/Pourquoi
-  vos meilleurs candidats disparaissent-ils avant l'offre.pdf`, 10 pages confirmees, 81 564
-  octets, nom de fichier conforme a la nouvelle convention (titre lisible, sans date ni
-  numero).
-- **Non publie a ce stade** : aucun "GO" recu pour cet acte irreversible sur ce second
-  carrousel. En attente d'instruction explicite avant toute publication reelle.
-- Le sort du premier carrousel (5 diapos) reste ouvert -- a trancher une fois son existence
-  confirmee par Julien depuis son propre profil.
+## Garde-fous automatiques (2026-09-14) -- refus explicite, pas un avertissement
+
+Priorite 1 du 14/09/2026 : amener `linkedin-carrousel` a conformite complete avant de rouvrir
+`linkedin-commentaires` ("mieux vaut deux skills finies que trois a moitie faites"). Les regles
+de structure et d'ecriture du brief integral (sections 3 et 4) sont desormais codees en
+garde-fous qui **refusent** -- ils ne se contentent pas de signaler.
+
+### A. Structure du carrousel -- `lib/valider-diapos.js`
+
+Appele automatiquement par `genererPdf()` (donc par le CLI `generer-pdf.js`), AVANT tout
+rendu :
+- Nombre de diapos hors de [8, 12] -> refus, message avec le compte reel et la fourchette.
+- Une diapo (titre + texte) au-dela de 25 mots -> refus avec le numero de la diapo fautive et
+  le nombre de mots constate. Aucune reduction de police n'existe nulle part dans le code
+  (verifie : `templates/*.html` n'a pas de taille de police calculee dynamiquement) -- le
+  seul geste possible reste de raccourcir le texte.
+- Diapo 1 doit porter `role: "hook"` et n'avoir aucun texte de soutien (accroche seule, sans
+  logo) -> refus sinon.
+- **Limite assumee** : "diapo 2 = le gain", "diapos 3-9 = une idee chacune", "derniere = une
+  action" sont des exigences de SENS, pas de forme -- aucun code ne peut verifier qu'une
+  phrase exprime bien "une seule idee". Seule la position et le decompte de mots sont
+  verifies automatiquement.
+- Titres >=64px, texte >=40px, numero sur chaque diapo, fleche sur la premiere : mesures
+  reellement (pas lues dans le CSS) via Playwright sur les 3 templates --
+  `test/tailles-police.test.js` et `test/numero-fleche.test.js`, 15 tests, tous verts.
+
+### B. Ecriture du texte du post -- `lib/valider-post.js` + `generer-post.js`
+
+Brouillon redige avec le gras en `**etoiles**` ; `node generer-post.js <brouillon> [sortie]`
+convertit et refuse (code de sortie 1, jamais un simple avertissement) :
+- Gras accentue -> refus (aucune forme Unicode grasse n'existe accentuee).
+- Aucun gras du tout -> refus.
+- Emojis hors de [3, 5], au milieu d'une phrase, ou deux consecutifs -> refus.
+- Hors de 1300-1900 caracteres -> refus avec le compte reel.
+- Accroche sans "?" dans les 140 premiers caracteres -> refus.
+- Plus de 2 mots-dieses, ou places ailleurs qu'en toute fin -> refus.
+- Formulations interdites (demande d'engagement, tiret long, "ce n'est pas X c'est Y", "ravi
+  de vous annoncer", "taguez quelqu'un", critique de LinkedIn, MAJUSCULES) -> refus.
+- Chiffre sans `(source : ...)` attache -> refus -- **le filet principal**, traite comme tel :
+  un nombre ecrit en toutes lettres ("sept", "dix") n'est jamais concerne, seule une suite de
+  chiffres l'est.
+- `test/valider-post.test.js` : 15 tests, chacun un cas reel qui doit echouer (gras accentue,
+  2 emojis colles, 1200 caracteres, chiffre sans source, etc.) -- tous verts, sortie reelle
+  capturee, pas une description.
+
+### C. Cinq regles d'usage (section 2 du brief) -- etat au 14/09/2026
+
+1. **Phrase de lancement** : faite, voir en tete de ce fichier et dans le README du paquet.
+2. **Point de situation en 3 lignes** : fait, `node etat.js [compte]` (voir en tete de ce
+   fichier) -- lit l'etat reel sur disque (derniers PDF generes, brouillons en attente),
+   jamais de donnee inventee.
+3. **Lecture des chiffres depuis une capture d'ecran, jamais de saisie manuelle** : **sans
+   objet pour l'instant, assume explicitement plutot que fait a moitie**. Cette regle vise le
+   suivi de performance d'un post deja publie (vues, reactions) -- `linkedin-carrousel` ne
+   fait que generer et publier, il ne suit encore aucune metrique post-publication. A
+   reprendre le jour ou un tableau de suivi (Notion ou autre) est construit pour cette skill.
+4. **Rien ne plante a vide** : `validerDiapos` et `chargerGabarit` refusent avec un message
+   explicite (jamais une exception brute) ; `etat.js` gere le cas "aucun brouillon nulle
+   part" (voir regle 5). `reglages-comptes.json` existe mais **n'est lu par aucun code** de
+   cette skill a ce jour (verifie) -- rien a proteger de ce cote.
+5. **Jamais les mains vides** : `etat.js` propose un repli concret (reprendre
+   `fixtures/diapos-exemple.json` ou un sujet deja publie sous un angle propre au compte) des
+   qu'aucun brouillon ni carrousel n'existe pour un compte -- teste reellement sur
+   `page-claude` (aucun contenu a ce jour) :
+   ```
+   $ node etat.js page-claude
+   Aucun carrousel jamais genere pour page-claude.
+   Aucun brouillon en attente de rendu pour page-claude.
+   Publication reelle sur LinkedIn : aucune confirmation suivie automatiquement ici -- ...
+   Repli propose : aucun contenu pour page-claude pour l'instant -- reprendre
+   "fixtures/diapos-exemple.json" comme point de depart, ou un sujet deja publie ...
+   ```
+
+### D. Exemple reel conforme -- produit en faisant tourner la skill
+
+`a-publier/julien-agency-2026-09-14-v2.brouillon.txt` (gras en `**etoiles**`) ->
+`node generer-post.js` -> `a-publier/julien-agency-2026-09-14-v2.commentary.txt` (texte final,
+1413 caracteres, accroche interrogative 87 caracteres, 4 emojis en tete de bloc, 2 passages en
+gras unicode sans accent, 2 hashtags en fin, aucune formulation interdite -- valide par le
+garde-fou reel, pas ecrit a cote). `a-publier/julien-agency-2026-09-14-v2.json` (10 diapos) ->
+`node generer-pdf.js julien-agency ...` -> `sortants/julien-agency/Pourquoi vos meilleurs
+candidats disparaissent-ils avant l'offre.pdf`, 10 pages, genere par le garde-fou `validerDiapos`
+en amont (refuse sinon).
+
+**Verification visuelle page par page faite** (rendu PNG identique au PDF, voir
+`test/generer-images.test.js`) : accroche seule + fleche "BALAYEZ" sur la diapo 1, logo "Claude
+Agency" sur les 9 suivantes, numerotation 01-10 correcte, aucun texte tronque. **Un defaut de
+contenu trouve puis corrige** pendant cette relecture : la diapo 2 annoncait "trois signes"
+alors que 7 diapos d'idees suivent -- corrige en "sept signes" (json ET post relies, pipeline
+re-execute entierement, pas seulement le fichier concerne) -- aucun garde-fou automatique ne
+pouvait detecter cette incoherence de sens, seule la relecture visuelle l'a fait.
+
+**Un point reste assume comme lacune, pas corrige** : le brief exige un chiffre precis source
+par tranche de 100 mots ; faute d'une statistique reellement verifiable sous la main pour ce
+sujet precis, ce post n'en contient volontairement aucun plutot que d'en inventer un -- a
+completer si Julien dispose d'une donnee source valide.
+
+**Non publie a ce stade** : aucun "GO" recu pour cet acte irreversible sur ce second carrousel.
+En attente d'instruction explicite avant toute publication reelle (API Documents, memes 4
+etapes que la premiere fois). Le sort du premier carrousel (5 diapos, existence non confirmee)
+reste ouvert.
+
+Le nombre de diapos (5), les mots par diapo (jusqu'a 29) et l'absence totale de gras/emojis du
+carrousel du 12/09 ci-dessus **auraient ete refuses** par ces memes garde-fous s'ils avaient
+existe a l'epoque -- confirme en rejouant `generer-pdf.js` dessus (voir plus bas).
 
 Voir `references/audit-brief-20260914-v3.md` pour le detail complet, skill par skill, de tout
-ce qui reste non conforme au brief integral (regles d'usage, garde-fous automatiques
-d'ecriture/structure non codes, mention "activation MANUELLE" absente, ligne README manquante,
-etc.).
+ce qui reste non conforme au brief integral en dehors de `linkedin-carrousel`
+(`linkedin-veille-virale`, `linkedin-commentaires`, obligations transverses).
 
 ## Limites connues
 

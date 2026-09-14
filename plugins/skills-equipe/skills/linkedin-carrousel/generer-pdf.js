@@ -49,6 +49,7 @@
 const fs = require('fs');
 const path = require('path');
 const { chromium } = require('playwright');
+const { validerDiapos } = require('./lib/valider-diapos');
 
 const SKILL_DIR = __dirname;
 const TEMPLATES_DIR = path.join(SKILL_DIR, 'templates');
@@ -164,9 +165,7 @@ function cheminSortieParDefaut(compte, diapos) {
 }
 
 async function genererPdf({ compte, diapos, sortie }) {
-  if (!Array.isArray(diapos) || diapos.length === 0) {
-    throw new Error('La liste de diapos est vide.');
-  }
+  validerDiapos(diapos);
   const html = construireDocument(compte, diapos);
 
   const navigateur = await chromium.launch();
