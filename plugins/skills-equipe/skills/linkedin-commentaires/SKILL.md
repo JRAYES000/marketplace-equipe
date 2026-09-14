@@ -131,15 +131,14 @@ commenter malgre tout le plus recent disponible en signalant explicitement qu'il
 fenetre de fraicheur -- decision a valider par Julien, pas automatique."
 ```
 
-## Comptes cibles -- proposition argumentee, pas un champ vide
+## Comptes cibles -- VALIDES par Julien le 14/09/2026
 
-`comptes_cibles` est vide dans `reglages-comptes.json` pour les deux comptes : c'est une
-decision editoriale qui revient a Julien, pas a moi. Mais "jamais les mains vides" (regle 5)
-s'applique aussi ici : voir `references/comptes-cibles-proposition-20260914.md` pour **8
-profils LinkedIn francais reels, actifs, verifies un par un** (ouverts et lus via navigateur,
-pas invente), avec positionnement observe et une suggestion de repartition par ton entre les
-deux comptes. **A valider ou corriger par Julien** ; une fois fait, copier les URLs retenues
-dans `reglages-comptes.json`.
+`comptes_cibles` est desormais rempli dans `reglages-comptes.json` : **16 profils LinkedIn
+francais reels, verifies un par un par navigation** (jamais devines), 8 par marque -- brief
+relu attentivement : "8 a 12 comptes PAR MARQUE", pas au total (premiere proposition
+corrigee suite a la remarque de Julien, qui n'avait que 4/marque). Detail complet, positionnement
+et methode de verification pour chacun : `references/comptes-cibles-proposition-20260914.md`.
+**Julien a valide d'avance** ("je valide la liste completee").
 
 ## Page Notion -- code pret, en attente du jeton (mis a jour le 14/09/2026)
 
@@ -165,16 +164,17 @@ l'interface. Le script imprime l'URL exacte de la page pour ce geste.
 disponible dans cette session -- ce code n'a donc pas encore ete verifie de bout en bout contre
 la vraie API, seule sa forme est conforme a la documentation officielle consultee le 14/09/2026.
 
-## Exemple reel attendu le 20/09 -- BLOQUE, pas contourne
+## Exemple reel attendu le 20/09 -- BLOQUE sur un point technique different, pas contourne
 
-Le brief demande cinq commentaires reels rediges (postes reels, cibles reelles). **Ce point
-reste bloque tant que `comptes_cibles` est vide** : sans compte cible valide par Julien, il n'y
-a pas de posts tiers reels et frais a commenter, et je n'ai pas recupere les posts des 8
-candidats proposes ci-dessus par moi-meme -- les cibler avant validation reviendrait a agir sur
-une decision editoriale que je n'ai pas le mandat de prendre seul. **Des que Julien valide (ou
-corrige) la liste**, la chaine est prete de bout en bout (garde-fous testes, pipeline
-fonctionnel sur donnees fixture) pour produire les cinq commentaires reels sans autre chantier
-technique.
+`comptes_cibles` est desormais rempli et valide (voir ci-dessus) -- ce blocage-la est leve.
+**Nouveau blocage, verifie explicitement le 14/09/2026** : `APIFY_TOKEN` n'est pas present dans
+l'environnement de cette session (`echo $APIFY_TOKEN` -> vide). Sans lui, `trouverPosts` ne
+peut recuperer aucun post reel des 16 comptes valides -- le pipeline entier (garde-fous,
+fraicheur, quota, redaction, validation) est pret et teste sur fixture, mais ne peut pas
+tourner sur donnees reelles tant que ce jeton n'est pas exporte. **A faire par Nomena**, meme
+methode que le 12/09/2026 (export manuel dans l'environnement de la session, jamais une
+lecture automatisee d'un fichier de secrets par ce code). Des que present, la recuperation
+reelle et la redaction des cinq commentaires peuvent demarrer sans autre chantier technique.
 
 ## Etat au 12/09/2026 -- ce qui restait pret, ce qui attendait (avant les garde-fous du 14/09)
 

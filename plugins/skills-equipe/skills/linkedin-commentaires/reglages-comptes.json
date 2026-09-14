@@ -2,8 +2,17 @@
   "julien-partners": {
     "actor_urn": "urn:li:person:ZvLHybJZhj",
     "_source_urn": "Verifie par Julien le 11/09/2026, a utiliser tel quel.",
-    "comptes_cibles": [],
-    "_comptes_cibles_proposition": "Vide en attente de decision editoriale de Julien -- voir references/comptes-cibles-proposition-20260914.md (8 profils reels verifies, suggestion de repartition par ton).",
+    "comptes_cibles": [
+      "https://www.linkedin.com/in/valentin--muller/",
+      "https://www.linkedin.com/in/c%C3%A9cilia-boavista-0b02309b/",
+      "https://www.linkedin.com/in/florent-pontiac/",
+      "https://www.linkedin.com/in/xavier-vincent33/",
+      "https://www.linkedin.com/in/th%C3%A9ophile-burnet/",
+      "https://www.linkedin.com/in/virginie-caurraze/",
+      "https://www.linkedin.com/in/sindy-desquerre/",
+      "https://www.linkedin.com/in/romy-ozier-lafontaine-ia/"
+    ],
+    "_comptes_cibles_source": "8 profils reels verifies par navigation, VALIDES par Julien le 14/09/2026 -- voir references/comptes-cibles-proposition-20260914.md pour le positionnement de chacun.",
     "ton": ["chaleureux", "professionnel", "facilitateur", "oriente-reseau"],
     "seuil_max_commentaires": 30,
     "plafond_par_jour": 5,
@@ -12,8 +21,17 @@
   "julien-agency": {
     "actor_urn": "urn:li:person:aFqu-W7ClW",
     "_source_urn": "Verifie par Julien le 11/09/2026, a utiliser tel quel.",
-    "comptes_cibles": [],
-    "_comptes_cibles_proposition": "Vide en attente de decision editoriale de Julien -- voir references/comptes-cibles-proposition-20260914.md (8 profils reels verifies, suggestion de repartition par ton).",
+    "comptes_cibles": [
+      "https://www.linkedin.com/in/georges-solutions-9b7957432",
+      "https://www.linkedin.com/in/alexandre-touraine/",
+      "https://www.linkedin.com/in/benjamin-lacroix-fr/",
+      "https://www.linkedin.com/in/jean-zendji-zenfia/",
+      "https://www.linkedin.com/in/mh-baydama/",
+      "https://www.linkedin.com/in/raphaelmizrahi/",
+      "https://www.linkedin.com/in/pierre-emmanuel-cochet-0053205a/",
+      "https://www.linkedin.com/in/romain-charissou-meteor/"
+    ],
+    "_comptes_cibles_source": "8 profils reels verifies par navigation, VALIDES par Julien le 14/09/2026 -- voir references/comptes-cibles-proposition-20260914.md pour le positionnement de chacun.",
     "ton": ["confiant", "direct", "pedagogue", "oriente-dirigeants"],
     "seuil_max_commentaires": 30,
     "plafond_par_jour": 5,
