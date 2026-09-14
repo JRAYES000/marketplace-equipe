@@ -14,7 +14,13 @@ const { creerBaseCommentaires, creerVueComparaisonHebdomadaire } = require('./li
 async function main() {
   const parentPageId = process.env.NOTION_PARENT_PAGE_ID;
   if (!parentPageId) {
-    console.error('NOTION_PARENT_PAGE_ID manquant (id de la page Notion sous laquelle creer la base).');
+    console.error(
+      'NOTION_PARENT_PAGE_ID manquant. A definir dans l\'environnement (meme methode que ' +
+      'NOTION_TOKEN et APIFY_TOKEN, voir .env.example) : c\'est l\'ID de la page Notion, deja ' +
+      'partagee avec l\'integration (bouton "..." de la page -> "Connexions" -> ajouter ' +
+      'l\'integration), sous laquelle creer cette base -- copiez-le depuis l\'URL de la page ' +
+      '(le bloc de 32 caracteres apres le dernier tiret).'
+    );
     process.exitCode = 1;
     return;
   }

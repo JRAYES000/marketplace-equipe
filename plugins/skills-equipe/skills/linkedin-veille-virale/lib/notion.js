@@ -33,19 +33,57 @@ function jeton(notionToken) {
   return cle;
 }
 
+/**
+ * Rien ne plante a vide (brief section 2, regle 4) : chaque echec connu de
+ * l'API Notion est traduit en message qui dit quoi faire et ou, pas en
+ * exception brute avec un corps JSON a decortiquer soi-meme.
+ */
+function messageErreurNotion(status, json) {
+  if (status === 401) {
+    return (
+      'NOTION_TOKEN invalide ou expire. Verifiez sa valeur dans Notion -> Parametres et ' +
+      'membres -> Connexions -> votre integration -> "Afficher le jeton secret", et ' +
+      'reexportez-la dans l\'environnement.'
+    );
+  }
+  if (status === 404 && json && json.code === 'object_not_found') {
+    return (
+      'Page ou base introuvable pour NOTION_PARENT_PAGE_ID -- deux causes possibles : ' +
+      '(1) l\'ID est invalide (copiez-le depuis l\'URL de la page Notion, le bloc de 32 ' +
+      'caracteres apres le dernier tiret) ; (2) la page existe mais n\'est PAS partagee avec ' +
+      'cette integration -- ouvrez la page dans Notion, bouton "..." en haut a droite -> ' +
+      '"Connexions" -> ajoutez l\'integration par son nom, puis relancez.'
+    );
+  }
+  if (status === 403) {
+    return (
+      'Acces refuse par Notion (403) -- l\'integration existe et le jeton est valide, mais ' +
+      'elle n\'a pas la permission necessaire sur cette ressource. Verifiez qu\'elle est bien ' +
+      'ajoutee via "Connexions" sur la page ET que son niveau d\'acces couvre l\'ecriture.'
+    );
+  }
+  return `Notion a repondu ${status} : ${JSON.stringify(json)}`;
+}
+
 async function appelNotion(endpoint, { method = 'GET', body, notionToken } = {}) {
-  const reponse = await fetch(`${NOTION_API}${endpoint}`, {
-    method,
-    headers: {
-      Authorization: `Bearer ${jeton(notionToken)}`,
-      'Notion-Version': NOTION_VERSION,
-      'Content-Type': 'application/json',
-    },
-    body: body ? JSON.stringify(body) : undefined,
-  });
+  const cle = jeton(notionToken); // leve avant toute tentative reseau -- pas une erreur "reseau"
+  let reponse;
+  try {
+    reponse = await fetch(`${NOTION_API}${endpoint}`, {
+      method,
+      headers: {
+        Authorization: `Bearer ${cle}`,
+        'Notion-Version': NOTION_VERSION,
+        'Content-Type': 'application/json',
+      },
+      body: body ? JSON.stringify(body) : undefined,
+    });
+  } catch (err) {
+    throw new Error(`Impossible de contacter l'API Notion (reseau) : ${err.message}`);
+  }
   const json = await reponse.json();
   if (!reponse.ok) {
-    throw new Error(`Notion ${method} ${endpoint} -> HTTP ${reponse.status} : ${JSON.stringify(json)}`);
+    throw new Error(messageErreurNotion(reponse.status, json));
   }
   return json;
 }
