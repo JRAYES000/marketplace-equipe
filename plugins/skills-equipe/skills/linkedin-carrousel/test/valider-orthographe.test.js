@@ -30,18 +30,23 @@ test('limite assumee : "a"/"à" et "ou"/"où" ne sont jamais signales -- trop am
   assert.doesNotThrow(() => validerAccents('Il a fini le rapport ou attend encore une reponse.'.replace('reponse', 'réponse')));
 });
 
-test('sur le carrousel reellement publie le 14/09/2026 (julien-agency, v2) : detecte bien le probleme reel', () => {
+test('sur le carrousel julien-agency v2 (republie le 15/09/2026) : plus aucun mot sans accent -- non-regression', () => {
+  // Ce carrousel avait ete publie le 14/09/2026 integralement sans accents (~68 occurrences
+  // reelles, 53 attrapees par la liste fermee -- voir references/etat-linkedin-20260912.md,
+  // Point n13). Corrige et republie le 15/09/2026 (contenu source + PDF regeneres via le
+  // pipeline reel) -- ce test verifie desormais que le probleme ne revient pas, plutot que de
+  // prouver qu'il existe.
   const diapos = require('../a-publier/julien-agency-2026-09-14-v2.json');
   const totalTrouves = diapos.reduce(
     (somme, d) => somme + detecterMotsSansAccent(`${d.titre || ''} ${d.texte || ''}`).length,
     0
   );
-  assert.ok(totalTrouves > 20, `attendu plus de 20 mots sans accent dans le carrousel reel, trouve ${totalTrouves}`);
+  assert.equal(totalTrouves, 0, `attendu 0 mot sans accent dans le carrousel republie, trouve ${totalTrouves}`);
 
   const post = fs.readFileSync(
     path.join(__dirname, '..', 'a-publier', 'julien-agency-2026-09-14-v2.commentary.txt'),
     'utf8'
   );
   const totalPost = detecterMotsSansAccent(post).length;
-  assert.ok(totalPost > 20, `attendu plus de 20 mots sans accent dans le texte du post reel, trouve ${totalPost}`);
+  assert.equal(totalPost, 0, `attendu 0 mot sans accent dans le texte du post republie, trouve ${totalPost}`);
 });
