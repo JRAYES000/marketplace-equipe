@@ -88,7 +88,7 @@ qui n'a jamais eu lieu). Répartition finale sur les cinq : trois questions rée
 (Jean Zendji, Benjamin Lacroix) — deux genres sur quatre, faute de matière pour sourcer un vrai
 chiffre ou une vraie anecdote sur ce lot précis de comptes et de posts.
 
-## Veille — trois posts adaptés, prêts à publier
+## Veille — trois posts adaptés, relus, programmés via Buffer
 
 Le pipeline de veille tourne réellement : 35 posts récupérés sur les 10 comptes suivis, 15
 retenus par le score d'engagement. Trois ont été adaptés en post prêt à publier — un par
@@ -100,11 +100,21 @@ Adaptés, pas traduits : structure et angle du post source conservés, exemples 
 remplacés par des références françaises vérifiées (Insee, Bpi France Le Lab/Rexecode,
 Stratégies — pages ouvertes et lues, pas de chiffre de mémoire).
 
-Les trois sont désormais **réellement dans Notion**, pas seulement rédigés (voir plus bas) —
-état "à relire", en attente du GO de publication.
+**Relus intégralement, corrigés, validés.** Le chiffre du texte sur le recrutement a été
+rafraîchi (Bpifrance Le Lab/Rexecode, mai 2023 → T3 2025, même population mesurée) sur demande
+explicite, plutôt que de garder un chiffre qui datait de deux ans. Les trois repassent
+réellement par les garde-fous d'écriture après correction — 3/3 validés.
 
-`[A COMPLETER]` **Lien(s) des posts réellement publiés sur LinkedIn** — en attente du GO. Règle
-à respecter au moment de publier : trois maximum, jamais deux le même jour.
+**Programmés réellement dans Buffer** (compte `contact@claudeagency.fr`, connecté aux deux
+profils LinkedIn — voir plus bas), un par jour distinct pour respecter la règle "trois maximum,
+jamais deux le même jour" :
+
+- Codie A. Sanchez → julien-agency, **aujourd'hui 15/09** à 22h29.
+- Jason Feifer → julien-agency, **demain 16/09** à 18h00.
+- Justin Welsh → julien-partners, **après-demain 17/09** à 13h00.
+
+`[A COMPLETER]` **Liens réels des trois posts** — chacun sera confirmé et ajouté ici au fur et à
+mesure qu'il passe réellement en ligne (rien de supposé tant que ce n'est pas vérifié).
 
 ## Compte Claude Partners — à connecter réellement pour l'utiliser un jour
 
@@ -152,11 +162,12 @@ Trois phrases suffisent, dans Claude Code :
 ## Arbitrage
 
 Aucune des trois skills n'a été sacrifiée : les trois ont un livrable réel à ce jour (carrousel
-en ligne, cinq commentaires en ligne, trois posts de veille réellement dans Notion), et les deux
-pages Notion sont créées, remplies et déjà partagées. Les points encore ouverts ne dépendent
-plus du travail sur les skills elles-mêmes, mais de deux petits gestes externes, tous identifiés
-précisément : supprimer toi-même les deux anciennes versions du carrousel, et décider si le
-compte Claude Partners doit être connecté pour un usage futur.
+en ligne, cinq commentaires en ligne, trois posts de veille relus et programmés dans Buffer),
+et les deux pages Notion sont créées, remplies et déjà partagées. Les points encore ouverts ne
+dépendent plus du travail sur les skills elles-mêmes : supprimer toi-même les deux anciennes
+versions du carrousel, décider si le compte Claude Partners doit être connecté pour un usage
+futur au-delà de Buffer, et confirmer les trois posts de veille au fur et à mesure qu'ils
+passent réellement en ligne d'ici le 17/09.
 
 N'hésite pas à revenir vers moi si tu veux qu'on creuse un point en particulier.
 

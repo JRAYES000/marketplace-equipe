@@ -90,7 +90,10 @@ async function appelNotion(endpoint, { method = 'GET', body, notionToken } = {})
 
 const COMPTES = ['page-claude', 'julien-agency', 'julien-partners'];
 const FORMATS = ['texte', 'carrousel', 'video'];
-const ETATS = ['Repere', 'Adapte', 'A relire', 'Publie', 'Rejete'];
+// "Programme" ajoute le 15/09/2026 : la base Notion reelle ne distinguait pas
+// "redige et valide, date de publication fixee" de "reellement en ligne" --
+// necessaire des que Buffer permet de planifier a l'avance (voir SKILL.md).
+const ETATS = ['Repere', 'Adapte', 'A relire', 'Programme', 'Publie', 'Rejete'];
 const BILANS = ['Gagnant', 'Neutre', 'Perdant'];
 
 /**
