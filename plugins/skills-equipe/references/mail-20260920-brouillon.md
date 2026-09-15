@@ -185,6 +185,10 @@ Trois phrases suffisent, dans Claude Code :
 - **« les commentaires du jour »** pour trouver et rédiger de nouveaux commentaires.
 - **« fais la veille du jour »** pour surveiller les comptes suivis et proposer un nouveau post.
 
+Un point important pour que ton test porte sur la bonne version : ouvre une session neuve pour
+tester. Une session déjà ouverte continue de charger la version qui était installée au moment où
+elle a démarré, et tu testerais une version périmée sans le savoir.
+
 ## Arbitrage
 
 Aucune des trois skills n'a été sacrifiée : les trois ont un livrable réel à ce jour (carrousel
