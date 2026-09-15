@@ -26,8 +26,9 @@ aujourd'hui ».
    moins de 4 heures. `validerQuotaJournalier` refuse un nouveau commentaire si le quota du jour
    (5) est atteint, ou si la meme personne a deja ete commentee aujourd'hui.
 4. La session Claude qui invoque cette skill **ecrit elle-meme** le commentaire, dans le ton de
-   `reglages-comptes.json`, en choisissant l'un des quatre genres du brief -- ce n'est pas une
-   generation automatique en JS.
+   `reglages-comptes.json`, en choisissant l'un des quatre genres du brief -- `information_chiffree`,
+   `desaccord_argumente`, `histoire_vecue`, `vraie_question` (`GENRES` dans
+   `lib/valider-commentaire.js`) -- ce n'est pas une generation automatique en JS.
 5. `lib/valider-commentaire.js` (`validerCommentaire`) **refuse** tout brouillon hors des regles
    de forme ou dont le genre declare ne correspond pas au contenu (voir "Garde-fous").
 6. `lib/publier-commentaire.js` (`publierCommentaire`) est le **seul** point d'appel qui publie
@@ -36,9 +37,10 @@ aujourd'hui ».
 7. Une fois publie, `lib/registre.js` (`enregistrerCommentairePublie`) l'ajoute a
    `data/registre-commentaires.json` (gitignore) -- ce registre fait respecter le quota d'un
    lancement a l'autre.
-8. `dry-run.js` execute les etapes 1-5 sans jamais appeler `publierCommentaire`. Bascule sur le
-   jeu fixture des que `APIFY_TOKEN` est absent (a lui seul, meme si `comptes_cibles` est
-   rempli) et/ou que `comptes_cibles` est vide.
+8. `node dry-run.js` (**sans argument** -- il boucle automatiquement sur tous les comptes de
+   `reglages-comptes.json`, il n'y a pas de filtre par compte) execute les etapes 1-5 sans
+   jamais appeler `publierCommentaire`. Bascule sur le jeu fixture des que `APIFY_TOKEN` est
+   absent (a lui seul, meme si `comptes_cibles` est rempli) et/ou que `comptes_cibles` est vide.
 
 ## Point de situation
 

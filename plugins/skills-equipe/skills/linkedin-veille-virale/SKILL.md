@@ -23,7 +23,10 @@ julien-agency ».
    `fenetre_jours` (coefficients/seuil/fenetre dans `reglage-score.json`, pas en dur dans le
    code). Les abonnes par auteur viennent de `abonnes-comptes.json` (l'acteur Apify ne les
    renvoie jamais) -- un auteur sans abonnes connus est ecarte, jamais suppose a score 0. Trie
-   par score decroissant.
+   par score decroissant. **Fichier a rafraichir periodiquement** (champ `_capture_date` du
+   fichier) : ces chiffres bougent et aucun script ne les remet a jour automatiquement --
+   rouvrir chaque profil LinkedIn de `comptes-a-surveiller.txt` et remplacer les valeurs a la
+   main si `_capture_date` est ancien.
 3. La session Claude qui invoque cette skill lit les posts retenus, choisit celui qui merite une
    reaction, et **ecrit elle-meme** le texte du post recycle/inspire dans le ton de
    `reglages-comptes.json` -- pas une generation automatique en JS.
