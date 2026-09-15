@@ -49,7 +49,7 @@ connectes -- voir `references/actions-composio.md`), un par jour distinct :
 
 | # | Compte | Date programmee | Heure (Europe/Paris) |
 | --- | --- | --- | --- |
-| Codie A. Sanchez | julien-agency | aujourd'hui 15/09/2026 | 21h29 |
+| Codie A. Sanchez | julien-agency | aujourd'hui 15/09/2026 | **19h00** (deplace, voir ci-dessous) |
 | Jason Feifer | julien-agency | demain 16/09/2026 | 17h00 |
 | Justin Welsh | julien-partners | apres-demain 17/09/2026 | 13h00 |
 
@@ -59,6 +59,16 @@ Paris (GMT+2) -- corrige ici a l'heure reelle en fuseau Paris, verifiee dans l'e
 (pas dans la vue liste). La programmation elle-meme n'a pas ete touchee : la regle du brief qui
 compte ("jamais deux posts le meme jour") reste respectee dans les deux cas. Le troisieme
 (Justin Welsh) affichait deja la bonne heure en vue Paris, non decale.
+
+**Codie Sanchez avancee a 19h00 (15/09/2026, plus tard dans la journee)** : sur demande explicite,
+pour un meilleur creneau. Changement fait directement dans Buffer (uniquement l'heure -- texte,
+compte et date inchanges), puis **verifie a l'ecran apres coup** plutot que suppose : l'editeur du
+post affiche explicitement "7:00 PM" en regard du libelle **Europe/Paris**, et la grille du
+calendrier (fuseau "Paris" selectionne en haut a droite, meme reglage que pour la correction
+Minsk/Paris ci-dessus) montre desormais la carte du post a la ligne 7 PM du mardi 15 -- aucun
+decalage constate cette fois, contrairement au 15/09 apres-midi. Jason Feifer (17h00, 16/09) et
+Justin Welsh (13h00, 17/09) verifies inchanges sur la meme capture -- ni leur heure, ni leur
+compte, ni leur texte n'ont ete touches.
 
 **Pas encore confirmes en ligne** au moment de cette mise a jour -- Notion reflete l'etat reel
 ("Programme", pas "Publie"). A confirmer et passer a "Publie" avec le lien reel une fois chaque

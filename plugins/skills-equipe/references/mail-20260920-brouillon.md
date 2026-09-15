@@ -125,9 +125,11 @@ réellement par les garde-fous d'écriture après correction — 3/3 validés.
 profils LinkedIn — voir plus bas), un par jour distinct pour respecter la règle "trois maximum,
 jamais deux le même jour" :
 
-- Codie A. Sanchez → julien-agency, **aujourd'hui 15/09** à 21h29.
-- Jason Feifer → julien-agency, **demain 16/09** à 17h00.
-- Justin Welsh → julien-partners, **après-demain 17/09** à 13h00.
+- Codie A. Sanchez → julien-agency, **aujourd'hui 15/09** à **19h00** (avancé sur demande depuis
+  21h29 pour un meilleur créneau — changement vérifié à l'écran après coup : "7:00 PM" affiché
+  dans l'éditeur du post en regard du fuseau Europe/Paris, texte et compte inchangés).
+- Jason Feifer → julien-agency, **demain 16/09** à 17h00 — inchangé, revérifié à l'écran.
+- Justin Welsh → julien-partners, **après-demain 17/09** à 13h00 — inchangé, revérifié à l'écran.
 
 `[A COMPLETER]` **Liens réels des trois posts** — chacun sera confirmé et ajouté ici au fur et à
 mesure qu'il passe réellement en ligne (rien de supposé tant que ce n'est pas vérifié).
