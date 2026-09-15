@@ -2,8 +2,9 @@
 
 Rédigé le 15/09/2026, 5 jours avant l'échéance. Ce fichier n'est pas le mail lui-même — c'est le
 texte prêt à copier-coller dans le client mail, avec les emplacements explicitement marqués
-`[A COMPLETER]` pour ce qui dépend encore de Julien ou de Nomena (partage des pages Notion) et
-des GO de publication. Tout le reste ci-dessous est déjà rédigé, pas un placeholder.
+`[A COMPLETER]` pour ce qui dépend encore d'un geste de Julien (suppression des anciens
+carrousels, décision sur Claude Partners) ou d'un GO de publication. Tout le reste ci-dessous
+est déjà rédigé, pas un placeholder.
 
 Format volontairement "mail", pas "rapport" : liens cliquables, pas de renvoi au dépôt pour
 comprendre une phrase, pas de pièce jointe.
@@ -130,8 +131,9 @@ sont créées et remplies avec des données réelles, pas des lignes vides.
   La vue croisant aussi les vues de profil et les demandes de contact reste à compléter à la
   main dans Notion (limite réelle de l'API : un seul axe par graphique en un appel).
 
-Reste à faire à la main, une fois (aucun endpoint Notion ne le permet par API) : ouvrir chaque
-page → bouton **Share** → inviter `contact@claudeagency.fr` en modification.
+Le partage avec `contact@claudeagency.fr` est déjà en place (accès complet, hérité de la page
+parente "LinkedIn — Veille & Commentaires" que tu as partagée) — vérifié directement dans
+Notion, rien à faire de plus de ce côté.
 
 ## Dépense
 
@@ -151,11 +153,10 @@ Trois phrases suffisent, dans Claude Code :
 
 Aucune des trois skills n'a été sacrifiée : les trois ont un livrable réel à ce jour (carrousel
 en ligne, cinq commentaires en ligne, trois posts de veille réellement dans Notion), et les deux
-pages Notion sont créées et remplies. Les points encore ouverts ne dépendent plus du travail sur
-les skills elles-mêmes, mais de trois petits gestes externes, tous identifiés précisément :
-supprimer toi-même les deux anciennes versions du carrousel, inviter
-`contact@claudeagency.fr` sur les deux pages Notion (bouton Share), et décider si le compte
-Claude Partners doit être connecté pour un usage futur.
+pages Notion sont créées, remplies et déjà partagées. Les points encore ouverts ne dépendent
+plus du travail sur les skills elles-mêmes, mais de deux petits gestes externes, tous identifiés
+précisément : supprimer toi-même les deux anciennes versions du carrousel, et décider si le
+compte Claude Partners doit être connecté pour un usage futur.
 
 N'hésite pas à revenir vers moi si tu veux qu'on creuse un point en particulier.
 
