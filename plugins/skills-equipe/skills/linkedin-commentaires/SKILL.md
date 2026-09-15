@@ -13,404 +13,119 @@ Variantes probables : « fais les commentaires du jour », « commentaires Linke
 julien-agency/julien-partners », « lance la veille commentaires », « qu'est-ce qu'on commente
 aujourd'hui ».
 
-**Point de situation** : lancer `node etat.js [compte]` avant toute chose -- affiche en trois
-lignes le dernier commentaire publie, le quota du jour deja utilise, et l'etat des comptes
-cibles. Propose un repli si rien n'est configure (jamais les mains vides).
-
-## Variables d'environnement (`.env.example`) -- etat reel, pas suppose (15/09/2026)
-
-`APIFY_TOKEN`, `NOTION_TOKEN` et `NOTION_PARENT_PAGE_ID` sont documentees en detail plus bas et
-reellement utilisees telles quelles. **`COMPOSIO_API_KEY`**, en revanche, est lue par
-`lib/composio.js` comme methode de secours (appel REST avec une cle de projet Composio
-statique) mais **n'est jamais celle qui a reellement servi a publier** dans ce chantier -- voir
-`linkedin-carrousel/SKILL.md`, section equivalente, pour le detail complet : la voie qui
-fonctionne est une cle "consumer" personnelle obtenue fraiche a chaque session, jamais stockee.
-
 ## Ce que fait la skill
 
 1. `lib/trouver-posts.js` (`trouverPosts`) interroge l'acteur Apify
    `harvestapi/linkedin-profile-posts` sur les comptes listes dans `comptes_cibles` de
    `reglages-comptes.json`. **Champ obligatoire : `targetUrls`, pas `profiles`** -- avec
    `profiles` l'acteur renvoie zero post sans aucune erreur.
-2. `trierPosts` ecarte les carrousels (repere : `document.totalPageCount` present -- commenter
-   dessus reviendrait a commenter un post non lu) et les posts au-dela de
-   `seuil_max_commentaires`, trie par date decroissante.
+2. `trierPosts` ecarte les carrousels (`document.totalPageCount` present -- commenter dessus
+   reviendrait a commenter un post non lu) et les posts au-dela de `seuil_max_commentaires`,
+   trie par date decroissante.
 3. `lib/planifier-commentaires.js` (`filtrerPostsFrais`) ne garde que les posts publies il y a
-   **moins de 4 heures** -- priorite a la fraicheur, jamais a la popularite, comme l'exige le
-   brief. `validerQuotaJournalier` refuse un nouveau commentaire si le quota du jour (5, voir
-   plus bas) est atteint, ou si la meme personne a deja ete commentee aujourd'hui.
-4. La session Claude qui invoque cette skill lit les posts retenus et **ecrit elle-meme** le
-   commentaire, dans le ton de `reglages-comptes.json`, en choisissant l'un des quatre genres du
-   brief -- ce n'est pas une generation automatique en JS.
-5. `lib/valider-commentaire.js` (`validerCommentaire`) **refuse** (jamais un avertissement) tout
-   brouillon hors des regles de forme (2-4 phrases, pas de puces/emoji/lien) ou dont le genre
-   declare ne correspond pas au contenu (voir "Garde-fous" plus bas).
+   moins de 4 heures. `validerQuotaJournalier` refuse un nouveau commentaire si le quota du jour
+   (5) est atteint, ou si la meme personne a deja ete commentee aujourd'hui.
+4. La session Claude qui invoque cette skill **ecrit elle-meme** le commentaire, dans le ton de
+   `reglages-comptes.json`, en choisissant l'un des quatre genres du brief -- ce n'est pas une
+   generation automatique en JS.
+5. `lib/valider-commentaire.js` (`validerCommentaire`) **refuse** tout brouillon hors des regles
+   de forme ou dont le genre declare ne correspond pas au contenu (voir "Garde-fous").
 6. `lib/publier-commentaire.js` (`publierCommentaire`) est le **seul** point d'appel qui publie
-   reellement : `publierCommentaire({ actorUrn, targetUrn, message })`. `targetUrn` doit etre le
-   `shareUrn` du post (jamais une URN `urn:li:activity:`, refusee par l'API).
-7. Une fois un commentaire reellement publie, `lib/registre.js` (`enregistrerCommentairePublie`)
-   l'ajoute a `data/registre-commentaires.json` (gitignore) -- c'est ce registre qui fait
-   respecter le quota journalier d'un lancement de la skill a l'autre.
-8. `dry-run.js` (`npm run dry-run` ou `node dry-run.js`) execute les etapes 1-5 de bout en bout
-   sans jamais appeler `publierCommentaire` (il n'importe meme pas
-   `lib/publier-commentaire.js`). **Declencheur reel du repli fixture, verifie dans le code
-   (15/09/2026)** : `APIFY_TOKEN` absent -- a lui seul, meme si `comptes_cibles` est rempli.
-   `comptes_cibles` vide bascule aussi sur la fixture, mais n'est pas la seule condition ; les
-   deux sont testees independamment (`et/ou`). Avec `APIFY_TOKEN` present ET `comptes_cibles`
-   rempli, `dry-run.js` fait un vrai appel Apify. `npm test` (`node --test`) verifie chaque
-   garde-fou individuellement (voir plus bas) et ce dry run de bout en bout, y compris qu'il
-   n'importe jamais `lib/publier-commentaire.js`.
+   reellement : `targetUrn` doit etre le `shareUrn` du post (jamais `urn:li:activity:`, refuse
+   par l'API).
+7. Une fois publie, `lib/registre.js` (`enregistrerCommentairePublie`) l'ajoute a
+   `data/registre-commentaires.json` (gitignore) -- ce registre fait respecter le quota d'un
+   lancement a l'autre.
+8. `dry-run.js` execute les etapes 1-5 sans jamais appeler `publierCommentaire`. Bascule sur le
+   jeu fixture des que `APIFY_TOKEN` est absent (a lui seul, meme si `comptes_cibles` est
+   rempli) et/ou que `comptes_cibles` est vide.
 
-## Garde-fous automatiques (14/09/2026) -- refus explicite, pas un avertissement
+## Point de situation
 
-Priorite 2 (apres `linkedin-carrousel`, livre et confirme). Les regles de la section 6 du brief
-sont desormais codees en garde-fous qui refusent, testes un par un avec un cas reel qui doit
-echouer.
+Lancer `node etat.js [compte]` avant toute chose -- affiche en trois lignes le dernier
+commentaire publie, le quota du jour deja utilise, et l'etat des comptes cibles. `dry-run.js` et
+`etat.js` proposent un repli concret des que rien n'est disponible (aucun post frais, aucun
+compte cible, quota atteint) -- jamais les mains vides.
+
+## Comptes cibles
+
+`comptes_cibles` est rempli dans `reglages-comptes.json` : 16 profils LinkedIn francais reels
+(8 par marque -- le brief demande "8 a 12 comptes PAR MARQUE"). Detail et methode de
+verification : `references/comptes-cibles-proposition-20260914.md`.
+
+## Variables d'environnement (`.env.example`)
+
+- **`APIFY_TOKEN`** -- requis pour `trouverPosts` ; sans lui, repli fixture (voir plus haut).
+- **`NOTION_TOKEN`** + **`NOTION_PARENT_PAGE_ID`** -- pour la base "Commentaires" (suivi a 3
+  jours). `NOTION_PARENT_PAGE_ID` est l'ID de la page Notion **deja partagee avec
+  l'integration** (bouton "..." de la page -> "Connexions") sous laquelle creer la base.
+- **`COMPOSIO_API_KEY`** -- repli REST statique, pas la voie qui sert reellement a publier (voir
+  `linkedin-carrousel/SKILL.md`, section "Publication reelle", pour la voie qui fonctionne).
+
+## Garde-fous automatiques (refus explicite, jamais un avertissement)
 
 ### Structure et frequence -- `lib/planifier-commentaires.js`
 
-- **Fraicheur** : `filtrerPostsFrais` ne garde que les posts de moins de 4h, tries du plus
-  recent au plus ancien. Un post de 5h est exclu -- teste reellement
-  (`test/planifier-commentaires.test.js`).
-  **A savoir avant de lancer la skill en usage courant** (pas seulement une excuse pour le
-  passage du 14/09/2026, verifie ce jour-la sur les 16 comptes reels) : la regle des 4h
-  suppose un vivier de comptes suffisamment actifs pour qu'il y ait TOUJOURS quelque chose de
-  frais au moment du passage. Sur 8 comptes par marque, un compte qui ne publie qu'une ou deux
-  fois par semaine ne garantit rien -- un passage donne legitimement 0 post frais si aucun des
-  8 n'a publie dans les 4 heures precedentes, sans que ce soit un signe de panne. Plus la liste
-  de comptes est active (plusieurs posts/semaine chacun), plus la fenetre de 4h a des chances
-  de donner quelque chose ; avec des comptes qui publient rarement, le repli documente (poster
-  le plus recent disponible, deviation ecrite) sera la norme plutot que l'exception.
-- **Quota journalier (5/jour)** et **jamais deux fois la meme personne le meme jour** :
-  `validerQuotaJournalier`, verifie contre `data/registre-commentaires.json` (le registre reel
-  des commentaires deja publies, pas une simple limite documentee).
-- Corrige a cette occasion : `reglages-comptes.json` portait encore l'ancien plafond de 12/jour
-  (convention reprise de `visibilite-ops`) ; le brief integral impose 5 -- corrige et desormais
-  fait respecter par le code, pas seulement documente.
+- **Fraicheur** : seuls les posts de moins de 4h sont retenus. Sur des comptes peu actifs
+  (moins de quelques posts/semaine chacun), un passage donne legitimement 0 post frais -- pas un
+  signe de panne, le repli documente (poster le plus recent en le signalant) est alors la norme.
+- **Quota journalier (5/jour)** et **jamais deux fois la meme personne le meme jour** --
+  verifie contre `data/registre-commentaires.json`, pas une simple limite documentee.
 
 ### Contenu du commentaire -- `lib/valider-commentaire.js`
 
-- **2 a 4 phrases**, refus hors de cette fourchette (teste avec 1 et avec 5 phrases).
-- **Aucune puce/liste numerotee, aucun emoji, aucun lien** -- chacun teste avec un cas reel qui
-  echoue.
-- **Commentaires vides refuses** : liste de formulations creuses ("super post", "tellement
-  vrai", "top", "merci du partage", etc.) -- refus explicite, testes.
+- **2 a 4 phrases**, aucune puce/liste numerotee, aucun emoji, aucun lien.
+- **Formulations creuses refusees** ("super post", "tellement vrai", "top", "merci du partage").
 - **Genre coherent avec le contenu** : `information_chiffree` exige un chiffre dans le texte,
-  `vraie_question` exige que le texte se termine par "?" -- les deux testes en echec.
-- **Aucune experience personnelle non sourcee** (ajoute le 14/09/2026, pendant exact de "aucun
-  chiffre sans source" du carrousel) : un commentaire qui affirme a la premiere personne
-  ("on"/"nous"/"j'ai") avoir vecu une experience professionnelle concrete (client, mission,
-  equipe de N personnes, resultat obtenu) est **refuse**, sauf si `anecdoteSourcee: true` est
-  passe explicitement -- ce que seule une confirmation reelle de Julien autorise. Voir "Genre
-  histoire_vecue" plus bas pour la procedure complete et pourquoi ce garde-fou existe.
-- **Accents manquants, controle PARTIEL ajoute le 15/09/2026** (`lib/valider-orthographe.js`,
-  `validerAccents`, appele par `validerCommentaire`) : les 5 premiers commentaires reels
-  s'etaient reveles integralement sans accents le 14/09 (pas un artefact d'affichage, confirme
-  sur les octets du fichier) -- meme constat sur `linkedin-carrousel` (y compris du contenu deja
-  publie) et `linkedin-veille-virale`. Refuse desormais tout texte contenant un mot d'une liste
-  fermee de mots toujours accentues en francais standard -- imparfait par construction (mots
-  ambigus comme "a"/"à" ou "ou"/"où" volontairement exclus, risque de faux positif trop eleve),
-  mais mieux qu'aucun controle. **Limite restante, assumee** : le rythme voulu par le brief ("un
-  mot parle en tete, un fragment sans verbe") reste une qualite de redaction non verifiable
-  mecaniquement -- c'est a la session qui redige de le tenir.
+  `vraie_question` exige que le texte se termine par "?".
+- **Aucune experience personnelle non sourcee** : un commentaire qui affirme a la premiere
+  personne ("on"/"nous"/"j'ai") avoir vecu une experience professionnelle concrete (client,
+  mission, resultat) est **refuse**, sauf si `anecdoteSourcee: true` est passe explicitement --
+  ce que seule une confirmation reelle de Julien ou Nomena autorise. **Ne jamais inventer une
+  anecdote pour remplir le genre `histoire_vecue`** (ou toute autre affirmation d'experience) :
+  sans anecdote confirmee, choisir un autre genre. Voir `references/` pour l'incident qui a
+  motive cette regle.
+- **Accents manquants** (`lib/valider-orthographe.js`) : refuse tout texte contenant un mot
+  d'une liste fermee de mots toujours accentues en francais standard -- heuristique
+  volontairement imparfaite (mots ambigus type "a"/"à" exclus pour eviter les faux positifs).
 
-## Genre "histoire_vecue" : ne jamais inventer une experience de Julien (14/09/2026)
+`node --test` : 49 tests.
 
-**Incident reel** : un commentaire prepare le 14/09/2026 pour Jean Zendji affirmait "On a mis en
-place un tri similaire chez un client hotelier l'an dernier" -- une mission qui n'a jamais existe,
-inventee pour remplir le genre. Julien a signale le probleme avant publication : ce commentaire
-serait parti sous son identite reelle, qu'il ne relit pas avant publication -- si un lecteur
-demande un detail sur ce client, Julien est piege publiquement sur son propre profil. Le brief
-interdit deja d'inventer un chiffre pour la meme raison (regle "aucun chiffre sans source") ;
-inventer une experience entiere est plus grave, pas moins.
+## Suivi a 3 jours (regle 3 du brief -- lecture par capture d'ecran)
 
-**Trois pistes evaluees, une tranchee** :
-1. *(retenue)* La skill ne redige jamais seule ce genre : avant d'ecrire un commentaire
-   "histoire_vecue" (ou toute affirmation d'experience dans un autre genre), la session qui
-   redige doit d'abord obtenir une anecdote REELLE de Julien ou Nomena -- pas la deviner, pas
-   l'inventer meme "plausible". Sans anecdote confirmee, elle choisit un autre genre plutot que
-   de forcer celui-ci. Cout d'implementation nul (aucune infrastructure nouvelle), coherent avec
-   le fait qu'un humain est deja dans la boucle a chaque redaction (point 4 ci-dessus).
-2. *(ecartee pour l'instant)* Un fichier d'anecdotes reelles alimente par Julien a l'avance,
-   consulte par la skill. Solution plus systematique, mais cout de maintenance reel pour Julien
-   (il doit ecrire et tenir ce fichier a jour) sans gain immediat : aujourd'hui ce fichier serait
-   vide, donc le comportement se reduit exactement a la piste 1 (proposer un autre genre, regle 4
-   du brief : jamais planter/echouer a vide sans dire quoi faire). A reconsiderer si Julien
-   souhaite un jour pre-ecrire des anecdotes pour accelerer la redaction.
-3. *(ecartee)* Remplacer le genre par une observation generale assumee, sans "je/on" factuel.
-   Ecartee parce qu'elle redefinirait unilateralement un genre que Julien a explicitement nomme
-   et valide dans son brief ("histoire vecue" implique justement un vecu reel) -- ce n'est pas a
-   la skill de decider seule que ce genre ne peut jamais exister sous sa forme prevue.
-
-**Garde-fou automatique correspondant, code** : `lib/valider-commentaire.js`
-(`validerAffirmationExperience`) refuse tout commentaire, **quel que soit son genre declare**,
-qui combine un pronom de premiere personne (on/nous/j'ai/notre) et du vocabulaire d'experience
-professionnelle (client, mission, equipe de N, livre/deploye/mis en place/implemente/accompagne,
-resultat) dans la meme phrase -- sauf `anecdoteSourcee: true`, que seule la personne qui redige
-peut poser, et seulement apres confirmation reelle de Julien. Heuristique, pas une preuve
-(comme "aucun chiffre sans source" : aucune regle mecanique ne peut verifier qu'une anecdote a
-vraiment eu lieu, seul un humain le peut) -- teste sur le cas reel du 14/09/2026 et sur un cas
-d'observation generale qui ne doit pas etre accuse a tort (`test/valider-commentaire.test.js`).
-
-**Resolu le 14/09/2026, sans attendre d'anecdote de Julien** (il ne relit rien et ne repond pas
-toujours vite -- le livrable du 20 ne peut pas dependre de sa disponibilite) : les 4 commentaires
-refuses ont ete **reecrits dans un genre qui ne demande aucune experience personnelle**, pas mis
-en attente indefiniment.
-- Theophile Burnet -> `information_chiffree`, mais avec un **vrai chiffre public sourcable**
-  (84% des developpeurs utilisent l'IA en 2025 contre 76% en 2024, Stack Overflow Developer
-  Survey 2025 -- page reellement ouverte et lue, citation exacte verifiee), jamais un chiffre
-  "de chez un client".
-- Florent Pontiac -> `vraie_question` : question reelle sur le site livre (structure, choix de
-  design), sans pretendre l'avoir concu.
-- Valentin Muller -> `desaccord_argumente` : argument sur le fond (tests automatises vs
-  verification manuelle a posteriori), sans "on a livre" ni "chez nous".
-- Jean Zendji -> `vraie_question` initialement, rebascule `desaccord_argumente` le 15/09/2026
-  apres relecture de Julien (nuance reelle sur le tri en 2 categories du post source, pour
-  rediversifier -- pas force).
-
-**Relecture de Julien le 15/09/2026, deux corrections avant le GO** : (1) le chiffre du
-commentaire Theophile Burnet deformait la source Stack Overflow ("using or planning to use"
-confondu avec "au quotidien") -- remplace par le chiffre qui mesure reellement l'usage
-quotidien (51% des developpeurs professionnels, meme enquete). (2) repartition des genres
-rééquilibree (Jean Zendji vers `desaccord_argumente`). Les 5 commentaires couvrent desormais
-**3 genres sur 4** (`vraie_question` x2, `information_chiffree` x1, `desaccord_argumente` x2)
--- `histoire_vecue` reste en reserve pour le jour ou Julien fournira une anecdote reelle,
-deviation assumee et ecrite pour le mail du 20/09. **GO donne par Julien pour les cinq**, puis
-publication reelle tentee sur les 5 le meme jour (canal Composio/MCP retrouve, voir
-`linkedin-carrousel/SKILL.md`) : **1/5 reussi** (Jean Zendji, julien-agency, confirme API et
-navigateur reel), **4/5 refuses proprement** (`403 Forbidden: Viewer/Actor is unauthorized
-agent`) -- l'identite julien-partners n'est toujours pas reellement connectee cote Composio
-(confirme, pas suppose). **Lecon retenue (Point n°16, `etat-linkedin-20260912.md`)** : les 4
-avaient ete rediges pour julien-partners sur une hypothese jamais testee, alors que
-`averse-cooser` = julien-agency est confirme depuis le 11/09 -- toujours verifier l'acces
-Composio d'un compte par un appel reel avant de rediger du contenu pour lui, jamais le
-supposer. **Meme jour, apres-midi** : les 4 refuses ont ete reecrits pour 4 profils reels de
-julien-agency (Georges Solutions, Romain Charissou, Benjamin Lacroix, Raphael Mizrahi) et
-publies reellement, confirmes API + navigateur pour chacun -- **les 5 commentaires du jour sont
-en ligne**. Voir `a-publier/README.md` pour le detail complet et le statut de chacun.
-
-### Sortie reelle des 5 cas de refus demandes
-
+Aucun OCR : c'est la **session Claude** qui lit les chiffres visibles sur la capture d'ecran
+collee dans la conversation, puis appelle le script avec ce qu'elle a lu :
 ```
-$ node -e "require('./lib/planifier-commentaires').validerQuotaJournalier([{date:'2026-09-14',auteurCible:'urn:li:person:a'},{date:'2026-09-14',auteurCible:'urn:li:person:b'},{date:'2026-09-14',auteurCible:'urn:li:person:c'},{date:'2026-09-14',auteurCible:'urn:li:person:d'},{date:'2026-09-14',auteurCible:'urn:li:person:e'}],{auteurCible:'urn:li:person:nouveau'})"
-Commentaire refuse : quota journalier atteint (5/5 deja publies aujourd'hui pour ce compte).
-
-$ node -e "require('./lib/valider-commentaire').validerCommentaire({texte:'Super post !',genre:'histoire_vecue'})"
-Commentaire refuse : formulation vide detectee ("Super post !") -- ca ne rapporte rien et ca se voit, comme le dit le brief.
-
-$ node -e "require('./lib/valider-commentaire').validerCommentaire({texte:'Bon point, ca rejoint ce qu on a vu chez un client 👍.',genre:'histoire_vecue'})"
-Commentaire refuse : aucun emoji autorise.
-
-$ node -e "require('./lib/valider-commentaire').validerCommentaire({texte:'Interessant.',genre:'histoire_vecue'})"
-Commentaire refuse : 1 phrase(s) detectee(s), attendu entre 2 et 4.
-
-$ node -e "require('./lib/valider-commentaire').validerCommentaire({texte:'On a vu ca aussi chez nous. Ca a vraiment aide.',genre:'information_chiffree'})"
-Commentaire refuse : genre "information_chiffree" declare mais aucun chiffre trouve dans le texte.
+node mettre-a-jour-stats.js --auteur "Jean ZENDJI" --date 2026-09-15 \
+  --jaime 4 --reponses 1 --reponseAuteur true --vuesProfil 12 --demandesContact 0
 ```
+`retrouverLigneCommentaire` refuse explicitement si plusieurs lignes correspondent au meme
+auteur (preciser `--date` leve l'ambiguite).
 
-`node --test` : 40 tests, tous verts (mis a jour le 15/09/2026 avec le garde-fou "accents manquants" -- voir plus haut).
+**Comparaison hebdomadaire** ("le coeur de la skill" selon le brief : commentaires de la semaine
+cote a cote avec vues de profil et demandes de contact) : `creerVueComparaisonHebdomadaire`
+cree un graphique Notion (nombre de commentaires par semaine seul -- l'API Notion n'accepte
+qu'un axe Y par vue). `ecrireBlocComparaisonHebdomadaire` complete avec un **bloc tableau natif**
+sur la page (les 3 chiffres cote a cote, une ligne par semaine) : **`pageId` doit etre la page
+PARENTE de la base "Commentaires"** (jamais l'ID de la base elle-meme -- une base de donnees
+Notion n'accepte pas de blocs enfants). A relancer pour rafraichir (pas une vue qui se met a
+jour seule).
 
-## Cinq regles d'usage (brief du 10/09/2026, section 2) -- etat au 14/09/2026
+## Regles d'usage (brief du 10/09/2026, section 2) -- etat actuel
 
-1. **Phrase de lancement** : faite, voir en tete de ce fichier et dans le README du paquet.
+1. **Phrase de lancement** : faite.
 2. **Point de situation en 3 lignes** : fait, `node etat.js [compte]`.
-3. **Lecture des chiffres depuis une capture d'ecran, jamais de saisie manuelle** :
-   **implementee le 15/09/2026**, maintenant que la page Notion existe reellement et attend des
-   chiffres a 3 jours. Aucun OCR dans ce paquet : c'est la **session Claude** qui lit les
-   chiffres visibles sur la capture d'ecran collee dans la conversation (capacite multimodale
-   native), exactement comme elle redige les commentaires -- un jugement assiste, pas une
-   automatisation aveugle. Une fois les chiffres lus, `lib/notion.js`
-   (`mettreAJourStatistiques`) retrouve la ligne par personne visee (+ date si ambigu) et ecrit
-   ce qui a ete lu :
-   ```
-   node mettre-a-jour-stats.js --auteur "Jean ZENDJI" --date 2026-09-15 \
-     --jaime 4 --reponses 1 --reponseAuteur true --vuesProfil 12 --demandesContact 0
-   ```
-   `retrouverLigneCommentaire` refuse explicitement si plusieurs lignes correspondent (jamais
-   d'ecriture sur la mauvaise ligne par ambiguite) -- teste sans reseau dans
-   `test/notion-statistiques.test.js`. **Non teste contre une vraie capture d'ecran a ce jour**
-   (aucune n'a encore ete fournie) : le mecanisme d'ecriture est reel et verifie, la lecture par
-   Claude reste a confirmer sur un premier cas concret.
-
-   **Pret a executer des le 18/09/2026** (3 jours apres la publication des 5 commentaires du
-   15/09, voir `a-publier/README.md` pour l'heure exacte de chacun) -- pas avant, les chiffres
-   n'existent pas encore. Prerequis reunis des ce jour, rien de plus a coder : le script
-   `mettre-a-jour-stats.js` existe et fonctionne (erreurs propres verifiees sans reseau),
-   `NOTION_COMMENTAIRES_DATA_SOURCE_ID` (ou `--dataSourceId`) et `NOTION_TOKEN` seront a
-   re-exporter ce jour-la (jamais persistes entre sessions, voir CLAUDE.md racine). Reste
-   reellement a faire ce jour-la, pas avant : ouvrir chacun des 5 posts sur LinkedIn, capturer
-   les chiffres reels (J'aime, reponses, reponse de l'auteur, vues de profil, demandes de
-   contact), les coller dans la conversation pour lecture, puis lancer le script une fois par
-   personne visee.
+3. **Lecture des chiffres depuis une capture d'ecran** : mecanisme pret et fonctionnel (voir
+   "Suivi a 3 jours") -- premiere execution reelle prevue une fois les posts publies depuis
+   3 jours (voir `references/` pour la date exacte).
 4. **Rien ne plante a vide** : `validerCommentaire`/`validerQuotaJournalier` refusent avec un
-   message explicite (jamais une exception brute) ; `etat.js` et `dry-run.js` gerent le cas
-   "rien de disponible" avec un message qui dit quoi faire (voir regle 5).
+   message explicite ; `etat.js` et `dry-run.js` gerent le cas "rien de disponible".
 5. **Jamais les mains vides** : `dry-run.js` et `etat.js` proposent un repli concret des que
-   rien n'est disponible (aucun post frais, aucun compte cible, quota atteint) -- teste
-   reellement (voir sortie CLI plus bas). Le champ `comptes_cibles` vide n'a pas ete laisse tel
-   quel non plus : une proposition argumentee de 8 comptes reels existe (voir "Comptes cibles"
-   ci-dessous) plutot qu'un blocage silencieux.
+   rien n'est disponible.
 
-**Sortie reelle de `node dry-run.js` a ce jour (comptes_cibles vide, donnees fixture datees,
-donc hors fenetre de fraicheur reelle)** :
-```
-"repli": "Aucun post de moins de 4h trouve parmi les 2 post(s) retenus pour julien-partners.
-Repli propose : reessayer au prochain passage (2 par jour prevus), ou, si le delai presse,
-commenter malgre tout le plus recent disponible en signalant explicitement qu'il depasse la
-fenetre de fraicheur -- decision a valider par Julien, pas automatique."
-```
+## Historique et incidents
 
-## Comptes cibles -- VALIDES par Julien le 14/09/2026
-
-`comptes_cibles` est desormais rempli dans `reglages-comptes.json` : **16 profils LinkedIn
-francais reels, verifies un par un par navigation** (jamais devines), 8 par marque -- brief
-relu attentivement : "8 a 12 comptes PAR MARQUE", pas au total (premiere proposition
-corrigee suite a la remarque de Julien, qui n'avait que 4/marque). Detail complet, positionnement
-et methode de verification pour chacun : `references/comptes-cibles-proposition-20260914.md`.
-**Julien a valide d'avance** ("je valide la liste completee").
-
-## Page Notion -- code pret, en attente du jeton (mis a jour le 14/09/2026)
-
-**Clarification importante** : ce n'est pas le connecteur OAuth "Notion" de claude.ai
-(Reglages -> Parcourir -> Notion -> Connecter) qu'il faut ici -- Julien fournit une **cle
-d'integration Notion** dans `env/secrets.md` (meme depot et methode que `APIFY_TOKEN`), a
-utiliser en appel direct a l'API `api.notion.com` via `fetch`, pas via un outil MCP. Nomena
-l'exportera dans l'environnement (`NOTION_TOKEN`) -- jamais lue directement par cette session.
-
-`lib/notion.js` est ecrit et pret : `creerBaseCommentaires` (schema exact des colonnes du
-brief : Titre, Compte, Personne visee, Lien du post, Date, Texte du commentaire, Genre, puis
-les 5 colonnes de suivi a 3 jours) et `creerVueComparaisonHebdomadaire` (la vue "nombre de
-commentaires de la semaine cote a cote avec les courbes de vues de profil/demandes de
-contact"). `creer-page-notion.js` (CLI) execute les deux d'un coup des que `NOTION_TOKEN` et
-`NOTION_PARENT_PAGE_ID` sont dans l'environnement.
-
-**Limite verifiee, pas contournee** : l'API Notion publique n'expose aucun endpoint pour
-inviter un e-mail externe sur une page (confirme par recherche) -- le partage en modification
-avec `contact@claudeagency.fr` devra se faire a la main, une fois, via le bouton "Share" de
-l'interface. Le script imprime l'URL exacte de la page pour ce geste.
-
-**Mise a jour du 14/09/2026, jeton recu -- nouveau blocage reel, different de l'absence de
-jeton** : `NOTION_TOKEN` fonctionne (`POST /v1/search` repond 200), mais **aucune page
-ordinaire n'est partagee avec cette integration** -- seulement 3 bases de donnees existantes
-(prospects/CRM, avec des donnees personnelles reelles de tiers : e-mails, telephones -- jamais
-copiees ni referencees ici au-dela de ce simple constat). Une integration Notion "interne" ne
-voit que ce qui lui a ete explicitement partage via le bouton "Share" d'une page -- **`POST
-/v1/databases` exige un `parent.page_id` valide, et aucun n'est disponible dans ce qui est
-partage aujourd'hui.** Je n'ai ni devine un ID de page, ni rattache les nouvelles bases a une
-des bases de prospects existantes (aucun rapport avec ce travail, et ce serait polluer les
-donnees de quelqu'un d'autre).
-
-**A faire par Julien ou Nomena, dans Notion** : ouvrir (ou creer) une page destinee a ce
-chantier, cliquer "..." en haut a droite -> "Connexions" -> ajouter l'integration Notion
-utilisee ici par son nom, puis donner l'ID de cette page (visible dans son URL) pour
-`NOTION_PARENT_PAGE_ID`. Des que fait, `creer-page-notion.js` peut tourner tel quel dans les
-deux skills -- rien d'autre a changer cote code.
-
-**Garde-fou verifie sur ce cas precis (regle 4 du brief, "rien ne plante a vide")** :
-`creer-page-notion.js` et `lib/notion.js` ne remontent plus jamais l'exception brute de
-l'API -- chaque echec connu est traduit en message qui dit quoi faire et ou. Teste reellement,
-sortie reelle capturee :
-```
-$ node creer-page-notion.js                                    # NOTION_PARENT_PAGE_ID absent
-NOTION_PARENT_PAGE_ID manquant. A definir dans l'environnement (meme methode que NOTION_TOKEN
-et APIFY_TOKEN, voir .env.example) : c'est l'ID de la page Notion, deja partagee avec
-l'integration (bouton "..." de la page -> "Connexions" -> ajouter l'integration), sous
-laquelle creer cette base -- copiez-le depuis l'URL de la page (le bloc de 32 caracteres
-apres le dernier tiret).
-
-$ NOTION_PARENT_PAGE_ID=x node creer-page-notion.js             # NOTION_TOKEN absent
-NOTION_TOKEN manquant (variable d'environnement ou parametre notionToken).
-
-$ NOTION_TOKEN=<valide> NOTION_PARENT_PAGE_ID=<id-invalide-ou-non-partage> node creer-page-notion.js
-Page ou base introuvable pour NOTION_PARENT_PAGE_ID -- deux causes possibles : (1) l'ID est
-invalide (copiez-le depuis l'URL de la page Notion, le bloc de 32 caracteres apres le dernier
-tiret) ; (2) la page existe mais n'est PAS partagee avec cette integration -- ouvrez la page
-dans Notion, bouton "..." en haut a droite -> "Connexions" -> ajoutez l'integration par son
-nom, puis relancez.
-
-$ NOTION_TOKEN=<invalide> ... node creer-page-notion.js         # jeton invalide/expire (401)
-NOTION_TOKEN invalide ou expire. Verifiez sa valeur dans Notion -> Parametres et membres ->
-Connexions -> votre integration -> "Afficher le jeton secret", et reexportez-la dans
-l'environnement.
-```
-**Bug reel corrige au passage** : la premiere version etiquetait a tort l'absence de
-`NOTION_TOKEN` comme une erreur "reseau" (le `try/catch` autour de `fetch` interceptait aussi
-l'exception synchrone levee avant tout appel reseau) -- corrige, avec test de non-regression
-(`test/notion-erreurs.test.js`, meme correction repliquee dans `linkedin-veille-virale`).
-
-**Debloque le 15/09/2026** : Julien a partage la page "LinkedIn — Veille & Commentaires" avec
-l'integration "Leads site claudeagency.fr". Jeton verifie AVANT tout usage (`GET
-/v1/users/me` renvoie bien ce nom de bot -- confirme que ce jeton correspond a l'integration
-partagee, pas une autre) ; ID de la page retrouve via `POST /v1/search` (non transmis, mais
-l'integration n'avait acces qu'a cette seule page ordinaire, sans ambiguite). `node
-creer-page-notion.js` execute reellement : base "Commentaires" creee. **Bug reel trouve et
-corrige a cette occasion** : la vue "chart" echouait (`400`, "Chart views require a CHART
-directive") faute d'objet `configuration` -- corrige dans `lib/notion.js`
-(`creerVueComparaisonHebdomadaire`) avec le schema reel de l'API (`x_axis`/`y_axis`,
-`group_by: 'week'`, `sort`), confirme par trois allers-retours avec l'API reelle jusqu'au
-succes. **Limite confirmee, pas contournee** : ce schema n'accepte qu'un seul axe Y par vue --
-la vue creee montre le nombre de commentaires par semaine seule.
-
-**Alternative reellement faisable trouvee le 15/09/2026** (le brief dit que ces 2 courbes sont
-« le coeur de la skill » -- livrer sans aucune comparaison serait passer a cote) : plutot qu'un
-deuxieme graphique impossible, un **bloc tableau natif Notion** ecrit directement sur la page
-(pas une vue de base de donnees, donc aucune des limites d'un chart view ne s'applique) avec les
-3 chiffres cote a cote, une ligne par semaine -- `calculerComparaisonHebdomadaire` (fonction
-PURE, agrege par semaine ISO, testee sans reseau : `test/notion-comparaison-hebdomadaire.test.js`,
-6 tests verts, y compris tableau vide et valeurs absentes traitees comme 0 jamais `NaN`) puis
-`ecrireBlocComparaisonHebdomadaire` (bloc `table`/`table_row`, API `/blocks/{id}/children`).
-
-**EXECUTE REELLEMENT le 15/09/2026, contre les 5 vraies lignes de la base "Commentaires"** :
-bloc `table` cree (id `3dce7fe5-dbf8-81a5-805b-f7c6eaa401d7`), contenu relu et verifie via
-l'API (`GET /blocks/{id}/children`) :
-```
-Semaine | Commentaires | Vues de profil | Demandes de contact
-2026-S38 (a partir du 2026-09-14) | 5 | 0 | 0
-```
-(0/0 attendu -- les 5 lignes n'ont pas encore leurs stats a 3 jours, regle 3, prevues le
-18/09/2026 ; `calculerComparaisonHebdomadaire` traite bien l'absence comme 0, pas `NaN`, verifie
-sur donnees reelles pas seulement sur fixture). **Bug reel trouve et corrige a cette occasion** :
-la conception initiale supposait que `pageId` pouvait etre l'ID de la base elle-meme -- **faux**,
-confirme par un vrai `400 validation_error` ("Block does not support children") ; `pageId` doit
-etre la page PARENTE de la base (ici "LinkedIn — Veille & Commentaires",
-`3dbe7fe5-dbf8-80af-b390-c2e62ff8ac46`, lue via `GET /v1/databases/{id}`, champ
-`parent.page_id`). Corrige dans `lib/notion.js`. `dataSourceId` de "Commentaires" pour reference
-future : `7a80342b-3ce9-416b-91c1-80deb64efb39` (identifiant, pas un secret).
-
-La vue graphique (`creerVueComparaisonHebdomadaire`) reste en place en complement, pas
-remplacee : elle donne une tendance visuelle sur les commentaires seuls, le bloc tableau donne
-la comparaison chiffree exacte des 3 mesures. **A relancer** (pas une vue qui se met a jour
-seule) une fois les stats a 3 jours renseignees le 18/09, pour un instantane a jour.
-
-**Remplie avec les 5 vrais commentaires publies le 15/09** via une nouvelle fonction
-`ajouterLigneCommentaire` (`lib/notion.js`) -- verifie en relisant les 5 lignes via l'API, pas
-suppose. URL de la base dans `references/mail-20260920-brouillon.md`.
-
-## Exemple reel attendu le 20/09 -- BLOQUE sur un point technique different, pas contourne
-
-`comptes_cibles` est desormais rempli et valide (voir ci-dessus) -- ce blocage-la est leve.
-**Nouveau blocage, verifie explicitement le 14/09/2026** : `APIFY_TOKEN` n'est pas present dans
-l'environnement de cette session (`echo $APIFY_TOKEN` -> vide). Sans lui, `trouverPosts` ne
-peut recuperer aucun post reel des 16 comptes valides -- le pipeline entier (garde-fous,
-fraicheur, quota, redaction, validation) est pret et teste sur fixture, mais ne peut pas
-tourner sur donnees reelles tant que ce jeton n'est pas exporte. **A faire par Nomena**, meme
-methode que le 12/09/2026 (export manuel dans l'environnement de la session, jamais une
-lecture automatisee d'un fichier de secrets par ce code). Des que present, la recuperation
-reelle et la redaction des cinq commentaires peuvent demarrer sans autre chantier technique.
-
-## Etat au 12/09/2026 -- ce qui restait pret, ce qui attendait (avant les garde-fous du 14/09)
-
-- **Identite confirmee, `publierCommentaire` utilisable pour julien-agency** :
-  `urn:li:person:aFqu-W7ClW`, confirme par appel reel -- voir SKILL.md de `linkedin-carrousel`
-  et `references/etat-linkedin-20260912.md`. `julien-partners` reste **non confirme**.
-- **`publierCommentaire` reste non testee par un appel reel** : elle utilise
-  `LINKEDIN_CREATE_COMMENT_ON_POST`, qui n'a pas d'equivalent "brouillon" -- un commentaire est
-  visible des sa creation. Le canal MCP/l'identite ont ete confirmes fonctionnels sur une action
-  voisine (creation de post), pas sur celle-ci precisement.
-- **Canal reellement fonctionnel : MCP, via une cle d'acces "consumer"** (pas le canal REST de
-  `lib/composio.js`, ecrit avant que ce canal MCP soit decouvert). **A faire** : migrer
-  `lib/composio.js` vers ce canal avant toute publication reelle.
-- **APIFY_TOKEN : RESOLU** -- export manuel par Nomena dans l'environnement de la session.
-
-Etat des lieux complet des 3 skills linkedin-* :
-`references/etat-linkedin-20260912.md` du paquet.
+Decisions de conception, incidents reels (dont l'invention d'une anecdote inexistante, a
+l'origine de la regle "jamais d'experience non sourcee"), blocages Notion resolus, publications
+reelles : `references/linkedin-commentaires-historique.md`. Etat des lieux transverse aux 3
+skills : `references/etat-linkedin-20260912.md`.
