@@ -207,7 +207,7 @@ async function main() {
 
 if (require.main === module) {
   main().catch((err) => {
-    console.error(err);
+    console.error(err.message);
     process.exitCode = 1;
   });
 }

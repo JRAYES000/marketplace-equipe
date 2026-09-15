@@ -86,6 +86,21 @@ Ce qui reste obligatoire malgré la vitesse :
      claude plugin marketplace update marketplace-equipe && claude plugin update skills-equipe@marketplace-equipe
      ```
 
+  4. **Une session Claude Code déjà ouverte ne voit rien de tout ça.** Trouvé le
+     15/09/2026 en testant les trois skills à froid : dans une session lancée
+     avant un push, l'outil `Skill` continue de charger le `SKILL.md` de la
+     version qui était installée **au démarrage de cette session précise**
+     (ex. `1.17.7`), même si `installed_plugins.json` pointe déjà correctement
+     vers `1.17.20`. Les trois étapes ci-dessus (marketplace, plugin, CLI) ne
+     changent rien à une session déjà en cours — cohérent avec le README de
+     l'équipe (« une conversation déjà commencée garde les skills qu'elle
+     avait à son démarrage »), mais facile à oublier en plein travail. Réflexe
+     à avoir : si le contenu chargé par `Skill` semble en retard sur le dépôt,
+     ouvrir une session neuve plutôt que de chercher un problème de sync côté
+     claude.ai — ou, pour tester un changement tout juste poussé, exécuter
+     directement les fichiers du clone local (`node etat.js`, etc.) plutôt que
+     de passer par l'outil `Skill`.
+
 ## Ce dépôt est public : aucune clé dedans
 
 Les clés d'API de l'équipe vivent dans `JRAYES000/claude-config` (privé), fichier
