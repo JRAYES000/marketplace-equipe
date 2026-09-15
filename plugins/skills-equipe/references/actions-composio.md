@@ -468,7 +468,8 @@ appel API ne remplace cette etape.
 (linkedin-carrousel, linkedin-veille-virale, linkedin-commentaires) -- verifie dans ce
 depot : **seule `linkedin-carrousel` existe reellement** ici, les deux autres n'ont
 aucun dossier/code. Meme une fois les comptes connectes, produire "un exemple reel de
-publication par skill" pour deux skills qui n'existent pas encore n'est pas possible
+publication par skill" pour deux skills qui n'existent pas encore n'est pas possible sans
+d'abord les construire.
 
 ### 15/09/2026 (soir) -- Buffer evalue comme alternative a Composio : ne remplace pas nos besoins
 
@@ -490,4 +491,24 @@ d'aide, pas une impression) avant de s'engager dessus :
 aucun moyen documente d'y automatiser un commentaire sous le post d'un tiers. A moins de
 scinder l'outillage par skill (Buffer pour le carrousel, Composio/MCP pour les commentaires),
 Buffer seul ne couvre pas les trois skills.
-sans d'abord les construire.
+
+### 15/09/2026 (soir, plus tard) -- Buffer connecte reellement : complete Composio, ne le remplace pas
+
+Nomena a connecte Buffer (compte `contact@claudeagency.fr`) avec les deux profils LinkedIn.
+Verifie reellement (pas suppose) via Claude in Chrome, session deja authentifiee, sans jamais
+manipuler d'identifiant : le composeur de post liste bien deux canaux distincts,
+`julien-rayes` (Claude Agency) et `julien-rayes-claude-partners` (Claude Partners) -- **Buffer
+atteint Claude Partners, que Composio n'a jamais reussi a connecter** (voir plus haut et
+`etat-linkedin-20260912.md`, Point n°1). Chaque canal affiche aussi son propre quota
+hebdomadaire ("0/3 posts sent this week"), pratique pour faire respecter la regle du brief
+("trois par semaine maximum, jamais deux le meme jour") sans la recoder cote skill.
+
+**Repartition retenue, chaque outil sur ce qu'il sait reellement faire** :
+- **Composio** : `linkedin-carrousel` (document PDF, methode API Documents validee, voir
+  Point n°15) et `linkedin-commentaires` (commenter le post d'un tiers, impossible via
+  Buffer -- voir la section precedente).
+- **Buffer** : posts texte de `linkedin-veille-virale`, et specifiquement tout ce qui cible
+  **julien-partners**, faute d'un acces Composio reel sur ce compte a ce jour.
+
+Buffer ne remplace donc pas Composio : il debloque un cas precis (Claude Partners, posts
+texte) que Composio ne couvrait pas, et complete l'outillage plutot que de s'y substituer.
