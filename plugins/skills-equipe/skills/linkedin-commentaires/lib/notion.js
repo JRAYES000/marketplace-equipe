@@ -223,13 +223,17 @@ function calculerComparaisonHebdomadaire(lignes) {
  * a une date donnee (pas une vue qui se met a jour seule) -- a relancer pour
  * rafraichir.
  *
- * CONCU SELON LA DOCUMENTATION PUBLIQUE DE L'API NOTION (blocs "table" /
- * "table_row"), PAS ENCORE EXECUTE CONTRE L'API REELLE au moment ou ce code
- * est ecrit -- NOTION_TOKEN absent de cette session. A verifier reellement
- * au premier appel, comme tout le reste de ce depot (voir CLAUDE.md racine).
+ * EXECUTE REELLEMENT le 15/09/2026 (bloc reel cree, contenu relu et verifie --
+ * voir SKILL.md). **`pageId` doit etre la PAGE PARENTE de la base
+ * "Commentaires" (ex. "LinkedIn — Veille & Commentaires"), jamais l'ID de la
+ * base elle-meme** : confirme par un vrai `400 validation_error` ("Block does
+ * not support children") en essayant d'abord sur l'ID de la base -- une base
+ * de donnees, meme en pleine page, n'est pas un conteneur de blocs enfants
+ * au sens de l'API. Le `page_id` du `parent` d'une base se lit via `GET
+ * /v1/databases/{id}` (`response.parent.page_id`).
  */
 async function ecrireBlocComparaisonHebdomadaire({ pageId, lignes, notionToken } = {}) {
-  if (!pageId) throw new Error('pageId requis (page Notion sous laquelle ecrire le tableau).');
+  if (!pageId) throw new Error('pageId requis (page PARENTE de la base "Commentaires", pas la base elle-meme -- voir GET /v1/databases/{id}.parent.page_id).');
   const semaines = calculerComparaisonHebdomadaire(lignes);
 
   const celluleTexte = (valeur) => [{ type: 'text', text: { content: String(valeur) } }];
