@@ -61,6 +61,16 @@ async function trouverPosts({
     throw new Error(`Apify a repondu ${reponse.status} : ${texte}`);
   }
   const bruts = await reponse.json();
+  // Audit adversarial du 15/09/2026 : un `.map` direct sur une reponse qui
+  // n'est PAS un tableau (Apify renvoyant un objet d'erreur avec status 200,
+  // par exemple) plantait avec "bruts.map is not a function" -- message brut
+  // sans aucune indication de la cause reelle.
+  if (!Array.isArray(bruts)) {
+    throw new Error(
+      `Apify a repondu 200 mais le corps n'est pas un tableau de posts (recu : ${typeof bruts}). ` +
+      `Contenu recu : ${JSON.stringify(bruts).slice(0, 200)}.`
+    );
+  }
   return bruts.map(normaliserPost);
 }
 
@@ -72,9 +82,16 @@ async function trouverPosts({
  * qu'il faut passer tel quel en `object` et `target_urn` de
  * LINKEDIN_CREATE_COMMENT_ON_POST -- une URN `urn:li:activity:` est refusee
  * par l'API.
+ *
+ * Audit adversarial du 15/09/2026 : un element `null`/non-objet au milieu du
+ * tableau (reponse Apify malformee) plantait avec un TypeError brut
+ * ("Cannot read properties of null") des le premier filtre -- ecarte
+ * desormais explicitement plutot que de faire planter tout le passage pour
+ * un seul post malforme parmi d'autres valides.
  */
 function trierPosts(posts, { maxCommentaires = 30 } = {}) {
   return posts
+    .filter((post) => post !== null && typeof post === 'object')
     .filter((post) => !(post.document && typeof post.document.totalPageCount === 'number'))
     .filter((post) => (post.commentsCount ?? 0) <= maxCommentaires)
     .sort((a, b) => new Date(b.postedAt || 0) - new Date(a.postedAt || 0));

@@ -107,6 +107,32 @@ faisait respecter -- asymetrie avec `linkedin-commentaires`, qui tient un vrai r
   prouvent le refus (registre a 3 entrees la meme semaine -> 4e candidat refuse ; entree le meme
   jour -> refuse), pas seulement le cas qui passe.
 
+## Audit adversarial et de robustesse (15/09/2026)
+
+Un sous-agent dedie a tente reellement de contourner `validerQuotaHebdomadaire`/`lib/registre.js`
+(sans modifier leur code), et des donnees malformees ont ete injectees dans les fonctions
+reseau/registre. Failles reellement reproduites et corrigees le meme jour, chacune verrouillee
+par un test dans `test/adversarial-15-09.test.js` :
+
+- **Quota hebdomadaire contourne par variation de la cle "compte"** (`Julien-Agency` vs
+  `julien-agency` vs `julien_agency` creaient chacun un historique separe pour le meme compte
+  reel) : `lib/registre.js` normalise et restreint desormais `compte` a
+  `julien-agency`/`julien-partners` exactement.
+- **Comparaison de date par egalite de chaine stricte** : une date fournie avec une heure/fuseau
+  ("2026-09-15T18:00:00.000Z" au lieu de "2026-09-15") cassait silencieusement la regle "jamais
+  deux le meme jour". Format "AAAA-MM-JJ" valide strictement dans `lib/registre.js` ET
+  `lib/planifier-veille.js` (defense en profondeur, meme si l'appelant normal passe deja par le
+  registre).
+- `debutSemaineISO` (calcul du lundi de la semaine, y compris autour d'un changement d'annee ou
+  d'un dimanche) a ete testee sur les cas limites et n'a montre aucune faille.
+- **Registre corrompu sur disque** : `chargerRegistre` plantait avec un `SyntaxError` brut --
+  message explicite desormais.
+- **Reponse Apify malformee** : un element `null` dans le tableau de posts, ou une reponse qui
+  n'est pas un tableau, plantaient `trierPosts`/`recupererPosts` avec un `TypeError` brut --
+  filtres/messages explicites desormais.
+- **Reponse Notion/Composio 500/429/tronquee** : `reponse.json()` etait appele sans filet --
+  message explicite desormais (`lib/notion.js`, `lib/composio.js`).
+
 ## Publication
 
 **Voie reelle en usage courant : Buffer**, compte `contact@claudeagency.fr`, connecte aux deux

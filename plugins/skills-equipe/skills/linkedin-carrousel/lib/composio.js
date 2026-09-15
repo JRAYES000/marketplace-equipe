@@ -26,7 +26,21 @@ async function executerActionComposio(slug, { arguments: args = {}, userId, apiK
     body: JSON.stringify(corps),
   });
 
-  const json = await reponse.json();
+  // Audit adversarial du 15/09/2026 : `reponse.json()` etait appele sans
+  // filet -- un 500/429 ou un corps tronque/non-JSON faisaient planter cette
+  // fonction avec un SyntaxError brut plutot qu'un message exploitable.
+  const texteBrut = await reponse.text();
+  let json;
+  try {
+    json = texteBrut ? JSON.parse(texteBrut) : {};
+  } catch (erreur) {
+    const err = new Error(
+      `Composio ${slug} a repondu ${reponse.status} avec un corps qui n'est pas du JSON exploitable ` +
+      `(${erreur.message}). Debut du corps recu : "${texteBrut.slice(0, 200)}".`
+    );
+    err.httpStatus = reponse.status;
+    throw err;
+  }
   if (!reponse.ok || json.successful === false) {
     const err = new Error(`Composio ${slug} a echoue (HTTP ${reponse.status}) : ${JSON.stringify(json)}`);
     err.httpStatus = reponse.status;

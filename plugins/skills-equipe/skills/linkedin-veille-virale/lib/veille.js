@@ -65,6 +65,16 @@ async function recupererPosts({
     throw new Error(`Apify a repondu ${reponse.status} : ${texte}`);
   }
   const bruts = await reponse.json();
+  // Audit adversarial du 15/09/2026 : un `.map` direct sur une reponse qui
+  // n'est PAS un tableau (Apify renvoyant un objet d'erreur avec status 200,
+  // par exemple) plantait avec "bruts.map is not a function" -- message brut
+  // sans aucune indication de la cause reelle.
+  if (!Array.isArray(bruts)) {
+    throw new Error(
+      `Apify a repondu 200 mais le corps n'est pas un tableau de posts (recu : ${typeof bruts}). ` +
+      `Contenu recu : ${JSON.stringify(bruts).slice(0, 200)}.`
+    );
+  }
   return bruts.map(normaliserPost);
 }
 
@@ -101,12 +111,19 @@ function calculerScore(post, { coefficients, abonnesParIdentifiant }) {
  * "assez bon" ou "pas assez bon". Le reste est trie par score decroissant : le
  * meilleur candidat a recycler en premier (dry-run.js/SKILL.md choisissent toujours
  * `retenus[0]`).
+ *
+ * Audit adversarial du 15/09/2026 : un element `null`/non-objet au milieu du
+ * tableau (reponse Apify malformee) plantait avec un TypeError brut
+ * ("Cannot read properties of null") des le premier filtre -- ecarte
+ * desormais explicitement plutot que de faire planter tout le passage pour
+ * un seul post malforme parmi d'autres valides.
  */
 function trierPosts(
   posts,
   { seuilScore, coefficients, fenetreJours = 7, abonnesParIdentifiant = {}, maintenant = new Date() } = {}
 ) {
   return posts
+    .filter((post) => post !== null && typeof post === 'object')
     .filter((post) => !(post.document && typeof post.document.totalPageCount === 'number'))
     .filter((post) => {
       if (!post.postedAt) return false;

@@ -91,7 +91,40 @@ verification : `references/comptes-cibles-proposition-20260914.md`.
   d'une liste fermee de mots toujours accentues en francais standard -- heuristique
   volontairement imparfaite (mots ambigus type "a"/"à" exclus pour eviter les faux positifs).
 
-`node --test` : 49 tests.
+`node --test` : 62 tests.
+
+## Audit adversarial et de robustesse (15/09/2026)
+
+Un sous-agent dedie a tente reellement de faire passer du contenu hors-regle a travers les
+garde-fous (sans jamais modifier leur code), et des donnees malformees ont ete injectees dans
+les fonctions reseau/registre. Failles reellement reproduites et corrigees le meme jour, chacune
+verrouillee par un test dans `test/adversarial-15-09.test.js` :
+
+- **Voix passive pour affirmer une experience non sourcee** ("un projet a ete livre pour une
+  equipe de 12" -- aucun pronom de 1ere personne, donc invisible a l'ancienne regex) : nouvelle
+  detection independante des pronoms (`REGEX_VOIX_PASSIVE_EXPERIENCE`).
+  **Limite assumee, non corrigee** : "je" seul et "mon"/"ma"/"mes" restent volontairement hors du
+  detecteur de pronoms -- trop frequents dans une opinion generale ("mon avis sur ce type de
+  mission") pour les y ajouter sans faire exploser les faux refus. Meme compromis que "a"/"à"
+  deja exclus des accents.
+- **Commentaire vide reformule sur 2-4 phrases** ("ça résonne", "ça me parle") : la liste
+  `COMMENTAIRES_VIDES` ne matchait que le texte ENTIER ; une phrase individuellement vide au
+  milieu d'un commentaire de plusieurs phrases refuse desormais si TOUTES les phrases le sont.
+- **Quota/anti-doublon contourne par variation de la cle "compte"** (`Julien-Agency` vs
+  `julien-agency` vs `julien_agency` creaient chacun un historique separe pour le meme compte
+  reel) : `lib/registre.js` normalise et restreint desormais `compte` a
+  `julien-agency`/`julien-partners` exactement.
+- **Comparaison de date par egalite de chaine stricte** : une date fournie avec une heure/fuseau
+  cassait silencieusement la detection "meme personne le meme jour". Format "AAAA-MM-JJ" valide
+  strictement des l'entree de `entreesDuJour`/`enregistrerCommentairePublie`.
+- **Registre corrompu sur disque** : `chargerRegistre` plantait avec un `SyntaxError` brut --
+  message explicite desormais, comme tout autre garde-fou.
+- **Reponse Apify malformee** : un element `null` dans le tableau de posts, ou une reponse qui
+  n'est pas un tableau, plantaient `trierPosts`/`trouverPosts` avec un `TypeError` brut --
+  filtres/messages explicites desormais.
+- **Reponse Notion/Composio 500/429/tronquee** : `reponse.json()` etait appele sans filet --
+  message explicite desormais (`lib/notion.js`, `lib/composio.js`), au lieu d'un `SyntaxError`
+  brut.
 
 ## Suivi a 3 jours (regle 3 du brief -- lecture par capture d'ecran)
 
