@@ -1,5 +1,22 @@
 # Quatre posts adaptes -- trois programmes reellement (mis a jour le 15/09/2026, soir)
 
+> **Decalage horaire Madagascar/Paris -- a verifier a CHAQUE fois avant de dire qu'un post
+> "aurait du" etre en ligne.** Nomena est a Madagascar (UTC+3, pas de changement d'heure).
+> Paris est a UTC+2 en septembre (heure d'ete) -- **Madagascar est en avance d'1h sur Paris**.
+> Toutes les heures de programmation ci-dessous sont en heure de **Paris** (fuseau reel de
+> Buffer, verifie dans l'editeur du post). Conversion pour les 3 posts de ce lot :
+>
+> | Post | Heure Paris (programmee) | Heure Madagascar (reelle pour Nomena) |
+> | --- | --- | --- |
+> | Codie A. Sanchez (15/09) | 19h00 | **20h00** |
+> | Jason Feifer (16/09) | 17h00 | **18h00** |
+> | Justin Welsh (17/09) | 13h00 | **14h00** |
+>
+> Meme regle documentee dans le CLAUDE.md racine du depot -- incident reel trouve le 15/09/2026 :
+> une verification faite a 19h15 Madagascar (= 18h15 Paris, 45 min AVANT l'heure programmee de
+> Codie Sanchez) avait conclu a tort que le post etait "bloque", alors qu'il etait simplement pas
+> encore a son heure.
+
 **Trois posts reels adaptes le 15/09/2026**, choisis parmi les 15 candidats reels retenus le
 14/09/2026 (`data/veille-resultats-reels-20260914.json`, passage reel sur les 10 comptes
 americains de `comptes-a-surveiller.txt`) -- les 3 meilleurs par score qui offraient une matiere
@@ -76,29 +93,28 @@ post effectivement paru (verification a demander explicitement le jour dit, jama
 qu'une programmation a fonctionne sans la verifier -- meme discipline que le reste de ce
 chantier).
 
-## Controle post-19h00 -- Codie Sanchez PAS en ligne, aucune republication (15/09/2026, ~19h15)
+## Controle premature -- fausse alerte, decalage horaire Madagascar/Paris non applique (15/09/2026, ~19h15 Madagascar)
 
-Verification demandee une fois l'heure programmee (19h00) depassee. **Resultat : le post n'est
-pas en ligne**, sur deux sources concordantes :
+**Corrige le 15/09/2026 : le paragraphe precedent affirmait a tort que le post etait "bloque en
+file d'attente ... sans cause identifiee".** C'etait faux -- la verification a simplement ete
+faite une heure trop tot. Nomena est a Madagascar (UTC+3, toute l'annee, pas de changement
+d'heure) ; Paris est a UTC+2 en septembre (heure d'ete). **Quand il est 19h15 a Madagascar, il
+est 18h15 a Paris.** Le post est programme a 19h00 **heure de Paris**, donc 20h00 heure de
+Madagascar -- la verification faite a 19h15 Madagascar (18h15 Paris) tombait 45 minutes AVANT
+l'heure reelle de publication, pas apres. Le post etait normalement encore dans la file
+d'attente : ce n'etait pas une panne, juste une horloge mal convertie. Voir le decalage horaire
+complet, avec les 3 horaires convertis, dans le CLAUDE.md racine du depot et en tete de ce
+fichier -- **toujours convertir Paris -> Madagascar (+1h en septembre) avant de conclure qu'un
+post programme "aurait du" etre en ligne.**
 
-1. **Profil LinkedIn `linkedin.com/in/julien-rayes` (Claude in Chrome)** : les 5 posts les plus
-   recents visibles ne contiennent pas le texte de Codie Sanchez. Le plus recent (5h) est un post
-   personnel de Julien sans rapport avec la veille ; suivent le carrousel republie (1j, 1j), une
-   offre d'emploi (5j) et un post sur le referencement IA (6j).
-2. **Buffer, compte julien-agency** : le post reste dans l'onglet **Queue** (pas dans **Sent**,
-   qui s'arrete a hier 14/09 20h53 -- le carrousel). La carte affiche toujours l'heure programmee
-   "7:00 PM" et le bouton **"Publish Now"**, ce qui n'apparaitrait pas sur un post deja parti.
-   Aucun badge d'erreur, aucune bannière de reconnexion de compte -- verifie dans les reglages du
-   canal (Posting Schedule et General), rien d'anormal cote authentification. Fuseau confirme
-   Europe/Paris.
-
-**Conclusion honnete, pas une supposition** : le post est reste bloque en file d'attente passe
-son heure programmee, sans message d'erreur visible -- ni panne d'authentification confirmee, ni
-explication trouvee. **Aucune republication tentee** (ni bouton "Publish Now" cliqué, ni nouveau
-post cree) -- geste public, jamais sans feu vert explicite de Julien. Notion et le registre de
-quota (`data/registre-veille.json`, `enregistrerPostPublie`) **restent inchanges** : aucune
-publication reelle a enregistrer tant que rien n'est confirme en ligne. A reverifier plus tard
-dans la soiree, ou a signaler a Julien si le blocage persiste.
+Verification refaite apres 20h00 Madagascar (heure reelle de publication) : voir plus bas des
+qu'elle est disponible. **Aucune republication tentee entre-temps** (ni bouton "Publish Now"
+cliqué, ni nouveau post cree) -- geste public, jamais sans feu vert explicite de Julien, et
+c'est precisement la programmation elle-meme qu'on veut laisser faire son travail. Notion et le
+registre de quota (`data/registre-veille.json`, `enregistrerPostPublie`) **restent inchanges** :
+aucune publication reelle a enregistrer tant que rien n'est confirme en ligne. Reverification
+prevue quelques minutes apres 20h00 Madagascar -- laisser une marge courte plutot que verifier
+pile a l'heure.
 
 ## L'ancien exemple du 12/09/2026 -- toujours a part
 
