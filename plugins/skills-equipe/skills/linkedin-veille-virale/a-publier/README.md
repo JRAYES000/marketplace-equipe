@@ -107,14 +107,33 @@ complet, avec les 3 horaires convertis, dans le CLAUDE.md racine du depot et en 
 fichier -- **toujours convertir Paris -> Madagascar (+1h en septembre) avant de conclure qu'un
 post programme "aurait du" etre en ligne.**
 
-Verification refaite apres 20h00 Madagascar (heure reelle de publication) : voir plus bas des
-qu'elle est disponible. **Aucune republication tentee entre-temps** (ni bouton "Publish Now"
-cliqué, ni nouveau post cree) -- geste public, jamais sans feu vert explicite de Julien, et
-c'est precisement la programmation elle-meme qu'on veut laisser faire son travail. Notion et le
-registre de quota (`data/registre-veille.json`, `enregistrerPostPublie`) **restent inchanges** :
-aucune publication reelle a enregistrer tant que rien n'est confirme en ligne. Reverification
-prevue quelques minutes apres 20h00 Madagascar -- laisser une marge courte plutot que verifier
-pile a l'heure.
+## Confirme en ligne -- 20h07 Madagascar (15/09/2026)
+
+**Reverification faite quelques minutes apres 20h00 Madagascar (heure reelle de publication,
+20h00 Madagascar = 19h00 Paris) : le post est bien en ligne.** Confirme sur deux sources :
+
+1. **Profil `linkedin.com/in/julien-rayes` (Claude in Chrome)** : le post apparait desormais en
+   tete du fil ("7m" au premier controle), texte integral verifie -- gras Unicode correctement
+   rendu (`𝟔𝟎% 𝐝𝐞𝐬 𝐝𝐢𝐫𝐢𝐠𝐞𝐚𝐧𝐭𝐬 𝐝𝐞 𝐏𝐌𝐄 𝐞𝐭 𝐓𝐏𝐄`), les 4 emojis en tete de paragraphe (🧩⏳✅🔁), tous
+   les accents corrects (française, pénurie, après, décider...), hashtags #recrutement #pme
+   groupes en fin de texte.
+2. **Permalien reel obtenu et resolu** : menu "..." du post -> "Copy link to post", lien lu via
+   le champ ou il a ete colle (jamais suppose) -- confirme en le rouvrant directement, le meme
+   texte s'affiche ("28m" a ce moment) :
+   https://www.linkedin.com/posts/julien-rayes_recrutement-pme-activity-7505672128533286914-zq3h
+
+**Mis a jour en consequence, pour de vrai** :
+- **Notion** ("Veille & posts", ligne Codie Sanchez) : `Etat` passe de "Programme" a "Publie",
+  `Lien du post publie` renseigne avec le permalien ci-dessus (`Date de publication` deja
+  correcte a "15 septembre 2026", inchangee).
+- **Registre de quota** (`data/registre-veille.json`, `enregistrerPostPublie('julien-agency',
+  {date: '2026-09-15', postId: '7505672128533286914', auteurOriginal: 'Codie A. Sanchez'})`) --
+  **premiere entree reelle depuis la creation de ce garde-fou** (audit adversarial du 15/09) :
+  premier test grandeur nature reussi, pas seulement une fixture.
+- **Mail du 20** (`references/mail-20260920-brouillon.md`) : lien reel ajoute pour Codie Sanchez.
+
+Aucune republication n'a ete necessaire ni tentee -- la programmation Buffer a fait son travail
+normalement, une fois la bonne heure (fuseau Madagascar) prise en compte.
 
 ## L'ancien exemple du 12/09/2026 -- toujours a part
 
