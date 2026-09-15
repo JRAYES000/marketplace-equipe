@@ -53,11 +53,13 @@ fonctionne est une cle "consumer" personnelle obtenue fraiche a chaque session, 
    respecter le quota journalier d'un lancement de la skill a l'autre.
 8. `dry-run.js` (`npm run dry-run` ou `node dry-run.js`) execute les etapes 1-5 de bout en bout
    sans jamais appeler `publierCommentaire` (il n'importe meme pas
-   `lib/publier-commentaire.js`) -- avec le jeu fixture de `fixtures/posts-exemple.json` tant
-   que `comptes_cibles` est vide, ou avec un vrai appel Apify des que ce champ est rempli et
-   `APIFY_TOKEN` present. `npm test` (`node --test`) verifie chaque garde-fou individuellement
-   (voir plus bas) et ce dry run de bout en bout, y compris qu'il n'importe jamais
-   `lib/publier-commentaire.js`.
+   `lib/publier-commentaire.js`). **Declencheur reel du repli fixture, verifie dans le code
+   (15/09/2026)** : `APIFY_TOKEN` absent -- a lui seul, meme si `comptes_cibles` est rempli.
+   `comptes_cibles` vide bascule aussi sur la fixture, mais n'est pas la seule condition ; les
+   deux sont testees independamment (`et/ou`). Avec `APIFY_TOKEN` present ET `comptes_cibles`
+   rempli, `dry-run.js` fait un vrai appel Apify. `npm test` (`node --test`) verifie chaque
+   garde-fou individuellement (voir plus bas) et ce dry run de bout en bout, y compris qu'il
+   n'importe jamais `lib/publier-commentaire.js`.
 
 ## Garde-fous automatiques (14/09/2026) -- refus explicite, pas un avertissement
 
