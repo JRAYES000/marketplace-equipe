@@ -74,7 +74,25 @@ async function appelNotion(endpoint, { method = 'GET', body, notionToken } = {})
   } catch (err) {
     throw new Error(`Impossible de contacter l'API Notion (reseau) : ${err.message}`);
   }
-  const json = await reponse.json();
+  // Audit adversarial du 15/09/2026 : `reponse.json()` etait appele sans
+  // filet -- un 500 renvoyant une page d'erreur HTML, un 429 (rate limit)
+  // renvoyant du texte brut, ou un corps tronque faisaient planter cette
+  // fonction avec un SyntaxError brut au lieu du message explicite prevu
+  // par `messageErreurNotion` juste en dessous. Le corps est lu une seule
+  // fois en texte, puis parse -- jamais deux lectures du meme flux.
+  const texteBrut = await reponse.text();
+  let json;
+  try {
+    json = texteBrut ? JSON.parse(texteBrut) : {};
+  } catch (erreur) {
+    throw new Error(
+      `Notion a repondu ${reponse.status} avec un corps qui n'est pas du JSON exploitable ` +
+      `(${erreur.message}). Debut du corps recu : "${texteBrut.slice(0, 200)}". ` +
+      (reponse.status === 429
+        ? 'Probablement une limite de frequence (rate limit) -- reessayez apres une pause.'
+        : 'Probablement une panne cote Notion -- reessayez plus tard.')
+    );
+  }
   if (!reponse.ok) {
     throw new Error(messageErreurNotion(reponse.status, json));
   }

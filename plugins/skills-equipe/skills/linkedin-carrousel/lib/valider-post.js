@@ -90,6 +90,32 @@ function convertirGras(brouillon) {
  */
 const REGEX_EMOJI = /\p{Extended_Pictographic}/gu;
 
+/**
+ * Regroupe les lignes brutes du texte en "phrases visuelles" : une ligne qui
+ * ne se termine PAS par une ponctuation forte (. ! ?) est fusionnee avec la
+ * suivante avant toute verification de position. Audit adversarial du
+ * 15/09/2026 : sans cette fusion, un simple retour a la ligne artificiel
+ * place juste avant/apres un emoji le faisait passer pour "en tete/fin de
+ * ligne" alors qu'il coupait grammaticalement une phrase en plein milieu
+ * (ex. "Ceci augmente vos couts\n🚀 et complique tout.") -- confirme comme
+ * contournement reel.
+ */
+function construireBlocsEmojis(texte) {
+  const lignesBrutes = texte.split('\n');
+  const blocs = [];
+  let courant = '';
+  for (const ligne of lignesBrutes) {
+    courant = courant ? `${courant} ${ligne}` : ligne;
+    const finDeBloc = /[.!?]\s*$/.test(ligne.trim()) || ligne.trim() === '';
+    if (finDeBloc) {
+      blocs.push(courant.trim());
+      courant = '';
+    }
+  }
+  if (courant.trim()) blocs.push(courant.trim());
+  return blocs;
+}
+
 function validerEmojis(texte) {
   const toutesCorrespondances = [...texte.matchAll(REGEX_EMOJI)];
   const total = toutesCorrespondances.length;
@@ -99,29 +125,30 @@ function validerEmojis(texte) {
     );
   }
 
-  const lignes = texte.split('\n');
-  for (const ligne of lignes) {
+  const blocs = construireBlocsEmojis(texte);
+  for (const bloc of blocs) {
     // Verifie d'abord les groupes (deux emojis consecutifs) : un message
     // specifique sur ce cas est plus utile que le message generique "au
     // milieu d'une phrase" que la position du second emoji declencherait
     // sinon en premier.
     const REGEX_GROUPE = new RegExp(`(${REGEX_EMOJI.source})\\s?(${REGEX_EMOJI.source})`, 'u');
-    if (REGEX_GROUPE.test(ligne)) {
+    if (REGEX_GROUPE.test(bloc)) {
       throw new Error(
-        `Post refuse : deux emojis se suivent sur la ligne "${ligne.trim()}" -- jamais deux a la suite.`
+        `Post refuse : deux emojis se suivent dans "${bloc}" -- jamais deux a la suite.`
       );
     }
 
-    const emojisDeLaLigne = [...ligne.matchAll(REGEX_EMOJI)];
-    for (const correspondance of emojisDeLaLigne) {
+    const emojisDuBloc = [...bloc.matchAll(REGEX_EMOJI)];
+    for (const correspondance of emojisDuBloc) {
       const position = correspondance.index;
-      const estDebut = ligne.slice(0, position).trim() === '';
-      const finLigne = position + correspondance[0].length;
-      const estFin = ligne.slice(finLigne).trim() === '';
+      const estDebut = bloc.slice(0, position).trim() === '';
+      const finBloc = position + correspondance[0].length;
+      const estFin = bloc.slice(finBloc).trim() === '';
       if (!estDebut && !estFin) {
         throw new Error(
           `Post refuse : l'emoji "${correspondance[0]}" apparait au milieu d'une phrase ` +
-          `(ligne : "${ligne.trim()}"). Autorise seulement en tete de bloc ou en fin de ligne.`
+          `(phrase : "${bloc}"). Autorise seulement en tete ou en fin de phrase -- un retour a ` +
+          'la ligne artificiel ne compte pas comme une frontiere.'
         );
       }
     }
@@ -173,7 +200,10 @@ const INTERDITS = [
   { regex: /!{2,}/, motif: 'exclamations en rafale' },
   { regex: /—|–/, motif: 'tiret long' },
   { regex: /--/, motif: 'tiret long (double tiret)' },
-  { regex: /ce\s+n['’]est\s+pas\s+.+?,?\s*c['’]est\s+/i, motif: '"ce n\'est pas X, c\'est Y"' },
+  // Elargi le 15/09/2026 (audit adversarial) : "ce n'est pas X, mais plutot
+  // Y" (sans "c'est") contournait la regle initiale, qui n'attrapait que la
+  // reformulation exacte "c'est" -- meme figure de style, meme interdiction.
+  { regex: /ce\s+n['’]est\s+pas\s+.+?,?\s*(?:c['’]est|mais\s+plut[oô]t|c['’][eé]tait)\s+/i, motif: '"ce n\'est pas X, c\'est/mais plutot Y"' },
   { regex: /ravi(?:e)?\s+de\s+vous\s+annoncer/i, motif: '"ravi de vous annoncer"' },
   { regex: /taguez\s+quelqu['’]un/i, motif: '"taguez quelqu\'un"' },
   { regex: /linkedin\s+(?:est\s+)?(?:nul|pourri|inutile|une\s+plaie|un\s+cirque)/i, motif: 'critique de LinkedIn' },
@@ -213,9 +243,18 @@ function validerInterdits(texte) {
  * citation deux chiffres dont un seul est reellement source ; exprimer une
  * comparaison non sourcee en toutes lettres ("deux fois plus"), pas en
  * chiffre.
+ *
+ * FAILLE REELLE TROUVEE ET CORRIGEE (audit adversarial, 15/09/2026) : cette
+ * fonction s'execute sur le texte APRES conversion du gras (voir
+ * `validerEtConvertirPost` plus bas), qui transforme les chiffres ASCII en
+ * chiffres Unicode "Mathematical Bold" (`convertirEnGrasUnicode`, plage
+ * U+1D7CE-U+1D7D7) des qu'ils sont entoures de `**etoiles**` -- un reflexe
+ * d'ecriture naturel pour un chiffre choc. `\d+` ne reconnait PAS ces
+ * caracteres : `"**40**% ... sans source"` passait entierement inapercu.
+ * `REGEX_CHIFFRE` reconnait desormais aussi cette plage.
  */
 function validerChiffreSource(texte) {
-  const REGEX_CHIFFRE = /\d+/g;
+  const REGEX_CHIFFRE = /[\d\u{1D7CE}-\u{1D7FF}]+/gu;
   let correspondance;
   while ((correspondance = REGEX_CHIFFRE.exec(texte)) !== null) {
     const debutFenetre = Math.max(0, correspondance.index - 80);
@@ -227,6 +266,38 @@ function validerChiffreSource(texte) {
         `(attendu : "(source : ...)" juste avant ou apres). Contexte : "${fenetre}".`
       );
     }
+    verifierSourceNonVague(fenetre, correspondance[0]);
+  }
+}
+
+/**
+ * Ajoute le 15/09/2026 (audit adversarial) : le code ne peut evidemment pas
+ * juger si une source est REELLEMENT exacte (meme limite que
+ * `anecdoteSourcee` dans linkedin-commentaires -- seul un humain le peut),
+ * mais il peut refuser les remplissages les plus grossiers, confirmes
+ * passants : "(source : une etude recente)", "(source : les chiffres)".
+ * Liste fermee, meme philosophie que COMMENTAIRES_VIDES -- rattrapage
+ * partiel assume, pas une preuve de source reelle.
+ */
+const SOURCES_VAGUES = [
+  /^\s*(une|des|plusieurs)?\s*[eé]tudes?(\s+r[eé]centes?)?\s*$/i,
+  /^\s*(les|des)?\s*chiffres?\s*$/i,
+  /^\s*(les|des)?\s*donn[eé]es?\s*$/i,
+  /^\s*(une)?\s*enqu[eê]te(\s+r[eé]cente)?\s*$/i,
+  /^\s*(certaines?|diverses?)\s+sources?\s*$/i,
+  /^\s*internet\s*$/i,
+];
+
+function verifierSourceNonVague(fenetre, chiffre) {
+  const correspondanceSource = fenetre.match(/\(\s*source\s*:\s*([^)]*)\)/i);
+  if (!correspondanceSource) return; // parenthese incomplete dans la fenetre -- rien a verifier ici
+  const contenuSource = correspondanceSource[1].trim();
+  if (SOURCES_VAGUES.some((regex) => regex.test(contenuSource))) {
+    throw new Error(
+      `Post refuse : la source du chiffre "${chiffre}" est trop vague ("${contenuSource}") -- ` +
+      'nommez l\'institution/etude reelle (ex. "Insee, 2025", "Bpifrance Le Lab"), pas un ' +
+      'remplissage generique.'
+    );
   }
 }
 

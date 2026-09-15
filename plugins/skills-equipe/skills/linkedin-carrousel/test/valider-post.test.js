@@ -125,7 +125,7 @@ test('refuse "ce n\'est pas X, c\'est Y"', () => {
     'Rarement pour le salaire.',
     "Ce n'est pas une question de salaire, c'est une question de delai."
   );
-  assert.throws(() => validerEtConvertirPost(brouillon), /ce n'est pas X, c'est Y/);
+  assert.throws(() => validerEtConvertirPost(brouillon), /ce n'est pas X, c'est\/mais plutot Y/);
 });
 
 test('refuse un chiffre sans source attachee -- cas demande', () => {

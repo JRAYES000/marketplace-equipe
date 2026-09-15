@@ -28,9 +28,24 @@ const path = require('path');
 
 const CHEMIN_PAR_DEFAUT = path.join(__dirname, '..', 'data', 'registre-veille.json');
 
+/**
+ * Audit adversarial du 15/09/2026 (sous-agent dedie) : un registre corrompu
+ * sur disque faisait planter `chargerRegistre` avec un `SyntaxError` brut --
+ * contraire a la regle "rien ne plante a vide" du brief. Message explicite
+ * desormais.
+ */
 function chargerRegistre(chemin = CHEMIN_PAR_DEFAUT) {
   if (!fs.existsSync(chemin)) return {};
-  return JSON.parse(fs.readFileSync(chemin, 'utf-8'));
+  const brut = fs.readFileSync(chemin, 'utf-8');
+  try {
+    return JSON.parse(brut);
+  } catch (erreur) {
+    throw new Error(
+      `Registre illisible : "${chemin}" ne contient pas du JSON valide (${erreur.message}). ` +
+      'Corrigez ou supprimez ce fichier a la main avant de relancer -- jamais suppose vide ' +
+      'silencieusement, un registre corrompu pourrait masquer un quota deja atteint.'
+    );
+  }
 }
 
 function sauvegarderRegistre(registre, chemin = CHEMIN_PAR_DEFAUT) {
@@ -39,11 +54,46 @@ function sauvegarderRegistre(registre, chemin = CHEMIN_PAR_DEFAUT) {
 }
 
 /**
+ * Comptes reellement geres par ce paquet (voir reglages-comptes.json).
+ * Audit adversarial du 15/09/2026 : `registre[compte]` etait un acces brut a
+ * une cle d'objet JS, sans normalisation -- "julien-agency" vs
+ * "Julien-Agency" vs "julien_agency" creaient chacun un historique separe
+ * pour le MEME compte reel, permettant de depasser le quota hebdomadaire ou
+ * de publier deux fois le meme jour en variant simplement la casse ou
+ * l'orthographe de `compte` d'un appel a l'autre.
+ */
+const COMPTES_VALIDES = ['julien-agency', 'julien-partners'];
+
+function normaliserCompte(compte) {
+  const normalise = String(compte || '').trim().toLowerCase();
+  if (!COMPTES_VALIDES.includes(normalise)) {
+    throw new Error(
+      `Registre refuse : compte "${compte}" inconnu, attendu l'un de : ${COMPTES_VALIDES.join(', ')} ` +
+      '(comparaison apres trim/minuscule -- variantes de casse ou d\'orthographe refusees explicitement ' +
+      'pour ne jamais fragmenter silencieusement le quota d\'un meme compte reel).'
+    );
+  }
+  return normalise;
+}
+
+const REGEX_JOUR_ISO = /^\d{4}-\d{2}-\d{2}$/;
+
+function validerJourISO(jourISO, contexte) {
+  if (!REGEX_JOUR_ISO.test(String(jourISO || ''))) {
+    throw new Error(
+      `${contexte} refuse : date "${jourISO}" hors du format attendu "AAAA-MM-JJ" -- une date avec ` +
+      'heure/fuseau ou un autre format casserait silencieusement la comparaison "meme jour".'
+    );
+  }
+}
+
+/**
  * Lundi 00:00 (ISO, semaine europeenne) de la semaine contenant `jourISO`
  * ("AAAA-MM-JJ"). Calcul en UTC pour rester deterministe quel que soit le
  * fuseau d'execution -- seule la partie date (pas l'heure) importe ici.
  */
 function debutSemaineISO(jourISO) {
+  validerJourISO(jourISO, 'debutSemaineISO');
   const date = new Date(`${jourISO}T00:00:00.000Z`);
   const jourSemaine = date.getUTCDay(); // 0 = dimanche, 1 = lundi, ...
   const decalage = jourSemaine === 0 ? 6 : jourSemaine - 1;
@@ -53,13 +103,21 @@ function debutSemaineISO(jourISO) {
 
 /**
  * Entrees du registre pour `compte` tombant dans la meme semaine (lundi a
- * dimanche) que `jourISO`.
+ * dimanche) que `jourISO`. Audit adversarial du 15/09/2026 : une entree du
+ * registre dont `date` n'est pas au format "AAAA-MM-JJ" strict (ex. avec une
+ * heure) est desormais ignoree plutot que de fausser silencieusement la
+ * comparaison "meme jour" faite ensuite par `validerQuotaHebdomadaire` (qui,
+ * elle, compare par egalite stricte -- voir lib/planifier-veille.js).
  */
 function entreesDeLaSemaine(registre, compte, jourISO) {
+  const compteNormalise = normaliserCompte(compte);
   const debut = debutSemaineISO(jourISO);
   const finExclusive = new Date(`${debut}T00:00:00.000Z`);
   finExclusive.setUTCDate(finExclusive.getUTCDate() + 7);
-  return (registre[compte] || []).filter((e) => e.date >= debut && e.date < finExclusive.toISOString().slice(0, 10));
+  const finISO = finExclusive.toISOString().slice(0, 10);
+  return (registre[compteNormalise] || []).filter(
+    (e) => REGEX_JOUR_ISO.test(String(e.date || '')) && e.date >= debut && e.date < finISO
+  );
 }
 
 /**
@@ -69,9 +127,11 @@ function entreesDeLaSemaine(registre, compte, jourISO) {
  * compterait a tort dans le quota de la semaine.
  */
 function enregistrerPostPublie(compte, { date, postId, auteurOriginal }, chemin = CHEMIN_PAR_DEFAUT) {
+  const compteNormalise = normaliserCompte(compte);
+  validerJourISO(date, 'enregistrerPostPublie');
   const registre = chargerRegistre(chemin);
-  registre[compte] = registre[compte] || [];
-  registre[compte].push({ date, postId: postId || null, auteurOriginal: auteurOriginal || null });
+  registre[compteNormalise] = registre[compteNormalise] || [];
+  registre[compteNormalise].push({ date, postId: postId || null, auteurOriginal: auteurOriginal || null });
   sauvegarderRegistre(registre, chemin);
   return registre;
 }
@@ -82,5 +142,8 @@ module.exports = {
   debutSemaineISO,
   entreesDeLaSemaine,
   enregistrerPostPublie,
+  normaliserCompte,
+  validerJourISO,
+  COMPTES_VALIDES,
   CHEMIN_PAR_DEFAUT,
 };

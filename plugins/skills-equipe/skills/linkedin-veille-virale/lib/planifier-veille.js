@@ -19,6 +19,7 @@
  */
 
 const QUOTA_MAX_PAR_SEMAINE = 3;
+const REGEX_JOUR_ISO = /^\d{4}-\d{2}-\d{2}$/;
 
 function dateJourISO(date = new Date()) {
   return date.toISOString().slice(0, 10);
@@ -30,10 +31,24 @@ function dateJourISO(date = new Date()) {
  * `entreesSemaine` : sous-ensemble deja filtre du registre pour (compte,
  * semaine) courants -- voir lib/registre.js pour construire ce filtre.
  * `date` : jour ISO ("AAAA-MM-JJ") auquel ce post serait publie/programme.
+ *
+ * Audit adversarial du 15/09/2026 : la comparaison `e.date === date` est une
+ * egalite de chaines stricte -- accepter `date` dans un format autre que
+ * "AAAA-MM-JJ" (avec une heure, un fuseau, un espace...) la faisait echouer
+ * silencieusement contre une entree du registre au bon format, laissant
+ * passer un second post le meme jour calendaire. `date` est desormais
+ * valide strictement des l'entree de cette fonction, defense en profondeur
+ * meme si l'appelant (lib/registre.js) est cense deja fournir ce format.
  */
 function validerQuotaHebdomadaire(entreesSemaine, { date }) {
   if (!date) {
     throw new Error('validerQuotaHebdomadaire : date requise (AAAA-MM-JJ).');
+  }
+  if (!REGEX_JOUR_ISO.test(String(date))) {
+    throw new Error(
+      `validerQuotaHebdomadaire refuse : date "${date}" hors du format attendu "AAAA-MM-JJ" -- ` +
+      'un autre format casserait silencieusement la comparaison "meme jour".'
+    );
   }
 
   const dejaPublieCeJour = entreesSemaine.some((e) => e.date === date);

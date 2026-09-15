@@ -123,6 +123,43 @@ standard (ete/été, deja/déjà, meme/même, etc.). Heuristique volontairement 
 ambigus selon le contexte ("a"/"à", "ou"/"où") sont exclus pour eviter les faux positifs. Appele
 depuis `validerDiapos` et `validerEtConvertirPost`.
 
+## Audit adversarial et de robustesse (15/09/2026)
+
+Un sous-agent dedie a tente reellement de faire passer du contenu hors-regle a travers
+`lib/valider-diapos.js`/`lib/valider-post.js` (sans jamais modifier leur code, rendu reel via
+Playwright pour confirmer l'impact visuel), et des donnees malformees ont ete injectees dans les
+fonctions de validation/reseau. Failles reellement reproduites et corrigees le meme jour, chacune
+verrouillee par un test dans `test/adversarial-15-09.test.js` :
+
+- **Chiffre EN GRAS echappait totalement a `validerChiffreSource`** (severite haute) : le
+  controle s'execute sur le texte APRES conversion du gras, qui transforme les chiffres ASCII en
+  chiffres Unicode "Mathematical Bold" -- `\d+` ne les reconnaissait pas. `"**40**% ... sans
+  source"` passait entierement inapercu. `REGEX_CHIFFRE` reconnait desormais aussi cette plage
+  Unicode.
+- **Mot colle par des tirets contournait le compte de 25 mots**, confirme par rendu Playwright
+  reel (texte debordant visuellement de la diapo, chevauchant le pied de page) : `compterMots`
+  segmente desormais aussi sur les tirets, et un filet de securite en caracteres
+  (`CARACTERES_MAX_PAR_DIAPO`, 260) refuse tout texte anormalement long meme si le compte de
+  "mots" passe (autre separateur exotique).
+- **"ce n'est pas X, c'est Y" contournable par "mais plutot Y"** (sans "c'est") : regex elargie.
+- **Emoji "milieu de phrase" cache par un retour a la ligne artificiel** : le controle raisonnait
+  ligne par ligne, pas phrase par phrase -- un simple `\n` juste avant/apres l'emoji le faisait
+  passer pour "en tete/fin de ligne". Les lignes sans ponctuation forte (`.!?`) sont desormais
+  fusionnees en "phrases visuelles" avant la verification de position.
+- **Source vague acceptee mecaniquement** ("(source : une etude recente)", "(source : les
+  chiffres)") : liste fermee de remplissages vagues refuses (`SOURCES_VAGUES`), meme philosophie
+  que `COMMENTAIRES_VIDES` dans linkedin-commentaires -- rattrapage partiel assume, pas une
+  preuve de source reelle.
+- **Limite deja documentee, non corrigee** : un chiffre ecrit en toutes lettres ("quarante pour
+  cent") n'est jamais detecte par `validerChiffreSource` -- assume explicitement par le
+  commentaire au-dessus de cette fonction depuis sa creation, confirme concretement par l'audit.
+- **Diapo `null`/titre vide/caracteres de controle** : un element `null` au milieu du tableau de
+  diapos, un `titre` absent/vide, ou un caractere de controle non imprimable passaient
+  silencieusement (ou plantaient avec un `TypeError` brut) -- refus explicite desormais.
+- **Fichier de diapos ou reponse Composio corrompus** : `JSON.parse`/`reponse.json()` sans filet
+  plantaient avec des erreurs brutes -- messages explicites desormais
+  (`generer-pdf.js`, `lib/composio.js`).
+
 ## Convention de nommage des fichiers de sortie
 
 `sortants/<compte>/<Titre lisible en francais>.pdf` -- sans date ni numero, casse et accents

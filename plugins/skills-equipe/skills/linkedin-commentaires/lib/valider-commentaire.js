@@ -34,6 +34,8 @@ const REGEX_PUCE = /(^|\n)\s*[-*•‣▪]\s|(^|\n)\s*\d+[.)]\s/;
 
 // Commentaires vides explicitement cites par le brief, plus les variantes les
 // plus courantes du meme registre ("ca ne rapporte rien et ca se voit").
+// Ancres (^...$) : ne matchent que si c'est TOUT le commentaire, pas un
+// fragment noye dans un commentaire plus long.
 const COMMENTAIRES_VIDES = [
   /^\s*super\s+post\s*!?\s*$/i,
   /^\s*tellement\s+vrai\s*!?\s*$/i,
@@ -46,11 +48,39 @@ const COMMENTAIRES_VIDES = [
   /^\s*(\+\s*1|\+1)\s*$/i,
 ];
 
+/**
+ * Ajoute le 15/09/2026 (audit adversarial, sous-agent dedie) : "Interessant
+ * comme approche, ca resonne avec ce qu'on observe en ce moment. Ca me parle
+ * vraiment." passe la barre des 2-4 phrases ET aucune phrase individuelle ne
+ * matche COMMENTAIRES_VIDES (ancre sur le texte ENTIER) -- confirme comme
+ * contournement reel. Ces fragments-ci sont volontairement NON ancres
+ * (matchent une PHRASE, pas tout le texte) et utilises uniquement par
+ * `validerNonVideParPhrase` ci-dessous : un commentaire ou CHAQUE phrase est
+ * un de ces fragments creux est refuse, mais une seule phrase-ouverture
+ * creuse suivie d'un vrai contenu substantiel reste acceptee (le but reste
+ * de bloquer le vide integral, pas de punir une accroche informelle).
+ */
+const FRAGMENTS_VIDES_PAR_PHRASE = [
+  /\bca\s+r[eé]sonne\b/i,
+  /\bca\s+me\s+parle\b/i,
+  /\bca\s+fait\s+sens\b/i,
+  /^\s*int[eé]ressant\s+comme\s+approche\s*\.?\s*$/i,
+  /^\s*totalement\s+d['’]accord\s*\.?\s*$/i,
+];
+
 function compterPhrases(texte) {
   return texte
     .split(/(?<=[.!?])\s+/)
     .map((p) => p.trim())
     .filter(Boolean).length;
+}
+
+function toutesLesPhrasesSontVides(texte) {
+  const phrases = texte
+    .split(/(?<=[.!?])\s+/)
+    .map((p) => p.trim())
+    .filter(Boolean);
+  return phrases.length > 0 && phrases.every((phrase) => FRAGMENTS_VIDES_PAR_PHRASE.some((regex) => regex.test(phrase)));
 }
 
 function validerFormeGenerale(texte) {
@@ -65,6 +95,13 @@ function validerFormeGenerale(texte) {
         'ca ne rapporte rien et ca se voit, comme le dit le brief.'
       );
     }
+  }
+  if (toutesLesPhrasesSontVides(texte)) {
+    throw new Error(
+      `Commentaire refuse : formulation vide detectee ("${texte.trim()}") -- reformuler sur ` +
+      'plusieurs phrases ("ca resonne", "ca me parle"...) ne rapporte pas plus que la version ' +
+      'courte deja refusee par le brief.'
+    );
   }
 
   if (REGEX_EMOJI.test(texte)) {
@@ -119,6 +156,19 @@ function validerFormeGenerale(texte) {
 // \b -- verifie sur "livré", "équipe", "coupé", "déployé" reellement testes.
 const FRONTIERE_AVANT = "(?<![\\p{L}\\p{N}])";
 const FRONTIERE_APRES = "(?![\\p{L}\\p{N}])";
+// Audit adversarial du 15/09/2026 (sous-agent dedie) : "je" seul, "mon"/"ma"/
+// "mes" et "m'a dit que" ont ete reellement testes et passent tous a travers
+// cette liste. DELIBEREMENT NON ELargie a ces formes malgre ca : "je"/"mon"/
+// "ma"/"mes" sont trop polysemiques (frequents dans une opinion generale --
+// "mon avis sur ce type de mission" -- sans aucune experience personnelle
+// affirmee) pour rester ici sans faire exploser les faux refus sur du
+// contenu legitime. Meme famille de compromis que "a"/"à" exclus des accents
+// (voir lib/valider-orthographe.js) : un trou assume plutot qu'un
+// elargissement qui casserait des commentaires corrects. Ce qui EST corrige
+// ci-dessous (REGEX_VOIX_PASSIVE_EXPERIENCE), c'est la tournure passive
+// ("a ete livre", "ont ete deployes") : un signal beaucoup plus specifique,
+// sans le meme risque de faux positif, et confirme par le meme audit comme
+// contournement reel de la regle "aucune experience non sourcee".
 const REGEX_PREMIERE_PERSONNE = new RegExp(
   `${FRONTIERE_AVANT}(on|nous|j'ai|j'avais|notre|nos)${FRONTIERE_APRES}`, 'iu'
 );
@@ -128,18 +178,35 @@ const REGEX_VOCABULAIRE_EXPERIENCE = new RegExp(
   `accompagn[eé]|accompagn[eé]es?|r[eé]sultat|coup[eé] le temps|chez (un|notre|une))${FRONTIERE_APRES}`,
   'iu'
 );
+// Ajoute le 15/09/2026 (audit adversarial) : une tournure PASSIVE ("un projet
+// a ete livre pour une equipe de 12", "la mission a ete menee...") affirme la
+// meme experience professionnelle concrete SANS aucun pronom de 1ere
+// personne -- le sujet grammatical est l'objet livre, pas "je"/"on"/"nous".
+// Detecte independamment de REGEX_PREMIERE_PERSONNE : "a"/"ont" (auxiliaire
+// avoir, 3e personne) immediatement suivi (eventuellement via "ete") d'un des
+// participes passes du vocabulaire d'experience.
+const REGEX_VOIX_PASSIVE_EXPERIENCE = new RegExp(
+  `${FRONTIERE_AVANT}(a|ont)${FRONTIERE_APRES}\\s+(?:[eé]t[eé]\\s+)?` +
+  `(livr[eé]e?s?|d[eé]ploy[eé]e?s?|mis(?:e)? en place|impl[eé]ment[eé]e?s?|accompagn[eé]e?s?|men[eé]e?s?)`,
+  'iu'
+);
 
 /**
  * Verifie phrase par phrase, pas sur le texte entier : "on voit ca souvent.
  * Vous le refaites a chaque mission ?" contient bien "on" et "mission", mais
  * dans deux phrases distinctes, sur des sujets differents -- pas la meme
- * affirmation. Ne declenche que si le MEME pronom et le MEME vocabulaire
- * d'experience tombent dans la meme phrase.
+ * affirmation. Declenche si (le MEME pronom de 1ere personne ET le MEME
+ * vocabulaire d'experience) OU une construction passive d'experience
+ * tombent dans la meme phrase -- les deux chemins couvrent respectivement
+ * une affirmation active ("j'ai livre...") et une affirmation passive ("a
+ * ete livre...") de la meme experience non sourcee.
  */
 function detecterAffirmationExperienceNonSourcee(texte) {
   const phrases = texte.split(/(?<=[.!?])\s+/);
   return phrases.some(
-    (phrase) => REGEX_PREMIERE_PERSONNE.test(phrase) && REGEX_VOCABULAIRE_EXPERIENCE.test(phrase)
+    (phrase) =>
+      (REGEX_PREMIERE_PERSONNE.test(phrase) && REGEX_VOCABULAIRE_EXPERIENCE.test(phrase)) ||
+      REGEX_VOIX_PASSIVE_EXPERIENCE.test(phrase)
   );
 }
 

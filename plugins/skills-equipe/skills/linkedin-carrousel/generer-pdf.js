@@ -200,7 +200,16 @@ async function main() {
     process.exitCode = 1;
     return;
   }
-  const diapos = JSON.parse(fs.readFileSync(cheminDiapos, 'utf-8'));
+  const brut = fs.readFileSync(cheminDiapos, 'utf-8');
+  let diapos;
+  try {
+    diapos = JSON.parse(brut);
+  } catch (erreur) {
+    // Audit adversarial du 15/09/2026 : un fichier de diapos corrompu
+    // plantait avec un SyntaxError brut (position/ligne JSON), sans dire
+    // quel fichier ni quoi faire.
+    throw new Error(`Fichier de diapos illisible : "${cheminDiapos}" ne contient pas du JSON valide (${erreur.message}).`);
+  }
   const resultat = await genererPdf({ compte, diapos, sortie });
   console.log(`PDF genere : ${resultat.cheminSortie} (${resultat.nombreDiapos} diapos)`);
 }
