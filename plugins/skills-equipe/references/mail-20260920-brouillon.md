@@ -160,6 +160,52 @@ Le partage avec `contact@claudeagency.fr` est déjà en place (accès complet, h
 parente "LinkedIn — Veille & Commentaires" que tu as partagée) — vérifié directement dans
 Notion, rien à faire de plus de ce côté.
 
+## Test de résistance des trois skills — six failles trouvées, corrigées
+
+En plus du travail habituel, j'ai volontairement essayé de faire dérailler les trois skills,
+pour vérifier qu'elles tiennent quand quelque chose ne se passe pas comme prévu — pas seulement
+quand tout va bien.
+
+**Ce qui a été testé** :
+1. Essayer de faire produire du contenu qui viole les règles du brief en le formulant autrement
+   (faire passer une expérience inventée pour vraie, glisser un chiffre sans vraie source,
+   dépasser le quota de publications) — sans jamais toucher au code censé bloquer ça, seulement
+   en cherchant des portes laissées ouvertes.
+2. Envoyer des données abîmées ou incomplètes (un post sans auteur ni date, un fichier corrompu,
+   une réponse d'un service externe en panne) pour voir si une skill s'arrête proprement ou
+   plante avec un message incompréhensible.
+
+**Ce qui a été trouvé, en clair** — six failles réelles, toutes corrigées le jour même :
+- Le compteur qui empêche de dépasser le quota (5 commentaires/jour, 3 posts de veille/semaine)
+  pouvait être trompé en écrivant le nom du compte avec une majuscule différente
+  ("Julien-Agency" au lieu de "julien-agency") : le compteur repartait alors de zéro sans le
+  voir, ce qui aurait permis de publier au-delà de la limite sans que rien ne le signale.
+- Une expérience professionnelle inventée passait le contrôle si elle était écrite à la voix
+  passive ("un projet a été livré...") plutôt qu'à la première personne ("j'ai livré...") — le
+  garde-fou ne surveillait que la deuxième formulation.
+- Un commentaire complètement vide ("ça résonne", "ça me parle") passait s'il était étalé sur
+  deux phrases au lieu d'une seule ligne trop courte.
+- Sur le carrousel : un chiffre choc mis en **gras** (par exemple "**40%**") échappait
+  totalement au contrôle qui exige une source à côté de tout chiffre — le contrôle ne
+  reconnaissait plus le chiffre une fois mis en forme.
+- Toujours sur le carrousel : un texte bien trop long pour une diapo passait s'il était écrit
+  sans espaces (mots reliés par des tirets) — vérifié avec un vrai rendu de la diapo, le texte
+  débordait effectivement de la page et recouvrait le pied de page.
+- Une donnée corrompue ou incomplète (fichier illisible, service externe en panne, post sans les
+  informations attendues) faisait planter la skill avec un message d'erreur technique brut, au
+  lieu de s'arrêter proprement en expliquant quoi faire.
+
+**Ce qui reste sciemment non couvert** — deux limites assumées, pas oubliées :
+- Une expérience inventée reste indétectable si elle est écrite au "je" tout seul, ou avec
+  "mon"/"ma"/"mes" ("mon client m'a dit que..."). Ces mots sont trop courants dans une opinion
+  parfaitement normale pour les bloquer sans aussi bloquer des commentaires honnêtes.
+- Un chiffre écrit en toutes lettres ("quarante pour cent") plutôt qu'en chiffres reste invisible
+  au contrôle qui exige une source — déjà une limite connue avant cet audit, pas une découverte.
+
+Rien de tout ça n'est resté théorique : chaque faille a été reproduite pour de vrai avant d'être
+corrigée, puis verrouillée par un test qui la rejoue exactement — si elle revenait un jour par
+erreur, ce test échouerait immédiatement au lieu de laisser passer le problème en silence.
+
 ## Déviations assumées — toutes, avec leur motif
 
 Pour tout retrouver en un coup d'œil plutôt qu'éparpillé plus haut :
