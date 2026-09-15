@@ -359,14 +359,28 @@ deuxieme graphique impossible, un **bloc tableau natif Notion** ecrit directemen
 PURE, agrege par semaine ISO, testee sans reseau : `test/notion-comparaison-hebdomadaire.test.js`,
 6 tests verts, y compris tableau vide et valeurs absentes traitees comme 0 jamais `NaN`) puis
 `ecrireBlocComparaisonHebdomadaire` (bloc `table`/`table_row`, API `/blocks/{id}/children`).
-**Concue selon la documentation publique de l'API Notion, pas encore executee contre l'API
-reelle** au moment ou ce code est ecrit -- `NOTION_TOKEN` absent de cette session (voir CLAUDE.md
-racine : verifier par sortie reelle, jamais sur la foi d'une conception qui "devrait" marcher).
-A executer reellement au premier passage avec le jeton disponible, et corriger ici si l'API
-reagit differemment de la doc consultee -- meme discipline que le reste de ce depot. La vue
-graphique (`creerVueComparaisonHebdomadaire`) reste en place en complement, pas remplacee : elle
-donne une tendance visuelle sur les commentaires seuls, le bloc tableau donne la comparaison
-chiffree exacte des 3 mesures.
+
+**EXECUTE REELLEMENT le 15/09/2026, contre les 5 vraies lignes de la base "Commentaires"** :
+bloc `table` cree (id `3dce7fe5-dbf8-81a5-805b-f7c6eaa401d7`), contenu relu et verifie via
+l'API (`GET /blocks/{id}/children`) :
+```
+Semaine | Commentaires | Vues de profil | Demandes de contact
+2026-S38 (a partir du 2026-09-14) | 5 | 0 | 0
+```
+(0/0 attendu -- les 5 lignes n'ont pas encore leurs stats a 3 jours, regle 3, prevues le
+18/09/2026 ; `calculerComparaisonHebdomadaire` traite bien l'absence comme 0, pas `NaN`, verifie
+sur donnees reelles pas seulement sur fixture). **Bug reel trouve et corrige a cette occasion** :
+la conception initiale supposait que `pageId` pouvait etre l'ID de la base elle-meme -- **faux**,
+confirme par un vrai `400 validation_error` ("Block does not support children") ; `pageId` doit
+etre la page PARENTE de la base (ici "LinkedIn — Veille & Commentaires",
+`3dbe7fe5-dbf8-80af-b390-c2e62ff8ac46`, lue via `GET /v1/databases/{id}`, champ
+`parent.page_id`). Corrige dans `lib/notion.js`. `dataSourceId` de "Commentaires" pour reference
+future : `7a80342b-3ce9-416b-91c1-80deb64efb39` (identifiant, pas un secret).
+
+La vue graphique (`creerVueComparaisonHebdomadaire`) reste en place en complement, pas
+remplacee : elle donne une tendance visuelle sur les commentaires seuls, le bloc tableau donne
+la comparaison chiffree exacte des 3 mesures. **A relancer** (pas une vue qui se met a jour
+seule) une fois les stats a 3 jours renseignees le 18/09, pour un instantane a jour.
 
 **Remplie avec les 5 vrais commentaires publies le 15/09** via une nouvelle fonction
 `ajouterLigneCommentaire` (`lib/notion.js`) -- verifie en relisant les 5 lignes via l'API, pas

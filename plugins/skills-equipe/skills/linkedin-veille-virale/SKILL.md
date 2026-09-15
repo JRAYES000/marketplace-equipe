@@ -289,3 +289,31 @@ programmation Buffer a fonctionne sans le verifier).
 Etat des lieux complet des 3 skills linkedin-* et de tout ce qui devient
 activable des que chaque blocage se leve :
 `references/etat-linkedin-20260912.md` du paquet.
+
+## Commande "bilan" -- executee reellement contre l'API, plus seulement testee sur fixture (15/09/2026)
+
+`bilan.js` (CLI manquant, ajoute le 15/09/2026 -- reliait deja `recupererEntreesRecentes` et
+`calculerBilan`, jamais rejoues ensemble contre l'API reelle) execute reellement sur les 3
+entrees reelles de la base "Veille & posts" (`dataSourceId` obtenu par lecture directe de l'API
+Notion, `GET /v1/databases/{id}`, jamais suppose) :
+
+```
+$ node bilan.js julien-agency --dataSourceId 6a62dda7-58aa-41fd-9416-eccfaef04d4b
+Bilan julien-agency -- 30 derniers jours
+2 entree(s) sur la periode.
+Echantillon trop petit (2 < 10) pour degager une tendance fiable -- chiffres bruts ci-dessous,
+a titre indicatif seulement, pas une conclusion ("le format X marche mieux") que si peu de
+donnees ne permet pas d'affirmer.
+[...]
+
+$ node bilan.js page-claude --dataSourceId 6a62dda7-58aa-41fd-9416-eccfaef04d4b
+Bilan page-claude -- 30 derniers jours
+0 entree(s) sur la periode.
+Aucune entree sur cette periode pour ce compte.
+```
+
+**Regles 4 et 5 du brief verifiees reellement, pas seulement en test unitaire** : ni plantage ni
+conclusion trompeuse sur 1-2 lignes (julien-agency : 2 entrees, julien-partners : 1 -- message
+explicite d'echantillon trop petit avant les chiffres bruts) ; cas zero entree gere proprement
+(page-claude). `NOTION_TOKEN` reste a re-exporter a chaque session (jamais persiste) ; le
+`dataSourceId` ci-dessus peut etre reutilise tel quel (c'est un identifiant, pas un secret).
