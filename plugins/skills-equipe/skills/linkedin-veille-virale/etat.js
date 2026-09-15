@@ -9,18 +9,21 @@
  * Usage CLI :
  *   node etat.js [compte]
  *
- * Limite assumee, pour ne rien inventer : contrairement a linkedin-commentaires,
- * cette skill ne tient aucun registre de publication reelle (pas de
- * lib/registre.js equivalent) -- publierPost() n'a jamais ete appele en
- * conditions reelles a ce jour. Ce script lit donc l'etat le plus recent
- * disponible sur disque : le dernier passage de veille reel connu
- * (data/veille-resultats-reels-*.json, gitignore -- absent sur une machine
- * qui n'a jamais lance de vrai passage) et les posts adaptes prepares dans
- * a-publier/, pas un historique de publication.
+ * Depuis l'audit du 15/09/2026 (asymmetrie avec linkedin-commentaires,
+ * corrigee le meme jour) : cette skill tient desormais un registre reel des
+ * posts publies/programmes (lib/registre.js, data/registre-veille.json,
+ * gitignore) -- le quota hebdomadaire ci-dessous vient de ce registre, pas
+ * d'une regle simplement documentee. Ce registre ne se remplit que si
+ * `enregistrerPostPublie` est reellement appele apres une programmation
+ * confirmee (voir SKILL.md, section "Publication") -- une programmation
+ * jamais enregistree ici reste invisible pour ce point de situation, meme
+ * si elle est reellement en ligne.
  */
 
 const fs = require('fs');
 const path = require('path');
+const { chargerRegistre, entreesDeLaSemaine, debutSemaineISO } = require('./lib/registre');
+const { dateJourISO, QUOTA_MAX_PAR_SEMAINE } = require('./lib/planifier-veille');
 const reglages = require('./reglages-comptes.json');
 
 function dernierFichierResultatsReels() {
@@ -76,9 +79,13 @@ function etatPourCompte(compte, config) {
       : `Aucun post adapte pret dans a-publier/ pour ${compte} a ce jour.`
   );
 
+  const registre = chargerRegistre();
+  const aujourdhui = dateJourISO(new Date());
+  const entreesSemaine = entreesDeLaSemaine(registre, compte, aujourdhui);
   lignes.push(
-    'Publication reelle sur LinkedIn : aucun registre tenu par cette skill -- verifier aupres de ' +
-    'Julien (voir references/etat-linkedin-20260912.md, tenu a la main).'
+    `Quota hebdomadaire (semaine du ${debutSemaineISO(aujourdhui)}) : ` +
+    `${entreesSemaine.length}/${QUOTA_MAX_PAR_SEMAINE} posts deja publies/programmes pour ${compte}, ` +
+    `${Math.max(0, QUOTA_MAX_PAR_SEMAINE - entreesSemaine.length)} restant(s) -- data/registre-veille.json.`
   );
 
   if (nbSurveilles === 0 && prets.length === 0) {

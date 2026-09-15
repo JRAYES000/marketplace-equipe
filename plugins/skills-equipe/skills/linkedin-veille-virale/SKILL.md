@@ -34,9 +34,14 @@ julien-agency ».
    `commentary`). En usage courant, la publication reelle passe par **Buffer** (compte
    `contact@claudeagency.fr`, connecte aux deux profils LinkedIn) plutot que par cet appel
    direct -- voir "Publication" plus bas.
-5. `dry-run.js` execute les etapes 1-3 sans jamais appeler `publierPost`. Bascule sur le jeu
-   fixture des que `APIFY_TOKEN` est absent (a lui seul, meme si `comptes_a_surveiller` est
-   rempli) et/ou que `comptes_a_surveiller` est vide.
+5. `lib/planifier-veille.js` (`validerQuotaHebdomadaire`) **refuse** explicitement de proposer un
+   post si publier/programmer ce jour-la violerait le quota (3/semaine et par compte) ou la regle
+   "jamais deux le meme jour" -- verifie contre `data/registre-veille.json`
+   (`lib/registre.js`), pas une simple limite documentee. Voir "Garde-fou -- quota hebdomadaire"
+   plus bas.
+6. `dry-run.js` execute les etapes 1-3 et le controle de quota sans jamais appeler `publierPost`.
+   Bascule sur le jeu fixture des que `APIFY_TOKEN` est absent (a lui seul, meme si
+   `comptes_a_surveiller` est rempli) et/ou que `comptes_a_surveiller` est vide.
 
 ## Point de situation
 
@@ -67,12 +72,52 @@ fermee de mots toujours accentues en francais standard. `dry-run.js` l'appelle s
 `contenuFinal` -- en cas d'echec, `contenuFinal` et `argumentsPublierPost` deviennent `null`
 (`erreurOrthographe` porte le detail) plutot que de laisser passer un texte fautif.
 
+## Garde-fou -- quota hebdomadaire (registre reel, pas une regle documentee)
+
+Corrige le 15/09/2026 (audit du meme jour : la regle "trois par semaine maximum, jamais deux le
+meme jour" etait documentee ici et dans `a-publier/README.md`, mais rien dans le code ne la
+faisait respecter -- asymetrie avec `linkedin-commentaires`, qui tient un vrai registre depuis le
+14/09). Meme modele desormais :
+
+- `lib/registre.js` (`enregistrerPostPublie`) persiste chaque programmation reelle dans
+  `data/registre-veille.json` (gitignore, propre a chaque machine) -- `{ "<compte>": [ { "date",
+  "postId", "auteurOriginal" }, ... ] }`. **A appeler seulement APRES une programmation reelle
+  confirmee** (jamais au moment de la redaction) : une fois un post reellement programme dans
+  Buffer (ou publie via `publierPost`), appeler
+  ```js
+  const { enregistrerPostPublie } = require('./lib/registre');
+  enregistrerPostPublie('julien-agency', { date: '2026-09-16', postId: 'jason-feifer-2026-09-16', auteurOriginal: 'Jason Feifer' });
+  ```
+- `lib/planifier-veille.js` (`validerQuotaHebdomadaire`) leve une erreur explicite si le post
+  viole le quota (3/semaine par compte, calcule lundi-dimanche via `debutSemaineISO`) ou la regle
+  "jamais deux le meme jour". `dry-run.js` l'appelle avant de retenir un candidat -- si le quota
+  est deja atteint ou que le jour est deja pris, `contenuFinal` devient `null` et `erreurQuota`
+  porte le detail, exactement comme `erreurOrthographe` pour les accents.
+- **Ne baisse jamais le seuil de score pour remplir ce quota** : `seuilScore` vient uniquement de
+  `reglage-score.json` (voir `lib/veille.js`, `trierPosts`/`calculerScore`), jamais ajuste en
+  fonction du nombre de candidats deja retenus ou du quota restant. Si un seul post franchit le
+  seuil pour une semaine donnee, la reponse honnete est **une seule proposition cette semaine** --
+  pas un candidat plus faible pousse pour "completer" a trois. Rien ne code une baisse
+  automatique du seuil ; ce comportement est une consequence directe de `seuilScore` fixe, pas
+  une logique separee a auditer ailleurs.
+- `etat.js` affiche desormais le quota reellement utilise cette semaine
+  (`entreesDeLaSemaine`/`debutSemaineISO`) au lieu de dire, comme avant le 15/09, qu'aucun
+  registre n'est tenu.
+- `node --test test/planifier-veille.test.js` et les tests ajoutes a `test/dry-run.test.js`
+  prouvent le refus (registre a 3 entrees la meme semaine -> 4e candidat refuse ; entree le meme
+  jour -> refuse), pas seulement le cas qui passe.
+
 ## Publication
 
 **Voie reelle en usage courant : Buffer**, compte `contact@claudeagency.fr`, connecte aux deux
 profils LinkedIn -- programmer un post recycle, un par jour distinct, **jamais deux le meme
-jour, trois maximum par semaine**. Une fois un post reellement en ligne (a confirmer
-explicitement, jamais suppose), mettre a jour son entree Notion (`Etat`: "Publie", lien reel).
+jour, trois maximum par semaine** (desormais verifie contre `data/registre-veille.json` avant de
+proposer un candidat, voir ci-dessus -- **mais la programmation elle-meme dans Buffer reste un
+geste manuel, hors de ce code** : le registre ne se remplit que si la session qui programme
+appelle explicitement `enregistrerPostPublie` juste apres, ce garde-fou ne protege donc que les
+lancements ulterieurs de cette skill, pas Buffer directement). Une fois un post reellement en
+ligne (a confirmer explicitement, jamais suppose), mettre a jour son entree Notion (`Etat`:
+"Publie", lien reel).
 
 **Voie directe** (`publierPost`, via Composio/MCP) : `authorUrn` confirme pour julien-agency
 (`urn:li:person:aFqu-W7ClW`) ; julien-partners non confirme cote Composio -- voir
@@ -107,6 +152,10 @@ node mettre-a-jour-stats.js --titre "Le vrai cout d'un recrutement -- adapte de 
    actionnable ; `etat.js` gere le cas "aucun compte surveille, aucun post pret".
 5. **Jamais les mains vides** : `etat.js` propose un repli concret des que rien n'est
    disponible.
+6. **Quota "3/semaine, jamais deux le meme jour" reellement code** (corrige le 15/09/2026, voir
+   "Garde-fou -- quota hebdomadaire" plus haut) : `validerQuotaHebdomadaire` refuse
+   explicitement, contre un registre persistant (`data/registre-veille.json`), pas juste
+   documente dans ce fichier.
 
 ## Historique et incidents
 

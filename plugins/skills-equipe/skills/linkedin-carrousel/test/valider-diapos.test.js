@@ -5,9 +5,24 @@ const assert = require('node:assert/strict');
 const { validerDiapos } = require('../lib/valider-diapos');
 
 const diapos10Conformes = require('../fixtures/diapos-10-conformes.json');
+const diaposTestJulienPartners = require('../fixtures/diapos-test-julien-partners-ia-pme.json');
 
 test('accepte un carrousel de 10 diapos conformes', () => {
   assert.doesNotThrow(() => validerDiapos(diapos10Conformes));
+});
+
+/**
+ * Carrousel de test reel pour julien-partners (audit du 15/09/2026) : ce
+ * compte n'avait jamais eu de carrousel a contenu reel genere via le
+ * pipeline complet, seulement julien-agency (voir sortants/julien-agency/).
+ * Verrouille ici que ce carrousel precis reste conforme (structure, mots,
+ * accents) -- le rendu visuel (tailles/contraste/numero/fleche mesures) est
+ * deja couvert pour "julien-partners" par test/tailles-police.test.js,
+ * test/contraste.test.js et test/numero-fleche.test.js.
+ */
+test('accepte le carrousel de test reel julien-partners (IA pour les PME, sujet libre)', () => {
+  assert.equal(diaposTestJulienPartners.length, 10);
+  assert.doesNotThrow(() => validerDiapos(diaposTestJulienPartners));
 });
 
 test('refuse un carrousel de 5 diapos (sous le minimum de 8)', () => {

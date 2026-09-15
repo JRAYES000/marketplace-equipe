@@ -10,8 +10,10 @@ const {
   genererImageCouverture,
   lireDimensionsPng,
 } = require('../generer-images');
+const { genererPdf } = require('../generer-pdf');
 
 const diapos = require('../fixtures/diapos-exemple.json');
+const diaposTestJulienPartners = require('../fixtures/diapos-test-julien-partners-ia-pme.json');
 
 function dossierTemporaire() {
   return fs.mkdtempSync(path.join(os.tmpdir(), 'linkedin-carrousel-test-'));
@@ -78,6 +80,32 @@ test('le rendu local fonctionne aussi pour julien-agency', async () => {
     assert.equal(largeur, 1080);
     assert.equal(hauteur, 1350);
     assert.ok(tailleOctets > 5000, `fichier suspicieusement petit (${tailleOctets} octets)`);
+  } finally {
+    fs.rmSync(dossierSortie, { recursive: true, force: true });
+  }
+});
+
+/**
+ * Audit du 15/09/2026 : aucun carrousel a contenu reel n'avait jamais ete
+ * genere pour julien-partners via le pipeline complet (`genererPdf`, pas
+ * seulement le rendu image isole) -- seul julien-agency avait des sorties
+ * reelles dans sortants/. Ce test genere reellement le PDF (Playwright,
+ * meme chemin de code qu'une generation en conditions reelles) a partir du
+ * fixture dedie, dans un dossier temporaire (jamais dans sortants/, jamais
+ * publie).
+ */
+test('genererPdf produit un PDF reel et non vide pour le carrousel de test julien-partners', async () => {
+  const dossierSortie = dossierTemporaire();
+  const cheminSortie = path.join(dossierSortie, 'test-julien-partners.pdf');
+  try {
+    const resultat = await genererPdf({ compte: 'julien-partners', diapos: diaposTestJulienPartners, sortie: cheminSortie });
+    assert.equal(resultat.nombreDiapos, 10);
+    assert.ok(fs.existsSync(cheminSortie));
+    const tailleOctets = fs.statSync(cheminSortie).size;
+    // Un PDF de 10 pages avec polices embarquees ne descend pas sous
+    // quelques dizaines de Ko -- un fichier plus petit signalerait un rendu
+    // casse (pages vides, polices non chargees).
+    assert.ok(tailleOctets > 20000, `PDF suspicieusement petit (${tailleOctets} octets)`);
   } finally {
     fs.rmSync(dossierSortie, { recursive: true, force: true });
   }
