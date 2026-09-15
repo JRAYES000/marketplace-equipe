@@ -212,12 +212,23 @@ Commentaire refuse : genre "information_chiffree" declare mais aucun chiffre tro
 
 1. **Phrase de lancement** : faite, voir en tete de ce fichier et dans le README du paquet.
 2. **Point de situation en 3 lignes** : fait, `node etat.js [compte]`.
-3. **Lecture des chiffres depuis une capture d'ecran, jamais de saisie manuelle** : **a du sens
-   ici** (contrairement a `linkedin-carrousel`), vu les colonnes de suivi a 3 jours prevues sur
-   la page Notion (J'aime, reponses, vues de profil, demandes de contact -- section 6 du brief).
-   **Non implemente a ce stade** : aucune page Notion n'existe encore (connecteur absent de
-   cette session, voir plus bas), donc rien a lire par capture d'ecran pour l'instant -- a faire
-   des que la page existe.
+3. **Lecture des chiffres depuis une capture d'ecran, jamais de saisie manuelle** :
+   **implementee le 15/09/2026**, maintenant que la page Notion existe reellement et attend des
+   chiffres a 3 jours. Aucun OCR dans ce paquet : c'est la **session Claude** qui lit les
+   chiffres visibles sur la capture d'ecran collee dans la conversation (capacite multimodale
+   native), exactement comme elle redige les commentaires -- un jugement assiste, pas une
+   automatisation aveugle. Une fois les chiffres lus, `lib/notion.js`
+   (`mettreAJourStatistiques`) retrouve la ligne par personne visee (+ date si ambigu) et ecrit
+   ce qui a ete lu :
+   ```
+   node mettre-a-jour-stats.js --auteur "Jean ZENDJI" --date 2026-09-15 \
+     --jaime 4 --reponses 1 --reponseAuteur true --vuesProfil 12 --demandesContact 0
+   ```
+   `retrouverLigneCommentaire` refuse explicitement si plusieurs lignes correspondent (jamais
+   d'ecriture sur la mauvaise ligne par ambiguite) -- teste sans reseau dans
+   `test/notion-statistiques.test.js`. **Non teste contre une vraie capture d'ecran a ce jour**
+   (aucune n'a encore ete fournie) : le mecanisme d'ecriture est reel et verifie, la lecture par
+   Claude reste a confirmer sur un premier cas concret.
 4. **Rien ne plante a vide** : `validerCommentaire`/`validerQuotaJournalier` refusent avec un
    message explicite (jamais une exception brute) ; `etat.js` et `dry-run.js` gerent le cas
    "rien de disponible" avec un message qui dit quoi faire (voir regle 5).
