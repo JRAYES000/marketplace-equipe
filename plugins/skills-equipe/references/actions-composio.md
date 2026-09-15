@@ -469,4 +469,25 @@ appel API ne remplace cette etape.
 depot : **seule `linkedin-carrousel` existe reellement** ici, les deux autres n'ont
 aucun dossier/code. Meme une fois les comptes connectes, produire "un exemple reel de
 publication par skill" pour deux skills qui n'existent pas encore n'est pas possible
+
+### 15/09/2026 (soir) -- Buffer evalue comme alternative a Composio : ne remplace pas nos besoins
+
+Julien a propose Buffer comme piste pour fiabiliser la publication (contourner l'ambiguite des
+signaux Composio documentee plus haut). Recherche faite (pages officielles Buffer + centre
+d'aide, pas une impression) avant de s'engager dessus :
+
+- **PDF/carrousel LinkedIn : supporte.** "On the web version of Buffer, we support one LinkedIn
+  PDF document (carousel) per post, with a maximum size of 100MB and 300 pages" -- exige un
+  titre de document, sinon le post ne se programme pas. Couvrirait donc `linkedin-carrousel`.
+- **Commenter un post existant (le nôtre) : NON supporte.** La fonctionnalite "Community" de
+  Buffer ne permet que de **repondre aux commentaires recus sur ses propres posts deja publies**
+  -- rien dans la documentation officielle ne permet de publier un commentaire sous le post de
+  quelqu'un d'autre, ce qui est exactement le besoin de `linkedin-commentaires` (commenter sous
+  des comptes cibles, pas sous nos propres posts).
+
+**Conclusion, a dire a Julien avant d'y passer du temps** : Buffer remplacerait Composio pour
+`linkedin-carrousel` (publication de documents) mais **pas** pour `linkedin-commentaires` --
+aucun moyen documente d'y automatiser un commentaire sous le post d'un tiers. A moins de
+scinder l'outillage par skill (Buffer pour le carrousel, Composio/MCP pour les commentaires),
+Buffer seul ne couvre pas les trois skills.
 sans d'abord les construire.
