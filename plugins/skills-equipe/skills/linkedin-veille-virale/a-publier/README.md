@@ -76,6 +76,30 @@ post effectivement paru (verification a demander explicitement le jour dit, jama
 qu'une programmation a fonctionne sans la verifier -- meme discipline que le reste de ce
 chantier).
 
+## Controle post-19h00 -- Codie Sanchez PAS en ligne, aucune republication (15/09/2026, ~19h15)
+
+Verification demandee une fois l'heure programmee (19h00) depassee. **Resultat : le post n'est
+pas en ligne**, sur deux sources concordantes :
+
+1. **Profil LinkedIn `linkedin.com/in/julien-rayes` (Claude in Chrome)** : les 5 posts les plus
+   recents visibles ne contiennent pas le texte de Codie Sanchez. Le plus recent (5h) est un post
+   personnel de Julien sans rapport avec la veille ; suivent le carrousel republie (1j, 1j), une
+   offre d'emploi (5j) et un post sur le referencement IA (6j).
+2. **Buffer, compte julien-agency** : le post reste dans l'onglet **Queue** (pas dans **Sent**,
+   qui s'arrete a hier 14/09 20h53 -- le carrousel). La carte affiche toujours l'heure programmee
+   "7:00 PM" et le bouton **"Publish Now"**, ce qui n'apparaitrait pas sur un post deja parti.
+   Aucun badge d'erreur, aucune bannière de reconnexion de compte -- verifie dans les reglages du
+   canal (Posting Schedule et General), rien d'anormal cote authentification. Fuseau confirme
+   Europe/Paris.
+
+**Conclusion honnete, pas une supposition** : le post est reste bloque en file d'attente passe
+son heure programmee, sans message d'erreur visible -- ni panne d'authentification confirmee, ni
+explication trouvee. **Aucune republication tentee** (ni bouton "Publish Now" cliqué, ni nouveau
+post cree) -- geste public, jamais sans feu vert explicite de Julien. Notion et le registre de
+quota (`data/registre-veille.json`, `enregistrerPostPublie`) **restent inchanges** : aucune
+publication reelle a enregistrer tant que rien n'est confirme en ligne. A reverifier plus tard
+dans la soiree, ou a signaler a Julien si le blocage persiste.
+
 ## L'ancien exemple du 12/09/2026 -- toujours a part
 
 `julien-agency-2026-09-12.commentary.txt` : premier exemple technique du pipeline, redige avant
