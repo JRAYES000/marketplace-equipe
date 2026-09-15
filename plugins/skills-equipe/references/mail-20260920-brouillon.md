@@ -2,9 +2,10 @@
 
 Rédigé le 15/09/2026, 5 jours avant l'échéance. Ce fichier n'est pas le mail lui-même — c'est le
 texte prêt à copier-coller dans le client mail, avec les emplacements explicitement marqués
-`[A COMPLETER]` pour ce qui dépend encore d'un geste de Julien (suppression des anciens
-carrousels, décision sur Claude Partners) ou d'un GO de publication. Tout le reste ci-dessous
-est déjà rédigé, pas un placeholder.
+`[A COMPLETER]` seulement sur ce qui ne dépend ni de moi ni de Buffer d'ici le 20 : la
+suppression des deux anciens carrousels (geste de Julien) et les liens réels des trois posts de
+veille (pas encore publiés — programmés ce soir, demain et après-demain). Tout le reste
+ci-dessous est déjà rédigé, pas un placeholder.
 
 Format volontairement "mail", pas "rapport" : liens cliquables, pas de renvoi au dépôt pour
 comprendre une phrase, pas de pièce jointe.
@@ -116,17 +117,16 @@ jamais deux le même jour" :
 `[A COMPLETER]` **Liens réels des trois posts** — chacun sera confirmé et ajouté ici au fur et à
 mesure qu'il passe réellement en ligne (rien de supposé tant que ce n'est pas vérifié).
 
-## Compte Claude Partners — à connecter réellement pour l'utiliser un jour
+## Compte Claude Partners — plus bloquant, grâce à Buffer
 
-Tout ce qui est publié à ce jour (carrousel, cinq commentaires) l'est sur le compte Claude
-Agency, seul compte réellement connecté à notre outil de publication. Le compte Claude Partners
-ne l'est pas, malgré ce qu'on pensait jusqu'ici (voir plus haut, les quatre premiers commentaires
-avaient été écrits pour ce compte avant qu'on s'en aperçoive). Ce n'est plus bloquant pour le
-livrable du 20 — le contenu a été redirigé sur Claude Agency — mais ça le reste pour utiliser
-Claude Partners un jour (commentaires ou veille sur ce compte). Il faut une connexion réelle
-(autorisation LinkedIn complète, un geste ponctuel) plutôt qu'une simple clé — je ne peux pas la
-démarrer moi-même depuis mon environnement de travail actuel. `[A COMPLETER]` qui s'en charge et
-quand, si Claude Partners doit servir plus tard.
+Tout ce qui est publié à ce jour sur LinkedIn (carrousel, cinq commentaires) l'est sur le
+compte Claude Agency. Le compte Claude Partners n'a jamais été réellement connecté à Composio,
+malgré ce qu'on pensait (voir plus haut, les quatre premiers commentaires avaient été écrits
+pour ce compte avant qu'on s'en aperçoive) — mais **ce n'est plus un blocage** : Buffer, lui,
+atteint bien les deux comptes (voir la section Veille), c'est par là que passe le post Justin
+Welsh prévu après-demain sur Claude Partners. Composio pour Claude Partners resterait utile
+pour les commentaires (Buffer ne sait pas commenter le post d'un tiers) si ce compte doit
+commenter un jour — pas urgent pour le 20, à en reparler si le besoin se présente.
 
 ## Notion — débloqué, les deux pages sont réelles et remplies
 
@@ -144,6 +144,32 @@ sont créées et remplies avec des données réelles, pas des lignes vides.
 Le partage avec `contact@claudeagency.fr` est déjà en place (accès complet, hérité de la page
 parente "LinkedIn — Veille & Commentaires" que tu as partagée) — vérifié directement dans
 Notion, rien à faire de plus de ce côté.
+
+## Déviations assumées — toutes, avec leur motif
+
+Pour tout retrouver en un coup d'œil plutôt qu'éparpillé plus haut :
+
+1. **Carrousel, accents manquants (14/09)** : le premier carrousel publié était en ligne sans
+   accents (~1 mot sur 7). Corrigé en republiant proprement plutôt que laissé en l'état — voir
+   plus haut pour le lien du nouveau.
+2. **Commentaires, fraîcheur (15/09)** : le brief demande des posts de moins de 4h. Sur les 5
+   commentaires publiés, **0 respectent cette fenêtre** — le plus récent avait une semaine, faute
+   d'activité plus récente parmi les 8 comptes Claude Agency validés. Le contenu de chaque
+   commentaire reste ancré dans le post réel, seul le délai a été sacrifié.
+3. **Commentaires, genres (15/09)** : sur les 4 genres prévus par le brief, seuls 2 sont
+   utilisés (question réelle x3, désaccord argumenté x2) — "histoire vécue" reste en réserve,
+   faute d'anecdote réelle confirmée, plutôt que d'en inventer une (déjà écarté une fois le
+   14/09 pour cette raison). "Information chiffrée" écarté aussi faute d'un chiffre qui
+   s'imposait naturellement sur ce lot précis de posts.
+4. **Commentaires, identité de départ (15/09)** : les 4 premiers commentaires avaient été
+   rédigés pour Claude Partners sur une hypothèse jamais vérifiée que ce compte était connecté
+   — il ne l'était pas. Refaits pour Claude Agency plutôt que d'attendre une connexion externe.
+5. **Veille, règle 3 du brief (15/09)** : la lecture des statistiques par capture d'écran est
+   codée et testée (aucun OCR — c'est moi qui lis les chiffres sur l'image que tu colles), mais
+   **jamais encore exercée sur une vraie capture** faute de posts ayant eu le temps de cumuler
+   des vues. À confirmer sur un premier cas concret, pas avant le 18-19/09 pour le post
+   programmé aujourd'hui.
+6. **Dépense** : estimation, pas un relevé de facturation (détail juste en dessous).
 
 ## Dépense
 
@@ -163,11 +189,10 @@ Trois phrases suffisent, dans Claude Code :
 
 Aucune des trois skills n'a été sacrifiée : les trois ont un livrable réel à ce jour (carrousel
 en ligne, cinq commentaires en ligne, trois posts de veille relus et programmés dans Buffer),
-et les deux pages Notion sont créées, remplies et déjà partagées. Les points encore ouverts ne
-dépendent plus du travail sur les skills elles-mêmes : supprimer toi-même les deux anciennes
-versions du carrousel, décider si le compte Claude Partners doit être connecté pour un usage
-futur au-delà de Buffer, et confirmer les trois posts de veille au fur et à mesure qu'ils
-passent réellement en ligne d'ici le 17/09.
+et les deux pages Notion sont créées, remplies et déjà partagées. Les deux seuls points encore
+ouverts ne dépendent plus du travail sur les skills elles-mêmes : supprimer toi-même les deux
+anciennes versions du carrousel, et confirmer les trois posts de veille au fur et à mesure
+qu'ils passent réellement en ligne d'ici le 17/09.
 
 N'hésite pas à revenir vers moi si tu veux qu'on creuse un point en particulier.
 
