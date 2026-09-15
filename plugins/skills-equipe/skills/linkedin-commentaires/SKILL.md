@@ -231,6 +231,17 @@ Commentaire refuse : genre "information_chiffree" declare mais aucun chiffre tro
    `test/notion-statistiques.test.js`. **Non teste contre une vraie capture d'ecran a ce jour**
    (aucune n'a encore ete fournie) : le mecanisme d'ecriture est reel et verifie, la lecture par
    Claude reste a confirmer sur un premier cas concret.
+
+   **Pret a executer des le 18/09/2026** (3 jours apres la publication des 5 commentaires du
+   15/09, voir `a-publier/README.md` pour l'heure exacte de chacun) -- pas avant, les chiffres
+   n'existent pas encore. Prerequis reunis des ce jour, rien de plus a coder : le script
+   `mettre-a-jour-stats.js` existe et fonctionne (erreurs propres verifiees sans reseau),
+   `NOTION_COMMENTAIRES_DATA_SOURCE_ID` (ou `--dataSourceId`) et `NOTION_TOKEN` seront a
+   re-exporter ce jour-la (jamais persistes entre sessions, voir CLAUDE.md racine). Reste
+   reellement a faire ce jour-la, pas avant : ouvrir chacun des 5 posts sur LinkedIn, capturer
+   les chiffres reels (J'aime, reponses, reponse de l'auteur, vues de profil, demandes de
+   contact), les coller dans la conversation pour lecture, puis lancer le script une fois par
+   personne visee.
 4. **Rien ne plante a vide** : `validerCommentaire`/`validerQuotaJournalier` refusent avec un
    message explicite (jamais une exception brute) ; `etat.js` et `dry-run.js` gerent le cas
    "rien de disponible" avec un message qui dit quoi faire (voir regle 5).
