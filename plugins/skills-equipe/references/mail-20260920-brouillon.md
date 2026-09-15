@@ -136,14 +136,19 @@ réellement par les garde-fous d'écriture après correction — 3/3 validés.
 profils LinkedIn — voir plus bas), un par jour distinct pour respecter la règle "trois maximum,
 jamais deux le même jour" :
 
-- Codie A. Sanchez → julien-agency, **aujourd'hui 15/09** à **19h00** (avancé sur demande depuis
-  21h29 pour un meilleur créneau — changement vérifié à l'écran après coup : "7:00 PM" affiché
-  dans l'éditeur du post en regard du fuseau Europe/Paris, texte et compte inchangés).
+- [Codie A. Sanchez](https://www.linkedin.com/posts/julien-rayes_recrutement-pme-activity-7505672128533286914-zq3h)
+  → julien-agency, **publié aujourd'hui 15/09 à 19h00** (avancé sur demande depuis 21h29 pour un
+  meilleur créneau). **Confirmé réellement en ligne** : texte, gras, emojis et accents vérifiés
+  un par un sur le permalien LinkedIn — rien de supposé. Ligne Notion passée à "Publié" avec ce
+  lien, et le registre de quota de la skill (`enregistrerPostPublie`) mis à jour en conséquence —
+  premier test réel de ce garde-fou depuis sa création.
 - Jason Feifer → julien-agency, **demain 16/09** à 17h00 — inchangé, revérifié à l'écran.
 - Justin Welsh → julien-partners, **après-demain 17/09** à 13h00 — inchangé, revérifié à l'écran.
 
-`[A COMPLETER]` **Liens réels des trois posts** — chacun sera confirmé et ajouté ici au fur et à
-mesure qu'il passe réellement en ligne (rien de supposé tant que ce n'est pas vérifié).
+`[A COMPLETER]` **Liens de Jason Feifer et Justin Welsh** — confirmés et ajoutés ici au fur et à
+mesure qu'ils passent réellement en ligne (rien de supposé tant que ce n'est pas vérifié — et en
+tenant compte du décalage horaire Madagascar/Paris, voir plus haut, avant de conclure qu'un post
+"aurait dû" être en ligne).
 
 ## Compte Claude Partners — plus bloquant, grâce à Buffer
 
