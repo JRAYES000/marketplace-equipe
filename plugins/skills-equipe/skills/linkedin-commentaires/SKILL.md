@@ -337,10 +337,25 @@ corrige a cette occasion** : la vue "chart" echouait (`400`, "Chart views requir
 directive") faute d'objet `configuration` -- corrige dans `lib/notion.js`
 (`creerVueComparaisonHebdomadaire`) avec le schema reel de l'API (`x_axis`/`y_axis`,
 `group_by: 'week'`, `sort`), confirme par trois allers-retours avec l'API reelle jusqu'au
-succes. **Limite assumee, pas contournee** : ce schema n'accepte qu'un seul axe Y par vue --
-la vue creee montre le nombre de commentaires par semaine ; les 2 courbes complementaires
-(vues de profil, demandes de contact) restent a ajouter a la main dans l'interface, aucun
-moyen API de les superposer en un seul appel a ce jour.
+succes. **Limite confirmee, pas contournee** : ce schema n'accepte qu'un seul axe Y par vue --
+la vue creee montre le nombre de commentaires par semaine seule.
+
+**Alternative reellement faisable trouvee le 15/09/2026** (le brief dit que ces 2 courbes sont
+« le coeur de la skill » -- livrer sans aucune comparaison serait passer a cote) : plutot qu'un
+deuxieme graphique impossible, un **bloc tableau natif Notion** ecrit directement sur la page
+(pas une vue de base de donnees, donc aucune des limites d'un chart view ne s'applique) avec les
+3 chiffres cote a cote, une ligne par semaine -- `calculerComparaisonHebdomadaire` (fonction
+PURE, agrege par semaine ISO, testee sans reseau : `test/notion-comparaison-hebdomadaire.test.js`,
+6 tests verts, y compris tableau vide et valeurs absentes traitees comme 0 jamais `NaN`) puis
+`ecrireBlocComparaisonHebdomadaire` (bloc `table`/`table_row`, API `/blocks/{id}/children`).
+**Concue selon la documentation publique de l'API Notion, pas encore executee contre l'API
+reelle** au moment ou ce code est ecrit -- `NOTION_TOKEN` absent de cette session (voir CLAUDE.md
+racine : verifier par sortie reelle, jamais sur la foi d'une conception qui "devrait" marcher).
+A executer reellement au premier passage avec le jeton disponible, et corriger ici si l'API
+reagit differemment de la doc consultee -- meme discipline que le reste de ce depot. La vue
+graphique (`creerVueComparaisonHebdomadaire`) reste en place en complement, pas remplacee : elle
+donne une tendance visuelle sur les commentaires seuls, le bloc tableau donne la comparaison
+chiffree exacte des 3 mesures.
 
 **Remplie avec les 5 vrais commentaires publies le 15/09** via une nouvelle fonction
 `ajouterLigneCommentaire` (`lib/notion.js`) -- verifie en relisant les 5 lignes via l'API, pas
