@@ -5,6 +5,15 @@ exécuter dans l'ordre. Les 5 commentaires ont tous été publiés le 15/09/2026
 `skills/linkedin-commentaires/a-publier/README.md`) — le suivi à 3 jours (règle 3 du brief) tombe
 donc pour les 5 le même jour, 18/09/2026.
 
+**Corrigé le 15/09/2026, avant toute exécution réelle** : la première version de cette procédure
+disait de coller les deux chiffres globaux de profil (vues de profil, demandes de contact) sur
+les **5** commandes `mettre-a-jour-stats.js`. C'était une faille de conception, pas un détail —
+`calculerComparaisonHebdomadaire` additionne ces chiffres par ligne de commentaire : les répéter
+sur 5 lignes aurait donné un total **5 fois trop élevé** dans le tableau de comparaison
+hebdomadaire, la vue que le brief appelle "le cœur de la skill", sans que rien ne le signale.
+Corrigé en séparant les deux natures de mesure : voir `lib/statistiques-profil.js` et la
+section 1 ci-dessous, réécrite en conséquence.
+
 ## 0. Avant de commencer (une fois)
 
 1. Ouvrir une session Claude Code **neuve** (une session déjà ouverte garde la version de skill
@@ -23,7 +32,7 @@ donc pour les 5 le même jour, 18/09/2026.
    cd plugins/skills-equipe/skills/linkedin-commentaires
    ```
 
-## 1. Les deux chiffres globaux (à relever une seule fois, pas par commentaire)
+## 1. Le relevé de profil du jour (UN SEUL relevé, jamais un par commentaire)
 
 **Écran LinkedIn n°1 : "Qui a consulté votre profil"**
 `https://www.linkedin.com/me/profile-views/`
@@ -34,11 +43,23 @@ Relever le nombre total affiché.
 Relever le nombre de nouvelles demandes de connexion/contact reçues.
 
 **Limite assumée, à ne pas dissimuler** : LinkedIn n'attribue ni les vues de profil ni les
-demandes de contact à un commentaire précis — ce sont des compteurs globaux du compte, pas une
-mesure par commentaire. Le même couple de chiffres (vues de profil, demandes de contact) sera
-donc utilisé sur les 5 lignes ci-dessous : un instantané global reporté cinq fois, pas cinq
-mesures indépendantes. Coller ces deux captures d'écran **en premier**, avant celles des 5
-posts, pour que ces chiffres soient lus une fois pour toutes.
+demandes de contact à un commentaire précis — ce sont des compteurs globaux du compte, une mesure
+de **profil**, datée par jour (le brief : "dans mes statistiques LinkedIn, jour par jour"), pas
+une propriété d'un commentaire. Un seul relevé pour aujourd'hui (18/09), enregistré une seule
+fois, **jamais collé sur les 5 lignes de commentaires** — c'est exactement l'erreur de conception
+corrigée le 15/09/2026 (voir en tête de ce fichier).
+
+Coller ces deux captures d'écran **en premier**, avant celles des 5 posts, puis lancer
+immédiatement :
+
+```
+node enregistrer-releve-profil.js --date 2026-09-18 --vuesProfil <vues> --demandesContact <demandes>
+```
+
+Ce script vit dans `data/statistiques-profil.json` (local, pas Notion) et n'a besoin d'aucun
+jeton — il peut être lancé avant même d'exporter `NOTION_TOKEN`. Un second appel pour la même
+date **remplacerait** ce premier relevé plutôt que de s'y ajouter (utile si une capture est
+recollée après correction), donc pas de risque à le relancer si besoin.
 
 ## 2. Les 5 posts — un écran par commentaire, dans cet ordre
 
@@ -63,39 +84,37 @@ personne.
 ## 3. Après chaque capture collée, lancer la commande correspondante
 
 Remplacer `<J'aime>`, `<réponses>` et `<true|false>` (l'auteur a-t-il répondu ?) par ce qui est
-réellement lu sur la capture — les deux chiffres globaux (`--vuesProfil`, `--demandesContact`)
-restent identiques sur les 5 commandes (voir section 1) :
+réellement lu sur la capture. **Ni `--vuesProfil` ni `--demandesContact` ici** — ces deux flags
+sont refusés explicitement par `mettre-a-jour-stats.js` depuis le 15/09/2026 (le relevé de profil
+est déjà réglé à l'étape 1, une seule fois, pas par commentaire) :
 
 ```
 node mettre-a-jour-stats.js --auteur "Jean ZENDJI" --date 2026-09-15 \
-  --jaime <J'aime> --reponses <réponses> --reponseAuteur <true|false> \
-  --vuesProfil <vues> --demandesContact <demandes>
+  --jaime <J'aime> --reponses <réponses> --reponseAuteur <true|false>
 
 node mettre-a-jour-stats.js --auteur "Georges Solutions" --date 2026-09-15 \
-  --jaime <J'aime> --reponses <réponses> --reponseAuteur <true|false> \
-  --vuesProfil <vues> --demandesContact <demandes>
+  --jaime <J'aime> --reponses <réponses> --reponseAuteur <true|false>
 
 node mettre-a-jour-stats.js --auteur "Romain Charissou" --date 2026-09-15 \
-  --jaime <J'aime> --reponses <réponses> --reponseAuteur <true|false> \
-  --vuesProfil <vues> --demandesContact <demandes>
+  --jaime <J'aime> --reponses <réponses> --reponseAuteur <true|false>
 
 node mettre-a-jour-stats.js --auteur "Benjamin Lacroix" --date 2026-09-15 \
-  --jaime <J'aime> --reponses <réponses> --reponseAuteur <true|false> \
-  --vuesProfil <vues> --demandesContact <demandes>
+  --jaime <J'aime> --reponses <réponses> --reponseAuteur <true|false>
 
 node mettre-a-jour-stats.js --auteur "Raphael Mizrahi" --date 2026-09-15 \
-  --jaime <J'aime> --reponses <réponses> --reponseAuteur <true|false> \
-  --vuesProfil <vues> --demandesContact <demandes>
+  --jaime <J'aime> --reponses <réponses> --reponseAuteur <true|false>
 ```
 
 Chaque commande imprime `Statistiques mises a jour pour "<auteur>" : <url>` en cas de succès —
 ouvrir cette URL une fois les 5 lancées pour confirmer visuellement les 5 lignes dans Notion,
 plutôt que de supposer que la commande a fonctionné.
 
-## 4. Une fois les 5 lignes mises à jour
+## 4. Une fois les 5 lignes et le relevé de profil mis à jour
 
-- Mettre à jour le tableau de comparaison hebdomadaire (`creerVueComparaisonHebdomadaire`/
-  `ecrireBlocComparaisonHebdomadaire`, déjà exécuté une fois le 15/09 — voir
-  `references/linkedin-commentaires-historique.md`) si le brief du 20 en a besoin.
+- Mettre à jour le tableau de comparaison hebdomadaire si le brief du 20 en a besoin :
+  `ecrireBlocComparaisonHebdomadaire({ pageId, lignes, relevesProfil })`, où `lignes` sont les
+  commentaires récupérés depuis Notion et `relevesProfil` vient de
+  `listeReleves()` (`lib/statistiques-profil.js`) — jamais les deux chiffres lus depuis les
+  lignes de commentaires elles-mêmes (voir en tête de ce fichier).
 - Rien d'autre à publier avant le 20 sur ce lot — passer directement à la relecture du mail
   (voir `references/mail-20260920-brouillon.md`).
