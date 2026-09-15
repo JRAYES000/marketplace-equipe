@@ -137,6 +137,10 @@ node mettre-a-jour-stats.js --auteur "Jean ZENDJI" --date 2026-09-15 \
 `retrouverLigneCommentaire` refuse explicitement si plusieurs lignes correspondent au meme
 auteur (preciser `--date` leve l'ambiguite).
 
+**Marche a suivre prete pour le 18/09/2026** (3 jours apres les 5 commentaires reels du 15/09) :
+`references/procedure-18-09-suivi-3-jours-commentaires.md` -- ecrans LinkedIn exacts a ouvrir,
+chiffres a relever pour chacun des 5, ordre de collage, commandes pretes a copier-coller.
+
 **Comparaison hebdomadaire** ("le coeur de la skill" selon le brief : commentaires de la semaine
 cote a cote avec vues de profil et demandes de contact) : `creerVueComparaisonHebdomadaire`
 cree un graphique Notion (nombre de commentaires par semaine seul -- l'API Notion n'accepte
