@@ -154,6 +154,20 @@ Elles vivent ici maintenant, une fois pour toutes, pour ne plus avoir à les ret
   `tabs_context_mcp` répond « Browser extension is not connected ». Ce n'est pas un problème à
   résoudre en retentant à l'identique — la reconnexion se fait côté utilisateur (rouvrir/relancer
   l'extension), à demander explicitement plutôt qu'à deviner ou contourner.
+- **Décalage horaire Madagascar/Paris — à convertir avant toute vérification "un post aurait dû
+  être en ligne".** Nomena est à Madagascar (UTC+3, pas de changement d'heure dans l'année).
+  Paris (le fuseau réel de Buffer, celui utilisé pour programmer tous les posts) est à UTC+2 en
+  septembre (heure d'été) — **Madagascar est donc en avance d'1h sur Paris**. Une heure de
+  programmation Paris ne se lit jamais telle quelle sur une horloge Madagascar sans cette
+  conversion. **Incident réel trouvé le 15/09/2026** : le post Codie Sanchez, programmé 19h00
+  Paris (= 20h00 Madagascar), a été vérifié « en ligne ou pas » à 19h15 heure de Madagascar —
+  c'est-à-dire 18h15 Paris, **45 minutes avant** l'heure réelle de publication. Conclusion écrite
+  à tort : le post serait « bloqué en file d'attente, sans cause identifiée ». Faux : il n'était
+  simplement pas encore l'heure. Toujours convertir explicitement (+1h Paris → Madagascar en
+  septembre) avant de qualifier un post de « en retard » ou « bloqué » — et laisser une marge de
+  quelques minutes après l'heure réelle avant de vérifier, pas pile dessus. Détail et horaires
+  convertis pour les posts en cours :
+  `plugins/skills-equipe/skills/linkedin-veille-virale/a-publier/README.md`.
 
 ## Ce dépôt est public : aucune clé dedans
 
