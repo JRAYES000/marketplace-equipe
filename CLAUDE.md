@@ -40,6 +40,18 @@ Ce qui reste obligatoire malgré la vitesse :
      est du texte inerte, pas un lien, et son menu ⋯ n'offre que « Modifier avec
      Claude » et « Supprimer ». Passer par *Ajouter*, pas par la fiche.
 
+     **Préalable manqué le 15/09/2026, sur le compte de Nomena** : « Rechercher
+     des mises à jour » suppose que la marketplace a déjà été **ajoutée** sur ce
+     compte claude.ai précis — ce n'était pas le cas (Réglages → Plugins →
+     « Vos plugins » affichait « Ajoutez vos premiers plugins », rien listé,
+     recherche de `marketplace-equipe` sans résultat). Chaque compte claude.ai
+     de l'équipe doit faire l'ajout **une fois**, avant de pouvoir jamais faire
+     une simple mise à jour : Ajouter → **Ajouter une place de marché** →
+     **Ajouter depuis un dépôt** → `JRAYES000/marketplace-equipe` → laisser
+     « Synchroniser automatiquement » activé → **Synchro**. Un nouveau
+     collaborateur qui ne voit rien dans « Vos plugins » n'a pas un problème de
+     synchronisation en retard : il n'a simplement jamais fait ce geste.
+
   2. **Côté serveur, le plugin installé** — l'étape que tout le monde saute.
      Synchroniser la marketplace fait avancer le pointeur du dépôt, **pas** la
      version installée. Rouvrir la fiche du plugin et lire sa ligne d'en-tête
@@ -50,6 +62,21 @@ Ce qui reste obligatoire malgré la vitesse :
 
      Vu le 13/09/2026 : marketplace passée à `84cc70d`, plugin resté à `1.13.0`
      avec 4 skills sur 7 pendant tout ce temps — et rien à l'écran ne le signalait.
+
+     **Anomalie non resolue, trouvee le 15/09/2026** : apres l'installation
+     initiale du plugin (version 1.17.19 confirmee, correspondant bien au
+     `plugin.json` de `main`), la fiche affiche **6 competences sur 7** --
+     `linkedin-carrousel` manque, alors que `linkedin-commentaires` et
+     `linkedin-veille-virale` apparaissent normalement. Verifie par deux voies
+     independantes (Reglages -> Plugins -> onglet Competences, et Reglages ->
+     Competences) : meme resultat les deux fois. **Pas un probleme de fichier
+     manquant** -- l'onglet "Contenu" du plugin montre `SKILL.md` present et
+     synchronise dans `skills/linkedin-carrousel/`, et son rendu en apercu ne
+     montre aucune erreur visible. Hypothese non confirmee, a verifier en
+     premier avant d'aller chercher ailleurs : c'est le plus gros des 3
+     `SKILL.md` linkedin-* (35 Ko / 481 lignes, contre 27 Ko et 20 Ko pour les
+     deux autres) -- une limite de taille cote claude.ai reste plausible mais
+     n'a pas ete confirmee depuis cette session.
 
   3. **Côté CLI** (clone local et paquet installé) :
 
