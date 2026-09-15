@@ -42,6 +42,32 @@ qu'aucun brouillon ni carrousel n'existe pour un compte -- jamais les mains vide
 `reglages-comptes.json` existe (structure a 3 comptes) mais n'est lu par aucun code de cette
 skill -- le compte/gabarit vient toujours de l'argument CLI.
 
+### Un fichier de style par compte -- verifie reellement le 15/09/2026
+
+Jusqu'a cette date, tous les carrousels a contenu reel produits (dossier `sortants/`) l'avaient
+ete pour **julien-agency** -- le template `julien-partners.html` n'avait jamais servi qu'a des
+rendus de fumee (fixtures generiques dans les tests). Audit du 15/09/2026 : un carrousel de test
+complet (`fixtures/diapos-test-julien-partners-ia-pme.json`, 10 diapos, sujet "IA pour les PME"
+dans le ton facilitateur/reseau du compte) genere via `genererPdf` reel pour julien-partners,
+jamais publie, puis les 10 pages inspectees visuellement (rendu PNG via `generer-images.js`).
+
+**Resultat** : les deux templates sont bien deux fichiers distincts qui rendent des couleurs
+d'accent differentes et propres a chaque marque -- vert `#7D9B76`/`#46603F` (julien-agency) contre
+terracotta `#C6B49A`/`#9C503A` (julien-partners), conformes aux palettes verifiees le 11/09/2026
+dans `reglages-comptes.json`. **Mais l'ecart visuel entre les deux reste concentre sur trois
+elements** (le petit trait en haut de diapo, le nom de marque en pied de page, le numero de
+page) -- fond, encre du titre, typographie et mise en page restent identiques aux deux comptes
+pres. A garder en tete si Julien veut un ecart de marque plus marque qu'un simple accent de
+couleur : c'est une decision editoriale, pas un defaut technique.
+
+Contraintes mesurees, pas supposees, specifiquement sur julien-partners (`node --test`,
+`test/tailles-police.test.js` + `test/contraste.test.js` + `test/numero-fleche.test.js`, deja
+parametres sur les 3 comptes avant cet audit) : titre >=64px, texte de soutien >=40px, contraste
+titre/texte/numero >=3:1 (WCAG AA texte large) mesure via `getComputedStyle` sur un rendu
+Playwright reel, numero present sur chaque diapo, fleche "BALAYEZ" presente uniquement sur la
+diapo 1. Regression verrouillee : `test/valider-diapos.test.js` (structure/mots/accents du
+carrousel de test) et `test/generer-images.test.js` (le PDF reel se genere et n'est pas vide).
+
 ## Variables d'environnement (`.env.example`)
 
 - **`COMPOSIO_API_KEY`** -- repli REST statique, lu par `lib/composio.js` en secours. Ce n'est

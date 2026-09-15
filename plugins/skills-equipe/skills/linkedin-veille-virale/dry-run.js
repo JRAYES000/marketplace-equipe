@@ -22,6 +22,8 @@ const fs = require('fs');
 const path = require('path');
 const { trierPosts, recupererPosts } = require('./lib/veille');
 const { validerAccents } = require('./lib/valider-orthographe');
+const { validerQuotaHebdomadaire, dateJourISO } = require('./lib/planifier-veille');
+const { chargerRegistre, entreesDeLaSemaine } = require('./lib/registre');
 const reglages = require('./reglages-comptes.json');
 const reglageScore = require('./reglage-score.json');
 const { abonnes: abonnesReels } = require('./abonnes-comptes.json');
@@ -52,7 +54,7 @@ async function chargerPosts(config) {
   };
 }
 
-async function executerPourCompte(compte, config) {
+async function executerPourCompte(compte, config, { cheminRegistre } = {}) {
   const { source, posts, abonnesParIdentifiant, maintenant } = await chargerPosts(config);
   const retenus = trierPosts(posts, {
     seuilScore: reglageScore.seuil_score,
@@ -64,15 +66,41 @@ async function executerPourCompte(compte, config) {
   const idsRetenus = new Set(retenus.map((p) => p.id));
   const ecartes = posts.filter((p) => !idsRetenus.has(p.id)).map((p) => p.id);
 
+  const registre = chargerRegistre(cheminRegistre);
+  const aujourdhui = dateJourISO(maintenant);
+  const entreesSemaine = entreesDeLaSemaine(registre, compte, aujourdhui);
+  const quotaRestant = Math.max(0, 3 - entreesSemaine.length);
+
   if (retenus.length === 0) {
-    return { compte, source, nbPostsRecuperes: posts.length, retenus: [], ecartes, choisi: null };
+    return {
+      compte,
+      source,
+      nbPostsRecuperes: posts.length,
+      retenus: [],
+      ecartes,
+      quotaDejaUtiliseCetteSemaine: entreesSemaine.length,
+      choisi: null,
+    };
   }
 
+  // Regle "ne jamais baisser le seuil pour remplir le quota" : trierPosts a
+  // deja applique seuilScore tel quel (reglage-score.json), jamais assoupli
+  // ici en fonction du quota restant -- s'il n'y a qu'un candidat au-dessus
+  // du seuil, une seule proposition est faite, jamais plus pour "completer".
   const choisi = retenus[0];
   const redactionsCompte = redactionsExemple[compte] || {};
   let contenuFinal = redactionsCompte[choisi.id] || null;
   let erreurOrthographe = null;
-  if (contenuFinal) {
+  let erreurQuota = null;
+
+  try {
+    validerQuotaHebdomadaire(entreesSemaine, { date: aujourdhui });
+  } catch (erreur) {
+    erreurQuota = erreur.message;
+    contenuFinal = null;
+  }
+
+  if (contenuFinal && !erreurQuota) {
     try {
       validerAccents(contenuFinal);
     } catch (erreur) {
@@ -87,6 +115,8 @@ async function executerPourCompte(compte, config) {
     nbPostsRecuperes: posts.length,
     nbPostsRetenus: retenus.length,
     ecartes,
+    quotaDejaUtiliseCetteSemaine: entreesSemaine.length,
+    quotaRestant,
     postChoisi: {
       id: choisi.id,
       auteur: choisi.authorName,
@@ -98,6 +128,7 @@ async function executerPourCompte(compte, config) {
     },
     contenuFinal,
     erreurOrthographe,
+    erreurQuota,
     authorUrn: config.author_urn,
     argumentsPublierPost: contenuFinal
       ? { authorUrn: config.author_urn, commentary: contenuFinal }

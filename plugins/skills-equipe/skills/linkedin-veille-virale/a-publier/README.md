@@ -16,10 +16,12 @@ garde-fous d'ecriture que le carrousel (gras Unicode, 3-5 emojis, 1300-1900 cara
 interrogative, 0-2 hashtags, aucun interdit, chiffre source, accents), pas encore natifs a
 `linkedin-veille-virale` mais explicitement demandes pour ce livrable.
 
-**Regle de publication -- trois maximum, jamais deux le meme jour** : aucun des 4 n'est publie a
-ce jour, donc cette regle n'a pas encore ete testee en conditions reelles -- **a respecter au
-moment de publier** : espacer les 3 nouveaux posts sur au moins 3 jours differents si le GO de
-Julien les valide tous.
+**Regle de publication -- trois maximum, jamais deux le meme jour** : verifiee par
+`validerQuotaHebdomadaire` (voir "Methode de publication" plus bas, corrige le 15/09/2026) des
+qu'un post est reellement enregistre dans `data/registre-veille.json` apres programmation --
+espacer les 3 nouveaux posts sur au moins 3 jours differents si le GO de Julien les valide tous,
+et appeler `enregistrerPostPublie` juste apres chaque programmation confirmee pour que le controle
+protege les lancements suivants.
 
 ## Les trois posts adaptes le 15/09/2026
 
@@ -88,4 +90,19 @@ await publierPost({
 });
 ```
 
-Respecter la regle "trois maximum, jamais deux le meme jour" quelle que soit la methode utilisee.
+Respecter la regle "trois maximum, jamais deux le meme jour" quelle que soit la methode utilisee
+-- **desormais verifiee par du code, pas seulement une consigne a suivre** (corrige le
+15/09/2026) : `lib/planifier-veille.js` (`validerQuotaHebdomadaire`) refuse explicitement si un
+registre reel (`data/registre-veille.json`, `lib/registre.js`) montre le quota deja atteint ou le
+jour deja pris. `dry-run.js` applique ce controle avant de retenir un candidat. **Ce registre ne
+se remplit pas tout seul** : une fois un post reellement programme (Buffer) ou publie
+(`publierPost`), enregistrer l'evenement explicitement --
+
+```js
+const { enregistrerPostPublie } = require('../lib/registre');
+enregistrerPostPublie('julien-agency', { date: '2026-09-16', postId: '<identifiant reel>', auteurOriginal: 'Jason Feifer' });
+```
+
+Ne jamais appeler `enregistrerPostPublie` par anticipation -- comme pour
+`linkedin-commentaires/lib/registre.js`, le registre doit refleter des programmations/publications
+reelles confirmees, pas des intentions.

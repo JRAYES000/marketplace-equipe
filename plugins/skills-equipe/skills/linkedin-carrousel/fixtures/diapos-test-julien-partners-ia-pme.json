@@ -1,0 +1,51 @@
+[
+  {
+    "role": "hook",
+    "titre": "Et si l'IA servait d'abord à mieux faire vivre votre réseau ?"
+  },
+  {
+    "role": "contenu",
+    "titre": "Ce que vous repartez avec",
+    "texte": "Trois usages concrets de l'IA pour un réseau plus utile, pas plus gros."
+  },
+  {
+    "role": "contenu",
+    "titre": "1. L'IA trie, elle ne choisit pas",
+    "texte": "Elle repère qui, dans votre réseau, n'a plus eu de nouvelles depuis des mois. À vous de relancer."
+  },
+  {
+    "role": "contenu",
+    "titre": "2. Une synthèse avant chaque rendez-vous",
+    "texte": "Relire en deux minutes l'historique d'un contact avant un café change la conversation qui suit."
+  },
+  {
+    "role": "contenu",
+    "titre": "3. Une intro rédigée, jamais envoyée seule",
+    "texte": "L'IA propose une première version du message qui met en relation deux personnes. La relecture reste humaine."
+  },
+  {
+    "role": "contenu",
+    "titre": "L'adoption va plus vite qu'on ne le pense",
+    "texte": "55% des TPE-PME françaises utilisaient l'IA générative fin 2025, contre 31% fin 2024 (Bpifrance Le Lab)."
+  },
+  {
+    "role": "contenu",
+    "titre": "Le risque : un réseau qui sonne automatisé",
+    "texte": "Un message généré sans relecture se reconnaît vite. Le gain de temps ne doit jamais se voir."
+  },
+  {
+    "role": "contenu",
+    "titre": "Le vrai gain n'est pas le temps gagné",
+    "texte": "C'est ce que vous en faites : plus d'appels préparés, moins de relances oubliées faute de temps."
+  },
+  {
+    "role": "contenu",
+    "titre": "Commencer petit, sur un seul usage",
+    "texte": "Choisissez une seule tâche répétitive de votre réseau à déléguer ce mois-ci, pas les trois d'un coup."
+  },
+  {
+    "role": "contenu",
+    "titre": "Une seule chose à faire cette semaine",
+    "texte": "Listez cinq contacts sans nouvelles depuis six mois. Relancez-en un, avec un message vraiment écrit par vous."
+  }
+]
