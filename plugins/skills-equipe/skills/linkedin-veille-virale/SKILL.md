@@ -24,10 +24,15 @@ description: "Surveille des comptes LinkedIn suivis, repere les posts qui valent
    reellement : `publierPost({ authorUrn, commentary })`. Rien d'autre dans
    le module n'ecrit sur LinkedIn.
 5. `dry-run.js` (`npm run dry-run`) execute les etapes 1-3 de bout en bout
-   sans jamais appeler `publierPost` (il n'importe meme pas `lib/publier.js`)
-   -- avec le jeu fixture de `fixtures/posts-exemple.json` tant que
-   `comptes_a_surveiller` est vide, ou avec un vrai appel Apify des que ce
-   champ est rempli et `APIFY_TOKEN` present. Ecrit le resultat (post retenu,
+   sans jamais appeler `publierPost` (il n'importe meme pas `lib/publier.js`).
+   **Declencheur reel du repli fixture, verifie dans le code (15/09/2026)** :
+   `APIFY_TOKEN` absent -- a lui seul, meme si `comptes_a_surveiller` est
+   rempli (c'est le cas courant depuis le 14/09/2026 : les 10 comptes sont
+   renseignes, mais un passage sans jeton bascule quand meme sur la fixture).
+   `comptes_a_surveiller` vide bascule aussi sur la fixture, mais n'est pas
+   la seule condition ; les deux sont testees independamment (`et/ou`). Avec
+   `APIFY_TOKEN` present ET `comptes_a_surveiller` rempli, `dry-run.js` fait
+   un vrai appel Apify. Ecrit le resultat (post retenu,
    texte final, arguments qu'on passerait a `publierPost`) dans
    `dry-run-sortie/veille-exemple-fixture.json` -- nom de fichier volontairement
    explicite : **c'est un exemple sur donnees fixture, pas un candidat pret a
