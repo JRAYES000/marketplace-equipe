@@ -290,12 +290,65 @@ function calculerBilan(entrees, { compte } = {}) {
   };
 }
 
+/**
+ * Regle 3 du brief (lecture des chiffres par capture d'ecran) -- meme
+ * principe que `linkedin-commentaires/lib/notion.js` : aucun OCR ici, la
+ * session Claude lit les chiffres visibles sur la capture d'ecran collee
+ * par l'utilisateur (capacite multimodale native) et cette fonction se
+ * contente de retrouver la ligne (par Titre) et d'ecrire ce qui a ete lu.
+ * Voir SKILL.md, section "Regle 3".
+ */
+async function retrouverEntreeParTitre({ dataSourceId, titre, notionToken } = {}) {
+  if (!dataSourceId) throw new Error('dataSourceId requis.');
+  if (!titre) throw new Error('titre requis (doit correspondre exactement au champ "Titre").');
+
+  const reponse = await appelNotion(`/data_sources/${dataSourceId}/query`, {
+    method: 'POST',
+    notionToken,
+    body: { filter: { property: 'Titre', title: { equals: titre } } },
+  });
+  if (!reponse.results || reponse.results.length === 0) {
+    throw new Error(`Aucune entree trouvee avec le titre "${titre}".`);
+  }
+  if (reponse.results.length > 1) {
+    throw new Error(`${reponse.results.length} entrees trouvees avec le titre "${titre}" -- titre pas assez precis.`);
+  }
+  return reponse.results[0];
+}
+
+async function mettreAJourStatistiques7j({
+  dataSourceId, titre, vues7j, reactions7j, commentaires7j, bilan, notionToken,
+} = {}) {
+  const entree = await retrouverEntreeParTitre({ dataSourceId, titre, notionToken });
+
+  const properties = {};
+  if (vues7j !== undefined) properties['Vues a 7 jours'] = { number: vues7j };
+  if (reactions7j !== undefined) properties['Reactions a 7 jours'] = { number: reactions7j };
+  if (commentaires7j !== undefined) properties['Commentaires a 7 jours'] = { number: commentaires7j };
+  if (bilan !== undefined) {
+    if (!BILANS.includes(bilan)) throw new Error(`bilan "${bilan}" inconnu, attendu l'un de : ${BILANS.join(', ')}.`);
+    properties.Bilan = { select: { name: bilan } };
+  }
+
+  if (Object.keys(properties).length === 0) {
+    throw new Error('Aucun chiffre fourni -- rien a ecrire.');
+  }
+
+  return appelNotion(`/pages/${entree.id}`, {
+    method: 'PATCH',
+    notionToken,
+    body: { properties },
+  });
+}
+
 module.exports = {
   creerBaseVeilleEtPosts,
   creerVuesParCompte,
   ajouterEntreeVeille,
   recupererEntreesRecentes,
   calculerBilan,
+  retrouverEntreeParTitre,
+  mettreAJourStatistiques7j,
   PROPRIETES_VEILLE_ET_POSTS,
   COMPTES,
   FORMATS,

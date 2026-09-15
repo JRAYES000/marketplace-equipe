@@ -200,10 +200,72 @@ async function ajouterLigneCommentaire({
   });
 }
 
+/**
+ * Regle 3 du brief (lecture des chiffres par capture d'ecran) : cette
+ * fonction ne fait AUCUNE lecture d'image elle-meme (pas d'OCR dans ce
+ * paquet) -- c'est la session Claude qui lit les chiffres visibles sur la
+ * capture d'ecran collee par l'utilisateur (capacite multimodale native,
+ * meme principe que la redaction editoriale des posts : un jugement humain
+ * assiste, pas une automatisation aveugle). Cette fonction se contente de
+ * retrouver la bonne ligne (par personne visee + date) et d'ecrire les
+ * chiffres que la session a lus. Voir SKILL.md, section "Regle 3".
+ */
+async function retrouverLigneCommentaire({ dataSourceId, auteurCible, date, notionToken } = {}) {
+  if (!dataSourceId) throw new Error('dataSourceId requis.');
+  if (!auteurCible) throw new Error('auteurCible requis (doit correspondre exactement a "Personne visee").');
+
+  const filtre = {
+    and: [
+      { property: 'Personne visee', rich_text: { equals: auteurCible } },
+      ...(date ? [{ property: 'Date', date: { equals: date } }] : []),
+    ],
+  };
+  const reponse = await appelNotion(`/data_sources/${dataSourceId}/query`, {
+    method: 'POST',
+    notionToken,
+    body: { filter: filtre },
+  });
+  if (!reponse.results || reponse.results.length === 0) {
+    throw new Error(`Aucune ligne trouvee pour "${auteurCible}"${date ? ` a la date ${date}` : ''}.`);
+  }
+  if (reponse.results.length > 1) {
+    throw new Error(
+      `${reponse.results.length} lignes trouvees pour "${auteurCible}"${date ? ` a la date ${date}` : ''} -- ` +
+      'precisez la date pour lever l\'ambiguite plutot que d\'ecrire sur la mauvaise ligne.'
+    );
+  }
+  return reponse.results[0];
+}
+
+async function mettreAJourStatistiques({
+  dataSourceId, auteurCible, date, jaime, reponses, reponseAuteur, vuesProfil, demandesContact, notionToken,
+} = {}) {
+  const ligne = await retrouverLigneCommentaire({ dataSourceId, auteurCible, date, notionToken });
+
+  const properties = {};
+  if (jaime !== undefined) properties["J'aime recus (3j)"] = { number: jaime };
+  if (reponses !== undefined) properties['Reponses recues (3j)'] = { number: reponses };
+  if (reponseAuteur !== undefined) properties["Reponse de l'auteur (3j)"] = { checkbox: reponseAuteur };
+  if (vuesProfil !== undefined) properties['Vues de profil (3j)'] = { number: vuesProfil };
+  if (demandesContact !== undefined) properties['Demandes de contact (3j)'] = { number: demandesContact };
+
+  if (Object.keys(properties).length === 0) {
+    throw new Error('Aucun chiffre fourni -- rien a ecrire (au moins un des 5 champs est requis).');
+  }
+
+  return appelNotion(`/pages/${ligne.id}`, {
+    method: 'PATCH',
+    notionToken,
+    body: { properties },
+  });
+}
+
 module.exports = {
   creerBaseCommentaires,
   creerVueComparaisonHebdomadaire,
   ajouterLigneCommentaire,
+  retrouverLigneCommentaire,
+  mettreAJourStatistiques,
   PROPRIETES_COMMENTAIRES,
   COMPTES,
 };

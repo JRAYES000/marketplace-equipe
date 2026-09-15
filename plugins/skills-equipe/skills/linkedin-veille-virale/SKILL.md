@@ -46,11 +46,23 @@ les deux autres skills linkedin-* l'avaient deja.
 2. **Point de situation en 3 lignes** : `node etat.js [compte]` -- lit le dernier passage de
    veille reel connu sur disque (`data/veille-resultats-reels-*.json`, gitignore) et les posts
    adaptes deja prets dans `a-publier/`, jamais de donnee inventee.
-3. **Lecture des chiffres depuis une capture d'ecran, jamais de saisie manuelle** : **sans objet
-   pour l'instant, assume explicitement plutot que fait a moitie** -- meme justification que les
-   deux autres skills linkedin-* : cette skill ne suit encore aucune metrique post-publication
-   (vues, reactions sur un post deja recycle). A reprendre le jour ou un tableau de suivi est
-   construit.
+3. **Lecture des chiffres depuis une capture d'ecran, jamais de saisie manuelle** :
+   **implementee le 15/09/2026**, maintenant que la page Notion "Veille & posts" existe
+   reellement et attend des chiffres a 7 jours. Aucun OCR dans ce paquet : c'est la **session
+   Claude** qui lit les chiffres visibles sur la capture d'ecran collee dans la conversation
+   (capacite multimodale native), pas une automatisation aveugle. Une fois les chiffres lus,
+   `lib/notion.js` (`mettreAJourStatistiques7j`) retrouve l'entree par titre exact et ecrit ce
+   qui a ete lu :
+   ```
+   node mettre-a-jour-stats.js --titre "Le vrai cout d'un recrutement -- adapte de Codie Sanchez" \
+     --vues 1500 --reactions 40 --commentaires 6 --bilan Neutre
+   ```
+   `retrouverEntreeParTitre` refuse explicitement si le titre correspond a plusieurs entrees --
+   teste sans reseau dans `test/notion-statistiques.test.js`. **Non teste contre une vraie
+   capture d'ecran a ce jour** : le mecanisme d'ecriture est reel et verifie, la lecture par
+   Claude reste a confirmer sur un premier cas concret (le plus tot possible sera lorsque les 3
+   posts programmes le 15/09 auront cumule des vues, au plus tot le 18-19/09 pour 7 jours
+   pleins sur le premier).
 4. **Rien ne plante a vide** : `recupererPosts`/`trierPosts` refusent avec un message explicite
    (jamais une exception brute) si `APIFY_TOKEN` manque ou si `profileUrls` est vide ; les
    erreurs Notion (`messageErreurNotion`, `lib/notion.js`) traduisent chaque echec connu en
