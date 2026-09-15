@@ -71,8 +71,17 @@ verification : `references/comptes-cibles-proposition-20260914.md`.
 - **Fraicheur** : seuls les posts de moins de 4h sont retenus. Sur des comptes peu actifs
   (moins de quelques posts/semaine chacun), un passage donne legitimement 0 post frais -- pas un
   signe de panne, le repli documente (poster le plus recent en le signalant) est alors la norme.
+  **Testee en conditions reelles deux fois le 15/09/2026** (matin et fin d'apres-midi, lecture
+  directe des 16 comptes cibles via navigateur) : **0 post frais les deux fois** -- la regle n'a
+  encore jamais ete "vraie" sur ces comptes, mais l'ecart se resserre reellement (72h -> 7h pour
+  le compte le plus proche entre les deux passages). Voir
+  `references/linkedin-commentaires-historique.md` pour le detail compte par compte.
 - **Quota journalier (5/jour)** et **jamais deux fois la meme personne le meme jour** --
-  verifie contre `data/registre-commentaires.json`, pas une simple limite documentee.
+  verifie contre `data/registre-commentaires.json`, pas une simple limite documentee. **Testee
+  pour de vrai le 15/09/2026** (fin d'apres-midi, registre reel a 5/5) : refus confirme
+  (`"Commentaire refuse : quota journalier atteint (5/5 deja publies aujourd'hui pour ce
+  compte)."`), y compris contre la variante de casse que l'audit adversarial avait trouvee
+  contournable (fusionne desormais vers le vrai compte, le quota tient quand meme).
 
 ### Contenu du commentaire -- `lib/valider-commentaire.js`
 

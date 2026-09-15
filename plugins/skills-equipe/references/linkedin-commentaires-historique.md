@@ -5,6 +5,57 @@ d'emploi) -- il garde la trace des decisions, tests reels et incidents qui ont p
 actuel. Complement de `references/etat-linkedin-20260912.md` (etat des lieux transverse aux 3
 skills).
 
+## Second passage reel du jour -- fraicheur toujours a 0, quota reellement refuse (15/09/2026, ~16h20-17h50)
+
+Le brief prevoit 2 passages par jour. Le premier (matin) avait donne 0/5 posts frais (le plus
+recent trouve : 1 semaine). Deuxieme passage en fin d'apres-midi pour verifier deux choses en
+conditions reelles, jamais testees jusque-la :
+
+**1. La fenetre de fraicheur (<4h), sur les 16 comptes cibles reels (8 julien-agency + 8
+julien-partners), lus directement via Claude in Chrome (session authentifiee de Nomena --
+`APIFY_TOKEN` absent de cette session, meme repli que le 15/09 matin).**
+
+Resultat, compte par compte (heure du post le plus recent au moment du passage) :
+
+| Compte | julien-agency | Plus recent | | Compte | julien-partners | Plus recent |
+| --- | --- | --- | --- | --- | --- | --- |
+| Georges Solutions | | 1 semaine | | Valentin Muller | | 1 jour |
+| Alexandre Touraine | | tres ancien (repost tiers) | | Cecilia Boavista | | 1 jour |
+| Benjamin Lacroix | | 2 mois | | Florent Pontiac | | 18h |
+| Jean ZENDJI | | 4 jours | | Xavier Vincent | | 15h |
+| MH Baydama | | 5 mois | | Theophile Burnet | | 1 jour |
+| Raphael Mizrahi | | 2 mois | | Virginie Caurraze | | **7h** (le plus proche) |
+| Pierre-Emmanuel Cochet | | plusieurs annees | | Sindy Desquerre | | 2 mois |
+| Romain Charissou | | 1 mois | | Romy Ozier-Lafontaine | | 1 an |
+
+**0 sur 16 comptes ont un post de moins de 4h a ce moment precis** -- la regle de fraicheur n'a
+toujours jamais ete verifiee "vraie" en conditions reelles, deux passages sur deux. Mais l'ecart
+se resserre nettement par rapport au matin : le compte le plus proche (Virginie Caurraze, 7h)
+etait a 71h le matin meme sur le lot le plus frais alors disponible -- c'est un rapprochement
+reel, pas un hasard de mesure, meme si le seuil de 4h n'est toujours pas franchi. **Conclusion
+honnete, pas une supposition** : la regle des 4h reste, a ce jour, jamais satisfaite en
+conditions reelles sur ces 16 comptes -- ni preuve qu'elle "marche", ni preuve qu'elle est
+inatteignable, juste deux mesures reelles qui montrent un ecart qui se reduit. Voir
+`references/mail-20260920-brouillon.md`, section "Deviations assumees", inchangee sur le fond
+mais desormais appuyee sur deux passages reels au lieu d'un seul.
+
+**2. Le quota journalier (5/jour), sur le registre reel (pas une fixture).**
+
+`data/registre-commentaires.json` portait deja 5 entrees reelles pour `julien-agency`, datees
+`2026-09-15` (les 5 commentaires publies le matin meme). Appel reel de
+`validerQuotaJournalier` avec les vraies `entreesDuJour` de ce registre :
+
+```
+Commentaire refuse : quota journalier atteint (5/5 deja publies aujourd'hui pour ce compte).
+```
+
+Refus confirme aussi contre le contournement par la casse trouve par l'audit adversarial du
+15/09 (`entreesDuJour(registre, 'Julien-Agency', '2026-09-15')` retrouve bien les 5 memes
+entrees -- la casse fusionne vers le vrai compte, le quota tient quand meme) et contre une
+orthographe reellement differente (`julien_agency`, refusee explicitement comme compte
+inconnu). **Aucune publication tentee ni effectuee** -- test en lecture seule sur le registre et
+les fonctions de validation, conformement a la consigne.
+
 ## Correction du quota (14/09/2026)
 
 `reglages-comptes.json` portait encore l'ancien plafond de 12/jour (convention reprise du depot

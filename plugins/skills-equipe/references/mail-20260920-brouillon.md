@@ -98,6 +98,14 @@ caché : **0 sur 5 respectent la règle des 4h** aujourd'hui, faute d'activité 
 les 8 comptes Claude Agency validés. Chaque commentaire reste ancré dans le contenu réel et
 récent du post, ce n'est pas la fraîcheur qui a été sacrifiée sur le fond, seulement le délai.
 
+**Second passage du jour (fin d'après-midi), même constat, écart qui se resserre** : le brief
+prévoit deux passages quotidiens. Au second, testé sur les 16 comptes cibles réels (les 8
+Claude Agency et les 8 Claude Partners, lus un par un) : toujours **0 sur 16** avec un post de
+moins de 4h. Mais le compte le plus proche est passé de 72h (le matin) à 7h (l'après-midi,
+Virginie Caurraze côté Claude Partners) — un vrai rapprochement, pas encore une réussite. Deux
+passages réels, même résultat honnête : la règle des 4h n'a encore jamais été remplie en
+conditions réelles sur ces comptes, ni prouvée inatteignable.
+
 **Déviation assumée sur les genres** : le brief prévoit quatre genres de commentaire, dont
 "histoire vécue". Aucun des cinq ne l'utilise aujourd'hui — "histoire vécue" reste en réserve
 pour le jour où une anecdote réelle sera disponible, plutôt que d'en inventer une (un premier
@@ -226,10 +234,12 @@ Pour tout retrouver en un coup d'œil plutôt qu'éparpillé plus haut :
    identités franchement distinctes, tranché sans attendre ton retour comme le brief l'autorise :
    Claude Agency et Claude Partners restent deux facettes de la même maison. **Si tu veux deux
    identités plus marquées, c'est un réglage à changer dans les templates.**
-3. **Commentaires, fraîcheur (15/09)** : le brief demande des posts de moins de 4h. Sur les 5
-   commentaires publiés, **0 respectent cette fenêtre** — le plus récent avait une semaine, faute
-   d'activité plus récente parmi les 8 comptes Claude Agency validés. Le contenu de chaque
-   commentaire reste ancré dans le post réel, seul le délai a été sacrifié.
+3. **Commentaires, fraîcheur (15/09, testé deux fois)** : le brief demande des posts de moins de
+   4h. Sur les 5 commentaires publiés le matin, **0 respectent cette fenêtre** — le plus récent
+   avait une semaine. Second passage en fin d'après-midi, sur les 16 comptes réels cette fois
+   (les 8 Claude Agency et les 8 Claude Partners) : toujours **0 sur 16**, mais l'écart se
+   resserre (le compte le plus proche est passé de 72h à 7h entre les deux passages). Le contenu
+   de chaque commentaire reste ancré dans le post réel, seul le délai a été sacrifié.
 4. **Commentaires, genres (15/09)** : sur les 4 genres prévus par le brief, seuls 2 sont
    utilisés (question réelle x3, désaccord argumenté x2) — "histoire vécue" reste en réserve,
    faute d'anecdote réelle confirmée, plutôt que d'en inventer une (déjà écarté une fois le
