@@ -30,11 +30,15 @@ C'est fait : [voir le nouveau
 carrousel](https://www.linkedin.com/posts/julien-rayes_pourquoi-vos-meilleurs-candidats-disparaissent-ils-activity-7505338063762534401-bkxp)
 — confirmé en ligne, 10 pages, accents corrects vérifiés diapo par diapo.
 
-**La suppression automatique des deux anciennes versions a échoué** : l'outil a répondu
-"supprimé" deux fois de suite pour chacun des deux posts, mais les deux sont restés parfaitement
-visibles et lisibles (vérifié directement dans le navigateur, pas un problème de cache). Plutôt
-que de chercher un contournement technique, le plus rapide et le plus sûr est que tu les
-supprimes toi-même depuis ton profil (**•••** sur le post → **Supprimer**) :
+**La suppression automatique des deux anciennes versions a échoué, trois méthodes essayées** :
+l'action de suppression standard a répondu "supprimé" deux fois de suite pour chacun des deux
+posts, mais les deux sont restés parfaitement visibles et lisibles (vérifié directement dans le
+navigateur, pas un problème de cache) ; l'appel direct à l'API LinkedIn (suppression brute,
+contournant l'outil standard) a répondu "introuvable" pour les deux, quelle que soit la forme
+d'identifiant essayée. Ce n'est donc pas un oubli ni un manque d'essai — ces deux posts
+résistent à la suppression par API pour une raison technique non résolue (probablement liée à
+la façon dont ils ont été publiés). Le plus rapide et le plus sûr est que tu les supprimes
+toi-même depuis ton profil (**•••** sur le post → **Supprimer**) :
 
 - [Carrousel du 12/09](https://www.linkedin.com/posts/julien-rayes_carrouselpdf-activity-7505146405649559552-m6yM)
   — 5 diapos seulement, non conforme au brief (10 diapos attendues), nom de fichier resté
