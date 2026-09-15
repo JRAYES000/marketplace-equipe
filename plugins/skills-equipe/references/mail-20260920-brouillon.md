@@ -52,8 +52,10 @@ que la version du 15/09.
 **Premier carrousel de test pour Claude Partners (15/09)** : jusqu'ici tous les carrousels
 publiés l'avaient été pour Claude Agency — le gabarit Claude Partners n'avait jamais servi qu'à
 des tests génériques en coulisses. Un carrousel de test complet (10 pages, sujet "l'IA pour les
-PME", jamais publié) a confirmé que le gabarit fonctionne réellement : titres et texte assez
-grands, bon contraste, numéro sur chaque page, flèche sur la première — tout mesuré, pas supposé.
+PME") a confirmé que le gabarit fonctionne réellement : titres et texte assez grands, bon
+contraste, numéro sur chaque page, flèche sur la première — tout mesuré, pas supposé. **Pas de
+lien ici** : ce test n'a volontairement jamais été publié (juste pour vérifier le gabarit) —
+dis-le si tu veux que je te l'envoie ou que je le publie pour de vrai.
 
 Les deux comptes partagent la base visuelle (fond, encre, mise en page) et se distinguent par
 l'accent de couleur, le pied de page et le numéro — un choix assumé plutôt qu'un oubli : les deux
@@ -82,10 +84,11 @@ jour) et publiés :
 
 Avec [le commentaire chez Jean
 Zendji](https://www.linkedin.com/posts/jean-zendji-zenfia_arr%C3%AAtez-de-vouloir-r%C3%A9pondre-%C3%A0-tous-vos-avis-activity-7504102064814268416-FPQV)
-publié plus tôt dans la journée, **les cinq commentaires du jour sont réellement en ligne**,
-tous sur des personnes distinctes (aucune ne recommente deux fois le même jour). Détail complet
-: [voir le
-README](https://github.com/JRAYES000/marketplace-equipe/blob/main/plugins/skills-equipe/skills/linkedin-commentaires/a-publier/README.md).
+— désaccord argumenté sur le tri en 2 catégories — publié plus tôt dans la journée, **les cinq
+commentaires du jour sont réellement en ligne**, tous sur des personnes distinctes (aucune ne
+recommente deux fois le même jour). Les 5 liens ci-dessus et celui-ci suffisent pour tout voir ;
+si tu veux creuser plus loin (texte source, genre choisi), dis-le-moi et je te l'envoie
+directement plutôt que de te renvoyer au dépôt.
 
 **Déviation assumée sur la fraîcheur** : le brief demande de commenter des posts de moins de
 4h. Aucun des cinq comptes Claude Agency retenus aujourd'hui n'avait publié dans cette fenêtre
@@ -108,9 +111,9 @@ chiffre ou une vraie anecdote sur ce lot précis de comptes et de posts.
 
 Le pipeline de veille tourne réellement : 35 posts récupérés sur les 10 comptes suivis, 15
 retenus par le score d'engagement. Trois ont été adaptés en post prêt à publier — un par
-compte concerné, choisis parmi les meilleurs scores : [voir le détail des trois posts
-adaptés](https://github.com/JRAYES000/marketplace-equipe/blob/main/plugins/skills-equipe/skills/linkedin-veille-virale/a-publier/README.md)
-(texte intégral, post source noté pour chacun, chiffre français vérifié).
+compte concerné, choisis parmi les meilleurs scores (post source noté pour chacun, chiffre
+français vérifié — le texte intégral des trois arrive ci-dessous avec leurs liens réels dès
+qu'ils sont en ligne).
 
 Adaptés, pas traduits : structure et angle du post source conservés, exemples et chiffres
 remplacés par des références françaises vérifiées (Insee, Bpi France Le Lab/Rexecode,
@@ -137,13 +140,14 @@ mesure qu'il passe réellement en ligne (rien de supposé tant que ce n'est pas 
 ## Compte Claude Partners — plus bloquant, grâce à Buffer
 
 Tout ce qui est publié à ce jour sur LinkedIn (carrousel, cinq commentaires) l'est sur le
-compte Claude Agency. Le compte Claude Partners n'a jamais été réellement connecté à Composio,
-malgré ce qu'on pensait (voir plus haut, les quatre premiers commentaires avaient été écrits
-pour ce compte avant qu'on s'en aperçoive) — mais **ce n'est plus un blocage** : Buffer, lui,
-atteint bien les deux comptes (voir la section Veille), c'est par là que passe le post Justin
-Welsh prévu après-demain sur Claude Partners. Composio pour Claude Partners resterait utile
-pour les commentaires (Buffer ne sait pas commenter le post d'un tiers) si ce compte doit
-commenter un jour — pas urgent pour le 20, à en reparler si le besoin se présente.
+compte Claude Agency. Le compte Claude Partners n'a jamais été réellement connecté à Composio
+(notre outil de publication), malgré ce qu'on pensait (voir plus haut, les quatre premiers
+commentaires avaient été écrits pour ce compte avant qu'on s'en aperçoive) — mais **ce n'est
+plus un blocage** : Buffer, lui, atteint bien les deux comptes (voir la section Veille), c'est
+par là que passe le post Justin Welsh prévu après-demain sur Claude Partners. Connecter Claude
+Partners à notre outil de publication resterait utile pour les commentaires (Buffer ne sait pas
+commenter le post d'un tiers) si ce compte doit commenter un jour — pas urgent pour le 20, à en
+reparler si le besoin se présente.
 
 ## Notion — débloqué, les deux pages sont réelles et remplies
 
