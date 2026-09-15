@@ -17,6 +17,20 @@ lignes le dernier carrousel genere, les brouillons en attente de rendu, et l'eta
 publication reelle (jamais suivi automatiquement, a verifier aupres de Julien). Propose un
 repli si rien n'est en attente (jamais les mains vides).
 
+## Variables d'environnement (`.env.example`) -- etat reel, pas suppose (15/09/2026)
+
+- **`COMPOSIO_API_KEY`** : lue par `lib/composio.js` (`executerActionComposio`) comme methode
+  de secours -- un appel REST direct avec une cle de projet Composio statique. **Jamais celle
+  qui a reellement servi a publier** dans ce chantier : la voie qui fonctionne est une cle
+  "consumer" personnelle (couche "FOR YOU" de Composio, `connect.composio.dev` -> Reglages ->
+  Sessions & API Key), obtenue fraiche a chaque session et jamais stockee (voir
+  `references/actions-composio.md`). Laisser vide dans `.env.example` reste correct ; ne pas
+  s'attendre a ce que la remplir suffise a publier.
+- **`PDF_RENDER_API_KEY`** : **vestigial, confirme par cet audit.** Le rendu PDF reel se fait en
+  local via Playwright (`generer-pdf.js`), sans aucun service ni cle externe. Retiree du
+  `.env.example` -- si un moteur de rendu distant remplace un jour Playwright, la reintroduire
+  a ce moment-la, pas avant.
+
 ## Perimetre au 12/09/2026 (renverse le meme jour par un test reel -- ne pas revenir a la version precedente)
 
 **Hypothese initiale de Julien (11-12/09/2026), infirmee par un test reel le 12/09/2026** :

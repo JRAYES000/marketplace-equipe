@@ -17,6 +17,15 @@ aujourd'hui ».
 lignes le dernier commentaire publie, le quota du jour deja utilise, et l'etat des comptes
 cibles. Propose un repli si rien n'est configure (jamais les mains vides).
 
+## Variables d'environnement (`.env.example`) -- etat reel, pas suppose (15/09/2026)
+
+`APIFY_TOKEN`, `NOTION_TOKEN` et `NOTION_PARENT_PAGE_ID` sont documentees en detail plus bas et
+reellement utilisees telles quelles. **`COMPOSIO_API_KEY`**, en revanche, est lue par
+`lib/composio.js` comme methode de secours (appel REST avec une cle de projet Composio
+statique) mais **n'est jamais celle qui a reellement servi a publier** dans ce chantier -- voir
+`linkedin-carrousel/SKILL.md`, section equivalente, pour le detail complet : la voie qui
+fonctionne est une cle "consumer" personnelle obtenue fraiche a chaque session, jamais stockee.
+
 ## Ce que fait la skill
 
 1. `lib/trouver-posts.js` (`trouverPosts`) interroge l'acteur Apify

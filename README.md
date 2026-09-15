@@ -23,7 +23,7 @@ Ou avec la souris : **Réglages → Capacités → Plugins → Ajouter une marke
 
 Une fois `skills-equipe` installé, les skills arrivent avec le paquet. Tu n'as rien à télécharger.
 
-**Paquet publié : `skills-equipe` 1.17.1.** Si le numéro affiché dans *Réglages → Plugins* est inférieur à 1.17.1, tu n'as pas la dernière version.
+**Paquet publié : `skills-equipe` 1.17.16.** Si le numéro affiché dans *Réglages → Plugins* est inférieur à 1.17.16, tu n'as pas la dernière version.
 
 **Aucune skill ne s'active toute seule.** Les sept attendent que tu les appelles — en tapant leur nom, ou avec une des formulations données dans la colonne *Ce qu'elle fait*. Une fois lancée, une skill tient jusqu'à ce que tu dises `mode normal`. C'est volontaire : rien ne change ta façon de travailler sans que tu l'aies décidé. Si une skill se déclenche alors que tu ne l'as pas demandée, c'est un bug — ouvre une issue.
 
