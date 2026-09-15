@@ -108,6 +108,17 @@ const { GENRES } = require('./valider-commentaire');
  * de la skill" selon le brief, qui repond a "est-ce que commenter chez les
  * concurrents amene des gens", pas seulement "combien de J'aime".
  */
+// Faille de conception trouvee et corrigee le 15/09/2026 (voir
+// lib/statistiques-profil.js pour le detail) : "Vues de profil (3j)" et
+// "Demandes de contact (3j)" ont ete RETIREES du schema des lignes de
+// commentaire -- ce sont des mesures de PROFIL datees, pas des proprietes
+// d'un commentaire, et les additionner par ligne (comme le faisait
+// `calculerComparaisonHebdomadaire` avant cette date) gonflait le tableau de
+// comparaison hebdomadaire d'un facteur egal au nombre de commentaires du
+// jour. Elles vivent desormais dans data/statistiques-profil.json (un
+// releve par jour, lib/statistiques-profil.js). La base Notion deja creee
+// le 15/09/2026 porte encore ces deux colonnes sur son schema d'origine --
+// laissees vides, mortes, sans consequence : plus aucun code n'y ecrit.
 const PROPRIETES_COMMENTAIRES = {
   Titre: { type: 'title', title: {} }, // identifiant lisible de la ligne (ex. "auteur -- date")
   Compte: { type: 'select', select: { options: COMPTES.map((c) => ({ name: c })) } },
@@ -119,8 +130,6 @@ const PROPRIETES_COMMENTAIRES = {
   "J'aime recus (3j)": { type: 'number', number: { format: 'number' } },
   'Reponses recues (3j)': { type: 'number', number: { format: 'number' } },
   "Reponse de l'auteur (3j)": { type: 'checkbox', checkbox: {} },
-  'Vues de profil (3j)': { type: 'number', number: { format: 'number' } },
-  'Demandes de contact (3j)': { type: 'number', number: { format: 'number' } },
 };
 
 /**
@@ -216,19 +225,56 @@ function numeroSemaineISO(dateStr) {
   return { cle: `${d.getUTCFullYear()}-S${String(numero).padStart(2, '0')}`, debutSemaine: lundi.toISOString().slice(0, 10) };
 }
 
-function calculerComparaisonHebdomadaire(lignes) {
+/**
+ * FAILLE DE CONCEPTION TROUVEE ET CORRIGEE (15/09/2026, avant toute donnee
+ * reelle ecrite) : cette fonction prenait un seul tableau `lignes` (les
+ * commentaires) et lisait `ligne.vuesProfil`/`ligne.demandesContact` dessus,
+ * additionnees a chaque ligne -- 5 commentaires publies le meme jour,
+ * portant chacun le MEME chiffre global de profil (ecrit 5 fois par erreur,
+ * ou simplement parce que ce chiffre est global et identique ce jour-la),
+ * produisaient un total 5 fois trop eleve dans le tableau de comparaison
+ * hebdomadaire. Voir lib/statistiques-profil.js pour le detail complet.
+ *
+ * Desormais deux parametres separes, correspondant a deux natures de
+ * donnees differentes :
+ * - `lignesCommentaires` : une ligne = un commentaire reellement publie.
+ *   Seul `nombreCommentaires` en depend (compte les lignes, correct par
+ *   nature -- chaque commentaire compte une fois).
+ * - `relevesProfil` : une entree = UN releve quotidien de profil (voir
+ *   `lib/statistiques-profil.js`, `listeReleves()`). Deduplique par date
+ *   AVANT agregation (une seule entree retenue par date, meme si
+ *   l'appelant en fournit plusieurs par erreur) : c'est le filet qui
+ *   empeche la faille du 15/09/2026 de revenir, structurellement, meme si
+ *   un futur appelant se trompe et repasse un releve par commentaire.
+ */
+function calculerComparaisonHebdomadaire(lignesCommentaires, relevesProfil = []) {
   const semaines = new Map();
-  for (const ligne of lignes || []) {
-    if (!ligne.date) continue;
-    const { cle, debutSemaine } = numeroSemaineISO(ligne.date);
+
+  function semaineDe(cle, debutSemaine) {
     if (!semaines.has(cle)) {
       semaines.set(cle, { semaine: cle, debutSemaine, nombreCommentaires: 0, vuesProfil: 0, demandesContact: 0 });
     }
-    const agg = semaines.get(cle);
-    agg.nombreCommentaires += 1;
-    agg.vuesProfil += ligne.vuesProfil || 0;
-    agg.demandesContact += ligne.demandesContact || 0;
+    return semaines.get(cle);
   }
+
+  for (const ligne of lignesCommentaires || []) {
+    if (!ligne || !ligne.date) continue;
+    const { cle, debutSemaine } = numeroSemaineISO(ligne.date);
+    semaineDe(cle, debutSemaine).nombreCommentaires += 1;
+  }
+
+  const relevesParDate = new Map();
+  for (const releve of relevesProfil || []) {
+    if (!releve || !releve.date) continue;
+    relevesParDate.set(releve.date, releve); // dedoublonnage -- voir docstring
+  }
+  for (const releve of relevesParDate.values()) {
+    const { cle, debutSemaine } = numeroSemaineISO(releve.date);
+    const agg = semaineDe(cle, debutSemaine);
+    agg.vuesProfil += releve.vuesProfil || 0;
+    agg.demandesContact += releve.demandesContact || 0;
+  }
+
   return [...semaines.values()].sort((a, b) => a.debutSemaine.localeCompare(b.debutSemaine));
 }
 
@@ -250,9 +296,9 @@ function calculerComparaisonHebdomadaire(lignes) {
  * au sens de l'API. Le `page_id` du `parent` d'une base se lit via `GET
  * /v1/databases/{id}` (`response.parent.page_id`).
  */
-async function ecrireBlocComparaisonHebdomadaire({ pageId, lignes, notionToken } = {}) {
+async function ecrireBlocComparaisonHebdomadaire({ pageId, lignes, relevesProfil = [], notionToken } = {}) {
   if (!pageId) throw new Error('pageId requis (page PARENTE de la base "Commentaires", pas la base elle-meme -- voir GET /v1/databases/{id}.parent.page_id).');
-  const semaines = calculerComparaisonHebdomadaire(lignes);
+  const semaines = calculerComparaisonHebdomadaire(lignes, relevesProfil);
 
   const celluleTexte = (valeur) => [{ type: 'text', text: { content: String(valeur) } }];
   const ligneEntete = { type: 'table_row', table_row: { cells: [
@@ -347,8 +393,15 @@ async function retrouverLigneCommentaire({ dataSourceId, auteurCible, date, noti
   return reponse.results[0];
 }
 
+/**
+ * Ecrit les statistiques a 3 jours d'UN commentaire (J'aime, reponses,
+ * reponse de l'auteur). Retire le 15/09/2026 : `vuesProfil`/`demandesContact`
+ * -- ce ne sont pas des proprietes d'un commentaire mais des mesures de
+ * profil datees, voir `lib/statistiques-profil.js`
+ * (`enregistrerReleveProfil`) pour ces deux chiffres.
+ */
 async function mettreAJourStatistiques({
-  dataSourceId, auteurCible, date, jaime, reponses, reponseAuteur, vuesProfil, demandesContact, notionToken,
+  dataSourceId, auteurCible, date, jaime, reponses, reponseAuteur, notionToken,
 } = {}) {
   const ligne = await retrouverLigneCommentaire({ dataSourceId, auteurCible, date, notionToken });
 
@@ -356,11 +409,9 @@ async function mettreAJourStatistiques({
   if (jaime !== undefined) properties["J'aime recus (3j)"] = { number: jaime };
   if (reponses !== undefined) properties['Reponses recues (3j)'] = { number: reponses };
   if (reponseAuteur !== undefined) properties["Reponse de l'auteur (3j)"] = { checkbox: reponseAuteur };
-  if (vuesProfil !== undefined) properties['Vues de profil (3j)'] = { number: vuesProfil };
-  if (demandesContact !== undefined) properties['Demandes de contact (3j)'] = { number: demandesContact };
 
   if (Object.keys(properties).length === 0) {
-    throw new Error('Aucun chiffre fourni -- rien a ecrire (au moins un des 5 champs est requis).');
+    throw new Error('Aucun chiffre fourni -- rien a ecrire (au moins un des 3 champs est requis).');
   }
 
   return appelNotion(`/pages/${ligne.id}`, {

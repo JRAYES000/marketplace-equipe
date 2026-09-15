@@ -91,7 +91,7 @@ verification : `references/comptes-cibles-proposition-20260914.md`.
   d'une liste fermee de mots toujours accentues en francais standard -- heuristique
   volontairement imparfaite (mots ambigus type "a"/"à" exclus pour eviter les faux positifs).
 
-`node --test` : 62 tests.
+`node --test` : 74 tests.
 
 ## Audit adversarial et de robustesse (15/09/2026)
 
@@ -129,26 +129,54 @@ verrouillee par un test dans `test/adversarial-15-09.test.js` :
 ## Suivi a 3 jours (regle 3 du brief -- lecture par capture d'ecran)
 
 Aucun OCR : c'est la **session Claude** qui lit les chiffres visibles sur la capture d'ecran
-collee dans la conversation, puis appelle le script avec ce qu'elle a lu :
-```
-node mettre-a-jour-stats.js --auteur "Jean ZENDJI" --date 2026-09-15 \
-  --jaime 4 --reponses 1 --reponseAuteur true --vuesProfil 12 --demandesContact 0
-```
-`retrouverLigneCommentaire` refuse explicitement si plusieurs lignes correspondent au meme
-auteur (preciser `--date` leve l'ambiguite).
+collee dans la conversation, puis appelle le script avec ce qu'elle a lu.
+
+**Deux mesures, deux natures, deux scripts** (corrige le 15/09/2026 -- voir "Faille de
+conception" plus bas) :
+- **Statistiques du COMMENTAIRE** (J'aime, reponses, reponse de l'auteur) -- une ligne par
+  commentaire, `mettre-a-jour-stats.js` :
+  ```
+  node mettre-a-jour-stats.js --auteur "Jean ZENDJI" --date 2026-09-15 \
+    --jaime 4 --reponses 1 --reponseAuteur true
+  ```
+  `retrouverLigneCommentaire` refuse explicitement si plusieurs lignes correspondent au meme
+  auteur (preciser `--date` leve l'ambiguite). Refuse explicitement `--vuesProfil`/
+  `--demandesContact` (retires, voir ci-dessous).
+- **Vues de profil et demandes de contact** -- un releve par JOUR, independant du nombre de
+  commentaires publies ce jour-la, `enregistrer-releve-profil.js` :
+  ```
+  node enregistrer-releve-profil.js --date 2026-09-18 --vuesProfil 42 --demandesContact 2
+  ```
+  Stocke dans `data/statistiques-profil.json` (gitignore). Un second appel pour la meme date
+  **remplace** le premier, ne s'y ajoute jamais.
+
+**Faille de conception trouvee et corrigee (15/09/2026, avant toute donnee reelle ecrite)** :
+vues de profil et demandes de contact etaient a l'origine des colonnes PAR LIGNE DE COMMENTAIRE
+dans Notion, additionnees par ligne dans `calculerComparaisonHebdomadaire`. Le brief est pourtant
+explicite : "Vues de profil et demandes de contact sont dans mes statistiques LinkedIn, jour par
+jour" -- une mesure de PROFIL datee, pas une propriete de commentaire. 5 commentaires publies le
+meme jour, portant chacun le meme chiffre global (le releve unique de ce jour-la), auraient
+gonfle le tableau de comparaison hebdomadaire d'un facteur 5 sans que rien ne le signale. Voir
+`lib/statistiques-profil.js` pour le detail complet et `test/notion-comparaison-hebdomadaire.test.js`
+pour le test qui verrouille la non-regression (5 commentaires + 1 releve = le total d'UN jour,
+jamais multiplie).
 
 **Marche a suivre prete pour le 18/09/2026** (3 jours apres les 5 commentaires reels du 15/09) :
 `references/procedure-18-09-suivi-3-jours-commentaires.md` -- ecrans LinkedIn exacts a ouvrir,
-chiffres a relever pour chacun des 5, ordre de collage, commandes pretes a copier-coller.
+chiffres a relever pour chacun des 5 commentaires ET pour le releve de profil du jour (un seul,
+pas cinq), ordre de collage, commandes pretes a copier-coller (mise a jour le 15/09/2026 pour
+refleter ce correctif).
 
 **Comparaison hebdomadaire** ("le coeur de la skill" selon le brief : commentaires de la semaine
 cote a cote avec vues de profil et demandes de contact) : `creerVueComparaisonHebdomadaire`
 cree un graphique Notion (nombre de commentaires par semaine seul -- l'API Notion n'accepte
-qu'un axe Y par vue). `ecrireBlocComparaisonHebdomadaire` complete avec un **bloc tableau natif**
-sur la page (les 3 chiffres cote a cote, une ligne par semaine) : **`pageId` doit etre la page
-PARENTE de la base "Commentaires"** (jamais l'ID de la base elle-meme -- une base de donnees
-Notion n'accepte pas de blocs enfants). A relancer pour rafraichir (pas une vue qui se met a
-jour seule).
+qu'un axe Y par vue). `ecrireBlocComparaisonHebdomadaire({ pageId, lignes, relevesProfil })`
+complete avec un **bloc tableau natif** sur la page (les 3 chiffres cote a cote, une ligne par
+semaine) : `lignes` = les commentaires (comptage), `relevesProfil` = `listeReleves()` depuis
+`lib/statistiques-profil.js` (vues/demandes, dedupliquees par date avant agregation). **`pageId`
+doit etre la page PARENTE de la base "Commentaires"** (jamais l'ID de la base elle-meme -- une
+base de donnees Notion n'accepte pas de blocs enfants). A relancer pour rafraichir (pas une vue
+qui se met a jour seule).
 
 ## Regles d'usage (brief du 10/09/2026, section 2) -- etat actuel
 
