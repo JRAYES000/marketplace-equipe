@@ -172,6 +172,94 @@ async function creerVueComparaisonHebdomadaire({ databaseId, dataSourceId, notio
 }
 
 /**
+ * Alternative reellement faisable a la superposition impossible (voir
+ * limite documentee juste au-dessus) : au lieu d'un seul graphique a 3
+ * courbes, un BLOC TABLEAU NATIF Notion, ecrit sur la page (pas une vue de
+ * base de donnees) avec les 3 colonnes demandees cote a cote, une ligne par
+ * semaine -- "commentaires de la semaine" et les 2 courbes de suivi
+ * redeviennent directement comparables d'un coup d'oeil, sans les
+ * limitations d'un chart view. Fonction PURE, testable sans reseau : prend
+ * les lignes deja recuperees (mais recupererEntreesRecentes-like) et calcule
+ * l'agregat par semaine ISO (lundi comme premier jour).
+ *
+ * Choix assume : pas d'interpretation ("meilleure semaine", tendance...) --
+ * seulement les 3 chiffres bruts cote a cote, pour laisser le jugement a qui
+ * lit (regle 5 du brief : ne jamais pretendre a une conclusion que les
+ * donnees ne permettent pas).
+ */
+function numeroSemaineISO(dateStr) {
+  const d = new Date(`${dateStr}T00:00:00Z`);
+  const jour = (d.getUTCDay() + 6) % 7; // lundi = 0
+  d.setUTCDate(d.getUTCDate() - jour + 3); // jeudi de la semaine ISO
+  const premierJeudi = new Date(Date.UTC(d.getUTCFullYear(), 0, 4));
+  const numero = 1 + Math.round(((d - premierJeudi) / 86400000 - 3 + ((premierJeudi.getUTCDay() + 6) % 7)) / 7);
+  const lundi = new Date(`${dateStr}T00:00:00Z`);
+  lundi.setUTCDate(lundi.getUTCDate() - jour);
+  return { cle: `${d.getUTCFullYear()}-S${String(numero).padStart(2, '0')}`, debutSemaine: lundi.toISOString().slice(0, 10) };
+}
+
+function calculerComparaisonHebdomadaire(lignes) {
+  const semaines = new Map();
+  for (const ligne of lignes || []) {
+    if (!ligne.date) continue;
+    const { cle, debutSemaine } = numeroSemaineISO(ligne.date);
+    if (!semaines.has(cle)) {
+      semaines.set(cle, { semaine: cle, debutSemaine, nombreCommentaires: 0, vuesProfil: 0, demandesContact: 0 });
+    }
+    const agg = semaines.get(cle);
+    agg.nombreCommentaires += 1;
+    agg.vuesProfil += ligne.vuesProfil || 0;
+    agg.demandesContact += ligne.demandesContact || 0;
+  }
+  return [...semaines.values()].sort((a, b) => a.debutSemaine.localeCompare(b.debutSemaine));
+}
+
+/**
+ * Ecrit (ajoute) le tableau calcule par calculerComparaisonHebdomadaire comme
+ * un vrai bloc "table" Notion, enfant de la page donnee -- API blocks
+ * standard (POST /blocks/{id}/children), pas une vue de base de donnees :
+ * aucune des limites de "chart view" (un seul axe Y) ne s'applique a un bloc
+ * de contenu statique. Rappelle a chaque appel qu'il s'agit d'un instantane
+ * a une date donnee (pas une vue qui se met a jour seule) -- a relancer pour
+ * rafraichir.
+ *
+ * CONCU SELON LA DOCUMENTATION PUBLIQUE DE L'API NOTION (blocs "table" /
+ * "table_row"), PAS ENCORE EXECUTE CONTRE L'API REELLE au moment ou ce code
+ * est ecrit -- NOTION_TOKEN absent de cette session. A verifier reellement
+ * au premier appel, comme tout le reste de ce depot (voir CLAUDE.md racine).
+ */
+async function ecrireBlocComparaisonHebdomadaire({ pageId, lignes, notionToken } = {}) {
+  if (!pageId) throw new Error('pageId requis (page Notion sous laquelle ecrire le tableau).');
+  const semaines = calculerComparaisonHebdomadaire(lignes);
+
+  const celluleTexte = (valeur) => [{ type: 'text', text: { content: String(valeur) } }];
+  const ligneEntete = { type: 'table_row', table_row: { cells: [
+    celluleTexte('Semaine'), celluleTexte('Commentaires'), celluleTexte('Vues de profil'), celluleTexte('Demandes de contact'),
+  ] } };
+  const lignesDonnees = semaines.map((s) => ({ type: 'table_row', table_row: { cells: [
+    celluleTexte(`${s.semaine} (a partir du ${s.debutSemaine})`),
+    celluleTexte(s.nombreCommentaires),
+    celluleTexte(s.vuesProfil),
+    celluleTexte(s.demandesContact),
+  ] } }));
+
+  if (lignesDonnees.length === 0) {
+    throw new Error('Aucune ligne avec une Date exploitable -- rien a ecrire (verifiez que les entrees ont bien une Date renseignee).');
+  }
+
+  return appelNotion(`/blocks/${pageId}/children`, {
+    method: 'PATCH',
+    notionToken,
+    body: {
+      children: [{
+        type: 'table',
+        table: { table_width: 4, has_column_header: true, has_row_header: false, children: [ligneEntete, ...lignesDonnees] },
+      }],
+    },
+  });
+}
+
+/**
  * Ajoute une entree reelle (une ligne) dans la base "Commentaires". A
  * appeler seulement APRES une publication reelle confirmee (meme regle que
  * enregistrerCommentairePublie/lib/registre.js) -- jamais en anticipant.
@@ -263,6 +351,8 @@ async function mettreAJourStatistiques({
 module.exports = {
   creerBaseCommentaires,
   creerVueComparaisonHebdomadaire,
+  calculerComparaisonHebdomadaire,
+  ecrireBlocComparaisonHebdomadaire,
   ajouterLigneCommentaire,
   retrouverLigneCommentaire,
   mettreAJourStatistiques,
