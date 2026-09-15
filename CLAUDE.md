@@ -63,20 +63,22 @@ Ce qui reste obligatoire malgré la vitesse :
      Vu le 13/09/2026 : marketplace passée à `84cc70d`, plugin resté à `1.13.0`
      avec 4 skills sur 7 pendant tout ce temps — et rien à l'écran ne le signalait.
 
-     **Anomalie non resolue, trouvee le 15/09/2026** : apres l'installation
-     initiale du plugin (version 1.17.19 confirmee, correspondant bien au
-     `plugin.json` de `main`), la fiche affiche **6 competences sur 7** --
-     `linkedin-carrousel` manque, alors que `linkedin-commentaires` et
-     `linkedin-veille-virale` apparaissent normalement. Verifie par deux voies
-     independantes (Reglages -> Plugins -> onglet Competences, et Reglages ->
-     Competences) : meme resultat les deux fois. **Pas un probleme de fichier
-     manquant** -- l'onglet "Contenu" du plugin montre `SKILL.md` present et
-     synchronise dans `skills/linkedin-carrousel/`, et son rendu en apercu ne
-     montre aucune erreur visible. Hypothese non confirmee, a verifier en
-     premier avant d'aller chercher ailleurs : c'est le plus gros des 3
-     `SKILL.md` linkedin-* (35 Ko / 481 lignes, contre 27 Ko et 20 Ko pour les
-     deux autres) -- une limite de taille cote claude.ai reste plausible mais
-     n'a pas ete confirmee depuis cette session.
+     **Faux problème trouvé et corrige le 15/09/2026** : juste apres
+     l'installation initiale du plugin (version 1.17.19 confirmee), la fiche
+     affichait **6 competences sur 7** dans Reglages -> Plugins/Competences --
+     `linkedin-carrousel` semblait absente. **Ce n'en etait pas une** : verifie
+     ensuite par Julien directement depuis sa session (la skill apparait bien,
+     avec sa description complete, aux cotes des deux autres) -- c'etait un
+     decalage d'affichage/cache cote interface claude.ai, pas un defaut
+     d'installation ni de `SKILL.md`. Mesure reelle a l'appui (longueur exacte
+     de `name`/`description`, validite du YAML du front-matter, absence de BOM
+     ou de caractere suspect) : les trois `SKILL.md` linkedin-* sont
+     structurellement identiques sur ces criteres, rien a y corriger de ce
+     cote. **A retenir** : si le compteur de competences d'une fiche plugin
+     claude.ai semble en retard d'une unite juste apres une installation,
+     revenir verifier depuis la liste des skills reellement disponibles dans
+     une session avant de chercher un defaut dans le depot -- le decompte de
+     la fiche peut mentir, le contenu charge, lui, fait foi.
 
   3. **Côté CLI** (clone local et paquet installé) :
 
