@@ -148,6 +148,12 @@ Elles vivent ici maintenant, une fois pour toutes, pour ne plus avoir à les ret
   chaque nouvelle session qui en a besoin, jamais lus automatiquement depuis un fichier de
   secrets (voir « Ce dépôt est public » ci-dessous). Une session qui ne voit pas de jeton doit le
   traiter comme réellement absent, pas comme un oubli à corriger soi-même.
+- **Un changement de compte via `/login` en cours de session coupe l'extension Claude in
+  Chrome.** Vu le 15/09/2026 : un `/login` qui bascule d'un compte claude.ai à un autre pendant
+  une session déconnecte l'extension navigateur, même si elle fonctionnait juste avant. Symptôme :
+  `tabs_context_mcp` répond « Browser extension is not connected ». Ce n'est pas un problème à
+  résoudre en retentant à l'identique — la reconnexion se fait côté utilisateur (rouvrir/relancer
+  l'extension), à demander explicitement plutôt qu'à deviner ou contourner.
 
 ## Ce dépôt est public : aucune clé dedans
 

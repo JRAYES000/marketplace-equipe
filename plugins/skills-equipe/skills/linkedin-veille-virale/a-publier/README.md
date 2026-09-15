@@ -45,11 +45,18 @@ ACCEPTE**. GO donne pour programmer.
 **Programmes reellement via Buffer** (compte `contact@claudeagency.fr`, deux profils LinkedIn
 connectes -- voir `references/actions-composio.md`), un par jour distinct :
 
-| # | Compte | Date programmee | Heure |
+| # | Compte | Date programmee | Heure (Europe/Paris) |
 | --- | --- | --- | --- |
-| Codie A. Sanchez | julien-agency | aujourd'hui 15/09/2026 | 22h29 |
-| Jason Feifer | julien-agency | demain 16/09/2026 | 18h00 (Europe/Paris) |
-| Justin Welsh | julien-partners | apres-demain 17/09/2026 | 13h00 (Europe/Paris) |
+| Codie A. Sanchez | julien-agency | aujourd'hui 15/09/2026 | 21h29 |
+| Jason Feifer | julien-agency | demain 16/09/2026 | 17h00 |
+| Justin Welsh | julien-partners | apres-demain 17/09/2026 | 13h00 |
+
+**Heures corrigees le 15/09/2026** : les deux premieres (Codie Sanchez, Jason Feifer) avaient ete
+notees a partir d'une vue du tableau de bord Buffer reglee sur le fuseau Minsk (GMT+3) au lieu de
+Paris (GMT+2) -- corrige ici a l'heure reelle en fuseau Paris, verifiee dans l'editeur du post
+(pas dans la vue liste). La programmation elle-meme n'a pas ete touchee : la regle du brief qui
+compte ("jamais deux posts le meme jour") reste respectee dans les deux cas. Le troisieme
+(Justin Welsh) affichait deja la bonne heure en vue Paris, non decale.
 
 **Pas encore confirmes en ligne** au moment de cette mise a jour -- Notion reflete l'etat reel
 ("Programme", pas "Publie"). A confirmer et passer a "Publie" avec le lien reel une fois chaque
