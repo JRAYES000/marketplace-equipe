@@ -701,6 +701,40 @@ crees via l'API Documents, par opposition a un post texte simple) -- aucune nouv
 relancee sans clarifier d'abord. Decision a prendre par Julien : reessayer la suppression par
 une autre voie, ou assumer les trois versions comme un historique visible.
 
+## Point n°17 -- Suppression : les 3 voies techniques epuisees, echec precis sur chacune (15/09/2026)
+
+A la demande explicite de Julien, les 3 voies restantes ont ete tentees reellement (cle
+consumer `ck_...` fournie pour l'occasion, jamais persistee -- client MCP minimal Node contre
+`https://connect.composio.dev/mcp`, meme methode que le Point n°16/republication) :
+
+1. **`DELETE /rest/posts/{urn}` via `proxy_execute`, forme `urn:li:share:...` encodee, jamais
+   tentee avant (seule l'action native `LINKEDIN_DELETE_POST` l'avait ete)** : requete
+   reellement envoyee (en-tetes `Linkedin-Version: 202608`, `X-Restli-Protocol-Version:
+   2.0.0`) -- **`404` sur les deux posts** :
+   `{"code": "NOT_FOUND", "message": "Could not find entity", "status": 404}`.
+2. **Verification du type reel d'URN** : `urn:li:activity:...` -> **`400
+   UGC_VALIDATIONS_FAILED`**, `"urn:li:activity:<id> is not a valid urn type"` (rejete avant
+   meme d'atteindre la ressource -- confirme ce que Point n°16 disait deja). `urn:li:ugcPost:...`
+   -> **`404 NOT_FOUND`**, meme message que `share`. Seule la forme `share` est syntaxiquement
+   acceptee par cet endpoint pour les deux posts -- mais l'entite reste introuvable sous cette
+   forme aussi bien que sous `ugcPost`.
+3. **`LINKEDIN_DELETE_POST` natif rejoue** (forme `share`, seule valide) sur les deux posts :
+   `{"deleted": true}` pour les deux -- **exactement le meme signal deja invalide par navigation
+   reelle le jour meme** (Point n°15 ci-dessus). Pas rejoue de verification navigateur cette
+   fois (consigne explicite de Julien : ne pas passer par le navigateur de Nomena pour cette
+   tache) -- donc **ni confirme ni infirme visuellement**, seulement le meme signal deja connu
+   comme non fiable sur ce compte.
+
+**Conclusion honnete, aucune des 3 voies n'a abouti a une preuve de suppression reelle.** Les
+trois convergent vers la meme cause probable, jamais confirmee au-dela d'une hypothese : ces
+deux posts ont ete crees via l'API Documents (`content.media.id`), pas via un post texte
+simple -- `/rest/posts` en DELETE (quel que soit le canal, direct ou action native) semble ne
+pas les reconnaitre comme la meme ressource que celle qu'il sait creer. **A transmettre a
+Julien pour suppression manuelle** (menu ••• -> Supprimer, depuis son propre profil) :
+
+- 14/09 : `https://www.linkedin.com/posts/julien-rayes_pourquoi-vos-meilleurs-candidats-disparaissent-ils-activity-7505170085091840000-6DCd`
+- 12/09 : `https://www.linkedin.com/posts/julien-rayes_carrouselpdf-activity-7505146405649559552-m6yM`
+
 **Publication reelle des 5 commentaires, meme session** : 1/5 reussi (Jean Zendji, julien-agency
 -- `urn:li:comment:(urn:li:activity:7504102064814268416,7505342737219526656)`, confirme API et
 navigateur reel), **4/5 refuses proprement** (`403 Forbidden: Viewer/Actor is unauthorized
