@@ -174,6 +174,45 @@ async function creerVuesParCompte({ databaseId, dataSourceId, notionToken } = {}
 }
 
 /**
+ * Ajoute une entree reelle (une ligne) dans la base "Veille & posts". A
+ * appeler pour chaque post reellement repere/adapte -- jamais en anticipant
+ * un etat non atteint (meme regle que enregistrerCommentairePublie cote
+ * linkedin-commentaires : refleter la realite, pas une intention).
+ */
+async function ajouterEntreeVeille({
+  dataSourceId, titre, compte, lienOrigine, auteur, abonnes, dateOrigine,
+  reactions, commentaires, partages, sujet, format, etat,
+  datePublication, lienPostPublie, notionToken,
+} = {}) {
+  if (!dataSourceId) throw new Error('dataSourceId requis.');
+  if (!COMPTES.includes(compte)) throw new Error(`compte "${compte}" inconnu, attendu l'un de : ${COMPTES.join(', ')}.`);
+  if (!ETATS.includes(etat)) throw new Error(`etat "${etat}" inconnu, attendu l'un de : ${ETATS.join(', ')}.`);
+
+  const properties = {
+    Titre: { title: [{ text: { content: titre } }] },
+    Compte: { select: { name: compte } },
+    "Lien d'origine": { url: lienOrigine },
+    Auteur: { rich_text: [{ text: { content: auteur } }] },
+    Abonnes: { number: abonnes },
+    "Date d'origine": { date: { start: dateOrigine } },
+    Reactions: { number: reactions },
+    Commentaires: { number: commentaires },
+    Partages: { number: partages },
+    Sujet: { rich_text: [{ text: { content: sujet } }] },
+    Format: { select: { name: format } },
+    Etat: { select: { name: etat } },
+  };
+  if (datePublication) properties['Date de publication'] = { date: { start: datePublication } };
+  if (lienPostPublie) properties['Lien du post publie'] = { url: lienPostPublie };
+
+  return appelNotion('/pages', {
+    method: 'POST',
+    notionToken,
+    body: { parent: { type: 'data_source_id', data_source_id: dataSourceId }, properties },
+  });
+}
+
+/**
  * Interroge la source de donnees pour les entrees d'un compte publiees dans
  * les `fenetreJours` derniers jours -- utilise par la commande "bilan" (voir
  * calculerBilan ci-dessous, qui prend directement ce resultat en entree).
@@ -251,6 +290,7 @@ function calculerBilan(entrees, { compte } = {}) {
 module.exports = {
   creerBaseVeilleEtPosts,
   creerVuesParCompte,
+  ajouterEntreeVeille,
   recupererEntreesRecentes,
   calculerBilan,
   PROPRIETES_VEILLE_ET_POSTS,

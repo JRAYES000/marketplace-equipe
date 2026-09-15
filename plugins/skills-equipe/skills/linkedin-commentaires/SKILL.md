@@ -305,6 +305,25 @@ l'environnement.
 l'exception synchrone levee avant tout appel reseau) -- corrige, avec test de non-regression
 (`test/notion-erreurs.test.js`, meme correction repliquee dans `linkedin-veille-virale`).
 
+**Debloque le 15/09/2026** : Julien a partage la page "LinkedIn — Veille & Commentaires" avec
+l'integration "Leads site claudeagency.fr". Jeton verifie AVANT tout usage (`GET
+/v1/users/me` renvoie bien ce nom de bot -- confirme que ce jeton correspond a l'integration
+partagee, pas une autre) ; ID de la page retrouve via `POST /v1/search` (non transmis, mais
+l'integration n'avait acces qu'a cette seule page ordinaire, sans ambiguite). `node
+creer-page-notion.js` execute reellement : base "Commentaires" creee. **Bug reel trouve et
+corrige a cette occasion** : la vue "chart" echouait (`400`, "Chart views require a CHART
+directive") faute d'objet `configuration` -- corrige dans `lib/notion.js`
+(`creerVueComparaisonHebdomadaire`) avec le schema reel de l'API (`x_axis`/`y_axis`,
+`group_by: 'week'`, `sort`), confirme par trois allers-retours avec l'API reelle jusqu'au
+succes. **Limite assumee, pas contournee** : ce schema n'accepte qu'un seul axe Y par vue --
+la vue creee montre le nombre de commentaires par semaine ; les 2 courbes complementaires
+(vues de profil, demandes de contact) restent a ajouter a la main dans l'interface, aucun
+moyen API de les superposer en un seul appel a ce jour.
+
+**Remplie avec les 5 vrais commentaires publies le 15/09** via une nouvelle fonction
+`ajouterLigneCommentaire` (`lib/notion.js`) -- verifie en relisant les 5 lignes via l'API, pas
+suppose. URL de la base dans `references/mail-20260920-brouillon.md`.
+
 ## Exemple reel attendu le 20/09 -- BLOQUE sur un point technique different, pas contourne
 
 `comptes_cibles` est desormais rempli et valide (voir ci-dessus) -- ce blocage-la est leve.

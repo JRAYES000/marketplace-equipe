@@ -132,30 +132,78 @@ async function creerBaseCommentaires({ parentPageId, notionToken } = {}) {
 /**
  * Vue demandee par le brief : "une vue qui met cote a cote le nombre de
  * commentaires de la semaine et ces deux courbes [vues de profil, demandes
- * de contact]". Cree une vue de type "chart" -- l'API des vues (2025-09-03)
- * supporte ce type, mais son objet `configuration` (choix des series, axe
- * temporel) n'est pas entierement documente publiquement au moment ou ce
- * code est ecrit : la vue est creee avec un regroupement par semaine sur
- * "Date", a ajuster a la main dans l'interface si le rendu par defaut ne
- * convient pas -- assume comme limite, pas devine plus loin.
+ * de contact]". Cree une vue de type "chart" (API des vues, 2025-09-03).
+ *
+ * LIMITE VERIFIEE le 15/09/2026, pas devinee : le schema reel de
+ * `configuration` (confirme par un essai reel, l'appel echouait avant avec
+ * "Chart views require a CHART directive in the configure param" faute de
+ * `configuration`) n'accepte qu'UN SEUL axe Y par vue -- pas de superposition
+ * "commentaires + vues de profil + demandes de contact" sur le meme
+ * graphique en un seul appel. Cette fonction cree donc la vue la plus utile
+ * a elle seule (nombre de commentaires par semaine) ; les 2 courbes
+ * complementaires ("Vues de profil (3j)", "Demandes de contact (3j)")
+ * restent a ajouter a la main dans l'interface (bouton "+" a cote des
+ * vues -> Graphique -> ajouter une serie), pas un contournement possible par
+ * API a ce jour.
  */
 async function creerVueComparaisonHebdomadaire({ databaseId, dataSourceId, notionToken } = {}) {
+  // L'id reel de la propriete "Date" n'est connu qu'apres creation (Notion le
+  // genere, ex. "{]AL") -- jamais suppose, toujours relu sur le data source.
+  const source = await appelNotion(`/data_sources/${dataSourceId}`, { notionToken });
+  const proprieteDateId = source.properties && source.properties.Date && source.properties.Date.id;
+  if (!proprieteDateId) throw new Error(`Propriete "Date" introuvable sur le data source ${dataSourceId}.`);
+
   return appelNotion('/views', {
     method: 'POST',
     notionToken,
     body: {
       database_id: databaseId,
       data_source_id: dataSourceId,
-      name: 'Commentaires vs vues de profil / demandes de contact',
+      name: 'Commentaires par semaine',
       type: 'chart',
-      sorts: [{ property: 'Date', direction: 'ascending' }],
+      configuration: {
+        type: 'chart',
+        chart_type: 'column',
+        x_axis: { type: 'date', property_id: proprieteDateId, group_by: 'week', sort: { type: 'ascending' } },
+        y_axis: { aggregator: 'count', property_id: proprieteDateId },
+      },
     },
+  });
+}
+
+/**
+ * Ajoute une entree reelle (une ligne) dans la base "Commentaires". A
+ * appeler seulement APRES une publication reelle confirmee (meme regle que
+ * enregistrerCommentairePublie/lib/registre.js) -- jamais en anticipant.
+ */
+async function ajouterLigneCommentaire({
+  dataSourceId, compte, auteurCible, lienPost, date, texte, genre, notionToken,
+} = {}) {
+  if (!dataSourceId) throw new Error('dataSourceId requis.');
+  if (!COMPTES.includes(compte)) throw new Error(`compte "${compte}" inconnu, attendu l'un de : ${COMPTES.join(', ')}.`);
+  if (!GENRES.includes(genre)) throw new Error(`genre "${genre}" inconnu, attendu l'un de : ${GENRES.join(', ')}.`);
+
+  const properties = {
+    Titre: { title: [{ text: { content: `${auteurCible} -- ${date}` } }] },
+    Compte: { select: { name: compte } },
+    'Personne visee': { rich_text: [{ text: { content: auteurCible } }] },
+    'Lien du post': { url: lienPost },
+    Date: { date: { start: date } },
+    'Texte du commentaire': { rich_text: [{ text: { content: texte } }] },
+    Genre: { select: { name: genre } },
+  };
+
+  return appelNotion('/pages', {
+    method: 'POST',
+    notionToken,
+    body: { parent: { type: 'data_source_id', data_source_id: dataSourceId }, properties },
   });
 }
 
 module.exports = {
   creerBaseCommentaires,
   creerVueComparaisonHebdomadaire,
+  ajouterLigneCommentaire,
   PROPRIETES_COMMENTAIRES,
   COMPTES,
 };

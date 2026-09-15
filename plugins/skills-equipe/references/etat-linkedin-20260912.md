@@ -746,6 +746,36 @@ commentaires du jour (avec Jean Zendji du Point n°15) sont donc reellement en l
 journalier de 5 respecte, aucune personne commentee deux fois le meme jour. Detail complet et
 lien de chaque commentaire : `linkedin-commentaires/a-publier/README.md`.
 
+## Point n°17 -- Notion debloque, les deux pages reellement remplies (15/09/2026, soir)
+
+Julien a partage la page "LinkedIn — Veille & Commentaires" avec l'integration "Leads site
+claudeagency.fr". Verification demandee avant tout usage : `GET /v1/users/me` avec
+`NOTION_TOKEN` confirme bien ce nom de bot -- le jeton correspond a la bonne integration, pas
+une autre. L'ID de la page n'avait pas encore ete transmis : retrouve via `POST /v1/search`
+(seule page ordinaire accessible a cette integration, les autres resultats etant des bases
+CRM/prospects sans rapport, ignorees comme deja etabli au Point n°9).
+
+`node creer-page-notion.js` execute reellement dans les deux skills :
+- **linkedin-veille-virale** : base "Veille & posts" creee, 3 vues par compte creees sans
+  erreur, **remplie avec les 3 vrais posts adaptes du 15/09** (metriques reelles du post
+  source reprises de `data/veille-resultats-reels-20260914.json`, pas devinees) via une
+  nouvelle fonction `ajouterEntreeVeille`.
+- **linkedin-commentaires** : base "Commentaires" creee, mais la vue "chart" a echoue en 400
+  ("Chart views require a CHART directive") -- **bug reel trouve et corrige** dans
+  `lib/notion.js` (`creerVueComparaisonHebdomadaire`), le schema reel de l'API exigeant un
+  objet `configuration` complet (`x_axis`/`y_axis`, `group_by`, `sort`), trouve par 3
+  allers-retours reels avec l'API jusqu'au succes. **Limite assumee** : ce schema n'accepte
+  qu'un seul axe Y -- impossible de superposer nombre de commentaires + vues de profil +
+  demandes de contact en un seul appel API ; les 2 courbes complementaires restent a ajouter a
+  la main dans l'interface Notion. Base **remplie avec les 5 vrais commentaires publies** (voir
+  Point n°16) via une nouvelle fonction `ajouterLigneCommentaire`.
+
+Les deux bases relues via l'API apres remplissage (`POST /v1/data_sources/.../query`) pour
+confirmer le bon nombre de lignes (3 et 5) -- pas suppose. URLs des deux pages dans
+`references/mail-20260920-brouillon.md`. Reste a faire a la main, une fois (aucun endpoint
+Notion ne le permet par API) : partager chaque page en modification avec
+`contact@claudeagency.fr` via le bouton "Share".
+
 ## Recapitulatif
 
 Au 12/09/2026, aucun point bloquant "technique" majeur ne reste ouvert :
