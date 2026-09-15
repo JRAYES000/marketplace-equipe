@@ -54,11 +54,21 @@ jamais publie, puis les 10 pages inspectees visuellement (rendu PNG via `generer
 **Resultat** : les deux templates sont bien deux fichiers distincts qui rendent des couleurs
 d'accent differentes et propres a chaque marque -- vert `#7D9B76`/`#46603F` (julien-agency) contre
 terracotta `#C6B49A`/`#9C503A` (julien-partners), conformes aux palettes verifiees le 11/09/2026
-dans `reglages-comptes.json`. **Mais l'ecart visuel entre les deux reste concentre sur trois
-elements** (le petit trait en haut de diapo, le nom de marque en pied de page, le numero de
-page) -- fond, encre du titre, typographie et mise en page restent identiques aux deux comptes
-pres. A garder en tete si Julien veut un ecart de marque plus marque qu'un simple accent de
-couleur : c'est une decision editoriale, pas un defaut technique.
+dans `reglages-comptes.json`. L'ecart visuel entre les deux reste concentre sur trois elements
+(le petit trait en haut de diapo, le nom de marque en pied de page, le numero de page) -- fond,
+encre du titre, typographie et mise en page restent identiques aux deux comptes pres.
+
+**Decision prise le 15/09/2026 (tranchee sans attendre Julien, comme le brief l'autorise pour
+tout ce qu'il ne precise pas -- a expliquer dans le mail du 20/09, voir
+`references/mail-20260920-brouillon.md`)** : garder cette base commune, ne pas creuser l'ecart.
+Claude Agency et Claude Partners sont deux facettes de la meme maison -- un ecart marque sur le
+fond et l'encre donnerait deux identites visuelles etrangeres l'une a l'autre, pas souhaitable.
+Un accent differencie sur le trait, le pied de page et le numero, avec une base commune, est le
+choix retenu -- pas un defaut a corriger. Si Julien veut malgre tout deux identites franchement
+distinctes, c'est un reglage a changer dans `templates/julien-agency.html` /
+`templates/julien-partners.html` (au minimum `--ink`, `--muted` et le fond `body`, pas seulement
+les 3 variables d'accent deja distinctes) -- pas un chantier a rouvrir ici sans decision explicite
+de sa part.
 
 Contraintes mesurees, pas supposees, specifiquement sur julien-partners (`node --test`,
 `test/tailles-police.test.js` + `test/contraste.test.js` + `test/numero-fleche.test.js`, deja

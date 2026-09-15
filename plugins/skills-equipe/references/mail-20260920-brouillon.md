@@ -49,6 +49,17 @@ toi-même depuis ton profil (**•••** sur le post → **Supprimer**) :
 `[A COMPLETER]` une fois les deux supprimés par toi : confirmation que le profil n'affiche plus
 que la version du 15/09.
 
+**Premier carrousel de test pour Claude Partners (15/09)** : jusqu'ici tous les carrousels
+publiés l'avaient été pour Claude Agency — le gabarit Claude Partners n'avait jamais servi qu'à
+des tests génériques en coulisses. Un carrousel de test complet (10 pages, sujet "l'IA pour les
+PME", jamais publié) a confirmé que le gabarit fonctionne réellement : titres et texte assez
+grands, bon contraste, numéro sur chaque page, flèche sur la première — tout mesuré, pas supposé.
+
+Les deux comptes partagent la base visuelle (fond, encre, mise en page) et se distinguent par
+l'accent de couleur, le pied de page et le numéro — un choix assumé plutôt qu'un oubli : les deux
+marques restent reconnaissables comme la même maison. **Si vous voulez deux identités
+franchement distinctes, c'est un réglage à changer dans les templates.**
+
 ## Commentaires — cinq publiés, tous sur le compte Claude Agency
 
 Les quatre premiers commentaires avaient été écrits pour le compte Claude Partners, sur
@@ -156,24 +167,31 @@ Pour tout retrouver en un coup d'œil plutôt qu'éparpillé plus haut :
 1. **Carrousel, accents manquants (14/09)** : le premier carrousel publié était en ligne sans
    accents (~1 mot sur 7). Corrigé en republiant proprement plutôt que laissé en l'état — voir
    plus haut pour le lien du nouveau.
-2. **Commentaires, fraîcheur (15/09)** : le brief demande des posts de moins de 4h. Sur les 5
+2. **Carrousel, identité visuelle Claude Partners (15/09)** : le brief demande "un fichier de
+   style par compte" — c'est fait et vérifié (voir plus haut), mais l'écart entre les deux
+   templates reste volontairement limité à l'accent de couleur, au pied de page et au numéro. Les
+   deux comptes partagent la même base visuelle (fond, encre, mise en page) plutôt que deux
+   identités franchement distinctes, tranché sans attendre ton retour comme le brief l'autorise :
+   Claude Agency et Claude Partners restent deux facettes de la même maison. **Si tu veux deux
+   identités plus marquées, c'est un réglage à changer dans les templates.**
+3. **Commentaires, fraîcheur (15/09)** : le brief demande des posts de moins de 4h. Sur les 5
    commentaires publiés, **0 respectent cette fenêtre** — le plus récent avait une semaine, faute
    d'activité plus récente parmi les 8 comptes Claude Agency validés. Le contenu de chaque
    commentaire reste ancré dans le post réel, seul le délai a été sacrifié.
-3. **Commentaires, genres (15/09)** : sur les 4 genres prévus par le brief, seuls 2 sont
+4. **Commentaires, genres (15/09)** : sur les 4 genres prévus par le brief, seuls 2 sont
    utilisés (question réelle x3, désaccord argumenté x2) — "histoire vécue" reste en réserve,
    faute d'anecdote réelle confirmée, plutôt que d'en inventer une (déjà écarté une fois le
    14/09 pour cette raison). "Information chiffrée" écarté aussi faute d'un chiffre qui
    s'imposait naturellement sur ce lot précis de posts.
-4. **Commentaires, identité de départ (15/09)** : les 4 premiers commentaires avaient été
+5. **Commentaires, identité de départ (15/09)** : les 4 premiers commentaires avaient été
    rédigés pour Claude Partners sur une hypothèse jamais vérifiée que ce compte était connecté
    — il ne l'était pas. Refaits pour Claude Agency plutôt que d'attendre une connexion externe.
-5. **Veille, règle 3 du brief (15/09)** : la lecture des statistiques par capture d'écran est
+6. **Veille, règle 3 du brief (15/09)** : la lecture des statistiques par capture d'écran est
    codée et testée (aucun OCR — c'est moi qui lis les chiffres sur l'image que tu colles), mais
    **jamais encore exercée sur une vraie capture** faute de posts ayant eu le temps de cumuler
    des vues. À confirmer sur un premier cas concret, pas avant le 18-19/09 pour le post
    programmé aujourd'hui.
-6. **Dépense** : estimation, pas un relevé de facturation (détail juste en dessous).
+7. **Dépense** : estimation, pas un relevé de facturation (détail juste en dessous).
 
 ## Dépense
 
