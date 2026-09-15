@@ -153,9 +153,19 @@ via "Share" (le script imprime l'URL de la page pour ce geste).
 aucune page ordinaire n'est partagee avec cette integration (seulement des bases de donnees
 existantes sans rapport, non modifiees) -- `POST /v1/databases` exige un `parent.page_id`
 valide, indisponible aujourd'hui. Detail complet et marche a suivre dans le SKILL.md de
-`linkedin-commentaires` (meme blocage, memes deux skills). **A faire par Julien/Nomena** :
-partager une page Notion avec l'integration (bouton "Share"), puis fournir son ID pour
-`NOTION_PARENT_PAGE_ID`.
+`linkedin-commentaires` (meme blocage, memes deux skills).
+
+**Debloque le 15/09/2026** : Julien a partage la page "LinkedIn — Veille & Commentaires" avec
+l'integration "Leads site claudeagency.fr" -- jeton verifie correspondre a cette integration
+(`GET /v1/users/me` renvoie bien ce nom de bot), page retrouvee via `POST /v1/search` (l'ID
+n'avait pas encore ete transmis). `node creer-page-notion.js` execute reellement : base
+"Veille & posts" creee, 3 vues par compte creees. **Remplie avec les 3 vrais posts adaptes**
+(voir `a-publier/README.md`) via une nouvelle fonction `ajouterEntreeVeille` (`lib/notion.js`) --
+metriques reelles du post source (reactions/commentaires/partages/abonnes) reprises depuis
+`data/veille-resultats-reels-20260914.json`, etat "A relire" (adaptes et valides
+techniquement, mais le GO de publication de Julien n'a pas encore ete donne). Verifie en
+relisant les 3 lignes via l'API (`POST /v1/data_sources/.../query`), pas suppose. URL de la
+base dans `references/mail-20260920-brouillon.md`.
 
 **Non execute a ce stade, pour cette raison** : `creerBaseVeilleEtPosts` n'a pas ete lance
 contre l'API reelle -- sa forme est conforme a la documentation consultee, mais son

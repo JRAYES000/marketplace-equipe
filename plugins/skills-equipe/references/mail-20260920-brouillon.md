@@ -99,6 +99,9 @@ Adaptés, pas traduits : structure et angle du post source conservés, exemples 
 remplacés par des références françaises vérifiées (Insee, Bpi France Le Lab/Rexecode,
 Stratégies — pages ouvertes et lues, pas de chiffre de mémoire).
 
+Les trois sont désormais **réellement dans Notion**, pas seulement rédigés (voir plus bas) —
+état "à relire", en attente du GO de publication.
+
 `[A COMPLETER]` **Lien(s) des posts réellement publiés sur LinkedIn** — en attente du GO. Règle
 à respecter au moment de publier : trois maximum, jamais deux le même jour.
 
@@ -114,15 +117,21 @@ Claude Partners un jour (commentaires ou veille sur ce compte). Il faut une conn
 démarrer moi-même depuis mon environnement de travail actuel. `[A COMPLETER]` qui s'en charge et
 quand, si Claude Partners doit servir plus tard.
 
-## Notion — bloqué sur le partage de la page parente
+## Notion — débloqué, les deux pages sont réelles et remplies
 
-Le code des deux pages Notion ("Veille & posts" et suivi des commentaires) est prêt et testé,
-mais aucune des deux n'a pu être créée : il manque une page Notion partagée avec l'intégration
-(le jeton fonctionne, mais aucune page ordinaire ne lui est accessible).
+Merci pour le partage de "LinkedIn — Veille & Commentaires" avec l'intégration : les deux bases
+sont créées et remplies avec des données réelles, pas des lignes vides.
 
-`[A COMPLETER]` **Lien de la page Notion "Veille & posts"** — en attente que Nomena partage la
-page parente et fournisse son ID.
-`[A COMPLETER]` **Lien de la page Notion de suivi des commentaires** — même blocage.
+- [Veille & posts](https://app.notion.com/p/9aa90eff20334db694ca04fb4182b385) — les 3 posts
+  adaptés du 15/09 (voir plus haut), avec les vraies métriques du post source (réactions,
+  commentaires, partages, abonnés) et 3 vues filtrées par compte.
+- [Suivi des commentaires](https://app.notion.com/p/8dd4dc38fdb14e6190fa6b5923baba55) — les 5
+  commentaires publiés aujourd'hui (voir plus haut), avec une vue "Commentaires par semaine".
+  La vue croisant aussi les vues de profil et les demandes de contact reste à compléter à la
+  main dans Notion (limite réelle de l'API : un seul axe par graphique en un appel).
+
+Reste à faire à la main, une fois (aucun endpoint Notion ne le permet par API) : ouvrir chaque
+page → bouton **Share** → inviter `contact@claudeagency.fr` en modification.
 
 ## Dépense
 
@@ -140,12 +149,13 @@ Trois phrases suffisent, dans Claude Code :
 
 ## Arbitrage
 
-Aucune des trois skills n'a été sacrifiée : les trois ont un livrable réel et publié à ce jour
-(carrousel en ligne, cinq commentaires en ligne, trois posts de veille prêts). Les points encore
-ouverts ne dépendent plus du travail sur les skills elles-mêmes, mais de trois gestes externes,
-tous identifiés précisément : supprimer toi-même les deux anciennes versions du carrousel,
-partager la page Notion, et décider si le compte Claude Partners doit être connecté pour un
-usage futur.
+Aucune des trois skills n'a été sacrifiée : les trois ont un livrable réel à ce jour (carrousel
+en ligne, cinq commentaires en ligne, trois posts de veille réellement dans Notion), et les deux
+pages Notion sont créées et remplies. Les points encore ouverts ne dépendent plus du travail sur
+les skills elles-mêmes, mais de trois petits gestes externes, tous identifiés précisément :
+supprimer toi-même les deux anciennes versions du carrousel, inviter
+`contact@claudeagency.fr` sur les deux pages Notion (bouton Share), et décider si le compte
+Claude Partners doit être connecté pour un usage futur.
 
 N'hésite pas à revenir vers moi si tu veux qu'on creuse un point en particulier.
 
