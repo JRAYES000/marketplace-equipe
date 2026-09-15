@@ -1,4 +1,4 @@
-# Quatre posts adaptes -- prets, non publies (mis a jour le 15/09/2026)
+# Quatre posts adaptes -- trois programmes reellement (mis a jour le 15/09/2026, soir)
 
 **Trois posts reels adaptes le 15/09/2026**, choisis parmi les 15 candidats reels retenus le
 14/09/2026 (`data/veille-resultats-reels-20260914.json`, passage reel sur les 10 comptes
@@ -27,12 +27,35 @@ Julien les valide tous.
 | --- | --- | --- | --- | --- | --- |
 | 1 | `julien-partners-2026-09-15-v1.commentary.txt` | julien-partners | [Justin Welsh](https://www.linkedin.com/posts/justinwelsh_one-of-the-best-business-hacks-is-being-your-activity-7504143803625218049-bQCf) (score 0,016439, le plus eleve des 15) | Croire en soi assez longtemps pour que la competence suive, avant que les resultats ne parlent | 28% des micro-entrepreneurs francais encore actifs 5 ans apres (Insee Premiere n°2069, 2025 -- page ouverte et lue) |
 | 2 | `julien-agency-2026-09-15-v1.commentary.txt` | julien-agency | [Jason Feifer](https://www.linkedin.com/posts/jasonfeifer_this-ad-could-have-pissed-everyone-off-activity-7503453455580057601-S0Q6) (score 0,012546) | Retourner un defaut assume en argument de vente plutot que de le cacher | Campagne "fruits et legumes moches" d'Intermarche : -30%, Grand Prix Strategies de la publicite 2014 (page Strategies ouverte et lue) |
-| 3 | `julien-agency-2026-09-15-v2.commentary.txt` | julien-agency | [Codie A. Sanchez](https://www.linkedin.com/posts/codiesanchez_business-scaling-isnt-rocket-science-but-activity-7503799578358525952-6opW) (score 0,006832) | Le cout reel d'un recrutement se mesure des mois apres, pas a la signature | 78% des PME/TPE francaises confrontees a des difficultes de recrutement (Bpi France Le Lab/Rexecode, mai 2023 -- page ouverte et lue) |
+| 3 | `julien-agency-2026-09-15-v2.commentary.txt` | julien-agency | [Codie A. Sanchez](https://www.linkedin.com/posts/codiesanchez_business-scaling-isnt-rocket-science-but-activity-7503799578358525952-6opW) (score 0,006832) | Le cout reel d'un recrutement se mesure des mois apres, pas a la signature | 60% des dirigeants de PME/TPE francaises ayant cherche a recruter confrontes a des difficultes (Bpifrance Le Lab/Rexecode, T3 2025 -- chiffre rafraichi le 15/09, page ouverte et lue) |
 
 Chaque post source est note ici et reste verifiable via son lien -- **jamais republie a
 l'identique**, chaque texte est une redaction originale qui reprend la structure/l'angle du post
 source avec un exemple et une source francaise reels, conformement a la consigne "adapter, pas
 traduire".
+
+## Relu par Julien, corrige, programme reellement -- 15/09/2026 (soir)
+
+Les 3 textes ont ete relus integralement par Julien (colles un par message pour eviter la
+troncature rencontree plus tot), corriges (chiffre Codie Sanchez rafraichi a une edition plus
+recente de la meme enquete, deux reformulations, traits d'union et accents verifies avec la
+meme rigueur sur les 3), puis repasses reellement par les garde-fous d'ecriture -- **3/3
+ACCEPTE**. GO donne pour programmer.
+
+**Programmes reellement via Buffer** (compte `contact@claudeagency.fr`, deux profils LinkedIn
+connectes -- voir `references/actions-composio.md`), un par jour distinct :
+
+| # | Compte | Date programmee | Heure |
+| --- | --- | --- | --- |
+| Codie A. Sanchez | julien-agency | aujourd'hui 15/09/2026 | 22h29 |
+| Jason Feifer | julien-agency | demain 16/09/2026 | 18h00 (Europe/Paris) |
+| Justin Welsh | julien-partners | apres-demain 17/09/2026 | 13h00 (Europe/Paris) |
+
+**Pas encore confirmes en ligne** au moment de cette mise a jour -- Notion reflete l'etat reel
+("Programme", pas "Publie"). A confirmer et passer a "Publie" avec le lien reel une fois chaque
+post effectivement paru (verification a demander explicitement le jour dit, jamais supposer
+qu'une programmation a fonctionne sans la verifier -- meme discipline que le reste de ce
+chantier).
 
 ## L'ancien exemple du 12/09/2026 -- toujours a part
 
@@ -41,9 +64,12 @@ que `comptes_a_surveiller` ne soit rempli -- reagit a un post de Julien Rayes lu
 agency), pas a un veritable tiers. Reste documente ici pour memoire, mais **les 3 posts ci-dessus
 sont les premiers exemples reels sur un veritable compte tiers.**
 
-## En attente du GO de Julien
+## Methode de publication -- desormais Buffer, pas `publierPost`
 
-Rien n'a ete publie. Pour publier reellement un de ces posts une fois valide :
+`publierPost`/Composio reste la methode pour un post texte simple si Buffer n'est pas
+disponible, mais le GO du 15/09 a ete execute via Buffer (programmation a l'avance, respect
+natif du quota hebdomadaire par canal) -- voir la table ci-dessus et
+`references/actions-composio.md` pour le detail. `publierPost` reste documentee pour memoire :
 
 ```js
 const { publierPost } = require('../lib/publier');
@@ -55,4 +81,4 @@ await publierPost({
 });
 ```
 
-Respecter la regle "trois maximum, jamais deux le meme jour" si plusieurs sont valides d'un coup.
+Respecter la regle "trois maximum, jamais deux le meme jour" quelle que soit la methode utilisee.

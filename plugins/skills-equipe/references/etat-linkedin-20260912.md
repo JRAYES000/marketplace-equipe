@@ -772,9 +772,40 @@ CRM/prospects sans rapport, ignorees comme deja etabli au Point n°9).
 
 Les deux bases relues via l'API apres remplissage (`POST /v1/data_sources/.../query`) pour
 confirmer le bon nombre de lignes (3 et 5) -- pas suppose. URLs des deux pages dans
-`references/mail-20260920-brouillon.md`. Reste a faire a la main, une fois (aucun endpoint
-Notion ne le permet par API) : partager chaque page en modification avec
-`contact@claudeagency.fr` via le bouton "Share".
+`references/mail-20260920-brouillon.md`.
+
+**Verifie plus tard le meme jour, via Claude in Chrome (lecture seule, aucune modification)** :
+le partage avec `contact@claudeagency.fr` est en realite **deja en place** sur les deux pages --
+"Accès complet", herite du partage de la page parente "LinkedIn — Veille & Commentaires" fait
+par Julien. Rien a faire a la main de ce cote, contrairement a ce qui etait suppose juste
+au-dessus (le geste "Share" manuel n'etait pas necessaire, l'heritage suffit).
+
+## Point n°18 -- Buffer connecte, 3 posts de veille relus et programmes reellement (15/09/2026, soir)
+
+Nomena a connecte Buffer (`contact@claudeagency.fr`, deux profils LinkedIn). Verifie reellement
+avant tout usage (session Claude in Chrome deja authentifiee, aucun identifiant manipule) : le
+composeur de post liste bien `julien-rayes` (Claude Agency) et `julien-rayes-claude-partners`
+(Claude Partners) -- confirme que **Buffer atteint Claude Partners, la ou Composio a toujours
+echoue** (Point n°1). Buffer complete donc Composio plutot qu'il ne le remplace : Composio pour
+le carrousel (document PDF) et les commentaires (Buffer ne sait pas commenter le post d'un
+tiers, verifie), Buffer pour les posts texte de veille -- en particulier tout ce qui cible
+julien-partners.
+
+Julien a relu integralement les 3 textes de veille (envoyes un par message apres plusieurs
+troncatures -- lecon retenue). Trois corrections, repassees par les garde-fous reels (3/3
+ACCEPTE) : chiffre recrutement rafraichi (Bpifrance Le Lab/Rexecode T3 2025, 60%, remplace mai
+2023/78%, meme population mesuree), une phrase reformulee (referent flou), et une seconde
+relecture a trouve deux vrais oublis d'accent (`independants`, `l'exterieur/exterieure`) et deux
+traits d'union manquants (`soi-meme`, `qu'est-ce qui`) en plus des corrections demandees.
+
+**Programmes reellement dans Buffer**, un par jour (regle "trois maximum, jamais deux le meme
+jour" respectee) : Codie Sanchez -> julien-agency, 15/09 22h29 ; Jason Feifer -> julien-agency,
+16/09 18h00 ; Justin Welsh -> julien-partners, 17/09 13h00. Notion mis a jour avec la realite
+(`Etat` = "Programme", nouvelle valeur ajoutee au schema -- distincte de "Publie") plutot que
+d'anticiper une publication non confirmee. **Aucun des 3 n'est encore reellement en ligne** au
+moment de cette mise a jour -- a verifier et passer a "Publie" avec le lien reel le jour dit,
+sur demande explicite (ne jamais supposer qu'une programmation Buffer a abouti sans verifier).
+Detail complet : `linkedin-veille-virale/SKILL.md` et `a-publier/README.md`.
 
 ## Recapitulatif
 

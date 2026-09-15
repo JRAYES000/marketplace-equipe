@@ -236,6 +236,39 @@ paquet -- demande explicite pour ce livrable. Detail complet, post source note p
 dans `a-publier/README.md`. Aucune publication reelle -- en attente du GO de Julien, regle
 "trois maximum, jamais deux le meme jour" a respecter au moment de publier.
 
+## GO de Julien, relecture, chiffre rafraichi, programmation reelle via Buffer -- 15/09/2026 (soir)
+
+Julien a relu les 3 textes (colles integralement, un par message, apres plusieurs troncatures --
+lecon retenue : toujours coller un texte long seul dans son message, jamais mele a du
+commentaire). Trois retouches faites puis repassees par les garde-fous reels (`validerEtConvertirPost`,
+ACCEPTE a chaque fois) :
+- **Codie Sanchez** : chiffre recrutement rafraichi (mai 2023 -> T3 2025, 78% -> 60%, meme
+  population mesuree -- source Bpifrance Le Lab/Rexecode reellement ouverte et verifiee), phrase
+  "avant de se laisser seduire par le courant" clarifiee, "lui meme" -> "lui-meme".
+- **Jason Feifer** : source Strategies citee deux fois de suite -- retiree la seconde ; "des
+  octobre de la meme annee 2014" -- redondance retiree.
+- **Justin Welsh** : "Ca se retourne rarement avant plusieurs annees" (referent flou) ->
+  "Ce jugement met rarement moins de plusieurs annees a changer" ; plus, meme vigilance que les
+  accents appliquee aux traits d'union des 3 textes : "soi meme" -> "soi-meme", "qu'est ce qui"
+  -> "qu'est-ce qui", et deux vrais oublis d'accent trouves au passage ("des le depart" ->
+  "des le depart", "l'exterieur/exterieure" -> avec accent, "independants" -> avec accent).
+
+**Buffer connecte reellement** (compte `contact@claudeagency.fr`, deux profils LinkedIn
+branches -- voir `references/actions-composio.md`, section 15/09 soir, pour la verification
+faite avant tout usage). Les 3 textes **programmes reellement** via Buffer, un par jour distinct
+(regle "trois par semaine maximum, jamais deux le meme jour" respectee) :
+- Codie Sanchez -> julien-agency, aujourd'hui 15/09 22h29.
+- Jason Feifer -> julien-agency, demain 16/09 18h00 (Europe/Paris).
+- Justin Welsh -> julien-partners, apres-demain 17/09 13h00 (Europe/Paris).
+
+Notion mis a jour avec la realite (pas une anticipation) : `Etat` = "Programme" (nouvelle valeur
+ajoutee au schema de la base -- ne pas confondre avec "Publie", reserve au moment ou le post est
+reellement en ligne), `Date de publication` = date programmee. **Pas encore "Publie"** : aucun
+des 3 n'est encore reellement paru au moment de cette mise a jour -- a confirmer et a passer en
+"Publie" avec le lien reel une fois chaque post effectivement en ligne (demander explicitement
+"verifie si le post de veille du jour est en ligne" le jour dit, plutot que de supposer que la
+programmation Buffer a fonctionne sans le verifier).
+
 Etat des lieux complet des 3 skills linkedin-* et de tout ce qui devient
 activable des que chaque blocage se leve :
 `references/etat-linkedin-20260912.md` du paquet.
