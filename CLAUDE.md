@@ -101,6 +101,54 @@ Ce qui reste obligatoire malgré la vitesse :
      directement les fichiers du clone local (`node etat.js`, etc.) plutôt que
      de passer par l'outil `Skill`.
 
+## Méthode de travail — règles non négociables
+
+Ces règles ont été redemandées à chaque session pendant quatre jours de chantier (11-15/09/2026).
+Elles vivent ici maintenant, une fois pour toutes, pour ne plus avoir à les retaper.
+
+- **Vérifier, ne jamais supposer.** Toute affirmation sur l'état d'un fichier, d'une skill, d'un
+  compte ou d'un service s'appuie sur une sortie brute de commande ou une lecture directe faite
+  **dans la session en cours** — jamais sur la foi d'un résumé de session précédente, d'une
+  intuition, ou de ce qui « devrait » être vrai. Conclure chaque vérification par **FAIT** ou
+  **NON CONFORME**, jamais par une formule floue du type « globalement bon » ou « ça a l'air ok »
+  — ça ne dit pas si le contrôle a réellement eu lieu.
+- **Rien de public sans feu vert explicite.** Publier un post, supprimer un contenu en ligne,
+  envoyer un message ou un mail, modifier un réglage partagé : toujours attendre un accord
+  explicite donné **dans la conversation en cours**, jamais déduit d'un accord donné une fois
+  dans le passé pour un cas différent.
+- **Ne jamais inventer.** Aucun chiffre sans source réellement ouverte et lue (pas un chiffre "de
+  mémoire", pas une estimation présentée comme un fait) ; aucune expérience professionnelle
+  attribuée à Julien qui n'a pas réellement eu lieu ; aucune URL non vérifiée. Voir l'incident du
+  14/09/2026 (genre `histoire_vecue`, `linkedin-commentaires/SKILL.md`) qui a motivé cette règle.
+- **Accents corrects dès la première frappe**, dans tout contenu destiné à publication — jamais
+  une correction a posteriori. Seule exception : le gras en caractères Unicode (`𝐜𝐨𝐦𝐦𝐞 𝐜𝐞𝐜𝐢`),
+  qui exclut les accents par construction (aucune forme accentuée n'existe dans ce jeu de
+  caractères) — voir l'incident du carrousel du 14/09/2026 dans `linkedin-carrousel/SKILL.md`.
+- **Ne pas relancer une piste déjà bloquée** en espérant un résultat différent sans information
+  ou accès nouveau. Un blocage constaté (ex. endpoint qui n'existe pas, compte non connecté,
+  classifieur qui refuse un geste) se documente et se contourne autrement, ou attend une donnée
+  nouvelle — il ne se retente pas à l'identique.
+- **Committer et pousser au fur et à mesure**, pas en un seul lot en fin de session. Chaque
+  correction ou chaque étape validée part immédiatement, avec son propre message de commit.
+- **Signaler une erreur commise plutôt que la taire.** Y compris une action accidentelle sans
+  conséquence réelle (ex. suppression puis restauration immédiate d'un fichier) — le signalement
+  fait partie du travail, pas seulement la correction.
+
+### Pièges spécifiques déjà rencontrés sur ce dépôt
+
+- **Session Claude Code déjà ouverte = version périmée invisible.** Voir point 4 plus bas dans
+  « Resynchroniser après le push » — une session lancée avant un push continue de charger le
+  `SKILL.md` de la version installée à son démarrage, même après un push et une resynchronisation
+  réussie côté claude.ai et CLI.
+- **La marketplace doit être ajoutée une fois par compte claude.ai** avant qu'une mise à jour ait
+  un sens — voir point 1 plus bas. Un compte qui ne voit rien dans « Vos plugins » n'a pas un
+  problème de synchronisation en retard, il n'a simplement jamais fait cet ajout initial.
+- **Aucun jeton (API) n'est jamais persisté entre sessions.** `APIFY_TOKEN`, `NOTION_TOKEN`, etc.
+  vivent dans l'environnement d'une session précise et disparaissent avec elle — à réexporter à
+  chaque nouvelle session qui en a besoin, jamais lus automatiquement depuis un fichier de
+  secrets (voir « Ce dépôt est public » ci-dessous). Une session qui ne voit pas de jeton doit le
+  traiter comme réellement absent, pas comme un oubli à corriger soi-même.
+
 ## Ce dépôt est public : aucune clé dedans
 
 Les clés d'API de l'équipe vivent dans `JRAYES000/claude-config` (privé), fichier
