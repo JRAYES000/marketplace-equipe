@@ -68,14 +68,29 @@ verification : `references/comptes-cibles-proposition-20260914.md`.
 
 ### Structure et frequence -- `lib/planifier-commentaires.js`
 
-- **Fraicheur** : seuls les posts de moins de 4h sont retenus. Sur des comptes peu actifs
-  (moins de quelques posts/semaine chacun), un passage donne legitimement 0 post frais -- pas un
-  signe de panne, le repli documente (poster le plus recent en le signalant) est alors la norme.
-  **Testee en conditions reelles deux fois le 15/09/2026** (matin et fin d'apres-midi, lecture
-  directe des 16 comptes cibles via navigateur) : **0 post frais les deux fois** -- la regle n'a
-  encore jamais ete "vraie" sur ces comptes, mais l'ecart se resserre reellement (72h -> 7h pour
-  le compte le plus proche entre les deux passages). Voir
-  `references/linkedin-commentaires-historique.md` pour le detail compte par compte.
+- **Fraicheur** : seuls les posts de moins de 4h sont retenus en priorite. Sur des comptes peu
+  actifs (moins de quelques posts/semaine chacun), un passage donne legitimement 0 post frais --
+  pas un signe de panne, mais desormais un repli qui a une LIMITE (voir plafond ci-dessous, pas
+  "poster le plus recent quel qu'il soit").
+  **Testee en conditions reelles trois fois** (15/09 matin, 15/09 fin d'apres-midi, 16/09 matin,
+  lecture directe des 16 comptes cibles via navigateur) : **0 post frais les trois fois** -- la
+  regle n'a encore jamais ete "vraie" sur ces comptes. L'ecart au plus proche n'evolue pas de
+  facon monotone (72h -> 7h -> 21h entre les trois passages) : voir "Recommandation d'usage --
+  horaire de lancement" plus bas, c'est l'heure du passage qui explique l'ecart, pas une tendance
+  qui s'ameliorerait avec le temps. Voir `references/linkedin-commentaires-historique.md` pour le
+  detail compte par compte.
+- **Plafond dur de fraicheur (ajoute le 16/09/2026)** : `validerFraicheurMaximale`
+  (`lib/planifier-commentaires.js`, `FRAICHEUR_MAX_HEURES = 48`) **refuse** tout post publie il y
+  a plus de 48h -- explicitement, pas un avertissement. Avant ce garde-fou, rien n'empechait de
+  proposer un post arbitrairement vieux des que la fenetre de 4h ne donnait rien (incident reel :
+  un post de 5 mois propose dans le lot du 16/09/2026, refuse par Nomena -- "a ce delai, il ne
+  sera vu par personne, et ca donne l'image de quelqu'un qui racle le fil pour remplir un quota",
+  contraire a la raison d'etre de la regle, pas seulement a sa lettre). 48h choisi comme plafond
+  raisonnable : au-dela, le post a deja fini son cycle de visibilite dans le fil. Consequence
+  assumee : si aucun post n'est ni frais (<4h) ni acceptable (<48h) sur un compte donne, le bon
+  comportement est de ne rien proposer pour ce compte ce jour-la, jamais de forcer un vieux post.
+  Teste par 4 cas dans `test/planifier-commentaires.test.js` (accepte pile a 48h, refuse a 48.1h,
+  refuse sur le cas reel du post de 5 mois, refuse si `postedAt` absent).
 - **Quota journalier (5/jour)** et **jamais deux fois la meme personne le meme jour** --
   verifie contre `data/registre-commentaires.json`, pas une simple limite documentee. **Testee
   pour de vrai le 15/09/2026** (fin d'apres-midi, registre reel a 5/5) : refus confirme
@@ -100,7 +115,19 @@ verification : `references/comptes-cibles-proposition-20260914.md`.
   d'une liste fermee de mots toujours accentues en francais standard -- heuristique
   volontairement imparfaite (mots ambigus type "a"/"à" exclus pour eviter les faux positifs).
 
-`node --test` : 74 tests.
+`node --test` : 78 tests.
+
+## Recommandation d'usage -- horaire de lancement (16/09/2026)
+
+Sur les 3 passages reels effectues a ce jour, l'ecart a la fenetre de 4h n'a jamais ete
+monotone dans le temps (72h le 15/09 matin, 7h le 15/09 fin d'apres-midi, 21h le 16/09 matin) :
+c'est **l'heure du passage dans la journee**, pas le nombre de jours ecoules, qui semble
+determiner a quel point on s'approche d'un post frais -- les comptes cibles (entrepreneurs,
+consultants) publient surtout en fin de matinee et l'apres-midi, tres peu au reveil. Conclusion
+exploitable, pas juste une observation : **lancer le passage du matin plus tard dans la matinee
+(en fin de matinee plutot qu'au reveil) et privilegier le passage de l'apres-midi quand un choix
+est possible** augmente la probabilite reelle de tomber sur un post dans la fenetre de 4h. A
+confirmer sur d'autres passages avant de la considerer comme acquise.
 
 ## Audit adversarial et de robustesse (15/09/2026)
 
