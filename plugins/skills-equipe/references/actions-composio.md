@@ -512,3 +512,40 @@ hebdomadaire ("0/3 posts sent this week"), pratique pour faire respecter la regl
 
 Buffer ne remplace donc pas Composio : il debloque un cas precis (Claude Partners, posts
 texte) que Composio ne couvrait pas, et complete l'outillage plutot que de s'y substituer.
+
+### 16/09/2026 -- Limites reelles de COMPOSIO_MANAGE_CONNECTIONS et precedence des connexions
+
+**Schema reel de l'outil** (verifie via `COMPOSIO_GET_TOOL_SCHEMAS`) :
+- Parametres : `toolkits` (array, requis), `reinitiate_all` (boolean, defaut `false`),
+  `session_id` (string, optionnel, issu d'un appel `COMPOSIO_SEARCH_TOOLS` prealable).
+- Il n'existe AUCUN parametre `action` ("list"/"add" documentes dans les echanges avec Julien
+  n'existent pas) -- un tel champ est silencieusement ignore par le serveur, sans erreur.
+- Comportement documente : connexion deja active -> renvoie ses details ; sinon -> renvoie un
+  `redirect_url` d'authentification ; `reinitiate_all: true` force une reconnexion meme avec
+  une connexion active.
+- Cet outil ne fonctionne jamais comme un vrai "list" : son resume (`active_connections`) reste
+  a 0 quels que soient les parametres. Seul `COMPOSIO_SEARCH_TOOLS` a deja renvoye une vraie
+  liste de comptes connectes (nom, ID, URN, statut) -- mais sa recherche semantique est
+  sensible a la formulation exacte de la requete (une formulation imprecise peut matcher un
+  toolkit sans rapport). Formulation qui fonctionne : "linkedin get my profile info".
+
+**Comptes "Connected Accounts" vs "Shared connections"** : sur le dashboard Composio, une cle
+consumer (`ck_`) ne voit que les comptes explicitement pretes a l'equipe ("Shared
+connections"), pas les comptes personnels du proprietaire ("Connected Accounts"). Avant le
+16/09, un seul compte LinkedIn etait prete (`averse-cooser` / Claude Agency / `aFqu-W7ClW`,
+depuis le 11/09). Julien a ajoute un second pret (`asher-fill`, Claude Partners / `ZvLHybJZhj`
+a priori) le 16/09 via "Connect for my team".
+
+**Limite structurelle confirmee** : meme apres ce second partage actif, `asher-fill` reste
+invisible a TOUS les appels MCP (`COMPOSIO_MANAGE_CONNECTIONS`, `COMPOSIO_SEARCH_TOOLS`,
+`LINKEDIN_GET_MY_INFO`) -- tout se resout systematiquement sur `averse-cooser`/`aFqu-W7ClW`.
+Confirme sur session MCP fraiche (cache exclu) et par inspection visuelle du dashboard : la
+note affichee sur la ligne `asher-fill` dit litteralement "Using your own connection in MCP".
+Regle de precedence Composio : tant qu'une cle a sa propre connexion directe sur un toolkit,
+toute connexion partagee sur ce meme toolkit est ignoree -- sans parametre expose cote appelant
+pour la contourner (teste sur `LINKEDIN_GET_MY_INFO`, ignore silencieusement).
+
+**Consequence pratique** : `linkedin-carrousel` et `linkedin-commentaires` (qui publient via
+Composio MCP direct, pas via Buffer) restent structurellement bloques pour julien-partners tant
+que cette precedence n'est pas resolue cote Composio (support/documentation a consulter) -- ce
+n'est pas un probleme de code ou de configuration reparable de notre cote.
