@@ -97,13 +97,29 @@ verification : `references/comptes-cibles-proposition-20260914.md`.
   (`"Commentaire refuse : quota journalier atteint (5/5 deja publies aujourd'hui pour ce
   compte)."`), y compris contre la variante de casse que l'audit adversarial avait trouvee
   contournable (fusionne desormais vers le vrai compte, le quota tient quand meme).
+- **Canal de publication reel (ajoute le 16/09/2026)** : `validerCanalPublicationReel` refuse de
+  preparer un commentaire pour un compte dont `canal_publication_reel` n'est pas `true` dans
+  `reglages-comptes.json`. Incident reel, **deux fois de suite** : le 15/09/2026, 4 commentaires
+  rediges pour julien-partners ont echoue en publication (4 x 403) parce que ce compte n'est pas
+  connecte a Composio pour les commentaires (Buffer ne peut pas servir de repli non plus -- il ne
+  publie que des posts programmes, jamais un commentaire sous celui d'un tiers) ; le 16/09/2026,
+  **le meme lot a ete refait a l'identique** pour julien-partners avant d'etre bloque a la
+  relecture, faute de tout garde-fou qui l'aurait empeche des la preparation. `reglages-comptes.json`
+  porte desormais ce champ explicitement : `false` (+ note) pour julien-partners, `true` pour
+  julien-agency (`averse-cooser`, seul canal reellement connecte a ce jour). Teste par 4 cas, et
+  verifie en conditions reelles contre le lot du 16/09 lui-meme (voir `a-publier/README.md`).
 
 ### Contenu du commentaire -- `lib/valider-commentaire.js`
 
 - **2 a 4 phrases**, aucune puce/liste numerotee, aucun emoji, aucun lien.
 - **Formulations creuses refusees** ("super post", "tellement vrai", "top", "merci du partage").
 - **Genre coherent avec le contenu** : `information_chiffree` exige un chiffre dans le texte,
-  `vraie_question` exige que le texte se termine par "?".
+  `vraie_question` exige que le texte se termine par "?". **Limite assumee, non verifiable par
+  une regle mecanique** : le chiffre exige par `information_chiffree` doit etre une information
+  EN PLUS du post (le brief), pas une reformulation du chiffre deja present dans le post cible --
+  incident reel le 16/09/2026 (deux commentaires recyclaient le chiffre du post source), corrige
+  a la relecture humaine, aucun garde-fou automatique ne peut le detecter (il faudrait comparer
+  au texte du post cible, hors de portee de `validerCommentaire` qui ne voit que le commentaire).
 - **Aucune experience personnelle non sourcee** : un commentaire qui affirme a la premiere
   personne ("on"/"nous"/"j'ai") avoir vecu une experience professionnelle concrete (client,
   mission, resultat) est **refuse**, sauf si `anecdoteSourcee: true` est passe explicitement --
@@ -111,11 +127,20 @@ verification : `references/comptes-cibles-proposition-20260914.md`.
   anecdote pour remplir le genre `histoire_vecue`** (ou toute autre affirmation d'experience) :
   sans anecdote confirmee, choisir un autre genre. Voir `references/` pour l'incident qui a
   motive cette regle.
+- **Generalisation statistique vague et non sourcee (ajoute le 16/09/2026)** :
+  `validerQuantificationVague` refuse "la plupart de/des", "la majorite de/des", "beaucoup
+  de/d'", "peu de/d'" suivi d'un groupe/nom -- incident reel : "La plupart des utilisateurs de
+  Claude Code n'en connaissent qu'une poignee" (aucun chiffre, aucune experience a la premiere
+  personne) passait integralement inapercu de tous les garde-fous existants. Contrairement a
+  `anecdoteSourcee`, **aucun echappatoire** : un commentaire de 2-4 phrases sans lien n'a pas de
+  moyen raisonnable de citer une vraie source, la seule remediation reelle est de reformuler.
+  Exception assumee pour ne pas casser les tours idiomatiques courants ("la plupart du temps",
+  "dans la plupart des cas").
 - **Accents manquants** (`lib/valider-orthographe.js`) : refuse tout texte contenant un mot
   d'une liste fermee de mots toujours accentues en francais standard -- heuristique
   volontairement imparfaite (mots ambigus type "a"/"à" exclus pour eviter les faux positifs).
 
-`node --test` : 78 tests.
+`node --test` : 85 tests.
 
 ## Recommandation d'usage -- horaire de lancement (16/09/2026)
 

@@ -16,7 +16,9 @@
     "ton": ["chaleureux", "professionnel", "facilitateur", "oriente-reseau"],
     "seuil_max_commentaires": 30,
     "plafond_par_jour": 5,
-    "_plafond_par_jour_note": "Corrige le 14/09/2026 : 12 etait l'ancienne convention reprise de visibilite-ops, le brief integral impose 5/jour. Desormais fait respecter par lib/planifier-commentaires.js (validerQuotaJournalier), pas seulement documente."
+    "_plafond_par_jour_note": "Corrige le 14/09/2026 : 12 etait l'ancienne convention reprise de visibilite-ops, le brief integral impose 5/jour. Desormais fait respecter par lib/planifier-commentaires.js (validerQuotaJournalier), pas seulement documente.",
+    "canal_publication_reel": false,
+    "_canal_publication_reel_note": "Confirme NON connecte a Composio pour publier des commentaires (4 echecs 403 reels le 15/09/2026, voir a-publier/README.md). Buffer ne peut pas non plus servir de repli : Buffer publie des posts, jamais des commentaires sous le post d'un tiers. Meme erreur refaite a l'identique le 16/09/2026 (4 commentaires prepares pour ce compte, aucun publiable) -- d'ou validerCanalPublicationReel, qui refuse desormais toute preparation de commentaire pour un compte a false ici."
   },
   "julien-agency": {
     "actor_urn": "urn:li:person:aFqu-W7ClW",
@@ -35,6 +37,8 @@
     "ton": ["confiant", "direct", "pedagogue", "oriente-dirigeants"],
     "seuil_max_commentaires": 30,
     "plafond_par_jour": 5,
-    "_plafond_par_jour_note": "Corrige le 14/09/2026 : 12 etait l'ancienne convention reprise de visibilite-ops, le brief integral impose 5/jour. Desormais fait respecter par lib/planifier-commentaires.js (validerQuotaJournalier), pas seulement documente."
+    "_plafond_par_jour_note": "Corrige le 14/09/2026 : 12 etait l'ancienne convention reprise de visibilite-ops, le brief integral impose 5/jour. Desormais fait respecter par lib/planifier-commentaires.js (validerQuotaJournalier), pas seulement documente.",
+    "canal_publication_reel": true,
+    "_canal_publication_reel_note": "Seul compte reellement connecte a Composio pour publier des commentaires (averse-cooser = urn:li:person:aFqu-W7ClW) -- les 5 commentaires reels du 15/09/2026 sont passes par ce canal."
   }
 }

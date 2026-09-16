@@ -92,10 +92,35 @@ function validerQuotaJournalier(entreesDuJour, { auteurCible }) {
   }
 }
 
+/**
+ * Leve une erreur si `compte` n'a pas de canal de publication reel pour les
+ * commentaires (ajoute le 16/09/2026, deuxieme incident identique : un lot
+ * entier de commentaires prepare pour julien-partners le 15/09/2026 PUIS a
+ * nouveau le 16/09/2026, alors que ce compte n'est pas connecte a Composio
+ * pour publier des commentaires -- 4 echecs 403 reels le 15/09, refait a
+ * l'identique le 16/09 faute de garde-fou. Buffer ne peut pas servir de
+ * repli : Buffer publie des posts programmes, jamais un commentaire sous le
+ * post d'un tiers. `reglagesComptes` = le contenu de reglages-comptes.json ;
+ * le champ requis est `canal_publication_reel` (booleen explicite, jamais
+ * devine -- pas de valeur par defaut permissive).
+ */
+function validerCanalPublicationReel(compte, reglagesComptes) {
+  const reglages = reglagesComptes && reglagesComptes[compte];
+  if (!reglages || reglages.canal_publication_reel !== true) {
+    throw new Error(
+      `Commentaire refuse : le compte "${compte}" n'a pas de canal de publication reel pour les ` +
+      "commentaires (canal_publication_reel absent ou false dans reglages-comptes.json) -- " +
+      'Composio ne connait pas ce compte et Buffer ne sait publier que des posts, jamais des ' +
+      "commentaires sous celui d'un tiers. Ne pas preparer de commentaire pour ce compte."
+    );
+  }
+}
+
 module.exports = {
   filtrerPostsFrais,
   validerQuotaJournalier,
   validerFraicheurMaximale,
+  validerCanalPublicationReel,
   dateJourISO,
   FENETRE_FRAICHEUR_HEURES,
   QUOTA_MAX_PAR_JOUR,
