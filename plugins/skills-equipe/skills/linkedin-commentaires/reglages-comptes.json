@@ -31,9 +31,20 @@
       "https://www.linkedin.com/in/mh-baydama/",
       "https://www.linkedin.com/in/raphaelmizrahi/",
       "https://www.linkedin.com/in/pierre-emmanuel-cochet-0053205a/",
-      "https://www.linkedin.com/in/romain-charissou-meteor/"
+      "https://www.linkedin.com/in/romain-charissou-meteor/",
+      "https://www.linkedin.com/in/emmanuel-brisseau/",
+      "https://www.linkedin.com/in/theo-meuriot/",
+      "https://www.linkedin.com/in/yohann-nezri-expert-digitalisation/",
+      "https://www.linkedin.com/in/mehdi-stili-6769a6174/",
+      "https://www.linkedin.com/in/sbenoist/",
+      "https://www.linkedin.com/in/leoneladagbe/"
     ],
-    "_comptes_cibles_source": "8 profils reels verifies par navigation, VALIDES par Julien le 14/09/2026 -- voir references/comptes-cibles-proposition-20260914.md pour le positionnement de chacun.",
+    "_comptes_cibles_source": "8 profils reels verifies par navigation, VALIDES par Julien le 14/09/2026 (voir references/comptes-cibles-proposition-20260914.md) + 6 comptes complementaires VALIDES par Nomena le 16/09/2026 apres 3 passages consecutifs a zero candidat (voir references/comptes-cibles-proposition-20260916-complement-agence.md) : ces 6 ont ete verifies sur leur FREQUENCE DE PUBLICATION REELLE (5 derniers posts releves un par un), pas seulement leur pertinence thematique -- c'etait precisement le trou du 14/09/2026. `mehdi-stili-6769a6174` marque `_statut: en_observation` (voir ci-dessous) : cadence recente bonne mais precedee d'un trou de 3-4 mois, a reevaluer sur sa cadence reelle dans 2 semaines plutot que traite comme un compte fiable d'emblee.",
+    "_critere_pays_corrige_20260916": "Le critere \"base en France\" a ete initialement applique pour ecarter Leonel ADAGBE (base a Lome, Togo), avant d'etre corrige par Nomena le 16/09/2026 : ce qui compte pour un commentaire sous un post concurrent, c'est que l'AUDIENCE soit francophone et proche de celle de Julien (dirigeants/PME francophones), pas le pays de residence de l'auteur du post cible. Verifie reellement pour Leonel ADAGBE avant integration : 5 derniers posts entierement en francais, adresses explicitement \"Chers dirigeants\"/\"Si vous dirigez une PME\" -- audience cible identique a celle des 13 autres comptes malgre une base a Lome. Ne plus utiliser \"pays de residence\" comme filtre pour un futur candidat -- verifier la langue des posts et le public vise, uniquement.",
+    "comptes_cibles_statut": {
+      "https://www.linkedin.com/in/mehdi-stili-6769a6174/": "en_observation"
+    },
+    "_comptes_cibles_statut_note": "Champ hors de comptes_cibles (qui doit rester une simple liste d'URL, format attendu par trouverPosts/targetUrls) -- annotation manuelle a consulter par la session Claude avant de traiter un compte comme fiable au meme titre que les autres. `en_observation` : cadence recente correcte mais precedee d'un trou de plusieurs mois, statut a reevaluer sur sa cadence reelle des la semaine du 30/09/2026 (2 semaines apres le 16/09) avant de retirer cette annotation.",
     "ton": ["confiant", "direct", "pedagogue", "oriente-dirigeants"],
     "seuil_max_commentaires": 30,
     "plafond_par_jour": 5,

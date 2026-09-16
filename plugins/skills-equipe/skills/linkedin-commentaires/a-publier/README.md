@@ -87,14 +87,44 @@ passage pour rien.
 3 tests dans `test/planifier-commentaires.test.js` (le cas reel ci-dessus, un compte sans aucun
 post trouve, et le cas ou rien n'est signale car tous les comptes sont actifs).
 
-**2. La liste elle-meme** -- 5 comptes proposes en complement pour julien-agency, verifies sur leur
-frequence de publication REELLE (pas seulement leur pertinence thematique, l'erreur du 14/09) :
-Emmanuel Brisseau (Bordeaux), Théo Meuriot (Rouen), Yohann Nezri (Marseille), Mehdi Stili
-(Toulon), Stéphane Benoist (Bordeaux) -- detail complet, cadence relevee poste par poste, et
-reserves assumees (2 comptes au positionnement legerement excentre, 1 avec un historique
-irregulier a resurveiller) dans
-`references/comptes-cibles-proposition-20260916-complement-agence.md`. **En attente de validation
-Julien/Nomena** avant copie dans `reglages-comptes.json`, meme processus que le 14/09/2026.
+**2. La liste elle-meme** -- 6 comptes valides par Nomena et integres dans `reglages-comptes.json`
+(14 comptes cibles julien-agency au total) : Emmanuel Brisseau (Bordeaux), Théo Meuriot (Rouen),
+Yohann Nezri (Marseille), Mehdi Stili (Toulon, `en_observation`), Stéphane Benoist (Bordeaux),
+Leonel ADAGBE (Lome, Togo -- integre malgre le pays de residence, voir correction du critere
+ci-dessous). Detail complet dans
+`references/comptes-cibles-proposition-20260916-complement-agence.md`.
+
+**Correction de critere** : Leonel ADAGBE avait ete ecarte a tort pour "base au Togo, pas en
+France". Nomena a corrige : le critere pertinent est l'audience (francophone, dirigeants/PME),
+pas le pays de residence de l'auteur du post -- verifie sur ses 5 derniers posts (entierement en
+francais, adresses explicitement aux dirigeants de PME). Documente dans
+`_critere_pays_corrige_20260916` (`reglages-comptes.json`) pour ne plus servir a ecarter un futur
+bon candidat.
+
+## Premier vrai succes de la fenetre de 4h -- 16/09/2026, apres integration des 6 nouveaux comptes
+
+4e passage reel de la journee, sur les 14 comptes julien-agency desormais actifs. Resultat :
+**4 posts sur 5 candidats verifies sont reellement dans la fenetre de 4h** (Emmanuel Brisseau
+35min, Théo Meuriot 1h, Yohann Nezri 35min, Mehdi Stili 35min) -- une premiere depuis la creation
+de la skill, apres 3 passages consecutifs a 0/0. Le 5e (Leonel ADAGBE, 10h) est retenu hors
+fenetre de 4h mais sous le plafond de 48h, pour completer le lot a 5 sans sacrifier la qualite.
+**Confirme la lecture de Nomena** : la fenetre de 4h n'etait pas le probleme, c'etait la liste des
+comptes cibles.
+
+Lot propose (aucun publie -- en attente du GO) :
+
+| # | Compte | Auteur cible | Post cible | Fraicheur reelle | Genre |
+| --- | --- | --- | --- | --- | --- |
+| 1 | julien-agency | Emmanuel Brisseau | urn:li:activity:7505875733999833088 | 35 min | information_chiffree |
+| 2 | julien-agency | Théo Meuriot | urn:li:activity:7505860641556066304 | 1h | desaccord_argumente |
+| 3 | julien-agency | Yohann Nezri | urn:li:activity:7505875827062956033 | 35 min | vraie_question |
+| 4 | julien-agency | Mehdi Stili | urn:li:activity:7505875920872968193 | 35 min (compte `en_observation`) | desaccord_argumente |
+| 5 | julien-agency | Leonel ADAGBE | urn:li:activity:7505722142689230852 | 10h | vraie_question |
+
+Genres : `information_chiffree` x1 (chiffre externe reel -- barometre France Num 2025, 26% des
+TPE/PME utilisent l'IA, source verifiee, jamais le chiffre du post cible lui-meme), `desaccord_argumente`
+x2, `vraie_question` x2 -- 3 genres sur 4. Les 5 textes passent `validerCommentaire` (teste
+reellement). `node --test` : 88 tests, tous verts.
 
 ---
 
