@@ -124,7 +124,46 @@ Lot propose (aucun publie -- en attente du GO) :
 Genres : `information_chiffree` x1 (chiffre externe reel -- barometre France Num 2025, 26% des
 TPE/PME utilisent l'IA, source verifiee, jamais le chiffre du post cible lui-meme), `desaccord_argumente`
 x2, `vraie_question` x2 -- 3 genres sur 4. Les 5 textes passent `validerCommentaire` (teste
-reellement). `node --test` : 88 tests, tous verts.
+reellement).
+
+## Les 5 REELLEMENT PUBLIES le 16/09/2026, confirmes par l'API et par navigation reelle
+
+Apres GO de Nomena (avec verification prealable du chiffre France Num, voir plus bas) et
+resolution de deux blocages techniques distincts (cle Composio du mauvais canal, puis `shareUrn`
+manquant), les 5 commentaires sont reellement en ligne :
+
+| # | Auteur cible | Comment URN reel | Lien du post |
+| --- | --- | --- | --- |
+| 1 | Emmanuel Brisseau | `urn:li:comment:(urn:li:activity:7505875733999833088,7505927227851771904)` | https://www.linkedin.com/feed/update/urn:li:activity:7505875733999833088/ |
+| 2 | Théo Meuriot | `urn:li:comment:(urn:li:activity:7505860641556066304,7505928636915470336)` | https://www.linkedin.com/feed/update/urn:li:activity:7505860641556066304/ |
+| 3 | Yohann Nezri | `urn:li:comment:(urn:li:activity:7505875827062956033,7505928835515748352)` | https://www.linkedin.com/feed/update/urn:li:activity:7505875827062956033/ |
+| 4 | Mehdi Stili | `urn:li:comment:(urn:li:activity:7505875920872968193,7505929801640357888)` | https://www.linkedin.com/feed/update/urn:li:activity:7505875920872968193/ |
+| 5 | Leonel ADAGBE | `urn:li:comment:(urn:li:ugcPost:7505722141527511040,7505930133460025344)` | https://www.linkedin.com/feed/update/urn:li:activity:7505722142689230852/ |
+
+Chacun confirme par l'API (`successful: true`, texte integral renvoye identique) **et** par
+navigation reelle sur le post (le commentaire de "Julien Rayes" visible, pas suppose). Enregistres
+dans `data/registre-commentaires.json` apres chaque succes confirme, pas avant.
+
+**Deux blocages reels resolus avant publication** :
+1. **Mauvais canal Composio** : `lib/composio.js` appelait le canal REST direct
+   (`POST /api/v3.1/tools/execute/<slug>`, cle `ak_...`), qui n'a jamais fonctionne sur ce compte
+   -- deja diagnostique le 12/09/2026, redecouvert a l'identique le 16/09/2026 (une cle `ck_...`
+   passee a ce canal a renvoye un HTTP 401 opaque). **Corrige** : `lib/composio.js` migre vers le
+   canal MCP consumer (`https://connect.composio.dev/mcp`, cle `ck_...`), le seul qui fonctionne
+   reellement -- voir SKILL.md et `references/actions-composio.md`. `validerCle` refuse
+   desormais explicitement une cle `ak_...` avant tout appel reseau, pour ne pas rejouer cette
+   confusion une 3e fois.
+2. **`shareUrn` manquant** : les 5 posts n'avaient ete releves que via leur `urn:li:activity:`
+   (refuse par `LINKEDIN_CREATE_COMMENT_ON_POST`, qui exige un `shareUrn`/`ugcPost`). Resolu en
+   lisant directement le permalink de chaque post
+   (`https://www.linkedin.com/feed/update/urn:li:activity:<id>/`) et en extrayant le
+   `urn:li:share:...`/`urn:li:ugcPost:...` embarque dans le HTML de la page -- lecture passive du
+   DOM deja charge, aucune manipulation de cookie/CSRF (contrairement a la technique GraphQL du
+   15/09, qui a echoue cette fois -- LinkedIn a renvoye "CSRF check failed" a la reconstitution de
+   l'appel interne). Chaque `shareUrn` verifie contre le texte du post avant tout appel de
+   publication (jamais suppose).
+
+`node --test` : 93 tests, tous verts (88 + 5 pour le nouveau canal MCP de `lib/composio.js`).
 
 ---
 

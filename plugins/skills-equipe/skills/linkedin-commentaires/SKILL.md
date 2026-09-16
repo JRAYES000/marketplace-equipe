@@ -106,8 +106,15 @@ recente correcte mais precedee d'un trou de plusieurs mois) -- a reevaluer a par
 - **`NOTION_TOKEN`** + **`NOTION_PARENT_PAGE_ID`** -- pour la base "Commentaires" (suivi a 3
   jours). `NOTION_PARENT_PAGE_ID` est l'ID de la page Notion **deja partagee avec
   l'integration** (bouton "..." de la page -> "Connexions") sous laquelle creer la base.
-- **`COMPOSIO_API_KEY`** -- repli REST statique, pas la voie qui sert reellement a publier (voir
-  `linkedin-carrousel/SKILL.md`, section "Publication reelle", pour la voie qui fonctionne).
+- **`COMPOSIO_CONSUMER_API_KEY`** -- cle "consumer" (prefixe `ck_`, Reglages du compte personnel
+  Composio -> "Sessions & API Key", surface "FOR YOU"), utilisee par `lib/composio.js` via le
+  canal MCP (`https://connect.composio.dev/mcp`) -- **le seul canal reellement fonctionnel sur ce
+  compte**, verifie le 16/09/2026 (5 commentaires publies pour de vrai). **Ne jamais confondre
+  avec une cle `ak_...`** (couche PLATFORM Composio, admin d'organisation) : ce format n'existe
+  pas sur ce compte et refuse desormais explicitement avant tout appel reseau
+  (`validerCle`, `lib/composio.js`) -- voir `references/actions-composio.md` pour le protocole
+  MCP complet et l'historique de cette confusion (deja rencontree le 12/09/2026, redecouverte a
+  l'identique le 16/09/2026 avant cette correction).
 
 ## Garde-fous automatiques (refus explicite, jamais un avertissement)
 
@@ -185,7 +192,7 @@ recente correcte mais precedee d'un trou de plusieurs mois) -- a reevaluer a par
   d'une liste fermee de mots toujours accentues en francais standard -- heuristique
   volontairement imparfaite (mots ambigus type "a"/"à" exclus pour eviter les faux positifs).
 
-`node --test` : 88 tests.
+`node --test` : 93 tests.
 
 ## Recommandation d'usage -- horaire de lancement (16/09/2026, a lire comme secondaire)
 
