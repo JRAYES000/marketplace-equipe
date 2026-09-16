@@ -67,10 +67,24 @@ Teste sur le cas reel du 16/09/2026 (les 8 comptes julien-agency, ages reels rel
 `genererRepliAucunCandidat` identifie correctement Jean ZENDJI comme le plus actif (4 jours) et
 signale 6/8 comptes comme inactifs depuis plus de 28 jours, avec la recommandation de les
 remplacer -- voir `a-publier/README.md` du 16/09/2026 pour la sortie complete. Consequence
-directe : `references/comptes-cibles-proposition-20260916-complement-agence.md` propose 5 comptes
+directe : `references/comptes-cibles-proposition-20260916-complement-agence.md` propose 6 comptes
 de remplacement, verifies sur leur frequence de publication reelle (pas seulement thematique --
-c'est precisement ce qui manquait a la premiere liste du 14/09/2026), en attente de validation
-Julien/Nomena avant integration dans `reglages-comptes.json`.
+c'est precisement ce qui manquait a la premiere liste du 14/09/2026). **Valides par Nomena et
+integres le 16/09/2026** -- voir "Ce que ce passage demontre" plus bas pour le resultat obtenu des
+le passage suivant.
+
+## Ce que le passage du 16/09/2026 demontre -- la fenetre de 4h depend de la liste, pas du reglage
+
+3 passages reels avec l'ancienne liste de 8 comptes julien-agency : **0 candidat sous 4h a chaque
+fois** (15/09 matin, 15/09 apres-midi, 16/09 matin). Conclusion a l'epoque, prudente mais fausse :
+la deviation semblait tenir a l'heure du passage dans la journee. Des l'ajout de 6 comptes plus
+actifs (meme jour, meme reglage de la skill, seule la liste a change) : **4 candidats sur 5 tombent
+sous 4h** (35 min, 1h, 35 min, 35 min). La fenetre de 4h du brief n'est donc pas une contrainte
+irrealiste a assouplir -- elle fonctionne des que les comptes suivis publient reellement plusieurs
+fois par semaine. **Pour Julien qui fera tourner la skill au quotidien** : la qualite du resultat
+d'un passage tient a la liste de comptes cibles (`comptes_cibles`), pas au reglage de la fenetre de
+fraicheur -- une liste qui se degrade avec le temps (comptes qui ralentissent, changent de sujet)
+doit etre revue avant de toucher au seuil de 4h lui-meme.
 
 ## Comptes cibles
 
@@ -173,17 +187,17 @@ recente correcte mais precedee d'un trou de plusieurs mois) -- a reevaluer a par
 
 `node --test` : 88 tests.
 
-## Recommandation d'usage -- horaire de lancement (16/09/2026)
+## Recommandation d'usage -- horaire de lancement (16/09/2026, a lire comme secondaire)
 
-Sur les 3 passages reels effectues a ce jour, l'ecart a la fenetre de 4h n'a jamais ete
-monotone dans le temps (72h le 15/09 matin, 7h le 15/09 fin d'apres-midi, 21h le 16/09 matin) :
-c'est **l'heure du passage dans la journee**, pas le nombre de jours ecoules, qui semble
-determiner a quel point on s'approche d'un post frais -- les comptes cibles (entrepreneurs,
-consultants) publient surtout en fin de matinee et l'apres-midi, tres peu au reveil. Conclusion
-exploitable, pas juste une observation : **lancer le passage du matin plus tard dans la matinee
-(en fin de matinee plutot qu'au reveil) et privilegier le passage de l'apres-midi quand un choix
-est possible** augmente la probabilite reelle de tomber sur un post dans la fenetre de 4h. A
-confirmer sur d'autres passages avant de la considerer comme acquise.
+**Facteur secondaire par rapport a la liste de comptes cibles** (voir "Ce que le passage du
+16/09/2026 demontre" plus haut -- c'est le facteur principal, verifie sur donnees reelles). Sur
+les 3 passages avec l'ancienne liste, l'ecart a la fenetre de 4h n'a jamais ete monotone dans le
+temps (72h le 15/09 matin, 7h le 15/09 fin d'apres-midi, 21h le 16/09 matin) : l'heure du passage
+dans la journee jouait un role, les comptes cibles publiant surtout en fin de matinee et
+l'apres-midi. Reste une optimisation valable une fois la liste elle-meme active : **lancer le
+passage du matin plus tard dans la matinee et privilegier l'apres-midi quand un choix est
+possible** augmente encore la probabilite de tomber sur un post frais -- mais ne compense jamais
+une liste de comptes inactifs, comme les 3 passages a 0/3 l'ont montre.
 
 ## Audit adversarial et de robustesse (15/09/2026)
 

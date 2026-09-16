@@ -106,6 +106,12 @@ Virginie Caurraze côté Claude Partners) — un vrai rapprochement, pas encore 
 passages réels, même résultat honnête : la règle des 4h n'a encore jamais été remplie en
 conditions réelles sur ces comptes, ni prouvée inatteignable.
 
+**Mise à jour du 16/09 — la règle des 4h fonctionne, c'était la liste de comptes le vrai
+problème** : voir le point 3 des "Déviations assumées" plus bas pour le détail complet. En
+résumé, un 3e passage à 0/8 sur Claude Agency a montré que la liste initiale ne publiait
+presque jamais ; 6 comptes plus actifs ajoutés le jour même ont donné 4 candidats sur 5 sous 4h
+dès le passage suivant.
+
 **Déviation assumée sur les genres** : le brief prévoit quatre genres de commentaire, dont
 "histoire vécue". Aucun des cinq ne l'utilise aujourd'hui — "histoire vécue" reste en réserve
 pour le jour où une anecdote réelle sera disponible, plutôt que d'en inventer une (un premier
@@ -239,12 +245,25 @@ Pour tout retrouver en un coup d'œil plutôt qu'éparpillé plus haut :
    identités franchement distinctes, tranché sans attendre ton retour comme le brief l'autorise :
    Claude Agency et Claude Partners restent deux facettes de la même maison. **Si tu veux deux
    identités plus marquées, c'est un réglage à changer dans les templates.**
-3. **Commentaires, fraîcheur (15/09, testé deux fois)** : le brief demande des posts de moins de
-   4h. Sur les 5 commentaires publiés le matin, **0 respectent cette fenêtre** — le plus récent
-   avait une semaine. Second passage en fin d'après-midi, sur les 16 comptes réels cette fois
-   (les 8 Claude Agency et les 8 Claude Partners) : toujours **0 sur 16**, mais l'écart se
-   resserre (le compte le plus proche est passé de 72h à 7h entre les deux passages). Le contenu
-   de chaque commentaire reste ancré dans le post réel, seul le délai a été sacrifié.
+3. **Commentaires, fraîcheur — 3 passages à 0/0, puis résolu le 16/09 en corrigeant la liste, pas
+   la règle** : le brief demande des posts de moins de 4h. Sur les 5 commentaires publiés le
+   15/09 matin, **0 respectent cette fenêtre** — le plus récent avait une semaine. Second passage
+   en fin d'après-midi, sur les 16 comptes réels (les 8 Claude Agency et les 8 Claude Partners) :
+   toujours **0 sur 16**, écart qui se resserre (72h → 7h) sans jamais atteindre la fenêtre.
+   Troisième passage le 16/09 matin, toujours 0/8 sur Claude Agency : **le vrai diagnostic est
+   apparu à ce moment-là**. Le compte Claude Agency le plus actif de la liste initiale ne publie
+   qu'un post tous les 4 jours ; les 7 autres, à plusieurs semaines ou mois (2 sans même de post
+   original récent). Ce n'était donc pas la fenêtre de 4h qui posait problème, ni l'heure du
+   passage dans la journée — **c'était la liste de comptes suivis**, jamais vérifiée sur sa
+   fréquence de publication réelle jusque-là, seulement sur sa pertinence thématique.
+   **Corrigé le 16/09** : 6 comptes complémentaires ajoutés à Claude Agency, sélectionnés cette
+   fois sur leur cadence de publication réelle (posts relevés un par un, pas une recherche de
+   mots-clés seule). Résultat au passage suivant, même jour, même réglage de la skill : **4
+   candidats sur 5 tombent réellement sous 4h** (35 min, 1h, 35 min, 35 min) — première fois que
+   la règle donne un résultat depuis sa création. **Enseignement pour la suite** : la fenêtre de
+   4h n'est pas une contrainte à assouplir, elle dépend entièrement de l'activité des comptes
+   suivis — une liste qui se dégrade avec le temps doit être révisée en priorité, avant de
+   toucher au réglage de fraîcheur lui-même.
 4. **Commentaires, genres (15/09)** : sur les 4 genres prévus par le brief, seuls 2 sont
    utilisés (question réelle x3, désaccord argumenté x2) — "histoire vécue" reste en réserve,
    faute d'anecdote réelle confirmée, plutôt que d'en inventer une (déjà écarté une fois le
