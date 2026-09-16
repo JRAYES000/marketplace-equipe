@@ -2,7 +2,7 @@
 
 const test = require('node:test');
 const assert = require('node:assert/strict');
-const { filtrerPostsFrais, validerQuotaJournalier } = require('../lib/planifier-commentaires');
+const { filtrerPostsFrais, validerQuotaJournalier, validerFraicheurMaximale } = require('../lib/planifier-commentaires');
 
 const MAINTENANT = new Date('2026-09-14T12:00:00.000Z');
 
@@ -52,4 +52,29 @@ test('refuse un second commentaire a la meme personne le meme jour -- cas demand
     () => validerQuotaJournalier(entreesDuJour, { auteurCible: 'urn:li:person:deja-vu' }),
     /jamais deux fois la meme personne le meme jour/
   );
+});
+
+test('validerFraicheurMaximale accepte un post de moins de 48h', () => {
+  const post = { postedAt: ilYA(24) };
+  assert.doesNotThrow(() => validerFraicheurMaximale(post, MAINTENANT));
+});
+
+test('validerFraicheurMaximale refuse un post au-dela de 48h -- cas reel du 16/09/2026 (post de 5 mois propose)', () => {
+  const posteVieuxDeCinqMois = { postedAt: ilYA(24 * 30 * 5) };
+  assert.throws(
+    () => validerFraicheurMaximale(posteVieuxDeCinqMois, MAINTENANT),
+    /au-dela du plafond de 48h/
+  );
+});
+
+test('validerFraicheurMaximale refuse pile au-dessus du seuil (48.1h) et accepte pile au seuil (48h)', () => {
+  assert.doesNotThrow(() => validerFraicheurMaximale({ postedAt: ilYA(48) }, MAINTENANT));
+  assert.throws(
+    () => validerFraicheurMaximale({ postedAt: ilYA(48.1) }, MAINTENANT),
+    /au-dela du plafond de 48h/
+  );
+});
+
+test('validerFraicheurMaximale refuse un post sans postedAt', () => {
+  assert.throws(() => validerFraicheurMaximale({}, MAINTENANT), /fraicheur non verifiable/);
 });

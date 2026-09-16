@@ -1,3 +1,42 @@
+# Passage du 16/09/2026 (matin) -- 4 commentaires proposes, un garde-fou de fraicheur maximale ajoute au code
+
+Lot initial : 5 candidats (4 julien-partners + 1 julien-agency, `Mohamed Houmadi Baydama`, post
+vieux de **5 mois**). Nomena a refuse le lot tel quel : a ce delai, le post ne sera vu par
+personne, et le commenter donne l'image de quelqu'un qui racle le fil pour remplir un quota --
+contraire a la raison d'etre de la fenetre de fraicheur, pas seulement a sa lettre. Le
+commentaire visant ce post a ete retire ; les 4 autres (tous ~24h, sous le nouveau plafond de
+48h, voir ci-dessous) sont restes valides.
+
+**Constat qui a motive ca** : rien dans le code n'empechait jusque-la de proposer un post de 5
+mois -- `filtrerPostsFrais` (fenetre de 4h) n'est qu'une PRIORITE de tri utilisee par le dry-run
+avec `APIFY_TOKEN`, pas une limite dure appliquee au repli manuel (lecture directe des comptes
+via navigateur, utilisee ce jour-la comme les fois precedentes faute de token). D'ou l'ajout de
+`validerFraicheurMaximale` (`lib/planifier-commentaires.js`, `FRAICHEUR_MAX_HEURES = 48`) : refuse
+explicitement tout post au-dela de 48h, teste par 4 nouveaux cas dans
+`test/planifier-commentaires.test.js` (accepte a 24h/48h pile, refuse a 48.1h et sur le cas reel
+du post de 5 mois, refuse si `postedAt` absent). `node --test` : 78 tests, tous verts.
+
+Lot final retenu (4 commentaires, julien-partners, aucun publie -- en attente du GO) :
+
+| # | Compte | Auteur cible | Post cible | Fraicheur reelle | Genre |
+| --- | --- | --- | --- | --- | --- |
+| 1 | julien-partners | Valentin Muller | urn:li:activity:7505221717867298816 | ~24h | information_chiffree |
+| 2 | julien-partners | Florent Pontiac | urn:li:activity:7505371211309187072 | ~24h | vraie_question |
+| 3 | julien-partners | Xavier Vincent | urn:li:activity:7505421050554515456 | ~24h | desaccord_argumente |
+| 4 | julien-partners | Theophile Burnet | urn:li:activity:7505173186687299584 | ~24h | information_chiffree |
+
+Ecarte du lot (2 posts frais reels rejetes car carrousels, pas des posts lisibles en un
+commentaire) : Virginie Caurraze (21h -- le plus proche jamais observe de la fenetre de 4h, mais
+`document.totalPageCount` present) et Cecilia Boavista. Ecarte aussi : les 5 personnes deja
+commentees la veille (meme `urn` de post retrouve ce matin -- rien de nouveau chez elles).
+
+**Fraicheur (4h) : toujours 0/3 sur les tests reels** (15/09 matin, 15/09 apres-midi, 16/09
+matin). Le plus proche aujourd'hui est a 21h (post ecarte car carrousel), contre 7h lors du
+passage du 15/09 en fin d'apres-midi -- l'ecart s'est donc *reelargi* ce matin, pas resserre :
+observation exploitable, voir SKILL.md "Recommandation d'usage -- horaire de lancement".
+
+---
+
 # Cinq commentaires reels -- 5/5 publies sur julien-agency (15/09/2026)
 
 **Mise a jour du 15/09/2026, apres-midi** : les 4 commentaires refuses (voir plus bas, section
