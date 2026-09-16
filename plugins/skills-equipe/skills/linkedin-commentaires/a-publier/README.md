@@ -60,6 +60,42 @@ d'usage -- horaire de lancement".
 `node --test` : 85 tests, tous verts (78 apres le plafond de 48h + 7 pour le canal de publication
 et la quantification vague).
 
+## Repli reel implemente -- le probleme n'etait pas l'heure, c'etait la liste
+
+Nomena a pointe que 3 passages consecutifs a zero candidat n'est pas une question de moment de la
+journee : c'est que les 8 comptes julien-agency ne publient presque pas (le plus actif tous les
+4 jours, les autres a plusieurs semaines/mois). Deux choses livrees :
+
+**1. Le repli manque** -- `genererRepliAucunCandidat` (`lib/planifier-commentaires.js`), teste sur
+le cas reel de ce matin (les 8 comptes, ages reellement releves) :
+
+```
+MESSAGE :
+Aucun candidat : les 8 comptes cibles n'ont aucun post sous le plafond de fraicheur. Le plus
+recent est Jean ZENDJI a 4.0 jours. Detail par compte, du plus recent au plus ancien : Jean ZENDJI
+(4.0j), Georges Solutions (7.0j), Romain Charissou (30.0j), Benjamin Lacroix (60.0j), Raphael
+Mizrahi (60.0j), Mohamed Houmadi Baydama (150.0j), Alexandre Touraine (330.0j), Pierre-Emmanuel
+Cochet (1095.0j).
+
+RECOMMANDATION :
+6/8 comptes n'ont rien publie depuis plus de 28 jours (Romain Charissou, Benjamin Lacroix, Raphael
+Mizrahi, Mohamed Houmadi Baydama, Alexandre Touraine, Pierre-Emmanuel Cochet) -- a remplacer dans
+comptes_cibles par des profils plus actifs plutot que de continuer a les revisiter passage apres
+passage pour rien.
+```
+
+3 tests dans `test/planifier-commentaires.test.js` (le cas reel ci-dessus, un compte sans aucun
+post trouve, et le cas ou rien n'est signale car tous les comptes sont actifs).
+
+**2. La liste elle-meme** -- 5 comptes proposes en complement pour julien-agency, verifies sur leur
+frequence de publication REELLE (pas seulement leur pertinence thematique, l'erreur du 14/09) :
+Emmanuel Brisseau (Bordeaux), Théo Meuriot (Rouen), Yohann Nezri (Marseille), Mehdi Stili
+(Toulon), Stéphane Benoist (Bordeaux) -- detail complet, cadence relevee poste par poste, et
+reserves assumees (2 comptes au positionnement legerement excentre, 1 avec un historique
+irregulier a resurveiller) dans
+`references/comptes-cibles-proposition-20260916-complement-agence.md`. **En attente de validation
+Julien/Nomena** avant copie dans `reglages-comptes.json`, meme processus que le 14/09/2026.
+
 ---
 
 # Cinq commentaires reels -- 5/5 publies sur julien-agency (15/09/2026)
