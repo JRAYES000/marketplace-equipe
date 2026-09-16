@@ -2,7 +2,12 @@
 
 const test = require('node:test');
 const assert = require('node:assert/strict');
-const { filtrerPostsFrais, validerQuotaJournalier, validerFraicheurMaximale } = require('../lib/planifier-commentaires');
+const {
+  filtrerPostsFrais,
+  validerQuotaJournalier,
+  validerFraicheurMaximale,
+  validerCanalPublicationReel,
+} = require('../lib/planifier-commentaires');
 
 const MAINTENANT = new Date('2026-09-14T12:00:00.000Z');
 
@@ -77,4 +82,26 @@ test('validerFraicheurMaximale refuse pile au-dessus du seuil (48.1h) et accepte
 
 test('validerFraicheurMaximale refuse un post sans postedAt', () => {
   assert.throws(() => validerFraicheurMaximale({}, MAINTENANT), /fraicheur non verifiable/);
+});
+
+test('validerCanalPublicationReel accepte un compte avec canal_publication_reel: true', () => {
+  const reglages = { 'julien-agency': { canal_publication_reel: true } };
+  assert.doesNotThrow(() => validerCanalPublicationReel('julien-agency', reglages));
+});
+
+test('validerCanalPublicationReel refuse un compte avec canal_publication_reel: false -- cas reel julien-partners', () => {
+  const reglages = { 'julien-partners': { canal_publication_reel: false } };
+  assert.throws(
+    () => validerCanalPublicationReel('julien-partners', reglages),
+    /canal de publication reel/
+  );
+});
+
+test('validerCanalPublicationReel refuse un compte absent des reglages (rien de permissif par defaut)', () => {
+  assert.throws(() => validerCanalPublicationReel('compte-inconnu', {}), /canal de publication reel/);
+});
+
+test('validerCanalPublicationReel refuse si le champ est absent (pas de valeur par defaut permissive)', () => {
+  const reglages = { 'julien-agency': {} };
+  assert.throws(() => validerCanalPublicationReel('julien-agency', reglages), /canal de publication reel/);
 });

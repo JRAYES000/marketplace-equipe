@@ -210,6 +210,54 @@ function detecterAffirmationExperienceNonSourcee(texte) {
   );
 }
 
+/**
+ * Ajoute le 16/09/2026 : "La plupart des utilisateurs de Claude Code n'en
+ * connaissent qu'une poignee" est passe integralement inapercu de tous les
+ * garde-fous existants -- ce n'est pas un "chiffre sans source"
+ * (`information_chiffree` ne verifie qu'un chiffre PRESENT, jamais sa
+ * fiabilite, et il n'y a ici aucun chiffre du tout, juste une
+ * quantification vague) ni une "experience non sourcee" (aucun pronom de
+ * 1ere personne, ce n'est pas une anecdote vecue mais une generalisation
+ * statistique sur un TIERS). Meme principe que "aucun chiffre sans source"
+ * (linkedin-carrousel, `validerChiffreSource`) : une affirmation qui a
+ * l'apparence d'un fait verifie sur une population ("la plupart", "la
+ * majorite", "beaucoup", "peu") engage l'identite reelle de Julien sans
+ * qu'aucune source ne l'accompagne. Contrairement au carrousel, un
+ * commentaire de 2-4 phrases sans lien n'a pas de mecanisme raisonnable pour
+ * citer "(source : ...)" -- la remediation reelle est donc de reformuler
+ * sans la generalisation (avis personnel, constat sur le post lui-meme),
+ * jamais de l'accepter avec une source jointe. D'ou un refus direct, sans
+ * echappatoire du type `anecdoteSourcee`.
+ *
+ * Heuristique, pas une preuve (meme famille que les autres controles de ce
+ * fichier) : repere un quantificateur vague ("la plupart", "la majorite",
+ * "beaucoup", "peu", "tres peu") suivi de "des"/"d'"/"de la"/"de l'" --
+ * signale une generalisation sur un groupe. Assume un risque de faux positif
+ * sur un tour idiomatique sans claim statistique (ex. "la plupart du
+ * temps") : volontairement exclu via un verificateur de "temps"/"cas"
+ * juste apres, trop frequents pour rester dans le champ vise ici.
+ */
+const REGEX_QUANTIFICATION_VAGUE = new RegExp(
+  "(?<![\\p{L}\\p{N}])(la\\s+plupart|la\\s+majorit[ée]|beaucoup|tr[èe]s\\s+peu|peu)(?![\\p{L}\\p{N}])" +
+  "\\s+(?:des\\s+(?!cas\\b)|d['’](?!temps\\b|cas\\b)|de\\s+la\\s+|de\\s+l['’](?!temps\\b|cas\\b)|de\\s+(?!la\\b|l['’]|cas\\b|temps\\b))",
+  'iu'
+);
+
+function detecterQuantificationVagueNonSourcee(texte) {
+  return REGEX_QUANTIFICATION_VAGUE.test(texte);
+}
+
+function validerQuantificationVague(texte) {
+  if (detecterQuantificationVagueNonSourcee(texte)) {
+    throw new Error(
+      'Commentaire refuse : generalisation statistique vague et non sourcee detectee ("la plupart ' +
+      'de...", "la majorite de...", "beaucoup de...", "peu de..."). Aucun lien/source possible dans ' +
+      'un commentaire -- reformuler en avis personnel ou en constat sur le post lui-meme, ne pas ' +
+      'affirmer un fait sur un groupe sans preuve.'
+    );
+  }
+}
+
 function validerAffirmationExperience(texte, anecdoteSourcee) {
   if (detecterAffirmationExperienceNonSourcee(texte) && anecdoteSourcee !== true) {
     throw new Error(
@@ -263,6 +311,7 @@ function validerCommentaire({ texte, genre, anecdoteSourcee = false }) {
   validerFormeGenerale(texte);
   validerGenre(texte, genre);
   validerAffirmationExperience(texte, anecdoteSourcee);
+  validerQuantificationVague(texte);
   validerAccents(texte);
 }
 
@@ -272,6 +321,8 @@ module.exports = {
   validerGenre,
   validerAffirmationExperience,
   detecterAffirmationExperienceNonSourcee,
+  validerQuantificationVague,
+  detecterQuantificationVagueNonSourcee,
   compterPhrases,
   GENRES,
   PHRASES_MIN,

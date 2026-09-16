@@ -1,39 +1,64 @@
-# Passage du 16/09/2026 (matin) -- 4 commentaires proposes, un garde-fou de fraicheur maximale ajoute au code
+# Passage du 16/09/2026 (matin) -- lot invalide corrige, 2 garde-fous ajoutes au code, lot final VIDE
 
-Lot initial : 5 candidats (4 julien-partners + 1 julien-agency, `Mohamed Houmadi Baydama`, post
-vieux de **5 mois**). Nomena a refuse le lot tel quel : a ce delai, le post ne sera vu par
-personne, et le commenter donne l'image de quelqu'un qui racle le fil pour remplir un quota --
-contraire a la raison d'etre de la fenetre de fraicheur, pas seulement a sa lettre. Le
-commentaire visant ce post a ete retire ; les 4 autres (tous ~24h, sous le nouveau plafond de
-48h, voir ci-dessous) sont restes valides.
+## Lot n°1 (4 commentaires julien-partners) -- invalide, meme erreur que le 15/09 refaite a l'identique
 
-**Constat qui a motive ca** : rien dans le code n'empechait jusque-la de proposer un post de 5
-mois -- `filtrerPostsFrais` (fenetre de 4h) n'est qu'une PRIORITE de tri utilisee par le dry-run
-avec `APIFY_TOKEN`, pas une limite dure appliquee au repli manuel (lecture directe des comptes
-via navigateur, utilisee ce jour-la comme les fois precedentes faute de token). D'ou l'ajout de
-`validerFraicheurMaximale` (`lib/planifier-commentaires.js`, `FRAICHEUR_MAX_HEURES = 48`) : refuse
-explicitement tout post au-dela de 48h, teste par 4 nouveaux cas dans
-`test/planifier-commentaires.test.js` (accepte a 24h/48h pile, refuse a 48.1h et sur le cas reel
-du post de 5 mois, refuse si `postedAt` absent). `node --test` : 78 tests, tous verts.
+Propose d'abord : 4 commentaires (Valentin Muller, Florent Pontiac, Xavier Vincent, Theophile
+Burnet), tous sur julien-partners, tous ~24h. **Nomena a bloque le lot en entier** : julien-partners
+n'a pas de canal de publication reel pour les commentaires (Composio ne connait pas ce compte,
+4 echecs 403 le 15/09 -- voir plus bas ; Buffer ne sait publier que des posts, jamais un
+commentaire sous celui d'un tiers) -- exactement l'incident du 15/09/2026, refait a l'identique le
+16/09 faute de garde-fou empechant ce cas des la preparation.
 
-Lot final retenu (4 commentaires, julien-partners, aucun publie -- en attente du GO) :
+**Corrige** : `validerCanalPublicationReel` (`lib/planifier-commentaires.js`) refuse desormais
+explicitement de preparer un commentaire pour un compte dont `canal_publication_reel` n'est pas
+`true` dans `reglages-comptes.json`. Champ ajoute : `false` (+ note) pour julien-partners, `true`
+pour julien-agency (`averse-cooser`, seul canal reellement connecte). Teste par 4 nouveaux cas
+dans `test/planifier-commentaires.test.js`, et verifie en conditions reelles contre le lot n°1
+lui-meme : `validerCanalPublicationReel('julien-partners', reglages)` refuse bien avec le message
+attendu, `validerCanalPublicationReel('julien-agency', reglages)` accepte.
 
-| # | Compte | Auteur cible | Post cible | Fraicheur reelle | Genre |
-| --- | --- | --- | --- | --- | --- |
-| 1 | julien-partners | Valentin Muller | urn:li:activity:7505221717867298816 | ~24h | information_chiffree |
-| 2 | julien-partners | Florent Pontiac | urn:li:activity:7505371211309187072 | ~24h | vraie_question |
-| 3 | julien-partners | Xavier Vincent | urn:li:activity:7505421050554515456 | ~24h | desaccord_argumente |
-| 4 | julien-partners | Theophile Burnet | urn:li:activity:7505173186687299584 | ~24h | information_chiffree |
+3 autres corrections faites sur ce lot n°1 (pour reference, meme si le lot entier est abandonne
+faute de canal) :
+- **Chiffres recycles, pas "en plus"** (`information_chiffree` de Valentin Muller et Theophile
+  Burnet reutilisaient le chiffre deja present dans le post cible -- le brief demande un chiffre
+  EXTERNE qui ajoute au propos, pas une reformulation du chiffre du post). Aucun garde-fou
+  mecanique ne peut juger cette difference (elle exige de comparer au post source) -- reste une
+  verification humaine a faire a la redaction, documentee ici comme rappel.
+- **Generalisation statistique non sourcee** : "La plupart des utilisateurs de Claude Code n'en
+  connaissent qu'une poignee" (commentaire Theophile Burnet) passait a travers tous les
+  garde-fous existants (pas un chiffre, pas une experience a la premiere personne). **Corrige** :
+  `validerQuantificationVague` (`lib/valider-commentaire.js`) refuse desormais toute
+  generalisation du type "la plupart de/des", "la majorite de/des", "beaucoup de/d'", "peu de/d'"
+  -- aucun echappatoire (contrairement a `anecdoteSourcee`) car un commentaire de 2-4 phrases sans
+  lien n'a pas de moyen raisonnable de citer une vraie source. 4 nouveaux tests, dont le cas reel
+  Theophile Burnet.
+- **Mention de la naissance du 2e enfant de Florent Pontiac** (commentaire retire) : verifiee --
+  il l'annonce lui-meme explicitement dans le texte du post ("la naissance de mon deuxieme bebe").
+  Auto-divulgation confirmee, pas une intrusion, mais le commentaire est de toute facon abandonne
+  avec le reste du lot n°1 (canal julien-partners indisponible).
 
-Ecarte du lot (2 posts frais reels rejetes car carrousels, pas des posts lisibles en un
-commentaire) : Virginie Caurraze (21h -- le plus proche jamais observe de la fenetre de 4h, mais
-`document.totalPageCount` present) et Cecilia Boavista. Ecarte aussi : les 5 personnes deja
-commentees la veille (meme `urn` de post retrouve ce matin -- rien de nouveau chez elles).
+## Lot n°2 (julien-agency, apres re-verification des 8 comptes cibles) -- VIDE
+
+Refait pour julien-agency comme demande. Re-verification reelle des 8 comptes cibles (pas
+seulement reutilisation du releve du matin) : **aucun changement** -- les 5 memes posts qu'hier
+(Georges Solutions 1w, Jean ZENDJI 4d/96h, Benjamin Lacroix 2mo, Raphael Mizrahi 2mo, Romain
+Charissou 1mo, tous deja commentes le 15/09, meme `urn`), plus Mohamed Houmadi Baydama (5mo) et
+deux reposts sans contenu propre (Alexandre Touraine 11mo, Pierre-Emmanuel Cochet 3 ans).
+
+**Passes un par un dans `validerFraicheurMaximale` (plafond 48h) en conditions reelles : les 8
+refusent.** Le plus proche (Jean ZENDJI, 96h) reste plus de deux fois au-dessus du plafond, et
+c'est de toute facon le meme post que celui deja commente hier. **Conclusion honnete : zero
+candidat valide pour julien-agency ce matin** -- le bon comportement, avec les deux nouveaux
+garde-fous en place, est de ne rien proposer plutot que de forcer un vieux post ou un repost.
 
 **Fraicheur (4h) : toujours 0/3 sur les tests reels** (15/09 matin, 15/09 apres-midi, 16/09
-matin). Le plus proche aujourd'hui est a 21h (post ecarte car carrousel), contre 7h lors du
-passage du 15/09 en fin d'apres-midi -- l'ecart s'est donc *reelargi* ce matin, pas resserre :
-observation exploitable, voir SKILL.md "Recommandation d'usage -- horaire de lancement".
+matin). Le plus proche ce matin etait a 21h (Virginie Caurraze, julien-partners -- ecarte de toute
+facon car carrousel), contre 7h lors du passage du 15/09 en fin d'apres-midi -- l'ecart s'est donc
+*reelargi* ce matin, pas resserre : observation exploitable, voir SKILL.md "Recommandation
+d'usage -- horaire de lancement".
+
+`node --test` : 85 tests, tous verts (78 apres le plafond de 48h + 7 pour le canal de publication
+et la quantification vague).
 
 ---
 

@@ -129,3 +129,31 @@ test("n'accuse pas a tort une observation generale sans experience personnelle r
   const texte = "Ça rejoint un point qu'on voit souvent chez les indépendants qui commencent à embaucher. Vous le refaites à chaque mission ?";
   assert.doesNotThrow(() => validerCommentaire({ texte, genre: 'vraie_question' }));
 });
+
+test('refuse une generalisation statistique vague et non sourcee -- cas reel du 16/09/2026 (commentaire Theophile Burnet)', () => {
+  const texte = "40 raccourcis rangés en 6 familles, c'est un travail de synthèse qui vaut plus qu'un simple pense-bête. La plupart des utilisateurs de Claude Code n'en connaissent qu'une poignée et perdent du temps sur des tâches que deux secondes de commande règlent.";
+  assert.throws(
+    () => validerCommentaire({ texte, genre: 'information_chiffree' }),
+    /generalisation statistique vague et non sourcee/
+  );
+});
+
+test('refuse "la majorite de"/"beaucoup de"/"peu de" -- meme regle sur les autres quantificateurs vagues', () => {
+  assert.throws(
+    () => validerCommentaire({ texte: "C'est un bon post. La majorité des dirigeants sous-estiment ce sujet.", genre: 'desaccord_argumente' }),
+    /generalisation statistique vague et non sourcee/
+  );
+  assert.throws(
+    () => validerCommentaire({ texte: "C'est un bon post. Beaucoup d'entreprises n'ont jamais formalisé ce process.", genre: 'desaccord_argumente' }),
+    /generalisation statistique vague et non sourcee/
+  );
+  assert.throws(
+    () => validerCommentaire({ texte: "C'est un bon post. Peu de consultants osent l'écrire aussi clairement.", genre: 'desaccord_argumente' }),
+    /generalisation statistique vague et non sourcee/
+  );
+});
+
+test('n\'accuse pas a tort un tour idiomatique sans claim statistique ("la plupart du temps")', () => {
+  const texte = "Bon rappel. La plupart du temps, ce genre de choix se décide sans même en avoir conscience.";
+  assert.doesNotThrow(() => validerCommentaire({ texte, genre: 'desaccord_argumente' }));
+});
