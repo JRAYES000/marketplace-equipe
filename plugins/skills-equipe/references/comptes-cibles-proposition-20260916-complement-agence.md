@@ -1,4 +1,4 @@
-# Complement propose pour julien-agency (16/09/2026) -- EN ATTENTE de validation Julien/Nomena
+# Complement propose pour julien-agency (16/09/2026) -- VALIDE par Nomena le 16/09/2026, integre
 
 ## Pourquoi
 
@@ -26,12 +26,23 @@ Ecartes a cette etape (verifies puis rejetes, pour reference) :
 - **Franck Delmas** : 2 posts recents (1j, 3j) puis un trou de 3 semaines -- meme profil.
 - **Eric Gibout** : ~1 post/semaine (2j, 6j, 1sem, 2sem, 3sem) -- sous le seuil "2-3x/semaine"
   demande, quoique regulier.
-- **Leonel ADAGBE** : tres actif (10h, 5j, 6j, 6j, 1sem) et positionnement ideal ("J'aide les
-  dirigeants a gagner 20h/semaine en automatisant") -- **ecarte uniquement parce que base au
-  Togo**, pas en France (poste sur l'ecosysteme tech togolais). A reconsiderer si le critere
-  "comptes francais" de `reglages-comptes.json` est assoupli un jour.
+- **Leonel ADAGBE** -- initialement ecarte a cette etape pour base a Lome (Togo), **corrige et
+  reintegre le 16/09/2026** (voir "Correction du critere pays" plus bas).
 
-## Les 5 comptes proposes
+## Correction du critere pays (16/09/2026)
+
+Nomena a corrige le critere utilise pour ecarter Leonel ADAGBE : le pays de residence de l'auteur
+d'un post cible n'a aucune importance pour un commentaire poste dessous -- ce qui compte, c'est
+que son AUDIENCE soit francophone et proche de celle de Julien (dirigeants/PME francophones), pas
+sa localisation. Verification faite avant reintegration : les 5 derniers posts de Leonel ADAGBE
+sont entierement en francais, adresses explicitement a "Chers dirigeants"/"Si vous dirigez une
+PME" -- audience identique aux 13 autres comptes de la liste, malgre une base a Lome (Togo). Le
+critere "profils francais" documente plus haut est donc remplace par "audience francophone
+dirigeants/PME", et **ce champ est corrige dans `reglages-comptes.json`
+(`_critere_pays_corrige_20260916`)** pour que ce mauvais filtre ne serve pas a ecarter un futur
+bon candidat.
+
+## Les 6 comptes integres
 
 | # | Nom | URL LinkedIn | Positionnement observe | Zone | Abonnes | Dernier post | Cadence recente (5 derniers posts) |
 | --- | --- | --- | --- | --- | --- | --- | --- |
@@ -40,6 +51,7 @@ Ecartes a cette etape (verifies puis rejetes, pour reference) :
 | 3 | Yohann Nezri | `https://www.linkedin.com/in/yohann-nezri-expert-digitalisation/` | "DIGITAL POWER \| IA \| Automatisation \| SEO" -- aide aussi les avocats en generation de leads | Marseille | 5 354 | 22 min (16/09/2026) | 22min, 2j, 4j, 5j (repost), 1sem -- 4/5 originaux |
 | 4 | Mehdi Stili | `https://www.linkedin.com/in/mehdi-stili-6769a6174/` | "Tech Lead IA \| Python/FastAPI \| RAG/LLM en prod" -- freelance disponible | Toulon | 5 583 | 22 min (16/09/2026) | 22min, 2j, 5j, puis 3mo/4mo -- 3 posts sur 7 jours, mais gap avant : a resurveiller dans 2-3 semaines |
 | 5 | Stéphane Benoist | `https://www.linkedin.com/in/sbenoist/` | "DSI a temps partage \| Votre informatique coute cher..." -- gouvernance IT/IA pour PME, pas uniquement automatisation | Bordeaux | 4 057 | 1 jour (15/09/2026) | 1j, 2j, 4j, 5j, 1sem -- tous originaux, cadence tres reguliere |
+| 6 | Leonel ADAGBE | `https://www.linkedin.com/in/leoneladagbe/` | "J'aide les dirigeants a gagner 20h par semaine en automatisant leurs taches repetitives" -- CTO at Pandore, audience francophone dirigeants/PME | Lome, Togo (audience francophone -- voir correction du critere pays ci-dessus) | 6 802 | 10h (16/09/2026) | 10h, 5j (repost), 6j, 6j, 1sem -- tres regulier, positionnement le plus proche du brief de tous les nouveaux comptes |
 
 ## Reserves assumees (a lire avant de valider)
 
@@ -58,6 +70,7 @@ Ecartes a cette etape (verifies puis rejetes, pour reference) :
 
 ## Statut
 
-**En attente de validation** (Julien ou Nomena) avant toute copie dans
-`linkedin-commentaires/reglages-comptes.json` -- meme processus que le 14/09/2026, jamais copie
-sans validation explicite au prealable.
+**Valide par Nomena le 16/09/2026** -- les 6 comptes sont integres dans
+`linkedin-commentaires/reglages-comptes.json` (14 comptes cibles julien-agency au total).
+`mehdi-stili-6769a6174` porte l'annotation `comptes_cibles_statut: en_observation` (voir le
+fichier de reglages) -- a reevaluer sur sa cadence reelle a partir du 30/09/2026.

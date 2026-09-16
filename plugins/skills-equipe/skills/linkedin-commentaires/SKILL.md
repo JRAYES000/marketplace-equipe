@@ -74,9 +74,17 @@ Julien/Nomena avant integration dans `reglages-comptes.json`.
 
 ## Comptes cibles
 
-`comptes_cibles` est rempli dans `reglages-comptes.json` : 16 profils LinkedIn francais reels
-(8 par marque -- le brief demande "8 a 12 comptes PAR MARQUE"). Detail et methode de
-verification : `references/comptes-cibles-proposition-20260914.md`.
+`comptes_cibles` est rempli dans `reglages-comptes.json` : 8 comptes pour julien-partners, 14
+pour julien-agency (8 profils initiaux + 6 complementaires ajoutes le 16/09/2026 -- voir
+`references/comptes-cibles-proposition-20260914.md` puis
+`references/comptes-cibles-proposition-20260916-complement-agence.md`). **Critere corrige le
+16/09/2026** : ce qui qualifie un compte cible n'est plus "base en France" mais "audience
+francophone dirigeants/PME" -- corrige apres avoir initialement ecarte a tort un excellent
+candidat (Leonel ADAGBE, base a Lome/Togo mais dont les posts et l'audience visee sont
+entierement francophones), voir `_critere_pays_corrige_20260916` dans `reglages-comptes.json`.
+`mehdi-stili-6769a6174` porte l'annotation `comptes_cibles_statut: en_observation` (cadence
+recente correcte mais precedee d'un trou de plusieurs mois) -- a reevaluer a partir du
+30/09/2026.
 
 ## Variables d'environnement (`.env.example`)
 
@@ -95,13 +103,13 @@ verification : `references/comptes-cibles-proposition-20260914.md`.
   actifs (moins de quelques posts/semaine chacun), un passage donne legitimement 0 post frais --
   pas un signe de panne, mais desormais un repli qui a une LIMITE (voir plafond ci-dessous, pas
   "poster le plus recent quel qu'il soit").
-  **Testee en conditions reelles trois fois** (15/09 matin, 15/09 fin d'apres-midi, 16/09 matin,
-  lecture directe des 16 comptes cibles via navigateur) : **0 post frais les trois fois** -- la
-  regle n'a encore jamais ete "vraie" sur ces comptes. L'ecart au plus proche n'evolue pas de
-  facon monotone (72h -> 7h -> 21h entre les trois passages) : voir "Recommandation d'usage --
-  horaire de lancement" plus bas, c'est l'heure du passage qui explique l'ecart, pas une tendance
-  qui s'ameliorerait avec le temps. Voir `references/linkedin-commentaires-historique.md` pour le
-  detail compte par compte.
+  **Testee en conditions reelles quatre fois** (15/09 matin, 15/09 fin d'apres-midi, 16/09 matin,
+  16/09 matin apres complement de comptes) : **0 post frais les trois premieres fois**, puis
+  **4 posts frais sur 5 candidats au 4e passage** (16/09, apres integration de 6 comptes
+  complementaires plus actifs -- voir plus bas "Comptes cibles"). La regle n'etait donc pas fausse
+  : c'est la LISTE des comptes cibles qui etait le vrai probleme, pas la fenetre de 4h elle-meme
+  ni l'heure du passage (voir "Recommandation d'usage" plus bas, a nuancer avec ce resultat).
+  Voir `references/linkedin-commentaires-historique.md` pour le detail compte par compte.
 - **Plafond dur de fraicheur (ajoute le 16/09/2026)** : `validerFraicheurMaximale`
   (`lib/planifier-commentaires.js`, `FRAICHEUR_MAX_HEURES = 48`) **refuse** tout post publie il y
   a plus de 48h -- explicitement, pas un avertissement. Avant ce garde-fou, rien n'empechait de
