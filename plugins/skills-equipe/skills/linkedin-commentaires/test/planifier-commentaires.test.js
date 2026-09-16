@@ -7,6 +7,8 @@ const {
   validerQuotaJournalier,
   validerFraicheurMaximale,
   validerCanalPublicationReel,
+  genererRepliAucunCandidat,
+  SEUIL_INACTIVITE_JOURS,
 } = require('../lib/planifier-commentaires');
 
 const MAINTENANT = new Date('2026-09-14T12:00:00.000Z');
@@ -104,4 +106,52 @@ test('validerCanalPublicationReel refuse un compte absent des reglages (rien de 
 test('validerCanalPublicationReel refuse si le champ est absent (pas de valeur par defaut permissive)', () => {
   const reglages = { 'julien-agency': {} };
   assert.throws(() => validerCanalPublicationReel('julien-agency', reglages), /canal de publication reel/);
+});
+
+test('genererRepliAucunCandidat -- cas reel du 16/09/2026, les 8 comptes julien-agency', () => {
+  const cibles = [
+    { compte: 'julien-agency', nom: 'Jean ZENDJI', postedAt: ilYA(24 * 4) },
+    { compte: 'julien-agency', nom: 'Georges Solutions', postedAt: ilYA(24 * 7) },
+    { compte: 'julien-agency', nom: 'Romain Charissou', postedAt: ilYA(24 * 30) },
+    { compte: 'julien-agency', nom: 'Benjamin Lacroix', postedAt: ilYA(24 * 60) },
+    { compte: 'julien-agency', nom: 'Raphael Mizrahi', postedAt: ilYA(24 * 60) },
+    { compte: 'julien-agency', nom: 'Mohamed Houmadi Baydama', postedAt: ilYA(24 * 30 * 5) },
+    { compte: 'julien-agency', nom: 'Alexandre Touraine', postedAt: ilYA(24 * 30 * 11) },
+    { compte: 'julien-agency', nom: 'Pierre-Emmanuel Cochet', postedAt: ilYA(24 * 365 * 3) },
+  ];
+
+  const repli = genererRepliAucunCandidat(cibles, MAINTENANT);
+
+  assert.match(repli.message, /Jean ZENDJI/);
+  assert.match(repli.message, /4\.0 jours/);
+  assert.equal(repli.comptes[0].nom, 'Jean ZENDJI');
+  assert.equal(repli.comptes[0].ageJours, 4);
+  // Seuil a 28 jours : Jean ZENDJI (4j) et Georges Solutions (7j) restent sous le seuil, les 6
+  // autres (30j a plus de 1000j) sont signales comme candidats au remplacement -- reproduit le
+  // constat reel de Nomena ("le plus actif publie tous les 4 jours, les autres a des semaines/mois").
+  assert.equal(repli.comptesInactifs.length, 6);
+  assert.ok(repli.comptesInactifs.every((c) => c.ageJours > SEUIL_INACTIVITE_JOURS));
+  assert.match(repli.recommandation, /6\/8 comptes/);
+  assert.match(repli.recommandation, /remplacer/);
+});
+
+test('genererRepliAucunCandidat gere un compte sans aucun post trouve (postedAt: null)', () => {
+  const cibles = [
+    { compte: 'julien-agency', nom: 'Compte A', postedAt: ilYA(10) },
+    { compte: 'julien-agency', nom: 'Compte B', postedAt: null },
+  ];
+  const repli = genererRepliAucunCandidat(cibles, MAINTENANT);
+  assert.equal(repli.comptes[repli.comptes.length - 1].nom, 'Compte B');
+  assert.ok(repli.comptesInactifs.some((c) => c.nom === 'Compte B'));
+  assert.match(repli.message, /aucun post trouve/);
+});
+
+test('genererRepliAucunCandidat ne signale aucun compte inactif si tous sont recents', () => {
+  const cibles = [
+    { compte: 'julien-agency', nom: 'Compte A', postedAt: ilYA(24 * 3) },
+    { compte: 'julien-agency', nom: 'Compte B', postedAt: ilYA(24 * 5) },
+  ];
+  const repli = genererRepliAucunCandidat(cibles, MAINTENANT);
+  assert.equal(repli.comptesInactifs.length, 0);
+  assert.match(repli.recommandation, /ponctuelle, pas structurelle/);
 });

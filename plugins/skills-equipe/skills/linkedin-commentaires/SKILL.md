@@ -49,6 +49,29 @@ commentaire publie, le quota du jour deja utilise, et l'etat des comptes cibles.
 `etat.js` proposent un repli concret des que rien n'est disponible (aucun post frais, aucun
 compte cible, quota atteint) -- jamais les mains vides.
 
+**Repli "aucun candidat sous le plafond de fraicheur" (ajoute le 16/09/2026)** :
+`genererRepliAucunCandidat` (`lib/planifier-commentaires.js`) construit ce repli reellement,
+plutot que de laisser la session Claude s'arreter a "zero candidat" sans explication -- exactement
+ce qui s'est produit lors des 3 premiers passages reels (15/09 matin, 15/09 apres-midi, 16/09
+matin, voir "Fraicheur" plus bas). Prend en entree la liste des cibles avec la date du post le
+plus recent trouve sur chacune (`[{ compte, nom, url, postedAt }]`, `postedAt: null` si aucun post
+exploitable), releve manuellement par la session via Claude in Chrome (pas d'automatisation Apify
+ici -- meme repli documente que le suivi a 3 jours). Renvoie :
+- `message` : le constat complet, compte par compte, du plus recent au plus ancien.
+- `comptesInactifs` : les comptes au-dela de `SEUIL_INACTIVITE_JOURS` (28 jours, voir le
+  commentaire dans le code pour le calcul reel qui a fixe ce seuil).
+- `recommandation` : soit "rien a signaler, absence ponctuelle" si aucun compte n'est inactif,
+  soit une invitation explicite a remplacer les comptes inactifs dans `comptes_cibles`.
+
+Teste sur le cas reel du 16/09/2026 (les 8 comptes julien-agency, ages reels releves ce matin) :
+`genererRepliAucunCandidat` identifie correctement Jean ZENDJI comme le plus actif (4 jours) et
+signale 6/8 comptes comme inactifs depuis plus de 28 jours, avec la recommandation de les
+remplacer -- voir `a-publier/README.md` du 16/09/2026 pour la sortie complete. Consequence
+directe : `references/comptes-cibles-proposition-20260916-complement-agence.md` propose 5 comptes
+de remplacement, verifies sur leur frequence de publication reelle (pas seulement thematique --
+c'est precisement ce qui manquait a la premiere liste du 14/09/2026), en attente de validation
+Julien/Nomena avant integration dans `reglages-comptes.json`.
+
 ## Comptes cibles
 
 `comptes_cibles` est rempli dans `reglages-comptes.json` : 16 profils LinkedIn francais reels
@@ -140,7 +163,7 @@ verification : `references/comptes-cibles-proposition-20260914.md`.
   d'une liste fermee de mots toujours accentues en francais standard -- heuristique
   volontairement imparfaite (mots ambigus type "a"/"à" exclus pour eviter les faux positifs).
 
-`node --test` : 85 tests.
+`node --test` : 88 tests.
 
 ## Recommandation d'usage -- horaire de lancement (16/09/2026)
 
