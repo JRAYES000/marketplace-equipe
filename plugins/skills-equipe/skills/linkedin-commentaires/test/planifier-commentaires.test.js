@@ -8,6 +8,7 @@ const {
   validerFraicheurMaximale,
   validerCanalPublicationReel,
   genererRepliAucunCandidat,
+  normaliserAuteurCible,
   SEUIL_INACTIVITE_JOURS,
 } = require('../lib/planifier-commentaires');
 
@@ -59,6 +60,38 @@ test('refuse un second commentaire a la meme personne le meme jour -- cas demand
     () => validerQuotaJournalier(entreesDuJour, { auteurCible: 'urn:li:person:deja-vu' }),
     /jamais deux fois la meme personne le meme jour/
   );
+});
+
+/**
+ * Non-regression 17/09/2026 (suite) -- meme faille que l'audit adversarial
+ * du 15/09/2026 sur la casse de `compte` (voir lib/registre.js), mais sur
+ * `auteurCible` : cas reel, "Theophile Burnet" et "Theophile Burnet ⚡️"
+ * (nom exact renvoye par Apify le 17/09/2026) designent la meme personne.
+ */
+test('refuse un second commentaire a la meme personne le meme jour, avec ou sans emoji de fin -- cas reel du 17/09/2026', () => {
+  const entreesDuJour = [{ date: '2026-09-14', auteurCible: 'Théophile Burnet ⚡️' }];
+  assert.throws(
+    () => validerQuotaJournalier(entreesDuJour, { auteurCible: 'Théophile Burnet' }),
+    /jamais deux fois la meme personne le meme jour/
+  );
+});
+
+test('refuse un second commentaire malgre une casse ou des espaces differents -- variante du cas reel', () => {
+  const entreesDuJour = [{ date: '2026-09-14', auteurCible: '  théophile burnet  ' }];
+  assert.throws(
+    () => validerQuotaJournalier(entreesDuJour, { auteurCible: 'Théophile Burnet ⚡️' }),
+    /jamais deux fois la meme personne le meme jour/
+  );
+});
+
+test('normaliserAuteurCible ne fusionne jamais deux noms reellement differents -- reste conservateur', () => {
+  assert.notEqual(normaliserAuteurCible('Jean Dupont'), normaliserAuteurCible('Jean Dupond'));
+  assert.notEqual(normaliserAuteurCible('Émilie Martin'), normaliserAuteurCible('Emilie Martin'));
+});
+
+test('normaliserAuteurCible retire uniquement la decoration de fin, jamais un emoji au milieu du nom', () => {
+  assert.equal(normaliserAuteurCible('Théophile Burnet ⚡️'), normaliserAuteurCible('Théophile Burnet'));
+  assert.notEqual(normaliserAuteurCible('Théophile ⚡️ Burnet'), normaliserAuteurCible('Théophile Burnet'));
 });
 
 test('validerFraicheurMaximale accepte un post de moins de 48h', () => {
