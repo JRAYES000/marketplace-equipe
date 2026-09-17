@@ -549,3 +549,42 @@ pour la contourner (teste sur `LINKEDIN_GET_MY_INFO`, ignore silencieusement).
 Composio MCP direct, pas via Buffer) restent structurellement bloques pour julien-partners tant
 que cette precedence n'est pas resolue cote Composio (support/documentation a consulter) -- ce
 n'est pas un probleme de code ou de configuration reparable de notre cote.
+
+### 17/09/2026 -- explication de Julien, et un nouveau constat qui la nuance
+
+**Ce qui clot le "override" trouve la veille** : Julien a explique que "connected_accounts
+override in session config" ne designait aucune restriction posee sur la cle -- ca signifiait
+simplement qu'**un seul** compte etait alors prete a l'equipe. La distinction qui manquait :
+- **"Connected Accounts"** (dashboard Composio, cote proprietaire) : les comptes personnels de
+  Julien, jamais visibles tels quels par une cle consumer d'equipe.
+- **"Shared connections"** (cote cle consumer) : ce que Julien choisit explicitement de preter a
+  l'equipe via "Connect for my team". Avant le 17/09, un seul pret existait
+  (`averse-cooser`) -- d'ou le message, qui decrivait un etat ("un seul compte prete"), pas un
+  verrou technique.
+
+Julien a debloque Claude Partners le 17/09/2026 : un second pret existe desormais,
+`asher-fill`, cense correspondre a Claude Partners (`urn:li:person:ZvLHybJZhj`) -- lui-meme ne
+sait pas avec certitude lequel des deux prets correspond a quel compte reel, les noms sont
+generes au hasard par Composio.
+
+**Nuance reelle, verifiee le 17/09/2026 apres ce second pret** : `asher-fill` reste invisible a
+tous les appels MCP disponibles, exactement comme avant le second pret. Teste dans l'ordre :
+- `COMPOSIO_SEARCH_TOOLS` (session MCP fraiche, `Mcp-Session-Id` different de la veille) : le
+  tableau `accounts` ne contient toujours qu'une entree, `linkedin_averse-cooser`.
+- `COMPOSIO_MANAGE_CONNECTIONS` : meme message d'erreur mot pour mot qu'avant le second pret
+  ("connected_accounts override in session config").
+- `LINKEDIN_GET_MY_INFO` via `COMPOSIO_MULTI_EXECUTE_TOOL`, avec trois noms de champ candidats
+  non documentes (`connected_account_id: "linkedin_asher-fill"`,
+  `connected_account_id: "asher-fill"`, `account_id: "asher-fill"`) : les trois renvoient
+  `id: aFqu-W7ClW` -- jamais `ZvLHybJZhj`.
+
+**Donc l'explication de Julien est vraie sur le fond** (le message ne decrivait pas un verrou
+de cle), **mais ne suffit pas a elle seule a expliquer ce qui est observe apres un second pret**
+: meme avec deux connexions partagees actives, aucun appel MCP disponible ne sait aujourd'hui
+distinguer laquelle interroger -- tout se resout systematiquement sur la connexion "preferee"
+(`averse-cooser`). Deux lectures possibles, non tranchees a ce stade : (a) Julien s'est trompe
+de navigateur/compte en refaisant le pret, et celui-ci pointe en realite vers le meme compte
+LinkedIn que le premier ; (b) la regle de precedence documentee plus haut (une connexion
+partagee reste masquee tant qu'une connexion "preferee" existe sur le meme toolkit) n'est pas
+levee par un simple second pret, et il faut soit un support Composio, soit une methode encore
+non trouvee pour la lever.
