@@ -46,7 +46,7 @@ test('executerActionComposio refuse une cle ak_ avant tout appel reseau (aucun f
   }
 });
 
-test('executerActionComposio appelle le canal MCP (connect.composio.dev/mcp), pas le REST direct', async () => {
+test('executerActionComposio appelle le canal MCP (connect.composio.dev/mcp), pas le REST direct -- sans compte precise', async () => {
   const urlsAppelees = [];
   const fetchOriginal = global.fetch;
   global.fetch = async (url) => {
@@ -69,4 +69,58 @@ test('executerActionComposio appelle le canal MCP (connect.composio.dev/mcp), pa
   } finally {
     global.fetch = fetchOriginal;
   }
+});
+
+/**
+ * Ajoute le 17/09/2026 -- non-regression du routage par compte
+ * (lib/composio-canal.js) : julien-agency doit TOUJOURS passer par MCP,
+ * julien-partners doit passer par REST avec son connected_account_id, jamais
+ * l'inverse ni un melange.
+ */
+test('executerActionComposio(compte: "julien-agency") reste sur le canal MCP', async () => {
+  const urlsAppelees = [];
+  const fetchOriginal = global.fetch;
+  global.fetch = async (url) => {
+    urlsAppelees.push(String(url));
+    return { ok: false, status: 401, headers: { get: () => null }, text: async () => JSON.stringify({ error: 'unauthorized' }) };
+  };
+  try {
+    await assert.rejects(() =>
+      executerActionComposio('LINKEDIN_GET_MY_INFO', { compte: 'julien-agency', arguments: {}, apiKey: 'ck_test' })
+    );
+    assert.ok(urlsAppelees.every((u) => u === 'https://connect.composio.dev/mcp'), 'julien-agency ne doit jamais appeler le REST direct');
+  } finally {
+    global.fetch = fetchOriginal;
+  }
+});
+
+test('executerActionComposio(compte: "julien-partners") passe par le REST direct avec connected_account_id', async () => {
+  const urlsAppelees = [];
+  const corpsAppeles = [];
+  const fetchOriginal = global.fetch;
+  global.fetch = async (url, opts) => {
+    urlsAppelees.push(String(url));
+    corpsAppeles.push(JSON.parse(opts.body));
+    return { ok: true, status: 200, text: async () => JSON.stringify({ successful: true, data: { id: 'ZvLHybJZhj' } }) };
+  };
+  try {
+    const resultat = await executerActionComposio('LINKEDIN_GET_MY_INFO', {
+      compte: 'julien-partners',
+      arguments: {},
+      apiKey: 'ak_test',
+    });
+    assert.equal(resultat.data.id, 'ZvLHybJZhj');
+    assert.ok(
+      urlsAppelees.every((u) => u.startsWith('https://backend.composio.dev/api/v3.1/tools/execute/')),
+      'julien-partners ne doit jamais appeler le canal MCP'
+    );
+    assert.equal(corpsAppeles[0].connected_account_id, 'ca_vn1-dhh8VcYf');
+  } finally {
+    global.fetch = fetchOriginal;
+  }
+});
+
+test('resoudreRoutage refuse un compte inconnu', () => {
+  const { resoudreRoutage } = require('../../../lib/composio-canal');
+  assert.throws(() => resoudreRoutage('compte-inexistant'), /Compte Composio inconnu/);
 });

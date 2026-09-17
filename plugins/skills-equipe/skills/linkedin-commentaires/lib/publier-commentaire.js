@@ -1,6 +1,7 @@
 'use strict';
 
 const { executerActionComposio } = require('./composio');
+const { resoudreCompteParUrn } = require('../../../lib/composio-canal');
 
 /**
  * Verifie, AVANT tout appel de publication, que la connexion LinkedIn
@@ -23,9 +24,16 @@ const { executerActionComposio } = require('./composio');
  * signale par Julien. Cette fonction rend ce risque impossible : elle
  * refuse explicitement la publication plutot que de la laisser partir
  * sous la mauvaise identite.
+ *
+ * Depuis le 17/09/2026, le compte peut etre passe explicitement (`compte`)
+ * pour forcer le canal utilise par la verification -- sinon il est derive de
+ * `actorUrnAttendu` via resoudreCompteParUrn (comportement par defaut,
+ * compatible avec les appelants existants).
  */
-async function verifierConnexionAvantPublication(actorUrnAttendu, { userId, apiKey } = {}) {
+async function verifierConnexionAvantPublication(actorUrnAttendu, { compte, userId, apiKey } = {}) {
+  const compteResolu = compte || resoudreCompteParUrn(actorUrnAttendu);
   const resultat = await executerActionComposio('LINKEDIN_GET_MY_INFO', {
+    compte: compteResolu,
     arguments: {},
     userId,
     apiKey,
@@ -71,7 +79,8 @@ async function publierCommentaire({ actorUrn, targetUrn, message, parentCommentU
   if (!targetUrn) throw new Error('targetUrn requis (shareUrn du post cible, jamais une urn:li:activity:).');
   if (!message) throw new Error('message requis (texte du commentaire).');
 
-  await verifierConnexionAvantPublication(actorUrn, { userId, apiKey });
+  const compte = resoudreCompteParUrn(actorUrn);
+  await verifierConnexionAvantPublication(actorUrn, { compte, userId, apiKey });
 
   const args = {
     actor: actorUrn,
@@ -82,6 +91,7 @@ async function publierCommentaire({ actorUrn, targetUrn, message, parentCommentU
   if (parentCommentUrn) args.parent_comment = parentCommentUrn;
 
   return executerActionComposio('LINKEDIN_CREATE_COMMENT_ON_POST', {
+    compte,
     arguments: args,
     userId,
     apiKey,

@@ -1,33 +1,39 @@
 'use strict';
 
 /**
- * Appel d'une action Composio via le canal MCP consumer ("FOR YOU",
- * https://connect.composio.dev/mcp) -- le SEUL canal reellement fonctionnel
- * sur ce compte, verifie en conditions reelles le 16/09/2026 (5 commentaires
- * publies pour de vrai via ce canal).
+ * Appel d'une action Composio pour linkedin-commentaires, avec routage par
+ * compte depuis le 17/09/2026 (voir lib/composio-canal.js, ROUTAGE_COMPTES) :
+ *  - julien-agency : canal MCP consumer ("FOR YOU", connect.composio.dev/mcp)
+ *    -- inchange, verifie en conditions reelles le 16/09/2026 (5 commentaires
+ *    publies pour de vrai via ce canal). C'est TOUJOURS le seul canal
+ *    fonctionnel pour ce compte (aucune connexion pour lui sur le projet
+ *    "ak_", verifie le 17/09/2026).
+ *  - julien-partners : bascule le 17/09/2026 vers le canal REST direct
+ *    (POST /api/v3.1/tools/execute/<slug>, cle "ak_...") avec
+ *    connected_account_id explicite (ca_vn1-dhh8VcYf) -- une connexion
+ *    LinkedIn ACTIVE existe reellement pour ce compte sur ce canal (verifie
+ *    via GET /api/v3/connected_accounts). L'implementation REST vit dans
+ *    lib/composio-canal.js (partagee avec linkedin-carrousel).
  *
- * Migre le 16/09/2026 depuis le canal REST direct
- * (POST /api/v3.1/tools/execute/<slug>, cle "ak_..." de la couche PLATFORM)
- * que ce fichier utilisait jusque-la : ce canal n'a JAMAIS fonctionne sur ce
- * compte, faute de cle de projet ak_ existante -- deja diagnostique et
- * documente le 12/09/2026 (`references/actions-composio.md`), puis
- * RE-DECOUVERT a l'identique le 16/09/2026 (une session a perdu du temps a
- * obtenir une cle ck_, la passer a ce fichier, et se heurter au meme 401
- * "Invalid API key" avant de comprendre que le fichier appelait le mauvais
- * canal). Ce fichier ne doit plus jamais retomber dans ce piege : voir
- * `validerCle` ci-dessous, qui refuse explicitement une cle du mauvais
- * format plutot que de laisser Composio repondre un 401 opaque.
+ * Historique : ce fichier a utilise le REST direct jusqu'au 16/09/2026, sans
+ * jamais fonctionner (pas de cle de projet ak_ alors disponible) -- migre
+ * vers MCP ce jour-la (voir `validerCle` ci-dessous, qui refuse une cle "ak_"
+ * passee par erreur sur ce chemin). Le REST redevient un canal reel le
+ * 17/09/2026, mais UNIQUEMENT via le routage explicite par compte ci-dessous
+ * -- jamais en passant directement une cle ak_ a `validerCle`/`executerActionMcp`,
+ * qui la refusent toujours.
  *
  * Protocole MCP standard (JSON-RPC 2.0 sur HTTP, reponse JSON ou SSE) :
  * `initialize` -> recupere un `Mcp-Session-Id` a repasser sur les appels
  * suivants -> `notifications/initialized` -> `tools/call` sur
  * `COMPOSIO_MULTI_EXECUTE_TOOL` avec `{ tools: [{ tool_slug, arguments }] }`,
  * qui enveloppe l'appel reel a l'outil natif (ex. `LINKEDIN_CREATE_COMMENT_ON_POST`).
- * Une session MCP neuve est ouverte a chaque appel de `executerActionComposio`
- * (signature stateless volontairement conservee pour ne pas casser les
- * appelants existants) -- cout d'un aller-retour supplementaire par appel,
- * assume pour la simplicite.
+ * Une session MCP neuve est ouverte a chaque appel MCP (signature stateless
+ * volontairement conservee pour ne pas casser les appelants existants) --
+ * cout d'un aller-retour supplementaire par appel, assume pour la simplicite.
  */
+
+const { resoudreRoutage, executerActionRest } = require('../../../lib/composio-canal');
 
 const MCP_URL = 'https://connect.composio.dev/mcp';
 
@@ -121,7 +127,7 @@ async function appelMcpBrut(corps, cle, sessionId, contexte) {
  * `successful`/`data` qu'avant la migration -- `resultat.data.id` etc. cote
  * appelant continuent de fonctionner sans changement).
  */
-async function executerActionComposio(slug, { arguments: args = {}, userId, apiKey } = {}) {
+async function executerActionMcp(slug, { arguments: args = {}, userId, apiKey } = {}) {
   const cle = apiKey || process.env.COMPOSIO_CONSUMER_API_KEY;
   validerCle(cle);
 
@@ -197,4 +203,23 @@ async function executerActionComposio(slug, { arguments: args = {}, userId, apiK
   return reponseOutil;
 }
 
-module.exports = { executerActionComposio, validerCle };
+/**
+ * Point d'entree public : route vers REST (julien-partners) ou MCP
+ * (julien-agency, et tout appel sans `compte` -- comportement inchange pour
+ * les appelants existants qui ne connaissent pas encore le routage, voir
+ * lib/publier-commentaire.js qui derive `compte` depuis l'actorUrn).
+ */
+async function executerActionComposio(slug, { compte, arguments: args = {}, userId, apiKey, connectedAccountId } = {}) {
+  const routage = compte ? resoudreRoutage(compte) : null;
+  if (routage && routage.canal === 'rest') {
+    return executerActionRest(slug, {
+      arguments: args,
+      userId: userId || routage.userId,
+      apiKey: apiKey || process.env.COMPOSIO_API_KEY,
+      connectedAccountId: connectedAccountId || routage.connectedAccountId,
+    });
+  }
+  return executerActionMcp(slug, { arguments: args, userId, apiKey });
+}
+
+module.exports = { executerActionComposio, executerActionMcp, validerCle };

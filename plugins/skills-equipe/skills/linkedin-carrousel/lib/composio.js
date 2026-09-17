@@ -1,53 +1,26 @@
 'use strict';
 
 /**
- * Appel bas niveau d'une action Composio.
+ * Appel bas niveau d'une action Composio pour linkedin-carrousel -- canal
+ * REST direct (backend.composio.dev/api/v3.1, cle "ak_..." de la couche
+ * PLATFORM). L'implementation elle-meme vit dans lib/composio-canal.js
+ * (partagee avec linkedin-commentaires depuis le 17/09/2026, voir
+ * references/actions-composio.md) : ce fichier ne fait que la relayer, pour
+ * ne pas casser les appelants existants (require('./composio')).
  *
- * CANAL : voulu en MCP (connect.composio.dev/mcp), mais ce canal exige un jeton
- * AuthKit (session OAuth reelle), pas une cle API statique -- teste et documente
- * dans references/actions-composio.md du paquet (11/09/2026). En attendant une
- * voie d'acces programmatique a ce jeton, cette fonction utilise le canal REST
- * direct (/api/v3.1/tools/execute/<slug>) avec COMPOSIO_API_KEY, qui EST
- * verifiable aujourd'hui. A remplacer par un vrai appel MCP des que le jeton
- * est disponible.
+ * Historique : jusqu'au 17/09/2026 ce canal etait documente comme "methode
+ * de secours seulement" (aucune connexion LinkedIn sur le projet ak_ alors
+ * disponible). Verifie depuis (GET /api/v3/connected_accounts) : une
+ * connexion ACTIVE existe bien pour julien-partners (ca_vn1-dhh8VcYf) --
+ * c'est desormais le canal reel de publication pour ce compte, pas un
+ * secours. Rien n'existe pour julien-agency sur ce canal (voir
+ * lib/composio-canal.js, ROUTAGE_COMPTES) : ce compte reste sur MCP/ck_,
+ * gere par linkedin-commentaires/lib/composio.js.
  */
-async function executerActionComposio(slug, { arguments: args = {}, userId, apiKey } = {}) {
-  const cle = apiKey || process.env.COMPOSIO_API_KEY;
-  if (!cle) {
-    throw new Error('COMPOSIO_API_KEY manquant (variable d\'environnement ou parametre apiKey).');
-  }
+const { executerActionRest } = require('../../../lib/composio-canal');
 
-  const corps = { arguments: args };
-  if (userId) corps.user_id = userId;
-
-  const reponse = await fetch(`https://backend.composio.dev/api/v3.1/tools/execute/${slug}`, {
-    method: 'POST',
-    headers: { 'x-api-key': cle, 'Content-Type': 'application/json' },
-    body: JSON.stringify(corps),
-  });
-
-  // Audit adversarial du 15/09/2026 : `reponse.json()` etait appele sans
-  // filet -- un 500/429 ou un corps tronque/non-JSON faisaient planter cette
-  // fonction avec un SyntaxError brut plutot qu'un message exploitable.
-  const texteBrut = await reponse.text();
-  let json;
-  try {
-    json = texteBrut ? JSON.parse(texteBrut) : {};
-  } catch (erreur) {
-    const err = new Error(
-      `Composio ${slug} a repondu ${reponse.status} avec un corps qui n'est pas du JSON exploitable ` +
-      `(${erreur.message}). Debut du corps recu : "${texteBrut.slice(0, 200)}".`
-    );
-    err.httpStatus = reponse.status;
-    throw err;
-  }
-  if (!reponse.ok || json.successful === false) {
-    const err = new Error(`Composio ${slug} a echoue (HTTP ${reponse.status}) : ${JSON.stringify(json)}`);
-    err.httpStatus = reponse.status;
-    err.reponse = json;
-    throw err;
-  }
-  return json;
+async function executerActionComposio(slug, opts) {
+  return executerActionRest(slug, opts);
 }
 
 module.exports = { executerActionComposio };

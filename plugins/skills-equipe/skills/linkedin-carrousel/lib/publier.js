@@ -1,172 +1,91 @@
 'use strict';
 
-const fs = require('fs');
 const { executerActionComposio } = require('./composio');
+const { resoudreRoutage, televerserFichierComposio } = require('../../../lib/composio-canal');
+const reglagesComptes = require('../reglages-comptes.json');
 
 /**
- * SEUL point d'appel destine a publier reellement le carrousel sur LinkedIn.
- * Isole ici a dessein, meme s'il ne peut pas encore aboutir -- voir le constat
- * ci-dessous.
+ * Point d'entree public de publication du carrousel.
  *
- * `authorUrn` est un parametre substituable, volontairement generique :
- *   - `urn:li:person:<id>` pour julien-partners ou julien-agency (verifies
- *     par Julien le 11/09/2026, voir reglages-comptes.json).
- *   - `urn:li:organization:<id>` pour page-claude, une fois l'autorisation
- *     d'organisation validee cote LinkedIn (403 sur LINKEDIN_GET_COMPANY_INFO
- *     au 11/09/2026, Julien s'en occupe). Il suffira de brancher cette URN
- *     ici, aucune autre modification de cette fonction n'est necessaire.
+ * CE QUI N'A PAS CHANGE au 17/09/2026 : aucune des 24 actions du toolkit
+ * `linkedin` de Composio ne depose un document/PDF multi-pages (verifie le
+ * 11/09/2026, voir references/actions-composio.md). Cette fonction ne publie
+ * donc jamais le PDF du carrousel tel quel -- elle publie une IMAGE
+ * (couverture ou par-diapo, voir generer-images.js) via le repli documente le
+ * 12/09/2026.
  *
- * CONSTAT (11/09/2026, verifie dans references/actions-composio.md) : le
- * catalogue des 24 actions du toolkit `linkedin` de Composio ne contient
- * AUCUNE action pour deposer un document/PDF (l'equivalent d'un "carrousel"
- * LinkedIn). Les actions les plus proches --
- * `LINKEDIN_REGISTER_IMAGE_UPLOAD`/`LINKEDIN_INITIALIZE_IMAGE_UPLOAD` -- ne
- * gerent que des IMAGES, pas des documents PDF multi-pages, et
- * `LINKEDIN_CREATE_LINKED_IN_POST` n'accepte que `images[]`, pas de champ
- * document. Coherent avec un constat deja fait cote visibilite-ops
- * (JOURNAL.md, 04/09) : la passerelle Composio n'a jamais su deposer une
- * image sur un post, les posts illustres ont ete abandonnes pour cette
- * raison. Cette fonction leve donc une erreur explicite plutot que de
- * pretendre publier quelque chose qui ne correspond pas au carrousel reel.
+ * CE QUI A CHANGE : ce repli est desormais reellement fonctionnel pour
+ * julien-partners (canal REST/ak_, connected_account_id ca_vn1-dhh8VcYf) --
+ * voir televerserFichierComposio dans lib/composio-canal.js, qui corrige
+ * l'impasse du 12/09/2026 (LINKEDIN_CREATE_LINKED_IN_POST.images exige un
+ * FileUploadable {name, mimetype, s3key}, pas l'URN simple que produisait
+ * l'ancienne methode LINKEDIN_REGISTER_IMAGE_UPLOAD).
+ *
+ * julien-agency reste sur le canal MCP/ck_ (voir lib/composio-canal.js,
+ * ROUTAGE_COMPTES) -- non implemente ICI : ce fichier n'a jamais teste de
+ * publication d'image reelle via MCP (contrairement a linkedin-commentaires
+ * pour les commentaires), donc il refuse explicitement plutot que de
+ * pretendre que ca marche.
  */
-async function publierCarrousel({ authorUrn, cheminPdf }) {
-  throw new Error(
-    'publierCarrousel() : aucune action Composio ne permet de deposer un document/PDF sur ' +
-    'LinkedIn au 11/09/2026 (verifie sur les 24 actions du toolkit linkedin, voir ' +
-    'references/actions-composio.md). Publication a faire manuellement pour l\'instant : ' +
-    `PDF pret dans ${cheminPdf || 'sortants/<compte>/'}, a deposer a la main sur LinkedIn ` +
-    `en tant que "document post" pour ${authorUrn || '<authorUrn>'}.`
-  );
-}
+async function publierCarrousel({ compte, modeRepli, cheminsImages, commentary, userId, apiKey }) {
+  if (!compte) throw new Error('compte requis ("julien-agency" ou "julien-partners").');
 
-/**
- * REPLI IMAGE -- code reellement implemente le 12/09/2026, mais AUCUN appel
- * automatique nulle part dans ce paquet : ni CLI, ni main(), ni appel depuis
- * publierCarrousel ci-dessus. `publierCarrouselViaImage` n'est invoquee que si
- * quelqu'un l'appelle explicitement avec un `modeRepli` -- tant que Julien n'a
- * pas tranche entre "par-diapo" et "couverture" (ou confirme qu'il garde le
- * PDF depose a la main), cette fonction reste inerte. Objectif : le jour ou il
- * tranche, il n'y a plus qu'a l'appeler avec le bon `modeRepli`, rien a coder.
- *
- * Rendu local des images (verifie sans aucun appel Composio, voir
- * generer-images.js et test/generer-images.test.js -- 1080x1350px, meme
- * gabarit HTML que le PDF) : `genererImagesParDiapo` (une image par diapo,
- * option a) et `genererImageCouverture` (une seule image, la diapo "hook" ou
- * la premiere, option b). Cette fonction-ci ne fait QUE la partie Composio :
- * televerser des images DEJA rendues localement, puis creer le post.
- *
- *   1. `LINKEDIN_REGISTER_IMAGE_UPLOAD` (parametre requis `owner_urn`) --
- *      initialise un televersement natif et renvoie une URL presignee
- *      (`upload_url`) plus l'URN de l'asset image resultant. CONFIRME par
- *      appel reel le 12/09/2026 (julien-agency) : la reponse contient bien
- *      `upload_url`/`asset_urn`, et l'appel de `LINKEDIN_REGISTER_IMAGE_UPLOAD`
- *      via ce chemin reussit.
- *   2. Televerser les octets de l'image sur `upload_url` via une requete PUT
- *      (etape hors Composio, HTTP direct). CONFIRME par appel reel le
- *      12/09/2026 : `201 Created`.
- *   3. Appeler `LINKEDIN_CREATE_LINKED_IN_POST` avec son parametre optionnel
- *      `images` renseigne avec l'URN obtenue a l'etape 1.
- *
- * **ETAPE 3 CONFIRMEE CASSEE par appel reel le 12/09/2026** (julien-agency,
- * mode "couverture", tentative de publication reelle -- aucun post cree,
- * echec propre en amont) : `LINKEDIN_CREATE_LINKED_IN_POST.images` n'accepte
- * PAS une URN d'asset en chaine simple. Le schema reel (recupere via
- * `COMPOSIO_GET_TOOL_SCHEMAS` sur le canal MCP) exige, pour chaque element
- * du tableau `images`, un objet `{ name, mimetype, s3key }` -- un fichier
- * deja stocke dans le S3/R2 propre a Composio, pas une URN LinkedIn native.
- * Erreur reelle obtenue : `400 "Invalid request data provided - Input
- * should be a valid dictionary or instance of FileUploadable on parameter
- * images.0"`. Consequence : `televerserImageComposio` ci-dessous produit
- * bien une URN LinkedIn valide (etapes 1-2 fonctionnent), mais cette URN
- * est **inutilisable telle quelle** a l'etape 3 -- `publierCarrouselViaImage`
- * echouera systematiquement a la creation du post tant que ce point n'est
- * pas corrige.
- *
- * PISTE INVESTIGUEE LE 12/09/2026, IMPASSE CONFIRMEE (pas un blocage du
- * classifieur cette fois -- une vraie reponse d'API) : le SDK Python officiel
- * de Composio (`ComposioHQ/composio`, `python/composio/core/models/_files.py`,
- * lu publiquement via `gh api` sans authentification) construit un
- * `FileUploadable` en deux etapes : (1) `POST /api/v3/files/upload/request`
- * sur `backend.composio.dev` (body `{ md5, filename, mimetype, tool_slug,
- * toolkit_slug }`) renvoie une URL S3 presignee + une cle ; (2) PUT des
- * octets bruts du fichier sur cette URL (pas de base64 -- meme primitive PUT
- * que l'etape 2 ci-dessus, deja validee). Teste reellement le 12/09/2026 :
- * cet endpoint refuse la cle "consumer" MCP (`x-consumer-api-key` -> 401
- * `Auth_NoAuthProvided` ; la meme valeur en `x-api-key` -> 401
- * `APIKey_InvalidAPIKey`, prefixe `ck_` non reconnu comme cle de projet). Il
- * exige une veritable `COMPOSIO_API_KEY` de projet (prefixe `ak_`),
- * indisponible dans cet environnement -- et celle deja documentee dans
- * `references/actions-composio.md` (`ak_nz4gKAqnX4jAEOmXJ9jG`) appartient a
- * un projet Composio sans aucune connexion LinkedIn, donc ne resoudrait pas
- * le probleme meme si on l'avait ici. Aucun outil MCP accessible via la cle
- * consumer n'expose cette etape de televersement autrement (le seul chemin
- * indirect, `COMPOSIO_REMOTE_WORKBENCH`/`upload_local_file`, suppose de
- * faire entrer les octets locaux dans son bac a sable distant -- tente via
- * encodage base64, bloque par le classifieur auto-mode, non contourne).
- * **DEBLOQUE le meme jour par Julien** : `COMPOSIO_REMOTE_WORKBENCH` embarque
- * un helper (`upload_local_file`) qui appelle lui-meme cet endpoint de
- * fichiers avec la cle de la session MCP en cours -- pas besoin d'une cle de
- * projet separee (la piste ci-dessus testait l'endpoint hors du bac a sable,
- * avec la mauvaise cle). Reessaye avec succes technique dans une seule
- * session MCP continue (le `s3key` n'est valide que pour la session qui l'a
- * genere) : PDF transfere dans le bac a sable, televerse, puis
- * `LINKEDIN_CREATE_LINKED_IN_POST` appele avec `images: [{ name, mimetype:
- * "application/pdf", s3key }]` -- **reussi sans erreur**, un `x_restli_id`
- * obtenu. **Mais le contenu visible reel du post (le PDF apparait-il comme
- * document/carrousel, ou a-t-il ete ignore silencieusement) n'a pas pu etre
- * confirme** -- deux tentatives de lecture ont echoue (403, 404, meme genre
- * d'echec deja vu sur un brouillon dont l'existence etait pourtant confirmee
- * par ailleurs) et la verification par URL publique a ete bloquee par le
- * mecanisme anti-bot de LinkedIn, non contournee. Voir
- * `a-publier/README.md` et `references/etat-linkedin-20260912.md` pour le
- * detail complet. **Cette fonction JS n'a pas ete reecrite pour utiliser
- * cette methode** (orchestrer un appel `COMPOSIO_REMOTE_WORKBENCH` depuis
- * Node est un chantier distinct, pas fait ici) -- l'implementation
- * ci-dessous reste celle, confirmee cassee, du register+PUT+URN simple ; le
- * `throw` qui suit reste donc justifie tant que ce code n'est pas reecrit.
- *
- * Point toujours non verifie : est-ce que `images` accepte plusieurs
- * elements a la fois (necessaire pour le mode "par-diapo") ? Le nom au
- * pluriel le suggere, ce
- * n'est pas confirme.
- */
-async function televerserImageComposio({ ownerUrn, cheminImage, userId, apiKey }) {
-  const initialisation = await executerActionComposio('LINKEDIN_REGISTER_IMAGE_UPLOAD', {
-    arguments: { owner_urn: ownerUrn },
-    userId,
-    apiKey,
-  });
-
-  const donnees = (initialisation && initialisation.data) || {};
-  const uploadUrl = donnees.upload_url || donnees.uploadUrl;
-  const assetUrn = donnees.asset || donnees.asset_urn || donnees.assetUrn || donnees.image_urn || donnees.imageUrn;
-  if (!uploadUrl || !assetUrn) {
+  const reglages = reglagesComptes[compte];
+  if (!reglages) {
+    throw new Error(`Compte inconnu dans reglages-comptes.json : "${compte}".`);
+  }
+  if (reglages.canal_publication_reel !== true) {
     throw new Error(
-      `LINKEDIN_REGISTER_IMAGE_UPLOAD n'a pas renvoye upload_url/asset exploitables ` +
-      `(noms de champs reels a verifier sur un appel reussi) : ${JSON.stringify(initialisation)}`
+      `Publication refusee pour "${compte}" : canal_publication_reel n'est pas a true dans ` +
+      'reglages-comptes.json (voir la note associee pour la raison -- connexion non verifiee, ' +
+      'chantier abandonne, etc.). Ne pas contourner ce garde-fou.'
     );
   }
 
-  const octets = fs.readFileSync(cheminImage);
-  const reponsePut = await fetch(uploadUrl, {
-    method: 'PUT',
-    headers: { 'Content-Type': 'image/png' },
-    body: octets,
-  });
-  if (!reponsePut.ok) {
-    throw new Error(`PUT de ${cheminImage} vers l'URL presignee a echoue (HTTP ${reponsePut.status}).`);
+  const routage = resoudreRoutage(compte);
+  if (routage.canal !== 'rest') {
+    throw new Error(
+      `publierCarrousel() : le compte "${compte}" route vers le canal "${routage.canal}", non implemente ` +
+      'pour la publication d\'image dans ce fichier -- seul le canal "rest" (julien-partners) l\'est a ce ' +
+      'jour. Voir lib/composio-canal.js (ROUTAGE_COMPTES) et le commentaire en tete de ce fichier.'
+    );
   }
 
-  return assetUrn;
+  return publierCarrouselViaImage({
+    authorUrn: routage.authorUrn,
+    connectedAccountId: routage.connectedAccountId,
+    modeRepli,
+    cheminsImages,
+    commentary,
+    userId: userId || routage.userId,
+    apiKey,
+  });
 }
 
 /**
- * Point d'appel du repli image -- NON appele automatiquement (voir
- * commentaire ci-dessus). `cheminsImages` doit venir de generer-images.js :
- * un seul chemin pour `modeRepli: 'couverture'`, plusieurs pour
- * `modeRepli: 'par-diapo'`.
+ * Televerse une image locale vers le stockage Composio et renvoie le
+ * descripteur FileUploadable ({name, mimetype, s3key}) attendu par
+ * LINKEDIN_CREATE_LINKED_IN_POST.images -- voir televerserFichierComposio
+ * dans lib/composio-canal.js pour le detail du protocole (endpoint
+ * /api/v3/files/upload/request, confirme fonctionnel le 17/09/2026 avec une
+ * cle de projet ak_ reelle).
  */
-async function publierCarrouselViaImage({ authorUrn, modeRepli, cheminsImages, commentary, userId, apiKey }) {
+async function televerserImageComposio({ cheminImage, apiKey }) {
+  return televerserFichierComposio({
+    cheminFichier: cheminImage,
+    mimetype: 'image/png',
+    toolSlug: 'LINKEDIN_CREATE_LINKED_IN_POST',
+    toolkitSlug: 'linkedin',
+    apiKey,
+  });
+}
+
+/**
+ * Publication reelle du repli image. `cheminsImages` doit venir de
+ * generer-images.js : un seul chemin pour `modeRepli: 'couverture'`,
+ * plusieurs pour `modeRepli: 'par-diapo'`.
+ */
+async function publierCarrouselViaImage({ authorUrn, connectedAccountId, modeRepli, cheminsImages, commentary, userId, apiKey }) {
   if (!authorUrn) throw new Error('authorUrn requis (urn:li:person:... ou urn:li:organization:...).');
   if (modeRepli !== 'par-diapo' && modeRepli !== 'couverture') {
     throw new Error('modeRepli requis : "par-diapo" ou "couverture".');
@@ -179,36 +98,16 @@ async function publierCarrouselViaImage({ authorUrn, modeRepli, cheminsImages, c
   }
   if (!commentary) throw new Error('commentary requis (texte du post).');
 
-  // CONFIRME CASSE par appel reel le 12/09/2026 (julien-agency, mode
-  // "couverture") -- voir le commentaire au-dessus de televerserImageComposio
-  // pour le detail complet (erreur reelle obtenue, schema reel recupere via
-  // COMPOSIO_GET_TOOL_SCHEMAS). LINKEDIN_CREATE_LINKED_IN_POST.images exige
-  // { name, mimetype, s3key } (stockage S3 propre a Composio), pas une URN
-  // d'asset LinkedIn simple -- la seule chose que televerserImageComposio
-  // ci-dessous sait produire. Le garde-fou est place ICI, avant tout appel
-  // reseau reel, pour ne pas re-televerser inutilement une image sur
-  // LinkedIn (etapes 1-2 fonctionnent, mais leur resultat est ensuite
-  // inutilisable) a chaque tentative tant que ce point n'est pas corrige.
-  throw new Error(
-    'Repli image (publierCarrouselViaImage) : LINKEDIN_CREATE_LINKED_IN_POST.images exige {name, mimetype, ' +
-    's3key} (stockage S3 propre a Composio), confirme par un appel reel le 12/09/2026 -- une URN ' +
-    'LinkedIn simple (ce que televerserImageComposio produit) est refusee (400 "images.0" doit ' +
-    'etre un FileUploadable). Voir le commentaire au-dessus de televerserImageComposio avant de ' +
-    'corriger et retenter.'
-  );
-
-  // eslint-disable-next-line no-unreachable -- code laisse en place, pret a
-  // reactiver des que l'etape 3 (creation du post) est corrigee pour passer
-  // par le stockage S3 de Composio plutot qu'une URN LinkedIn simple.
-  const assetUrns = [];
+  const fichiers = [];
   for (const cheminImage of cheminsImages) {
-    assetUrns.push(await televerserImageComposio({ ownerUrn: authorUrn, cheminImage, userId, apiKey }));
+    fichiers.push(await televerserImageComposio({ cheminImage, apiKey }));
   }
 
   return executerActionComposio('LINKEDIN_CREATE_LINKED_IN_POST', {
-    arguments: { author: authorUrn, commentary, images: assetUrns },
+    arguments: { author: authorUrn, commentary, images: fichiers },
     userId,
     apiKey,
+    connectedAccountId,
   });
 }
 
@@ -218,11 +117,12 @@ async function publierCarrouselViaImage({ authorUrn, modeRepli, cheminsImages, c
  * organisation -- utiliser LINKEDIN_GET_COMPANY_INFO dans ce cas, bloque en
  * 403 au 11/09/2026 pour page-claude).
  */
-async function resoudreAuteurParDefaut({ userId, apiKey }) {
+async function resoudreAuteurParDefaut({ userId, apiKey, connectedAccountId }) {
   const resultat = await executerActionComposio('LINKEDIN_GET_MY_INFO', {
     arguments: {},
     userId,
     apiKey,
+    connectedAccountId,
   });
   const id = resultat && resultat.data && resultat.data.id;
   if (!id) throw new Error(`LINKEDIN_GET_MY_INFO n'a pas renvoye d'id exploitable : ${JSON.stringify(resultat)}`);

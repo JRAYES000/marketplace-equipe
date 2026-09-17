@@ -545,10 +545,16 @@ Regle de precedence Composio : tant qu'une cle a sa propre connexion directe sur
 toute connexion partagee sur ce meme toolkit est ignoree -- sans parametre expose cote appelant
 pour la contourner (teste sur `LINKEDIN_GET_MY_INFO`, ignore silencieusement).
 
-**Consequence pratique** : `linkedin-carrousel` et `linkedin-commentaires` (qui publient via
-Composio MCP direct, pas via Buffer) restent structurellement bloques pour julien-partners tant
-que cette precedence n'est pas resolue cote Composio (support/documentation a consulter) -- ce
-n'est pas un probleme de code ou de configuration reparable de notre cote.
+**Consequence pratique (imprecise ici, corrigee le 17/09/2026 -- voir la section du meme jour
+plus bas)** : cette phrase disait a tort que `linkedin-carrousel` publiait "via Composio MCP
+direct, comme linkedin-commentaires". Verifie sur le code reel des deux skills : seul
+`linkedin-commentaires` appelait MCP a cette date ; `linkedin-carrousel/lib/composio.js` n'a
+jamais appele que le canal REST direct (`backend.composio.dev/api/v3.1`, cle `ak_`), y compris a
+cette date-la -- aucun commit ne l'a jamais migre vers MCP. Le blocage de precedence decrit
+ci-dessus est donc reel pour `linkedin-commentaires` (canal MCP partage), mais ne s'appliquait
+pas a `linkedin-carrousel` de la meme facon : ce dernier restait bloque parce que son canal
+REST n'avait alors aucune cle de projet `ak_` ni aucune connexion LinkedIn active, pas a cause de
+cette precedence MCP.
 
 ### 17/09/2026 -- explication de Julien, et un nouveau constat qui la nuance
 
@@ -645,3 +651,37 @@ du dashboard. **Consequence cote code** : `verifierConnexionAvantPublication`
 active juste avant chaque publication et refuse explicitement si elle ne correspond pas au
 compte attendu -- rend le risque de publication sous la mauvaise identite impossible, sans
 attendre que Composio resolve ce point.
+
+### 17/09/2026 (suite) -- routage par compte tranche : REST/ak_ pour julien-partners, MCP/ck_ pour julien-agency
+
+Une cle de projet `ak_` reelle a ete obtenue et testee (`GET /api/v3/connected_accounts`) :
+**une seule connexion LinkedIn au statut ACTIVE existe sur ce projet**, `ca_vn1-dhh8VcYf`
+(`contact@claudepartners.fr`, soit julien-partners). Les 5 autres connexions LinkedIn listees
+sont EXPIRED, et **aucune n'est `aFqu-W7ClW`** (julien-agency) -- ce compte n'a donc aucune
+connexion sur le projet `ak_`, verifie et non suppose.
+
+**Decision d'architecture actee** (pas d'attente d'une resolution cote Composio pour
+julien-agency) :
+- **julien-agency** reste sur le canal MCP consumer (`ck_`) -- inchange, c'est le seul canal ou
+  ce compte a une connexion reelle et testee (5 commentaires publies le 15/09/2026).
+- **julien-partners** bascule sur le canal REST direct (`ak_`,
+  `backend.composio.dev/api/v3.1/tools/execute/<slug>`) avec `connected_account_id:
+  "ca_vn1-dhh8VcYf"` explicite dans le corps de chaque appel.
+- Le routage se fait **par compte, pas par connected_account_id sur un canal unique** : les deux
+  canaux (REST et MCP) restent utilises chacun pour un seul compte, dans
+  `plugins/skills-equipe/lib/composio-canal.js` (`ROUTAGE_COMPTES`), partage par
+  `linkedin-carrousel` et `linkedin-commentaires`.
+
+**Effet de bord positif decouvert au passage** : l'endpoint `POST
+/api/v3/files/upload/request`, qui exigeait une cle de projet `ak_` inexistante alors (impasse
+confirmee le 12/09/2026, voir plus haut), repond desormais **200** avec cette nouvelle cle. Cela
+corrige l'impasse `LINKEDIN_CREATE_LINKED_IN_POST.images` (FileUploadable requis, pas une URN
+LinkedIn simple) : `linkedin-carrousel/lib/publier.js` televerse desormais les images via cet
+endpoint (`televerserFichierComposio`, `lib/composio-canal.js`) plutot que via
+`LINKEDIN_REGISTER_IMAGE_UPLOAD` (qui produisait le mauvais format). Fonctionnel uniquement pour
+julien-partners a ce jour -- julien-agency reste sur MCP, canal jamais teste pour une publication
+d'image (seulement pour des commentaires texte).
+
+**Limite assumee** : `linkedin-carrousel` ne publie toujours pas le PDF multi-pages lui-meme
+(aucune action Composio ne le permet, constat du 11/09/2026 inchange) -- seulement une image
+(couverture ou par-diapo) pour le compte julien-partners.
