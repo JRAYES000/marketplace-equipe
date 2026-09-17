@@ -193,6 +193,25 @@ Anti-collision : `" (2)"`, `" (3)"`... jamais d'ecrasement silencieux d'un fichi
 document/PDF multi-pages sur LinkedIn. Cette skill ne publiera donc jamais le PDF du carrousel
 tel quel, seulement une image de repli.
 
+## Registre des echecs Composio/LinkedIn (`data/registre-echecs.json`)
+
+Ajoute le 17/09/2026 (suite) -- comble un manque signale par un rapport d'investigation sur le
+quota Composio du 16/09/2026 : jusque-la, aucune trace des tentatives de publication echouees
+n'existait, seuls les succes etaient documentes a la main.
+
+Desormais, tout echec reel de `lib/composio.js` (upload d'image ou creation du post) est
+journalise automatiquement, AVANT que l'erreur ne remonte a l'appelant -- le comportement en cas
+d'echec ne change pas, seule une trace est gardee en plus. Chaque entree : horodatage, compte
+vise, canal (`rest`), action Composio appelee, code HTTP si disponible, `source` (`composio` si
+le rejet vient d'avant tout relais reel -- cle invalide, format de requete refuse ; `linkedin` si
+Composio a bien relaye mais que l'action elle-meme a echoue cote LinkedIn), et un message d'erreur
+tronque. **Jamais de cle API ni de donnee personnelle dans ce fichier.**
+
+Fichier local, jamais commite (voir `.gitignore` racine, meme regle que
+`linkedin-commentaires/data/`) -- a consulter en cas d'investigation future sur un incident de
+publication ou de quota. Implementation partagee avec `linkedin-commentaires` :
+`plugins/skills-equipe/lib/composio-canal.js`, fonction `journaliserEchec`.
+
 ## Regles d'usage (brief du 10/09/2026, section 2) -- etat actuel
 
 1. **Phrase de lancement** : faite.

@@ -12,5 +12,9 @@ sortants/
 **/linkedin-veille-virale/data/
 **/linkedin-commentaires/data/
 
+# Registre des echecs Composio/LinkedIn (17/09/2026, suite) -- meme raison que
+# ci-dessus : donnee d'execution locale, jamais du code.
+**/linkedin-carrousel/data/
+
 # Dependances npm locales a une skill (package.json a cote, jamais commit)
 node_modules/

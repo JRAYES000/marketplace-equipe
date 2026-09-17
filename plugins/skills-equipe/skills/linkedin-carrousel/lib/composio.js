@@ -17,10 +17,20 @@
  * lib/composio-canal.js, ROUTAGE_COMPTES) : ce compte reste sur MCP/ck_,
  * gere par linkedin-commentaires/lib/composio.js.
  */
+const path = require('path');
 const { executerActionRest } = require('../../../lib/composio-canal');
 
-async function executerActionComposio(slug, opts) {
-  return executerActionRest(slug, opts);
+/**
+ * Registre des echecs Composio/LinkedIn (17/09/2026, suite) -- comble le
+ * manque signale par le rapport du 16/09 (seuls les succes etaient
+ * enregistres, cote linkedin-commentaires ; linkedin-carrousel n'avait meme
+ * pas de registre de succes). Meme convention gitignore que
+ * linkedin-commentaires/data/ (voir .gitignore racine).
+ */
+const CHEMIN_REGISTRE_ECHECS = path.join(__dirname, '..', 'data', 'registre-echecs.json');
+
+async function executerActionComposio(slug, opts = {}) {
+  return executerActionRest(slug, { cheminRegistreEchecs: CHEMIN_REGISTRE_ECHECS, ...opts });
 }
 
-module.exports = { executerActionComposio };
+module.exports = { executerActionComposio, CHEMIN_REGISTRE_ECHECS };

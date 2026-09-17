@@ -15,7 +15,28 @@
 
 const test = require('node:test');
 const assert = require('node:assert/strict');
+const fs = require('fs');
+const os = require('os');
+const path = require('path');
 const { publierCarrouselViaImage, publierCarrousel } = require('../lib/publier');
+
+function cheminRegistreJetable() {
+  return path.join(os.tmpdir(), `registre-echecs-test-${Date.now()}-${Math.random().toString(36).slice(2)}.json`);
+}
+
+function lireRegistre(chemin) {
+  try {
+    return JSON.parse(fs.readFileSync(chemin, 'utf8'));
+  } catch {
+    return [];
+  }
+}
+
+function ecrireImageJetable() {
+  const chemin = path.join(os.tmpdir(), `registre-echecs-image-${Date.now()}-${Math.random().toString(36).slice(2)}.png`);
+  fs.writeFileSync(chemin, Buffer.from('89504e470d0a1a0a', 'hex'));
+  return chemin;
+}
 
 test('publierCarrouselViaImage refuse un modeRepli absent ou invalide', async () => {
   await assert.rejects(
@@ -116,5 +137,121 @@ test('publierCarrousel(julien-partners) televerse puis publie via le canal REST,
     assert.ok(urlsAppelees.some((u) => u.includes('LINKEDIN_CREATE_LINKED_IN_POST')));
   } finally {
     global.fetch = fetchOriginal;
+  }
+});
+
+/**
+ * Ajoute le 17/09/2026 (suite) -- comble le manque signale par le rapport du
+ * 16/09 : aucune trace des echecs n'existait jusque-la (ni meme de registre
+ * de succes, cote linkedin-carrousel).
+ */
+test('un echec de televersement (files/upload/request, 401) cree une entree dans le registre d\'echecs, source "composio"', async (t) => {
+  const cheminImage = ecrireImageJetable();
+  t.after(() => { try { fs.unlinkSync(cheminImage); } catch { /* deja absent */ } });
+  const cheminRegistreEchecs = cheminRegistreJetable();
+
+  const fetchOriginal = global.fetch;
+  global.fetch = async (url) => {
+    if (String(url) === 'https://backend.composio.dev/api/v3/files/upload/request') {
+      return { ok: false, status: 401, text: async () => 'Invalid API key' };
+    }
+    throw new Error(`Mock fetch : requete inattendue -- ${url}`);
+  };
+  try {
+    await assert.rejects(
+      () => publierCarrousel({
+        compte: 'julien-partners',
+        modeRepli: 'couverture',
+        cheminsImages: [cheminImage],
+        commentary: 'texte de test',
+        apiKey: 'ak_test',
+        cheminRegistreEchecs,
+      }),
+      /files\/upload\/request a echoue \(HTTP 401\)/
+    );
+    const entrees = lireRegistre(cheminRegistreEchecs);
+    assert.equal(entrees.length, 1);
+    assert.equal(entrees[0].compte, 'julien-partners');
+    assert.equal(entrees[0].canal, 'rest');
+    assert.equal(entrees[0].action, 'files/upload/request');
+    assert.equal(entrees[0].httpStatus, 401);
+    assert.equal(entrees[0].source, 'composio');
+    assert.match(entrees[0].message, /Invalid API key/);
+  } finally {
+    global.fetch = fetchOriginal;
+    fs.rmSync(cheminRegistreEchecs, { force: true });
+  }
+});
+
+test('un rejet LINKEDIN_CREATE_LINKED_IN_POST (successful:false, HTTP 200) est journalise avec source "linkedin"', async (t) => {
+  const cheminImage = ecrireImageJetable();
+  t.after(() => { try { fs.unlinkSync(cheminImage); } catch { /* deja absent */ } });
+  const cheminRegistreEchecs = cheminRegistreJetable();
+
+  const fetchOriginal = global.fetch;
+  global.fetch = async (url) => {
+    if (String(url) === 'https://backend.composio.dev/api/v3/files/upload/request') {
+      return { ok: true, status: 200, json: async () => ({ key: 's3-key-test', new_presigned_url: 'https://s3.example/put' }) };
+    }
+    if (String(url) === 'https://s3.example/put') {
+      return { ok: true, status: 200 };
+    }
+    if (String(url).startsWith('https://backend.composio.dev/api/v3.1/tools/execute/LINKEDIN_CREATE_LINKED_IN_POST')) {
+      return { ok: true, status: 200, text: async () => JSON.stringify({ successful: false, error: 'contenu refuse' }) };
+    }
+    throw new Error(`Mock fetch : requete inattendue -- ${url}`);
+  };
+  try {
+    await assert.rejects(() => publierCarrousel({
+      compte: 'julien-partners',
+      modeRepli: 'couverture',
+      cheminsImages: [cheminImage],
+      commentary: 'texte de test',
+      apiKey: 'ak_test',
+      cheminRegistreEchecs,
+    }));
+    const entrees = lireRegistre(cheminRegistreEchecs);
+    assert.equal(entrees.length, 1);
+    assert.equal(entrees[0].action, 'LINKEDIN_CREATE_LINKED_IN_POST');
+    assert.equal(entrees[0].source, 'linkedin');
+    assert.equal(entrees[0].httpStatus, 200);
+  } finally {
+    global.fetch = fetchOriginal;
+    fs.rmSync(cheminRegistreEchecs, { force: true });
+  }
+});
+
+test('un succes complet ne cree AUCUNE entree dans le registre d\'echecs (pas de faux positif)', async (t) => {
+  const cheminImage = ecrireImageJetable();
+  t.after(() => { try { fs.unlinkSync(cheminImage); } catch { /* deja absent */ } });
+  const cheminRegistreEchecs = cheminRegistreJetable();
+
+  const fetchOriginal = global.fetch;
+  global.fetch = async (url, opts) => {
+    if (String(url) === 'https://backend.composio.dev/api/v3/files/upload/request') {
+      return { ok: true, status: 200, json: async () => ({ key: 's3-key-test', new_presigned_url: 'https://s3.example/put' }) };
+    }
+    if (String(url) === 'https://s3.example/put') {
+      return { ok: true, status: 200 };
+    }
+    if (String(url).startsWith('https://backend.composio.dev/api/v3.1/tools/execute/LINKEDIN_CREATE_LINKED_IN_POST')) {
+      return { ok: true, status: 200, text: async () => JSON.stringify({ successful: true, data: { id: 'post-ok' } }) };
+    }
+    throw new Error(`Mock fetch : requete inattendue -- ${url}`);
+  };
+  try {
+    const resultat = await publierCarrousel({
+      compte: 'julien-partners',
+      modeRepli: 'couverture',
+      cheminsImages: [cheminImage],
+      commentary: 'texte de test',
+      apiKey: 'ak_test',
+      cheminRegistreEchecs,
+    });
+    assert.equal(resultat.data.id, 'post-ok');
+    assert.equal(fs.existsSync(cheminRegistreEchecs), false, 'aucun fichier ne doit meme etre cree en l\'absence d\'echec');
+  } finally {
+    global.fetch = fetchOriginal;
+    fs.rmSync(cheminRegistreEchecs, { force: true });
   }
 });

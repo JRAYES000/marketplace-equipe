@@ -33,9 +33,18 @@
  * cout d'un aller-retour supplementaire par appel, assume pour la simplicite.
  */
 
-const { resoudreRoutage, executerActionRest } = require('../../../lib/composio-canal');
+const path = require('path');
+const { resoudreRoutage, executerActionRest, journaliserEchec } = require('../../../lib/composio-canal');
 
 const MCP_URL = 'https://connect.composio.dev/mcp';
+
+/**
+ * Registre des echecs Composio/LinkedIn (17/09/2026, suite) -- comble le
+ * manque signale par le rapport du 16/09 (seuls les succes etaient
+ * enregistres, voir lib/registre.js). Meme convention gitignore que
+ * data/registre-commentaires.json (voir .gitignore racine).
+ */
+const CHEMIN_REGISTRE_ECHECS = path.join(__dirname, '..', 'data', 'registre-echecs.json');
 
 /**
  * Refuse explicitement une cle du mauvais format AVANT tout appel reseau --
@@ -70,6 +79,7 @@ function creerErreurCorpsInvalide(contexte, texteBrut, erreurParsing, httpStatus
     `exploitable (${erreurParsing.message}). Debut du corps recu : "${texteBrut.slice(0, 200)}".`
   );
   err.httpStatus = httpStatus;
+  err.source = 'composio'; // corps de reponse illisible -- probleme de protocole/transport, pas l'action elle-meme
   return err;
 }
 
@@ -114,6 +124,7 @@ async function appelMcpBrut(corps, cle, sessionId, contexte) {
   if (!reponse.ok) {
     const err = new Error(`Composio MCP (${contexte}) a echoue (HTTP ${reponse.status}) : ${texteBrut.slice(0, 500)}`);
     err.httpStatus = reponse.status;
+    err.source = 'composio'; // rejet de transport MCP, avant tout relais vers l'outil natif
     throw err;
   }
 
@@ -127,7 +138,7 @@ async function appelMcpBrut(corps, cle, sessionId, contexte) {
  * `successful`/`data` qu'avant la migration -- `resultat.data.id` etc. cote
  * appelant continuent de fonctionner sans changement).
  */
-async function executerActionMcp(slug, { arguments: args = {}, userId, apiKey } = {}) {
+async function executerActionMcpBrut(slug, { arguments: args = {}, userId, apiKey } = {}) {
   const cle = apiKey || process.env.COMPOSIO_CONSUMER_API_KEY;
   validerCle(cle);
 
@@ -147,7 +158,9 @@ async function executerActionMcp(slug, { arguments: args = {}, userId, apiKey } 
     'initialize'
   );
   if (!sessionId) {
-    throw new Error('Composio MCP (initialize) : aucun Mcp-Session-Id recu, session non etablie.');
+    const err = new Error('Composio MCP (initialize) : aucun Mcp-Session-Id recu, session non etablie.');
+    err.source = 'composio';
+    throw err;
   }
 
   // Notification standard MCP, pas de reponse attendue -- ignore le corps.
@@ -170,12 +183,16 @@ async function executerActionMcp(slug, { arguments: args = {}, userId, apiKey } 
   );
 
   if (json && json.error) {
-    throw new Error(`Composio MCP (tools/call ${slug}) erreur JSON-RPC : ${JSON.stringify(json.error)}`);
+    const err = new Error(`Composio MCP (tools/call ${slug}) erreur JSON-RPC : ${JSON.stringify(json.error)}`);
+    err.source = 'composio';
+    throw err;
   }
 
   const texteInterne = json && json.result && json.result.content && json.result.content[0] && json.result.content[0].text;
   if (!texteInterne) {
-    throw new Error(`Composio MCP (tools/call ${slug}) : reponse sans contenu exploitable -- ${JSON.stringify(json)}`);
+    const err = new Error(`Composio MCP (tools/call ${slug}) : reponse sans contenu exploitable -- ${JSON.stringify(json)}`);
+    err.source = 'composio';
+    throw err;
   }
 
   let enveloppe;
@@ -190,6 +207,9 @@ async function executerActionMcp(slug, { arguments: args = {}, userId, apiKey } 
   if (enveloppe.successful === false || !resultatOutil || resultatOutil.response == null) {
     const err = new Error(`Composio ${slug} a echoue : ${JSON.stringify(enveloppe)}`);
     err.reponse = enveloppe;
+    // La session MCP a repondu, mais l'enveloppe globale (pas l'outil lui-meme) signale un
+    // echec -- toujours cote Composio (echec d'orchestration, pas de l'action LinkedIn).
+    err.source = 'composio';
     throw err;
   }
 
@@ -197,10 +217,34 @@ async function executerActionMcp(slug, { arguments: args = {}, userId, apiKey } 
   if (reponseOutil.successful === false) {
     const err = new Error(`Composio ${slug} a echoue : ${JSON.stringify(reponseOutil)}`);
     err.reponse = reponseOutil;
+    // Ici, l'outil natif (l'action LinkedIn) a bien ete execute et A REPONDU un echec --
+    // c'est le cas "rejet apres relais" du rapport du 17/09 (ex. validation LinkedIn).
+    err.source = 'linkedin';
     throw err;
   }
 
   return reponseOutil;
+}
+
+/**
+ * Journalise tout echec de executerActionMcpBrut dans le registre d'echecs
+ * avant de le relancer -- ajoute le 17/09/2026 (suite). Le comportement
+ * d'erreur pour l'appelant est strictement inchange (meme Error relance).
+ */
+async function executerActionMcp(slug, { arguments: args = {}, userId, apiKey, compte, cheminRegistreEchecs = CHEMIN_REGISTRE_ECHECS } = {}) {
+  try {
+    return await executerActionMcpBrut(slug, { arguments: args, userId, apiKey });
+  } catch (erreur) {
+    journaliserEchec(cheminRegistreEchecs, {
+      compte,
+      canal: 'mcp',
+      action: slug,
+      httpStatus: erreur.httpStatus == null ? null : erreur.httpStatus,
+      source: erreur.source || 'composio',
+      message: erreur.message,
+    });
+    throw erreur;
+  }
 }
 
 /**
@@ -209,7 +253,7 @@ async function executerActionMcp(slug, { arguments: args = {}, userId, apiKey } 
  * les appelants existants qui ne connaissent pas encore le routage, voir
  * lib/publier-commentaire.js qui derive `compte` depuis l'actorUrn).
  */
-async function executerActionComposio(slug, { compte, arguments: args = {}, userId, apiKey, connectedAccountId } = {}) {
+async function executerActionComposio(slug, { compte, arguments: args = {}, userId, apiKey, connectedAccountId, cheminRegistreEchecs } = {}) {
   const routage = compte ? resoudreRoutage(compte) : null;
   if (routage && routage.canal === 'rest') {
     return executerActionRest(slug, {
@@ -217,9 +261,11 @@ async function executerActionComposio(slug, { compte, arguments: args = {}, user
       userId: userId || routage.userId,
       apiKey: apiKey || process.env.COMPOSIO_API_KEY,
       connectedAccountId: connectedAccountId || routage.connectedAccountId,
+      compte,
+      cheminRegistreEchecs: cheminRegistreEchecs || CHEMIN_REGISTRE_ECHECS,
     });
   }
-  return executerActionMcp(slug, { arguments: args, userId, apiKey });
+  return executerActionMcp(slug, { arguments: args, userId, apiKey, compte, cheminRegistreEchecs });
 }
 
 module.exports = { executerActionComposio, executerActionMcp, validerCle };
