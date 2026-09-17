@@ -25,7 +25,7 @@ test('validerCle refuse une cle au format ak_ (couche PLATFORM) -- cas reel du 1
 });
 
 test('validerCle accepte une cle au format ck_ (canal consumer, celui qui fonctionne)', () => {
-  assert.doesNotThrow(() => validerCle('ck_56NqaZM8584P3OhNW3Ae'));
+  assert.doesNotThrow(() => validerCle('ck_exempledeclefictive000000'));
 });
 
 test('executerActionComposio refuse une cle ak_ avant tout appel reseau (aucun fetch declenche)', async () => {
