@@ -588,3 +588,14 @@ LinkedIn que le premier ; (b) la regle de precedence documentee plus haut (une c
 partagee reste masquee tant qu'une connexion "preferee" existe sur le meme toolkit) n'est pas
 levee par un simple second pret, et il faut soit un support Composio, soit une methode encore
 non trouvee pour la lever.
+
+**Ticket support ouvert le 17/09/2026** : pas de formulaire de ticket dans le dashboard --
+le support Composio se fait par email (`support@composio.dev`, trouve via Help > "How do I get
+help if something goes wrong?" sur la surface FOR YOU). Message envoye depuis
+`contact@claudeagency.fr` a 08:31:28 UTC, decrivant le symptome exact (deux connexions
+partagees Active, une seule joignable), les trois voies tentees avec leur comportement observe,
+le message d'erreur exact de `COMPOSIO_MANAGE_CONNECTIONS`, et la question precise sur la
+maniere de cibler une connexion partagee precise. Reference pour retrouver l'echange :
+Message-ID `<1789633887739349582.1789633887@claudeagency.fr>`, sujet "Consumer key (MCP) only
+resolves one of two Active shared connections on the same toolkit", copie dans
+`INBOX.Sent` de `contact@claudeagency.fr` (uid 316). Reponse de Composio a suivre.
