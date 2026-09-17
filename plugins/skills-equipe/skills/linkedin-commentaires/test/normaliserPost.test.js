@@ -46,3 +46,33 @@ test("ne plante pas si author/postedAt/engagement sont absents -- cas demande", 
   assert.equal(post.postedAt, undefined);
   assert.equal(post.commentsCount, undefined);
 });
+
+/**
+ * Non-regression 17/09/2026 (suite) : verifie qu'un identifiant/nom accentue
+ * traverse normaliserPost sans alteration -- une session precedente avait un
+ * bug de correspondance (decodeURIComponent + .includes()) dans un script
+ * d'analyse ponctuel (jamais dans lib/*.js), qui faisait passer
+ * Theophile Burnet/Cecilia Boavista pour "inactifs". Audit du code de
+ * production (lib/trouver-posts.js, lib/planifier-commentaires.js,
+ * dry-run.js) confirme qu'aucun chemin reel ne refait cette correspondance
+ * par URL -- Apify associe deja chaque post a son auteur, normaliserPost se
+ * contente de relayer les champs tels quels. Ce test verrouille ce
+ * comportement : forme brute reelle observee le 17/09/2026 (nom avec emoji
+ * de fin, URL avec caracteres accentues perc-encodes).
+ */
+test('conserve un nom et une URL d\'auteur accentues/perc-encodes sans alteration -- cas reel du 17/09/2026', () => {
+  const brutAccentue = {
+    ...BRUT_EXEMPLE,
+    id: '7506223190054989824',
+    author: {
+      name: 'Théophile Burnet ⚡️',
+      linkedinUrl: 'https://www.linkedin.com/in/th%C3%A9ophile-burnet?miniProfileUrn=urn%3Ali%3Afsd_profile%3AACoAAC-ijNEBBOSELCvzJWlJGyFK2pEMOPER6f4',
+    },
+  };
+  const post = normaliserPost(brutAccentue);
+  assert.equal(post.authorName, 'Théophile Burnet ⚡️');
+  assert.equal(
+    post.authorUrl,
+    'https://www.linkedin.com/in/th%C3%A9ophile-burnet?miniProfileUrn=urn%3Ali%3Afsd_profile%3AACoAAC-ijNEBBOSELCvzJWlJGyFK2pEMOPER6f4'
+  );
+});
