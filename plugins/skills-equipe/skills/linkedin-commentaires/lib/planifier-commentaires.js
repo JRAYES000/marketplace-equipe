@@ -78,13 +78,39 @@ function dateJourISO(date = new Date()) {
  * le meme jour". `entreesDuJour` : sous-ensemble deja filtre du registre pour
  * (compte, jour) courants -- voir lib/registre.js pour construire ce filtre.
  */
+/**
+ * Meme faille que celle trouvee par l'audit adversarial du 15/09/2026 sur
+ * `compte` (voir `normaliserCompte`, lib/registre.js) : `e.auteurCible ===
+ * auteurCible` etait une egalite de chaines stricte. Cas reel trouve le
+ * 17/09/2026 : "Theophile Burnet" et "Theophile Burnet ⚡️" (nom exact
+ * renvoye par Apify pour la meme personne, avec emoji de fin) sont deux
+ * chaines differentes pour l'egalite stricte -- la regle "jamais deux fois
+ * la meme personne le meme jour" tomberait silencieusement.
+ *
+ * Normalisation volontairement CONSERVATRICE : casse, espaces de debut/fin,
+ * et emojis/symboles de fin de nom uniquement. Les accents sont preserves
+ * (deux vraies personnes ne doivent jamais fusionner), tout comme le
+ * contenu du nom lui-meme -- seule la mise en forme de fin de chaine est
+ * ignoree.
+ */
+const REGEX_DECORATION_FIN_NOM = /[\s‍️\p{Extended_Pictographic}]+$/u;
+
+function normaliserAuteurCible(auteurCible) {
+  return String(auteurCible == null ? '' : auteurCible)
+    .trim()
+    .replace(REGEX_DECORATION_FIN_NOM, '')
+    .trim()
+    .toLowerCase();
+}
+
 function validerQuotaJournalier(entreesDuJour, { auteurCible }) {
   if (entreesDuJour.length >= QUOTA_MAX_PAR_JOUR) {
     throw new Error(
       `Commentaire refuse : quota journalier atteint (${entreesDuJour.length}/${QUOTA_MAX_PAR_JOUR} deja publies aujourd'hui pour ce compte).`
     );
   }
-  const dejaCommenteAujourdhui = entreesDuJour.some((e) => e.auteurCible === auteurCible);
+  const cibleNormalisee = normaliserAuteurCible(auteurCible);
+  const dejaCommenteAujourdhui = entreesDuJour.some((e) => normaliserAuteurCible(e.auteurCible) === cibleNormalisee);
   if (dejaCommenteAujourdhui) {
     throw new Error(
       `Commentaire refuse : "${auteurCible}" a deja recu un commentaire aujourd'hui pour ce compte -- jamais deux fois la meme personne le meme jour.`
@@ -189,6 +215,7 @@ module.exports = {
   validerFraicheurMaximale,
   validerCanalPublicationReel,
   genererRepliAucunCandidat,
+  normaliserAuteurCible,
   dateJourISO,
   FENETRE_FRAICHEUR_HEURES,
   QUOTA_MAX_PAR_JOUR,
