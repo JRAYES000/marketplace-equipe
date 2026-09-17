@@ -206,6 +206,23 @@ passage du matin plus tard dans la matinee et privilegier l'apres-midi quand un 
 possible** augmente encore la probabilite de tomber sur un post frais -- mais ne compense jamais
 une liste de comptes inactifs, comme les 3 passages a 0/3 l'ont montre.
 
+## Recommandation d'usage -- ne pas revisiter la meme personne trop de jours d'affilee (17/09/2026)
+
+Le brief interdit deux commentaires chez la meme personne le MEME jour (`validerQuotaJournalier`,
+verifie mecaniquement), mais rien n'empeche mecaniquement d'y revenir plusieurs jours d'affilee
+si son compte reste le plus frais disponible a chaque passage. **Cas reel** : Theo Meuriot
+commente le 16/09 puis a nouveau le 17/09 (deux posts differents, tous deux reellement les plus
+frais du jour) -- acceptable une fois, mais Nomena a signale que ca deviendrait moins defendable
+a un 3e jour consecutif, surtout sans interaction en retour (like, reponse, DM) de la personne
+visee entre les deux passages.
+
+**Volontairement PAS un garde-fou de code** : contrairement au quota journalier, ceci reste un
+jugement de situation (interaction en retour ou non, qualite du post, autres candidats
+disponibles ce jour-la), pas une regle mecanique verifiable par une fonction. **Recommandation** :
+au-dela de deux jours consecutifs chez la meme personne sans interaction en retour de sa part,
+preferer un autre compte de la liste ce jour-la, meme si son post est objectivement moins frais
+-- la diversite des personnes visees compte aussi, pas seulement la fraicheur du post.
+
 ## Audit adversarial et de robustesse (15/09/2026)
 
 Un sous-agent dedie a tente reellement de faire passer du contenu hors-regle a travers les
