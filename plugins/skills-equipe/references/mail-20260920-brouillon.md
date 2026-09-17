@@ -371,6 +371,12 @@ Pour tout retrouver en un coup d'œil plutôt qu'éparpillé plus haut :
     chaque changement de skill ; deux corrections récentes (accents dans la comparaison de nom,
     point 8 ci-dessus) étaient parties sans bump. Corrigé (1.2.1 → 1.2.2), sans impact sur le
     fonctionnement, juste un oubli de discipline réparé.
+11. **Version du plugin, 1.14.0 annoncé, 1.19.5 réellement poussé** : le brief du 10/09 visait un
+    bump vers 1.14.0. La version réelle est bien plus haute — chaque correction ou ajout depuis
+    le 10/09 (trois skills créées, six failles d'audit corrigées, routage par compte, journal des
+    échecs, remplacement de comptes cibles, etc.) a eu son propre bump, comme l'exige la règle du
+    dépôt. Rien n'a été sauté ni oublié : le numéro annoncé dans le brief est simplement dépassé,
+    pas en retard.
 
 ## Dépense
 
