@@ -1,3 +1,22 @@
+# Passage du 17/09/2026 -- 1 commentaire reel, Theo Meuriot 2e jour consecutif
+
+Verification reelle des 14 comptes julien-agency : un seul post neuf et frais trouve
+(**Theo Meuriot, 3h**, `urn:li:activity:7506223190054989824`) -- tous les autres montrent le meme
+post que la veille (deja commente) ou rien de recent. Aucun candidat force pour remplir le
+quota. Genre `vraie_question`, texte valide reellement par `validerCommentaire`.
+
+**Publie reellement** via le canal MCP : `urn:li:comment:(urn:li:activity:7506223190054989824,7506274307459792896)`,
+confirme par navigation reelle sur le post. Enregistre dans `data/registre-commentaires.json`.
+
+**Signale par Nomena** : Theo Meuriot est ainsi commente pour le **2e jour consecutif**
+(16/09 puis 17/09, deux posts differents). Acceptable une fois, mais pas indefiniment sans
+interaction en retour de sa part -- voir SKILL.md, "Recommandation d'usage -- ne pas revisiter
+la meme personne trop de jours d'affilee" (nouvelle section, pas un garde-fou de code, un
+jugement de situation a appliquer au prochain passage si son compte reste le plus frais un 3e
+jour de suite).
+
+---
+
 # Passage du 16/09/2026 (matin) -- lot invalide corrige, 2 garde-fous ajoutes au code, lot final VIDE
 
 ## Lot n°1 (4 commentaires julien-partners) -- invalide, meme erreur que le 15/09 refaite a l'identique
