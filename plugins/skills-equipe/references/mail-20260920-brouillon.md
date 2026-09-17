@@ -148,13 +148,18 @@ jamais deux le même jour" :
   un par un sur le permalien LinkedIn — rien de supposé. Ligne Notion passée à "Publié" avec ce
   lien, et le registre de quota de la skill (`enregistrerPostPublie`) mis à jour en conséquence —
   premier test réel de ce garde-fou depuis sa création.
-- Jason Feifer → julien-agency, **demain 16/09** à 17h00 — inchangé, revérifié à l'écran.
-- Justin Welsh → julien-partners, **après-demain 17/09** à 13h00 — inchangé, revérifié à l'écran.
+- [Jason Feifer](https://www.linkedin.com/feed/update/urn:li:activity:7506004464617713665/)
+  → julien-agency, **publié le 16/09 à 17h00 Paris (18h00 Madagascar)**. **Confirmé réellement en
+  ligne le 17/09** : texte intégral relu sur le permalien LinkedIn (thème repris de Jason Feifer
+  — retourner un défaut assumé en argument de vente, adapté avec la campagne "fruits et légumes
+  moches" d'Intermarché, Grand Prix Stratégies de la publicité 2014). Ligne Notion passée à
+  "Publié" avec ce lien, registre de quota (`enregistrerPostPublie`) mis à jour.
+- Justin Welsh → julien-partners, **aujourd'hui 17/09** à 13h00 Paris (14h00 Madagascar) —
+  vérification prévue après cette heure, avec une marge, pour ne pas répéter l'erreur de
+  vérification anticipée du 15/09 (voir plus haut).
 
-`[A COMPLETER]` **Liens de Jason Feifer et Justin Welsh** — confirmés et ajoutés ici au fur et à
-mesure qu'ils passent réellement en ligne (rien de supposé tant que ce n'est pas vérifié — et en
-tenant compte du décalage horaire Madagascar/Paris, voir plus haut, avant de conclure qu'un post
-"aurait dû" être en ligne).
+`[A COMPLETER]` **Lien de Justin Welsh** — confirmé et ajouté ici une fois réellement en ligne
+(rien de supposé tant que ce n'est pas vérifié).
 
 ## Compte Claude Partners — toujours pas connecté à Composio, vérifié à nouveau le 16/09
 
