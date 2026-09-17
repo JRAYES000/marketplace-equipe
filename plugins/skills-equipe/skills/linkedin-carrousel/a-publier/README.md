@@ -48,9 +48,16 @@ peu plus chaleureux) a ete redige le 12/09/2026 pour julien-partners, sur l'hypo
 confirmee de Julien. Il n'est plus dans ce dossier (remplace par la version julien-agency
 ci-dessus) mais son historique reste dans `git log` de ce fichier et de
 `julien-partners-2026-09-12.json`/`.commentary.txt` (renommes puis reecrits dans le meme
-commit que celui-ci). julien-partners reste un compte a acces LinkedIn **non confirme/a
-ouvrir** -- rien n'empeche d'y refaire un carrousel une fois son propre acces verifie, mais ce
-n'est plus la priorite du 20/09 (voir SKILL.md).
+commit que celui-ci).
+
+**Mise a jour du 17/09/2026** : julien-partners a desormais un acces LinkedIn reel et verifie
+(canal REST/`ak_`, voir `references/actions-composio.md`). Le carrousel de test du 15/09
+(`fixtures/diapos-test-julien-partners-ia-pme.json`, 10 diapos "IA pour les PME", chiffre
+Bpifrance source) a ete regenere via le pipeline reel et **publie pour de vrai** ce jour-la :
+[voir le post](https://www.linkedin.com/feed/update/urn:li:activity:7506384428168806400/) --
+10 images, `urn:li:ugcPost:7506384426956783618`, verifie par navigation directe sur le profil
+(pages, titres, accents, pied de page conformes). Legende validee par `generer-post.js` avant
+publication -- texte complet dans `julien-partners-2026-09-17.commentary.txt`.
 
 ## Ce qui a echoue (tentative reelle, 12/09/2026, apres l'accord de Julien)
 
