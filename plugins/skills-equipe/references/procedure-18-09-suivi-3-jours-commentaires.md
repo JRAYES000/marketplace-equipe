@@ -1,5 +1,13 @@
 # Marche à suivre — suivi à 3 jours des 5 commentaires (18/09/2026)
 
+**Revérifiée le 17/09/2026, toujours exacte** : les changements de code du 17/09
+(`verifierConnexionAvantPublication`, ciblage explicite de connexion Composio dans
+`lib/publier-commentaire.js`) ne touchent que la **publication** de nouveaux commentaires. Cette
+procédure ne passe que par `mettre-a-jour-stats.js` et `enregistrer-releve-profil.js` — vérifié
+par grep, aucun des deux ne référence `publier-commentaire.js`, `lib/composio.js`, ni
+`LINKEDIN_GET_MY_INFO`. Les 12 tests correspondants (`test/notion-statistiques.test.js`,
+`test/statistiques-profil.test.js`) passent tous, inchangés. Rien à adapter ici.
+
 Préparé le 15/09/2026 pour que le 18/09 soit rapide : rien à re-décider ce jour-là, juste
 exécuter dans l'ordre. Les 5 commentaires ont tous été publiés le 15/09/2026 (voir
 `skills/linkedin-commentaires/a-publier/README.md`) — le suivi à 3 jours (règle 3 du brief) tombe

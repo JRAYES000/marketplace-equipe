@@ -161,28 +161,38 @@ jamais deux le même jour" :
 `[A COMPLETER]` **Lien de Justin Welsh** — confirmé et ajouté ici une fois réellement en ligne
 (rien de supposé tant que ce n'est pas vérifié).
 
-## Compte Claude Partners — toujours pas connecté à Composio, vérifié à nouveau le 16/09
+## Compte Claude Partners — prêt de ton côté, toujours inatteignable côté API, ticket ouvert
 
-Tout ce qui est publié à ce jour sur LinkedIn (carrousel, cinq commentaires du 15/09, cinq
-commentaires du 16/09) l'est sur le compte Claude Agency. Reverifié en profondeur le 16/09/2026
-à 12h19 UTC, pas juste répété depuis le 12/09 : un appel réel `LINKEDIN_GET_MY_INFO` ne renvoie
-qu'un seul compte connecté (`id: aFqu-W7ClW`, Claude Agency), et la liste complète des connexions
-LinkedIn du projet (`toolkit_connection_statuses`, sans filtrer sur "actif") ne montre elle aussi
-qu'un seul compte. J'ai aussi vérifié qu'il n'existe pas une deuxième identité dans notre espace
-Composio qui donnerait accès à un connecteur différent pour Claude Partners (`urn:li:person:ZvLHybJZhj`)
-— aucun champ de ce type n'existe sur les outils qu'on utilise pour publier. **Verdict : Claude
-Partners n'a aucune connexion Composio, sous quelque forme que ce soit, à ce jour.**
+**Historique court** : au 16/09, Claude Partners n'avait aucune connexion Composio, sous aucune
+forme — vérifié en profondeur (`LINKEDIN_GET_MY_INFO`, liste complète des connexions sans filtrer
+sur "actif", recherche d'une deuxième identité côté notre espace Composio). **Le 17/09, tu as fait
+ta part** : un deuxième compte LinkedIn partagé à l'équipe est apparu sous le nom `asher-fill`,
+à côté de `averse-cooser` (Claude Agency) déjà en place — exactement le geste demandé.
 
-Ce n'est plus un blocage pour la veille : Buffer, lui, atteint bien les deux comptes (voir la
-section Veille), c'est par là que passe le post Justin Welsh sur Claude Partners. Mais ça reste
-un blocage pour les **commentaires** sous le post d'un tiers, que Buffer ne sait pas faire : les
-commentaires prévus pour Claude Partners ne peuvent être publiés que sur Claude Agency en
-attendant.
+**Mais ça ne suffit pas encore : `asher-fill` reste injoignable.** Vérifié de façon exhaustive le
+17/09 (nouvelle session à froid, cache exclu) : tout appel — qu'il s'agisse de lister les
+connexions, d'en initier une, ou d'appeler `LINKEDIN_GET_MY_INFO` en ciblant explicitement
+`asher-fill` par 7 noms de paramètre différents (y compris deux appels de contrôle qui nomment
+explicitement l'autre connexion, pour prouver que ce n'est pas juste `asher-fill` qui est
+invisible) — **résout systématiquement vers `averse-cooser` (Claude Agency)**, sans jamais
+produire d'erreur qui l'expliquerait. Composio semble imposer qu'une seule connexion "préférée"
+soit joignable par toolkit, même quand deux sont actives côté dashboard. **Ticket support ouvert
+le 17/09/2026** (`support@composio.dev`, référence `<1789633887739349582.1789633887@claudeagency.fr>`)
+décrivant le symptôme exact et les tests menés — en attente de réponse.
 
-**Ce qu'il faut de ton côté** : partager le compte LinkedIn Claude Partners avec notre
-intégration Composio, exactement comme tu l'as fait pour Claude Agency le 11/09. Sans ça, Claude
-Partners reste condamné à zéro commentaire publié tant que cette étape n'est pas faite — aucune
-piste technique de notre côté ne peut la remplacer.
+**Ce n'est plus un risque, même en l'état** : un garde-fou ajouté le 17/09
+(`verifierConnexionAvantPublication`) vérifie la connexion réellement active juste avant chaque
+publication et refuse explicitement si elle ne correspond pas au compte demandé — un commentaire
+préparé pour Claude Partners ne peut plus partir silencieusement sous l'identité Claude Agency,
+même tant que `asher-fill` reste injoignable. Le compte est configuré comme "prêt à publier" côté
+code (`canal_publication_reel: true`) ; c'est l'API Composio elle-même qui bloque, pas notre
+préparation.
+
+**Ce n'est pas un blocage pour la veille** : Buffer, lui, atteint bien les deux comptes (voir la
+section Veille), c'est par là que passe le post Justin Welsh sur Claude Partners. Le blocage ne
+concerne que les **commentaires** sous le post d'un tiers, que Buffer ne sait pas faire — les
+commentaires prévus pour Claude Partners restent donc sur pause jusqu'à la réponse de Composio,
+sans risque de partir sous la mauvaise identité entre-temps.
 
 ## Notion — débloqué, les deux pages sont réelles et remplies
 
