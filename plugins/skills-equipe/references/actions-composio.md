@@ -4,7 +4,7 @@ Registre verifie des actions ("tools") enregistrees par Composio pour le toolkit
 
 ## Methode de verification
 
-**La cle `COMPOSIO_API_KEY` de production (`ak_nz4gKAqnX4jAEOmXJ9jG`) ne permet PAS de lister les actions via l'API REST v3/v3.1** (`GET /api/v3/tools`, `GET /api/v3/toolkits`) : elle renvoie HTTP 403 `APIKey_InsufficientPermissions` -- "the key has no access for 'tools'" / "has write access" (mais pas read) pour `toolkits` et `connected_accounts`. Teste sur v3, v3.1 et l'ancien v1 (`/api/v1/actions` -> HTTP 410, endpoint retire). Julien devra ajouter la permission `tools:read` (et idealement `toolkits:read`) a cette cle, ou fournir une cle differente, pour que cette liste puisse un jour etre revérifiee directement via l'API.
+**La cle `COMPOSIO_API_KEY` de production (`ak_REVOQUEE-2026-09-17`) ne permet PAS de lister les actions via l'API REST v3/v3.1** (`GET /api/v3/tools`, `GET /api/v3/toolkits`) : elle renvoie HTTP 403 `APIKey_InsufficientPermissions` -- "the key has no access for 'tools'" / "has write access" (mais pas read) pour `toolkits` et `connected_accounts`. Teste sur v3, v3.1 et l'ancien v1 (`/api/v1/actions` -> HTTP 410, endpoint retire). Julien devra ajouter la permission `tools:read` (et idealement `toolkits:read`) a cette cle, ou fournir une cle differente, pour que cette liste puisse un jour etre revérifiee directement via l'API.
 
 **Contournement retenu : documentation publique officielle**, consultee sans authentification :
 - URL : <https://docs.composio.dev/toolkits/linkedin>
@@ -330,7 +330,7 @@ de commentaires (12/jour/compte) :
 
 **Testé en lecture seule (`LINKEDIN_GET_MY_INFO`, zero effet de bord) avec les 4 valeurs
 (les deux identifiants Composio et les deux URN `actor`) sous la cle `COMPOSIO_API_KEY`
-(`ak_nz4gKAqnX4jAEOmXJ9jG`, workspace `jrayes000_workspace`) : les 4 en HTTP 404
+(`ak_REVOQUEE-2026-09-17`, workspace `jrayes000_workspace`) : les 4 en HTTP 404
 `ActionExecute_ConnectedAccountNotFound`.**
 
 Conclusion : ces identifiants sont reels et actifs pour la routine `visibilite-ops`, mais
