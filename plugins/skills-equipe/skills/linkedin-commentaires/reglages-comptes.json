@@ -9,10 +9,10 @@
       "https://www.linkedin.com/in/xavier-vincent33/",
       "https://www.linkedin.com/in/th%C3%A9ophile-burnet/",
       "https://www.linkedin.com/in/virginie-caurraze/",
-      "https://www.linkedin.com/in/sindy-desquerre/",
-      "https://www.linkedin.com/in/romy-ozier-lafontaine-ia/"
+      "https://www.linkedin.com/in/victorpartouche/",
+      "https://www.linkedin.com/in/alexiscombeaux/"
     ],
-    "_comptes_cibles_source": "8 profils reels verifies par navigation, VALIDES par Julien le 14/09/2026 -- voir references/comptes-cibles-proposition-20260914.md pour le positionnement de chacun.",
+    "_comptes_cibles_source": "8 profils reels verifies par navigation, VALIDES par Julien le 14/09/2026 -- voir references/comptes-cibles-proposition-20260914.md pour le positionnement de chacun. 2 remplacements le 17/09/2026 (voir references/comptes-cibles-proposition-20260917-complement-partners.md) : sindy-desquerre et romy-ozier-lafontaine-ia retires (aucun post original sur le mois ecoule, verifie via Apify -- comptes morts), remplaces par victorpartouche et alexiscombeaux, verifies sur leur FREQUENCE DE PUBLICATION REELLE avant integration (pas seulement leur pertinence thematique), meme methode que le complement julien-agency du 16/09/2026.",
     "ton": ["chaleureux", "professionnel", "facilitateur", "oriente-reseau"],
     "seuil_max_commentaires": 30,
     "plafond_par_jour": 5,

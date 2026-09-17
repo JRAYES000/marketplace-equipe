@@ -46,3 +46,25 @@ test('sur le jeu fixture reel : garde c1 et c4-plus-ancien, dans cet ordre', () 
   const retenus = trierPosts(postsFixture, { maxCommentaires: 30 });
   assert.deepEqual(retenus.map((p) => p.id), ['c1', 'c4-plus-ancien']);
 });
+
+/**
+ * Non-regression 17/09/2026 (suite) : un post dont l'auteur a un nom/URL
+ * accentue ne doit jamais etre ecarte pour cette seule raison -- trierPosts
+ * ne filtre que sur document.totalPageCount et commentsCount, jamais sur le
+ * contenu du nom/URL d'auteur ; verifie explicitement apres qu'un bug de ce
+ * type (mais dans un script d'analyse ponctuel, jamais ici) ait fait passer
+ * des comptes accentues pour inactifs.
+ */
+test('ne filtre jamais un post sur la base d\'un nom/URL d\'auteur accentue', () => {
+  const posts = [
+    {
+      id: 'accentue',
+      postedAt: '2026-09-17T08:04:00.158Z',
+      commentsCount: 1,
+      authorName: 'Théophile Burnet ⚡️',
+      authorUrl: 'https://www.linkedin.com/in/th%C3%A9ophile-burnet',
+    },
+  ];
+  const retenus = trierPosts(posts, { maxCommentaires: 30 });
+  assert.deepEqual(retenus.map((p) => p.id), ['accentue']);
+});
