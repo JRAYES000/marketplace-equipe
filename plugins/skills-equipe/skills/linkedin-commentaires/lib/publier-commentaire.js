@@ -3,12 +3,63 @@
 const { executerActionComposio } = require('./composio');
 
 /**
+ * Verifie, AVANT tout appel de publication, que la connexion LinkedIn
+ * reellement active sur ce canal Composio correspond bien au compte pour
+ * lequel on s'apprete a publier -- ajoute le 17/09/2026 apres avoir prouve
+ * (7 variantes de parametres testees, y compris deux appels de controle
+ * nommant explicitement chaque connexion partagee) qu'aucun parametre
+ * connu (`connected_account_id`, `account_id`, `user_id`, `auth_config_id`,
+ * en sibling ou dans `arguments`) ne permet de cibler une connexion
+ * partagee precise sur ce canal MCP quand plusieurs existent pour le meme
+ * toolkit -- voir `references/actions-composio.md`, sections 16/09 et
+ * 17/09, pour le detail complet des tests.
+ *
+ * Consequence directe : tant que ce blocage Composio n'est pas leve,
+ * TOUT appel resout silencieusement vers la connexion "preferee"
+ * (`averse-cooser` / julien-agency / `aFqu-W7ClW`), meme si le code
+ * demande explicitement `actorUrn` = julien-partners. Sans cette
+ * verification, un commentaire prepare pour julien-partners partirait
+ * silencieusement sous l'identite julien-agency -- exactement le risque
+ * signale par Julien. Cette fonction rend ce risque impossible : elle
+ * refuse explicitement la publication plutot que de la laisser partir
+ * sous la mauvaise identite.
+ */
+async function verifierConnexionAvantPublication(actorUrnAttendu, { userId, apiKey } = {}) {
+  const resultat = await executerActionComposio('LINKEDIN_GET_MY_INFO', {
+    arguments: {},
+    userId,
+    apiKey,
+  });
+  const idReel = resultat && resultat.data && resultat.data.id;
+  if (!idReel) {
+    throw new Error(
+      `Publication refusee : impossible de verifier la connexion active avant publication -- ` +
+      `LINKEDIN_GET_MY_INFO n'a renvoye aucun id exploitable (${JSON.stringify(resultat)}).`
+    );
+  }
+  const idAttendu = String(actorUrnAttendu || '').replace('urn:li:person:', '');
+  if (idReel !== idAttendu) {
+    throw new Error(
+      `Publication refusee : la connexion Composio active resout vers "${idReel}", pas vers ` +
+      `"${idAttendu}" attendu pour ce compte. Aucun parametre connu ne permet aujourd'hui de ` +
+      `cibler explicitement une connexion partagee precise sur ce canal MCP quand plusieurs ` +
+      `existent pour le meme toolkit (voir references/actions-composio.md) -- publier maintenant ` +
+      `posterait sous la mauvaise identite LinkedIn. Ne pas contourner : attendre que Composio ` +
+      `resolve ce point (ticket support ouvert le 17/09/2026) ou que la connexion active change ` +
+      `reellement cote dashboard.`
+    );
+  }
+}
+
+/**
  * SEUL point d'appel qui publie reellement un commentaire sur LinkedIn.
  * Isole ici a dessein : rien d'autre dans le module n'a d'effet de bord
  * reseau ecrivant sur LinkedIn.
  *
  * `actorUrn` : URN de l'auteur du commentaire (le compte qui commente),
  * substituable -- `urn:li:person:...` pour julien-partners/julien-agency.
+ * Verifie desormais reellement AVANT publication (`verifierConnexionAvantPublication`) --
+ * jamais suppose correct juste parce qu'il est passe en parametre.
  * `targetUrn` / `object` : le `shareUrn` du post cible (voir
  * lib/trouver-posts.js) -- jamais une URN `urn:li:activity:`, refusee par
  * l'API.
@@ -19,6 +70,8 @@ async function publierCommentaire({ actorUrn, targetUrn, message, parentCommentU
   if (!actorUrn) throw new Error('actorUrn requis (urn:li:person:...).');
   if (!targetUrn) throw new Error('targetUrn requis (shareUrn du post cible, jamais une urn:li:activity:).');
   if (!message) throw new Error('message requis (texte du commentaire).');
+
+  await verifierConnexionAvantPublication(actorUrn, { userId, apiKey });
 
   const args = {
     actor: actorUrn,
@@ -51,4 +104,4 @@ async function resoudreActeurParDefaut({ userId, apiKey }) {
   return `urn:li:person:${id}`;
 }
 
-module.exports = { publierCommentaire, resoudreActeurParDefaut };
+module.exports = { publierCommentaire, resoudreActeurParDefaut, verifierConnexionAvantPublication };

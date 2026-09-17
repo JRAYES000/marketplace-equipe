@@ -599,3 +599,49 @@ maniere de cibler une connexion partagee precise. Reference pour retrouver l'ech
 Message-ID `<1789633887739349582.1789633887@claudeagency.fr>`, sujet "Consumer key (MCP) only
 resolves one of two Active shared connections on the same toolkit", copie dans
 `INBOX.Sent` de `contact@claudeagency.fr` (uid 316). Reponse de Composio a suivre.
+
+### 17/09/2026 (suite) -- piste du point 2 de Julien, epuisee methodiquement
+
+Julien a suggere deux pistes precises, non tentees jusque-la : passer l'identifiant de connexion
+directement dans les `arguments` de l'appel d'outil via `COMPOSIO_MULTI_EXECUTE_TOOL` (pas
+seulement en parametre sibling comme le 16/09), et chercher un outil `COMPOSIO_*` qui listerait
+les connexions partagees avec leur identifiant reel.
+
+**Schema exact de `COMPOSIO_MULTI_EXECUTE_TOOL`** (via `COMPOSIO_GET_TOOL_SCHEMAS`) : chaque
+entree de `tools[]` n'a que deux champs, `tool_slug` (requis) et `arguments` (requis,
+`additionalProperties: true` -- accepte explicitement des champs libres). Aucun champ dedie
+(`connected_account_id`, `account_id`, `user_id`, `auth_config_id`) au niveau de l'entree
+elle-meme.
+
+**7 appels reels testes**, chacun avec `LINKEDIN_GET_MY_INFO` et un champ different DANS
+`arguments` (pas en sibling) :
+```
+connected_account_id: "asher-fill"                 -> id: aFqu-W7ClW
+connected_account_id: "linkedin_asher-fill"         -> id: aFqu-W7ClW
+account_id: "asher-fill"                            -> id: aFqu-W7ClW
+user_id: "asher-fill"                                -> id: aFqu-W7ClW
+auth_config_id: "asher-fill"                        -> id: aFqu-W7ClW
+connected_account_id: "averse-cooser" (controle)    -> id: aFqu-W7ClW
+connected_account_id: "linkedin_averse-cooser" (controle) -> id: aFqu-W7ClW
+```
+**Les 7 renvoient exactement la meme reponse**, y compris les deux appels de controle qui
+nomment explicitement `averse-cooser` -- preuve que ces champs sont de purs no-op silencieusement
+ignores par l'execution reelle, pas seulement pour `asher-fill`.
+
+**Recherche d'un outil dedie** : 3 requetes `COMPOSIO_SEARCH_TOOLS` distinctes ("list all shared
+connections for a toolkit with their connection ids", "manage composio account connections list
+accounts", "composio list connected accounts for linkedin toolkit") ne renvoient aucun outil
+`COMPOSIO_*` de listage dedie pour le toolkit `linkedin` -- seulement des toolkits tiers sans
+rapport (nango, make, pipedrive, oneup, dotsimple, seam, unipile) ou `LINKEDIN_GET_MY_INFO`
+lui-meme. Dump integral de la reponse de la requete qui fonctionne ("linkedin get my profile
+info", 6806 caracteres) : **aucune occurrence de "asher" ni "fill"** nulle part dans le payload,
+`toolkit_connection_statuses` ne contenant toujours que `linkedin_averse-cooser`.
+
+**Conclusion** : les deux pistes du point 2 sont epuisees methodiquement, avec preuve
+reproductible (requetes et reponses completes conservees). Rien ne permet aujourd'hui, sur ce
+canal MCP, de cibler `asher-fill` ni de retrouver son identifiant ailleurs que dans l'interface
+du dashboard. **Consequence cote code** : `verifierConnexionAvantPublication`
+(`linkedin-commentaires/lib/publier-commentaire.js`) verifie desormais la connexion reellement
+active juste avant chaque publication et refuse explicitement si elle ne correspond pas au
+compte attendu -- rend le risque de publication sous la mauvaise identite impossible, sans
+attendre que Composio resolve ce point.

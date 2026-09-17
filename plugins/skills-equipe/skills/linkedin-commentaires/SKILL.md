@@ -157,9 +157,24 @@ recente correcte mais precedee d'un trou de plusieurs mois) -- a reevaluer a par
   publie que des posts programmes, jamais un commentaire sous celui d'un tiers) ; le 16/09/2026,
   **le meme lot a ete refait a l'identique** pour julien-partners avant d'etre bloque a la
   relecture, faute de tout garde-fou qui l'aurait empeche des la preparation. `reglages-comptes.json`
-  porte desormais ce champ explicitement : `false` (+ note) pour julien-partners, `true` pour
-  julien-agency (`averse-cooser`, seul canal reellement connecte a ce jour). Teste par 4 cas, et
-  verifie en conditions reelles contre le lot du 16/09 lui-meme (voir `a-publier/README.md`).
+  porte desormais ce champ explicitement -- `true` pour julien-agency et, depuis le 17/09/2026,
+  pour julien-partners aussi (Julien a partage une deuxieme connexion, `asher-fill`), meme si
+  cette derniere n'est pas encore reellement joignable (voir garde-fou suivant). Teste par 4 cas,
+  et verifie en conditions reelles contre le lot du 16/09 lui-meme (voir `a-publier/README.md`).
+- **Verification de connexion avant chaque publication (ajoute le 17/09/2026)** :
+  `verifierConnexionAvantPublication` (`lib/publier-commentaire.js`), appelee automatiquement en
+  tete de `publierCommentaire`, refuse la publication si la connexion Composio REELLEMENT active
+  (verifiee via `LINKEDIN_GET_MY_INFO` juste avant l'appel) ne correspond pas a l'`actorUrn`
+  demande. Motif : le canal MCP resout aujourd'hui systematiquement vers une seule connexion
+  "preferee" (`averse-cooser`/julien-agency) meme quand une deuxieme connexion partagee existe
+  pour le meme toolkit (`asher-fill`/julien-partners) -- **7 parametres de ciblage testes le
+  17/09/2026** (`connected_account_id`, `account_id`, `user_id`, `auth_config_id`, en sibling de
+  `tool_slug` ou dans `arguments`, y compris deux appels de controle nommant explicitement chaque
+  connexion), tous silencieusement ignores, voir `references/actions-composio.md`. Sans ce
+  garde-fou, un commentaire prepare pour julien-partners partirait silencieusement sous
+  l'identite julien-agency -- exactement le risque signale par Julien. 4 tests dedies
+  (`test/publier-commentaire.test.js`), dont un qui verifie que
+  `LINKEDIN_CREATE_COMMENT_ON_POST` n'est jamais appele quand la connexion ne correspond pas.
 
 ### Contenu du commentaire -- `lib/valider-commentaire.js`
 
@@ -192,7 +207,7 @@ recente correcte mais precedee d'un trou de plusieurs mois) -- a reevaluer a par
   d'une liste fermee de mots toujours accentues en francais standard -- heuristique
   volontairement imparfaite (mots ambigus type "a"/"à" exclus pour eviter les faux positifs).
 
-`node --test` : 93 tests.
+`node --test` : 97 tests.
 
 ## Recommandation d'usage -- horaire de lancement (16/09/2026, a lire comme secondaire)
 
