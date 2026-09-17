@@ -84,6 +84,70 @@ test('registre : quota reellement partage quelle que soit la casse d\'appel -- m
   }
 });
 
+/**
+ * Non-regression 17/09/2026 (suite) -- ecart trouve entre le "10 commentaires"
+ * du suivi de mission et les 5 entrees reelles du registre pour le 16/09/2026 :
+ * `enregistrerCommentairePublie('julien-partners', ...)` acceptait n'importe
+ * quel `compte` en texte libre, jamais confronte a l'identite LinkedIn
+ * reellement utilisee. Un commentaire redige pour julien-partners mais
+ * REELLEMENT publie sous l'identite julien-agency (le canal MCP resolvait
+ * tout vers aFqu-W7ClW avant le 17/09/2026, voir references/actions-composio.md)
+ * pouvait donc etre enregistre sous "julien-partners" -- son quota reel
+ * (agency) n'en tenait jamais compte, rendant un depassement du quota
+ * d'agency invisible au code tout en etant bien reel sur LinkedIn.
+ */
+test('reproduit le cas reel : commentaire redirige (redige pour partners, publie sous agency) refuse d\'etre enregistre sous le mauvais compte', () => {
+  const cheminRegistre = path.join(os.tmpdir(), `registre-redirection-test-${Date.now()}.json`);
+  try {
+    // Avant la correction du 17/09/2026 (suite), cet appel reussissait
+    // silencieusement : le commentaire etait compte dans le quota
+    // "julien-partners" alors qu'il avait reellement publie sous l'identite
+    // aFqu-W7ClW (julien-agency) -- le quota reel d'agency ne le voyait jamais.
+    assert.throws(
+      () => enregistrerCommentairePublie(
+        'julien-partners',
+        { date: '2026-09-16', auteurCible: 'Cible redirigee', postId: 'x', actorUrn: 'urn:li:person:aFqu-W7ClW' },
+        cheminRegistre
+      ),
+      /le compte declare "julien-partners" ne correspond pas au compte reel "julien-agency"/
+    );
+    assert.equal(fs.existsSync(cheminRegistre), false, 'aucune entree ne doit etre ecrite quand le compte declare est faux');
+  } finally {
+    fs.rmSync(cheminRegistre, { force: true });
+  }
+});
+
+test('un commentaire redirige, enregistre sous le VRAI compte (agency), compte bien dans SON quota et fait basculer le depassement', () => {
+  const cheminRegistre = path.join(os.tmpdir(), `registre-redirection-quota-${Date.now()}.json`);
+  try {
+    // 5 commentaires "genuinement" agency, deja au quota.
+    for (let i = 0; i < 5; i += 1) {
+      enregistrerCommentairePublie(
+        'julien-agency',
+        { date: '2026-09-16', auteurCible: `Cible agency ${i}`, postId: `p${i}`, actorUrn: 'urn:li:person:aFqu-W7ClW' },
+        cheminRegistre
+      );
+    }
+    // Le commentaire redirige, correctement enregistre sous le VRAI compte
+    // (agency, pas partners) : le registre reflete desormais 6 publications
+    // reelles sous agency ce jour-la, au-dela du plafond de 5.
+    enregistrerCommentairePublie(
+      'julien-agency',
+      { date: '2026-09-16', auteurCible: 'Cible redirigee', postId: 'p-redirige', actorUrn: 'urn:li:person:aFqu-W7ClW' },
+      cheminRegistre
+    );
+    const registre = chargerRegistre(cheminRegistre);
+    const entrees = entreesDuJour(registre, 'julien-agency', '2026-09-16');
+    assert.equal(entrees.length, 6, 'le registre doit montrer le vrai total publie sous agency, au-dela du quota de 5');
+    assert.throws(
+      () => validerQuotaJournalier(entrees, { auteurCible: 'Une nouvelle cible' }),
+      /quota journalier atteint \(6\/5/
+    );
+  } finally {
+    fs.rmSync(cheminRegistre, { force: true });
+  }
+});
+
 test('registre : date avec heure/fuseau refusee explicitement plutot que de fausser la comparaison', () => {
   const registre = { 'julien-agency': [{ date: '2026-09-15', auteurCible: 'x' }] };
   assert.throws(() => entreesDuJour(registre, 'julien-agency', '2026-09-15T18:00:00.000Z'), /hors du format attendu/);
