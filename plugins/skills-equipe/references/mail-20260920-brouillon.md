@@ -1,11 +1,9 @@
 # Brouillon du mail du 20/09/2026
 
-Rédigé le 15/09/2026, 5 jours avant l'échéance. Ce fichier n'est pas le mail lui-même — c'est le
-texte prêt à copier-coller dans le client mail, avec les emplacements explicitement marqués
-`[A COMPLETER]` seulement sur ce qui ne dépend ni de moi ni de Buffer d'ici le 20 : la
-suppression des deux anciens carrousels (geste de Julien) et les liens réels des trois posts de
-veille (pas encore publiés — programmés ce soir, demain et après-demain). Tout le reste
-ci-dessous est déjà rédigé, pas un placeholder.
+Rédigé le 15/09/2026, régénéré intégralement le 17/09/2026 : tous les liens sont désormais réels
+et vérifiés (carrousel Claude Partners, les 3 posts de veille, tous les commentaires), plus aucun
+`[A COMPLETER]`. Le seul point qui reste une action pour Julien lui-même (pas pour moi) est
+signalé explicitement en toutes lettres dans la section Carrousel, pas comme un placeholder muet.
 
 Format volontairement "mail", pas "rapport" : liens cliquables, pas de renvoi au dépôt pour
 comprendre une phrase, pas de pièce jointe.
@@ -46,8 +44,8 @@ toi-même depuis ton profil (**•••** sur le post → **Supprimer**) :
 - [Carrousel du 14/09](https://www.linkedin.com/posts/julien-rayes_pourquoi-vos-meilleurs-candidats-disparaissent-ils-activity-7505170085091840000-6DCd)
   — texte publié sans accents (le défaut corrigé ci-dessus), remplacé par la version du 15/09.
 
-`[A COMPLETER]` une fois les deux supprimés par toi : confirmation que le profil n'affiche plus
-que la version du 15/09.
+**Ça, c'est pour toi, pas pour moi** : une fois les deux anciennes versions supprimées de ton
+côté, dis-le-moi et je confirme que le profil n'affiche plus que la version du 15/09.
 
 **Carrousel Claude Partners, publié pour de vrai le 17/09** : le gabarit Claude Partners, testé le
 15/09 (10 pages, sujet "l'IA pour les PME", titres et texte assez grands, bon contraste, numéro
@@ -62,13 +60,20 @@ l'accent de couleur, le pied de page et le numéro — un choix assumé plutôt 
 marques restent reconnaissables comme la même maison. **Si vous voulez deux identités
 franchement distinctes, c'est un réglage à changer dans les templates.**
 
-## Commentaires — onze publiés sur trois jours, tous sur le compte Claude Agency
+## Commentaires — douze publiés en trois jours, dont le premier sur Claude Partners
 
-**Bilan à date (15 au 17/09)** : 11 commentaires réellement en ligne, tous sur Claude Agency
-(Claude Partners reste bloqué côté API, voir plus bas) — 5 le 15/09, 5 le 16/09, 1 le 17/09.
-Détail jour par jour ci-dessous pour le 15/09 (première fois, avec ses deux vraies déviations) ;
-les jours suivants sont résumés avec leurs liens, le détail complet reste dans
+**Bilan à date (15 au 17/09)** : 12 commentaires réellement en ligne — 11 sur Claude Agency (5 le
+15/09, 5 le 16/09, 1 le 17/09) et **1 sur Claude Partners aujourd'hui, le tout premier depuis que
+ce compte publie réellement** (voir "Compte Claude Partners" plus bas). Détail jour par jour
+ci-dessous pour le 15/09 (première fois, avec ses deux vraies déviations) ; les jours suivants
+sont résumés avec leurs liens, le détail complet reste dans
 `linkedin-commentaires/a-publier/README.md` si tu veux tout voir.
+
+**Premier commentaire réel sur Claude Partners (17/09)** :
+[Victor Partouche-Sebban](https://www.linkedin.com/posts/victorpartouche_c%C3%A9tait-le-17-septembre-2026-au-restaurant-activity-7506361684186492928-r_TP)
+— genre "vraie question", identité vérifiée avant publication
+(`verifierConnexionAvantPublication`, `urn:li:person:ZvLHybJZhj` confirmé), enregistré dans le
+registre avec cet URN réellement confirmé, pas seulement le nom de compte déclaré.
 
 **16/09 (5 commentaires, liste de comptes cibles élargie de 8 à 14)** :
 [Emmanuel Brisseau](https://www.linkedin.com/feed/update/urn:li:activity:7505875733999833088/),
@@ -149,8 +154,8 @@ chiffre ou une vraie anecdote sur ce lot précis de comptes et de posts.
 Le pipeline de veille tourne réellement : 35 posts récupérés sur les 10 comptes suivis, 15
 retenus par le score d'engagement. Trois ont été adaptés en post prêt à publier — un par
 compte concerné, choisis parmi les meilleurs scores (post source noté pour chacun, chiffre
-français vérifié — le texte intégral des trois arrive ci-dessous avec leurs liens réels dès
-qu'ils sont en ligne).
+français vérifié). **Les trois sont désormais publiés et confirmés en ligne**, liens réels
+ci-dessous.
 
 Adaptés, pas traduits : structure et angle du post source conservés, exemples et chiffres
 remplacés par des références françaises vérifiées (Insee, Bpi France Le Lab/Rexecode,
@@ -177,12 +182,12 @@ jamais deux le même jour" :
   — retourner un défaut assumé en argument de vente, adapté avec la campagne "fruits et légumes
   moches" d'Intermarché, Grand Prix Stratégies de la publicité 2014). Ligne Notion passée à
   "Publié" avec ce lien, registre de quota (`enregistrerPostPublie`) mis à jour.
-- Justin Welsh → julien-partners, **aujourd'hui 17/09** à 13h00 Paris (14h00 Madagascar) —
-  vérification prévue après cette heure, avec une marge, pour ne pas répéter l'erreur de
-  vérification anticipée du 15/09 (voir plus haut).
-
-`[A COMPLETER]` **Lien de Justin Welsh** — confirmé et ajouté ici une fois réellement en ligne
-(rien de supposé tant que ce n'est pas vérifié).
+- [Justin Welsh](https://www.linkedin.com/posts/julien-rayes-claude-partners_independants-entrepreneuriat-activity-7506306307176722432-pybK)
+  → julien-partners, publié le 17/09 à 13h00 Paris (14h00 Madagascar). **Confirmé réellement en
+  ligne** (17/09, en fin de journée) : texte intégral relu sur le permalien LinkedIn (thème repris
+  de Justin Welsh — croire en soi assez longtemps pour que la compétence suive, avant que les
+  résultats ne parlent ; chiffre 28% des micro-entrepreneurs français encore actifs 5 ans après,
+  Insee Première n°2069, 2025, page ouverte et lue).
 
 ## Compte Claude Partners — débloqué le 17/09, contournement plutôt qu'attente de Composio
 
@@ -201,9 +206,15 @@ contournement ci-dessus rend la question moins urgente pour Claude Partners, mai
 fond (une clé consumer d'équipe ne peut cibler qu'une seule connexion partagée par toolkit) reste
 entier pour Claude Agency et pour toute future troisième identité sur ce même canal MCP.
 
-**Commentaires Claude Partners** : passage frais réel effectué le 17/09 sur les 8 comptes ciblés
-(via Apify, pas une fixture) — 0 candidat dans la fenêtre de fraîcheur de 4h (le plus récent, un
-post de Théophile Burnet, avait 8,3h). Rien à publier aujourd'hui, pas un blocage technique.
+**Commentaires Claude Partners** : plusieurs passages frais réels effectués le 17/09 sur les
+comptes ciblés (via Apify, pas une fixture). Le premier post trouvé sous 4h (Victor
+Partouche-Sebban, 156e RDV NBC) a donné le tout premier commentaire réel publié sur Claude
+Partners (voir ci-dessus). Les passages suivants sont retombés à 0 candidat sous 4h — les comptes
+restent actifs (posts espacés de quelques heures à quelques jours), c'est un problème de timing
+du passage, pas de liste à corriger. 2 des 8 comptes cibles initiaux (`sindy-desquerre`,
+`romy-ozier-lafontaine-ia`) n'avaient produit aucun post en un mois — remplacés le 17/09 par
+`victorpartouche` et `alexiscombeaux`, vérifiés sur leur cadence réelle avant intégration (même
+méthode que le complément Claude Agency du 16/09).
 
 **Historique (avant le 17/09, pour mémoire)** : au 16/09, Claude Partners n'avait aucune
 connexion Composio, sous aucune forme — vérifié en profondeur (`LINKEDIN_GET_MY_INFO`, liste
@@ -220,22 +231,34 @@ connexion réellement active juste avant chaque publication et refuse explicitem
 correspond pas au compte demandé — utile pour Claude Agency (toujours sur le canal MCP partagé),
 sans objet pour Claude Partners depuis qu'il a son propre canal dédié.
 
-## Notion — débloqué, les deux pages sont réelles et remplies
+## Notion — les deux bases sont réelles et remplies, partage à confirmer par toi
 
-Merci pour le partage de "LinkedIn — Veille & Commentaires" avec l'intégration : les deux bases
-sont créées et remplies avec des données réelles, pas des lignes vides.
+**Précision structurelle (vérifiée le 17/09)** : ce ne sont pas deux pages Notion séparées, mais
+**une seule page** — [LinkedIn — Veille &
+Commentaires](https://app.notion.com/p/LinkedIn-Veille-Commentaires-3dbe7fe5dbf880afb390c2e62ff8ac46)
+— qui contient les deux bases demandées par le brief :
 
 - [Veille & posts](https://app.notion.com/p/9aa90eff20334db694ca04fb4182b385) — les 3 posts
-  adaptés du 15/09 (voir plus haut), avec les vraies métriques du post source (réactions,
-  commentaires, partages, abonnés) et 3 vues filtrées par compte.
-- [Suivi des commentaires](https://app.notion.com/p/8dd4dc38fdb14e6190fa6b5923baba55) — les 5
-  commentaires publiés aujourd'hui (voir plus haut), avec une vue "Commentaires par semaine".
-  La vue croisant aussi les vues de profil et les demandes de contact reste à compléter à la
-  main dans Notion (limite réelle de l'API : un seul axe par graphique en un appel).
+  adaptés (voir plus haut : Codie Sanchez, Jason Feifer, Justin Welsh), avec les vraies métriques
+  du post source (réactions, commentaires, partages, abonnés) et des vues filtrées par compte.
+- [Commentaires](https://app.notion.com/p/8dd4dc38fdb14e6190fa6b5923baba55) — les 12 commentaires
+  réellement publiés à ce jour (voir plus haut), avec une vue "Commentaires par semaine". La vue
+  croisant aussi les vues de profil et les demandes de contact reste à compléter à la main dans
+  Notion (limite réelle de l'API : un seul axe par graphique en un appel).
 
-Le partage avec `contact@claudeagency.fr` est déjà en place (accès complet, hérité de la page
-parente "LinkedIn — Veille & Commentaires" que tu as partagée) — vérifié directement dans
-Notion, rien à faire de plus de ce côté.
+**Le partage en modification avec `contact@claudeagency.fr` n'a pas pu être confirmé par
+l'API** — vérifié le 17/09 : l'API Notion ne permet de lire ni la liste des personnes ayant
+accès à une page, ni leur niveau d'accès (aucun champ de ce type sur l'objet page ou base ;
+seuls `created_by`/`last_edited_by`, pas une liste de partage). Ce que j'ai pu confirmer :
+`contact@claudeagency.fr` est bien membre de cet espace de travail Notion (vérifié via la liste
+des utilisateurs). Mais je ne peux pas dire si le partage EN MODIFICATION sur cette page précise
+est actif.
+
+**Vérification à faire toi-même, 30 secondes** : ouvre la page "LinkedIn — Veille &
+Commentaires" dans Notion → bouton **Share** en haut à droite → regarde si
+`contact@claudeagency.fr` apparaît dans la liste avec le niveau **Can edit** (pas seulement
+**Can view**). S'il manque ou n'a que la lecture : dans la même fenêtre, tape l'adresse dans le
+champ "Invite", sélectionne **Can edit**, clique **Invite**.
 
 ## Test de résistance des trois skills — six failles trouvées, corrigées
 
@@ -330,13 +353,35 @@ Pour tout retrouver en un coup d'œil plutôt qu'éparpillé plus haut :
    des vues. À confirmer sur un premier cas concret, pas avant le 18-19/09 pour le post
    programmé aujourd'hui.
 7. **Dépense** : estimation, pas un relevé de facturation (détail juste en dessous).
+8. **Comptage du quota par compte "prévu" plutôt que par compte "réellement publié" (trouvé et
+   corrigé le 17/09)** : `enregistrerCommentairePublie` acceptait un nom de compte en texte
+   libre, jamais confronté à l'identité LinkedIn réellement utilisée pour publier. Avant le
+   17/09 (avant `verifierConnexionAvantPublication`), un commentaire rédigé pour Claude Partners
+   mais réellement publié sous Claude Agency (le canal partagé résolvait tout vers Agency)
+   aurait pu être compté dans le mauvais quota, sans que rien ne le signale. Vérifié sur le
+   registre réel du 16/09 : aucune trace qu'une contamination ait réellement eu lieu, mais la
+   faille elle-même était réelle et vérifiée par le code. Corrigée : le compte déclaré est
+   désormais confronté à l'identité réellement confirmée, refus explicite en cas d'écart.
+9. **2 comptes cibles Claude Partners remplacés (17/09)** : `sindy-desquerre` et
+   `romy-ozier-lafontaine-ia` n'avaient produit aucun post en un mois — remplacés par
+   `victorpartouche` et `alexiscombeaux`, vérifiés sur leur cadence réelle avant intégration
+   (voir "Compte Claude Partners" plus haut).
+10. **Version de `linkedin-commentaires` restée figée après 2 changements de comportement**
+    (trouvé pendant cette relecture) : la règle du dépôt impose un nouveau numéro de version à
+    chaque changement de skill ; deux corrections récentes (accents dans la comparaison de nom,
+    point 8 ci-dessus) étaient parties sans bump. Corrigé (1.2.1 → 1.2.2), sans impact sur le
+    fonctionnement, juste un oubli de discipline réparé.
 
 ## Dépense
 
 Estimation traçable depuis le code et les comptes de posts réellement récupérés (pas un relevé
-de facturation, à confirmer sur la console Apify) : 59 posts facturés au plus sur l'ensemble du
-chantier à ce jour, soit environ **0,12 $** — très largement sous le plafond de 50 € fixé au
-départ.
+de facturation, à confirmer sur la console Apify) : **59 posts facturés au plus, environ 0,12 $**
+sur les passages du 12 au 15/09 — ce chiffre est celui du dernier suivi budgétaire écrit
+(`references/budget-apify-20260914.md`) et **n'inclut pas** les nombreux passages réels
+supplémentaires du 15 au 17/09 (commentaires Agency et Partners, plusieurs découvertes par jour).
+Je n'ai pas de relevé exact plus récent à donner honnêtement — la seule source fiable reste la
+console Apify elle-même. Même en ajoutant une marge large pour ces passages non comptés, on reste
+très largement sous le plafond de 50 € fixé au départ.
 
 ## Comment relancer chaque skill
 
@@ -352,11 +397,16 @@ elle a démarré, et tu testerais une version périmée sans le savoir.
 ## Arbitrage
 
 Aucune des trois skills n'a été sacrifiée : les trois ont un livrable réel à ce jour (carrousel
-en ligne, cinq commentaires en ligne, trois posts de veille relus et programmés dans Buffer),
-et les deux pages Notion sont créées, remplies et déjà partagées. Les deux seuls points encore
-ouverts ne dépendent plus du travail sur les skills elles-mêmes : supprimer toi-même les deux
-anciennes versions du carrousel, et confirmer les trois posts de veille au fur et à mesure
-qu'ils passent réellement en ligne d'ici le 17/09.
+Claude Partners en ligne, douze commentaires réellement publiés sur les deux comptes, trois
+posts de veille adaptés et confirmés en ligne), et les deux bases Notion sont créées et remplies
+avec des données réelles. Deux points restent ouverts, aucun ne dépend plus du travail sur les
+skills elles-mêmes :
+
+1. **Supprimer toi-même les deux anciennes versions du carrousel** (voir la section Carrousel) —
+   je ne peux pas le faire à ta place, l'API refuse ces deux suppressions précises.
+2. **Confirmer toi-même, dans l'interface Notion, le partage en modification avec
+   `contact@claudeagency.fr`** (voir la section Notion) — l'API ne me permet pas de le vérifier
+   ni de l'accorder, seulement de constater que la personne est membre de l'espace de travail.
 
 N'hésite pas à revenir vers moi si tu veux qu'on creuse un point en particulier.
 
