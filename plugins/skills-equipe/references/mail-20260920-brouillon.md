@@ -49,13 +49,13 @@ toi-même depuis ton profil (**•••** sur le post → **Supprimer**) :
 `[A COMPLETER]` une fois les deux supprimés par toi : confirmation que le profil n'affiche plus
 que la version du 15/09.
 
-**Premier carrousel de test pour Claude Partners (15/09)** : jusqu'ici tous les carrousels
-publiés l'avaient été pour Claude Agency — le gabarit Claude Partners n'avait jamais servi qu'à
-des tests génériques en coulisses. Un carrousel de test complet (10 pages, sujet "l'IA pour les
-PME") a confirmé que le gabarit fonctionne réellement : titres et texte assez grands, bon
-contraste, numéro sur chaque page, flèche sur la première — tout mesuré, pas supposé. **Pas de
-lien ici** : ce test n'a volontairement jamais été publié (juste pour vérifier le gabarit) —
-dis-le si tu veux que je te l'envoie ou que je le publie pour de vrai.
+**Carrousel Claude Partners, publié pour de vrai le 17/09** : le gabarit Claude Partners, testé le
+15/09 (10 pages, sujet "l'IA pour les PME", titres et texte assez grands, bon contraste, numéro
+sur chaque page, flèche sur la première — tout mesuré, pas supposé), est désormais réellement en
+ligne : [voir le
+carrousel](https://www.linkedin.com/feed/update/urn:li:activity:7506384428168806400/) — 10 images,
+vérifié par navigation directe sur ton profil (pas seulement par l'API), pages/titres/accents/pied
+de page conformes au rendu attendu.
 
 Les deux comptes partagent la base visuelle (fond, encre, mise en page) et se distinguent par
 l'accent de couleur, le pied de page et le numéro — un choix assumé plutôt qu'un oubli : les deux
@@ -184,38 +184,41 @@ jamais deux le même jour" :
 `[A COMPLETER]` **Lien de Justin Welsh** — confirmé et ajouté ici une fois réellement en ligne
 (rien de supposé tant que ce n'est pas vérifié).
 
-## Compte Claude Partners — prêt de ton côté, toujours inatteignable côté API, ticket ouvert
+## Compte Claude Partners — débloqué le 17/09, contournement plutôt qu'attente de Composio
 
-**Historique court** : au 16/09, Claude Partners n'avait aucune connexion Composio, sous aucune
-forme — vérifié en profondeur (`LINKEDIN_GET_MY_INFO`, liste complète des connexions sans filtrer
-sur "actif", recherche d'une deuxième identité côté notre espace Composio). **Le 17/09, tu as fait
-ta part** : un deuxième compte LinkedIn partagé à l'équipe est apparu sous le nom `asher-fill`,
-à côté de `averse-cooser` (Claude Agency) déjà en place — exactement le geste demandé.
+**Mise à jour du 17/09, ce qui suit dans cette section date d'avant et reste comme historique.**
+Plutôt que d'attendre une réponse de Composio sur le blocage `asher-fill` décrit ci-dessous, tu as
+ouvert un **projet Composio distinct** pour Claude Partners, avec sa propre clé de projet — une
+connexion LinkedIn active confirmée dessus (`contact@claudepartners.fr`). Ce compte publie
+désormais réellement, sur un canal séparé (REST direct) de celui de Claude Agency (MCP, partagé
+d'équipe) : le carrousel ci-dessus est la première publication réelle sur ce nouveau canal,
+vérifiée par navigation directe sur ton profil.
 
-**Mais ça ne suffit pas encore : `asher-fill` reste injoignable.** Vérifié de façon exhaustive le
-17/09 (nouvelle session à froid, cache exclu) : tout appel — qu'il s'agisse de lister les
-connexions, d'en initier une, ou d'appeler `LINKEDIN_GET_MY_INFO` en ciblant explicitement
-`asher-fill` par 7 noms de paramètre différents (y compris deux appels de contrôle qui nomment
-explicitement l'autre connexion, pour prouver que ce n'est pas juste `asher-fill` qui est
-invisible) — **résout systématiquement vers `averse-cooser` (Claude Agency)**, sans jamais
-produire d'erreur qui l'expliquerait. Composio semble imposer qu'une seule connexion "préférée"
-soit joignable par toolkit, même quand deux sont actives côté dashboard. **Ticket support ouvert
-le 17/09/2026** (`support@composio.dev`, référence `<1789633887739349582.1789633887@claudeagency.fr>`)
-décrivant le symptôme exact et les tests menés — en attente de réponse.
+**Le ticket support Composio ouvert le 17/09 reste ouvert, sans réponse de fond** : la seule
+réponse reçue à ce jour (08:37 le même jour) est un accusé de réception automatique ("we're
+working through more requests than usual... we'll get back to you"), pas une analyse. Le
+contournement ci-dessus rend la question moins urgente pour Claude Partners, mais le problème de
+fond (une clé consumer d'équipe ne peut cibler qu'une seule connexion partagée par toolkit) reste
+entier pour Claude Agency et pour toute future troisième identité sur ce même canal MCP.
 
-**Ce n'est plus un risque, même en l'état** : un garde-fou ajouté le 17/09
-(`verifierConnexionAvantPublication`) vérifie la connexion réellement active juste avant chaque
-publication et refuse explicitement si elle ne correspond pas au compte demandé — un commentaire
-préparé pour Claude Partners ne peut plus partir silencieusement sous l'identité Claude Agency,
-même tant que `asher-fill` reste injoignable. Le compte est configuré comme "prêt à publier" côté
-code (`canal_publication_reel: true`) ; c'est l'API Composio elle-même qui bloque, pas notre
-préparation.
+**Commentaires Claude Partners** : passage frais réel effectué le 17/09 sur les 8 comptes ciblés
+(via Apify, pas une fixture) — 0 candidat dans la fenêtre de fraîcheur de 4h (le plus récent, un
+post de Théophile Burnet, avait 8,3h). Rien à publier aujourd'hui, pas un blocage technique.
 
-**Ce n'est pas un blocage pour la veille** : Buffer, lui, atteint bien les deux comptes (voir la
-section Veille), c'est par là que passe le post Justin Welsh sur Claude Partners. Le blocage ne
-concerne que les **commentaires** sous le post d'un tiers, que Buffer ne sait pas faire — les
-commentaires prévus pour Claude Partners restent donc sur pause jusqu'à la réponse de Composio,
-sans risque de partir sous la mauvaise identité entre-temps.
+**Historique (avant le 17/09, pour mémoire)** : au 16/09, Claude Partners n'avait aucune
+connexion Composio, sous aucune forme — vérifié en profondeur (`LINKEDIN_GET_MY_INFO`, liste
+complète des connexions sans filtrer sur "actif", recherche d'une deuxième identité côté notre
+espace Composio). Le 17/09, un deuxième compte LinkedIn partagé à l'équipe était apparu sous le
+nom `asher-fill`, à côté de `averse-cooser` (Claude Agency) déjà en place — mais restait
+injoignable : vérifié de façon exhaustive (nouvelle session à froid, cache exclu), tout appel
+ciblant explicitement `asher-fill` par 7 noms de paramètre différents résolvait systématiquement
+vers `averse-cooser` (Claude Agency), sans jamais produire d'erreur qui l'expliquerait. C'est ce
+blocage que le nouveau projet Composio dédié contourne, plutôt que de le résoudre.
+
+**Le garde-fou ajouté le 17/09 reste actif** (`verifierConnexionAvantPublication`) : il vérifie la
+connexion réellement active juste avant chaque publication et refuse explicitement si elle ne
+correspond pas au compte demandé — utile pour Claude Agency (toujours sur le canal MCP partagé),
+sans objet pour Claude Partners depuis qu'il a son propre canal dédié.
 
 ## Notion — débloqué, les deux pages sont réelles et remplies
 

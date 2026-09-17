@@ -718,3 +718,36 @@ malgre la separation de canal (REST/`ak_` vs MCP/`ck_`) -- notamment si `aFqu-W7
 `ZvLHybJZhj` correspondent ou non au meme membre LinkedIn physique. Le registre d'echecs donne
 desormais la matiere pour instruire cette question a l'avenir (frequence et nature reelles des
 echecs par compte), mais ne la tranche pas lui-meme.
+
+### 17/09/2026 (suite 2) -- pourquoi deux canaux distincts, et non un seul avec deux connexions
+
+**Rapporte par Julien/Nomena (contenu du mail non verifie mot pour mot par cette session -- la
+lecture du corps d'un message personnel a ete refusee par le classifieur auto-mode de securite,
+raison invoquee : traitement de donnees personnelles ; seules les metadonnees -- expediteur, date,
+sujet, fil de discussion -- ont pu etre confirmees directement)** : julien-agency et julien-partners
+utilisent deux canaux Composio distincts pour deux raisons differentes, pas par choix arbitraire :
+
+- **julien-agency, MCP consumer (`ck_`)** : la connexion LinkedIn (`averse-cooser` / `aFqu-W7ClW`)
+  est un **pret d'equipe** ("Shared connection") sur le compte Composio du proprietaire -- une cle
+  consumer d'un membre de l'equipe (pas le proprietaire) ne peut atteindre que ce type de
+  connexion, jamais les "Connected Accounts" personnels du proprietaire.
+- **julien-partners, REST direct (`ak_`)** : Julien a ouvert un **projet Composio distinct**, avec
+  sa propre cle de projet, entre le 12/09 et le 17/09 -- confirme independamment par cette session
+  (`GET /api/v3/connected_accounts` sur cette cle, voir plus haut) : une seule connexion LinkedIn
+  ACTIVE, `ca_vn1-dhh8VcYf` / `contact@claudepartners.fr`.
+
+**Ce que ca explique** : pourquoi `asher-fill` (la seconde connexion partagee tentee sur le canal
+MCP, voir plus haut) n'a jamais ete atteignable -- un pret d'equipe ne permet pas de cibler une
+connexion precise quand plusieurs existent pour le meme toolkit (limite de precedence deja
+documentee). Plutot que d'attendre que Composio resolve ce point, Julien a contourne en ouvrant un
+second projet distinct pour julien-partners, sur un canal (REST) different de celui du pret
+d'equipe (MCP) -- ce qui rend la question de precedence sans objet pour ce compte : chaque compte
+vit desormais sur son propre canal, pas sur deux connexions partagees d'un meme canal.
+
+**Etat reel du ticket support Composio ouvert le 17/09** (verifie directement par cette session,
+lecture autorisee car contenu professionnel, pas personnel) : la reponse recue a 08:37 le meme
+jour est un **accusé de reception automatique** ("We're working through more requests than usual...
+We'll get back to you as soon as we can"), pas une reponse de fond. Composio n'a donc **pas encore
+confirme ni infirme** l'analyse du ticket (reprise plus haut, section du 17/09) -- le ticket reste
+ouvert et sans reponse humaine a ce jour. A relancer/transmettre a Julien si une reponse de fond
+arrive.
