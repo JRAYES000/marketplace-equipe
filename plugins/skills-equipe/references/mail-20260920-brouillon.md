@@ -62,7 +62,30 @@ l'accent de couleur, le pied de page et le numéro — un choix assumé plutôt 
 marques restent reconnaissables comme la même maison. **Si vous voulez deux identités
 franchement distinctes, c'est un réglage à changer dans les templates.**
 
-## Commentaires — cinq publiés, tous sur le compte Claude Agency
+## Commentaires — onze publiés sur trois jours, tous sur le compte Claude Agency
+
+**Bilan à date (15 au 17/09)** : 11 commentaires réellement en ligne, tous sur Claude Agency
+(Claude Partners reste bloqué côté API, voir plus bas) — 5 le 15/09, 5 le 16/09, 1 le 17/09.
+Détail jour par jour ci-dessous pour le 15/09 (première fois, avec ses deux vraies déviations) ;
+les jours suivants sont résumés avec leurs liens, le détail complet reste dans
+`linkedin-commentaires/a-publier/README.md` si tu veux tout voir.
+
+**16/09 (5 commentaires, liste de comptes cibles élargie de 8 à 14)** :
+[Emmanuel Brisseau](https://www.linkedin.com/feed/update/urn:li:activity:7505875733999833088/),
+[Théo Meuriot](https://www.linkedin.com/feed/update/urn:li:activity:7505860641556066304/),
+[Yohann Nezri](https://www.linkedin.com/feed/update/urn:li:activity:7505875827062956033/),
+[Mehdi Stili](https://www.linkedin.com/feed/update/urn:li:activity:7505875920872968193/),
+[Leonel Adagbe](https://www.linkedin.com/feed/update/urn:li:activity:7505722142689230852/) —
+premier jour où la règle des 4h a réellement fonctionné (4 sur 5 sous 4h), voir la section
+"Compte Claude Partners" et les déviations plus bas pour pourquoi.
+
+**17/09 (1 commentaire)** :
+[Théo Meuriot](https://www.linkedin.com/feed/update/urn:li:activity:7506223190054989824/),
+2e jour consécutif chez la même personne (son compte restait le plus frais du jour) — à ne pas
+répéter un 3e jour sans qu'il ait réagi, c'est désormais noté comme recommandation d'usage dans
+le SKILL.md.
+
+### Détail du 15/09 — première publication réelle
 
 Les quatre premiers commentaires avaient été écrits pour le compte Claude Partners, sur
 l'hypothèse (non vérifiée) que ce compte était connecté à notre outil de publication. Il ne
