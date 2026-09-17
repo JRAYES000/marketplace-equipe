@@ -80,9 +80,13 @@ carrousel de test) et `test/generer-images.test.js` (le PDF reel se genere et n'
 
 ## Variables d'environnement (`.env.example`)
 
-- **`COMPOSIO_API_KEY`** -- repli REST statique, lu par `lib/composio.js` en secours. Ce n'est
-  **pas** la voie qui sert reellement a publier (voir "Publication reelle"). Laisser vide reste
-  correct.
+- **`COMPOSIO_API_KEY`** -- cle de PROJET Composio ("ak_..."), canal REST direct. Depuis le
+  17/09/2026, c'est le canal reel de publication pour **julien-partners uniquement**
+  (connected_account_id `ca_vn1-dhh8VcYf`, verifie via `GET /api/v3/connected_accounts` -- voir
+  `references/actions-composio.md`). Ne pas la confondre avec une cle consumer "ck_..." (canal
+  MCP, utilise par `linkedin-commentaires` pour julien-agency) : les deux formats ne sont pas
+  interchangeables, voir `lib/composio-canal.js`. Laisser vide reste correct si seul
+  julien-agency est concerne (non implemente dans ce paquet, voir "Publication reelle").
 - **`PDF_RENDER_API_KEY`** -- **vestigiale**, ne rien y mettre : le rendu est 100% local
   (Playwright), aucun service externe n'est appele.
 
@@ -168,23 +172,26 @@ Anti-collision : `" (2)"`, `" (3)"`... jamais d'ecrasement silencieux d'un fichi
 
 ## Publication reelle
 
-**Methode qui fonctionne** : API Documents de LinkedIn, via le canal MCP Composio
-(`COMPOSIO_REMOTE_WORKBENCH`, cle consumer personnelle -- voir `references/actions-composio.md`
-pour le protocole complet), en 4 etapes dans une seule session MCP continue :
-1. Televerser le PDF dans le bac a sable distant (`upload_local_file`) -> `s3key`.
-2. `LINKEDIN_CREATE_LINKED_IN_POST` avec `images: [{ name, mimetype: "application/pdf", s3key
-   }]`, author, commentary.
+**Mis a jour le 17/09/2026 -- routage par compte, voir `lib/composio-canal.js` et
+`references/actions-composio.md` pour le detail complet.**
 
-Le signal de reponse est systematiquement ambigu sur ce compte (droits ecriture seule) :
-`successful: true`, corps vide, toute lecture (`GET /rest/posts`, etc.) echoue en 403/404 --
-**c'est la signature normale d'un succes**, pas un echec. Seule une verification par navigateur
-reel (permalink) confirme une publication.
+- **julien-partners** : fonctionnel. `publierCarrousel({ compte: 'julien-partners', ... })`
+  publie une IMAGE (couverture ou par-diapo, jamais le PDF multi-pages lui-meme -- aucune action
+  Composio ne le permet) via le canal REST direct (`COMPOSIO_API_KEY`, cle de projet "ak_"),
+  avec `connected_account_id: "ca_vn1-dhh8VcYf"` explicite. Televersement via
+  `POST /api/v3/files/upload/request` (corrige l'impasse FileUploadable du 12/09/2026), puis
+  `LINKEDIN_CREATE_LINKED_IN_POST`. Confirme par un post de test reel publie puis supprime le
+  17/09/2026 (`LINKEDIN_DELETE_POST`, `{deleted: true}`).
+- **julien-agency** : NON implemente dans ce paquet. Ce compte route vers le canal MCP/ck_ (voir
+  `linkedin-commentaires`, qui l'utilise deja pour des commentaires) mais `linkedin-carrousel` n'a
+  jamais teste de publication d'image via ce canal -- `publierCarrousel()` refuse explicitement
+  ce compte (`canal_publication_reel: false` dans `reglages-comptes.json`) plutot que de
+  pretendre que ca marche.
+- **page-claude** : abandonne (voir plus haut), `canal_publication_reel: false`.
 
-**Ce qui ne marche pas encore** : le repli image (`generer-images.js` +
-`publierCarrouselViaImage`) est code et teste pour le rendu, mais l'etape de creation du post
-reste cassee (contrainte du wrapper Composio sur le champ `images` d'un post simple) -- leve une
-erreur explicite avant tout appel reseau, ne pas debrancher. Ne pas utiliser cette voie pour
-publier tant qu'elle n'est pas corrigee.
+**Ce qui reste vrai, inchange depuis le 11/09/2026** : aucune action Composio ne depose un
+document/PDF multi-pages sur LinkedIn. Cette skill ne publiera donc jamais le PDF du carrousel
+tel quel, seulement une image de repli.
 
 ## Regles d'usage (brief du 10/09/2026, section 2) -- etat actuel
 

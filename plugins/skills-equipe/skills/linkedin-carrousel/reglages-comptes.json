@@ -13,7 +13,9 @@
     "ton": ["confiant", "direct", "pedagogue", "oriente-dirigeants"],
     "palette": ["#CC785C", "#46603F", "#7D9B76", "#FBF7F1"],
     "concurrents": [],
-    "_source_palette": "Terracotta de marque (--color-brand-500) + vert distinctif propre a claudeagency.fr (--color-sand/accents #46603f et #7d9b76, absents de la feuille de style de claudepartners.fr), verifie le 11/09/2026."
+    "_source_palette": "Terracotta de marque (--color-brand-500) + vert distinctif propre a claudeagency.fr (--color-sand/accents #46603f et #7d9b76, absents de la feuille de style de claudepartners.fr), verifie le 11/09/2026.",
+    "canal_publication_reel": false,
+    "_canal_publication_reel_note": "Reste a false le 17/09/2026 : ce compte route vers le canal MCP/ck_ (voir lib/composio-canal.js, ROUTAGE_COMPTES), mais linkedin-carrousel n'a jamais teste de publication d'image reelle via ce canal (seul linkedin-commentaires l'a fait, pour des commentaires, pas des posts avec image). publierCarrousel() refuse explicitement ce compte tant que ce chantier n'est pas ouvert -- voir lib/publier.js."
   },
   "julien-partners": {
     "author_urn": "urn:li:person:ZvLHybJZhj",
@@ -21,6 +23,8 @@
     "ton": ["chaleureux", "professionnel", "facilitateur", "oriente-reseau"],
     "palette": ["#CC785C", "#9C503A", "#C6B49A", "#FBF7F1"],
     "concurrents": [],
-    "_source_palette": "Terracotta de marque (--brand) + nuance brand-600 propre a claudepartners.fr (#9c503a, distincte du #b5634a de claudeagency.fr) + sable plus soutenu (--sand #c6b49a, propre a ce site), verifie le 11/09/2026."
+    "_source_palette": "Terracotta de marque (--brand) + nuance brand-600 propre a claudepartners.fr (#9c503a, distincte du #b5634a de claudeagency.fr) + sable plus soutenu (--sand #c6b49a, propre a ce site), verifie le 11/09/2026.",
+    "canal_publication_reel": true,
+    "_canal_publication_reel_note": "Passe a true le 17/09/2026 : connexion LinkedIn ACTIVE confirmee (GET /api/v3/connected_accounts, projet de la cle ak_) sous connected_account_id ca_vn1-dhh8VcYf (contact@claudepartners.fr). Le repli image (lib/publier.js, publierCarrouselViaImage) est desormais code pour ce compte : upload via /api/v3/files/upload/request (corrige l'impasse FileUploadable du 12/09/2026) puis LINKEDIN_CREATE_LINKED_IN_POST avec connected_account_id explicite -- voir references/actions-composio.md pour le statut du test en conditions reelles."
   }
 }

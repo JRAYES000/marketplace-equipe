@@ -108,13 +108,21 @@ recente correcte mais precedee d'un trou de plusieurs mois) -- a reevaluer a par
   l'integration** (bouton "..." de la page -> "Connexions") sous laquelle creer la base.
 - **`COMPOSIO_CONSUMER_API_KEY`** -- cle "consumer" (prefixe `ck_`, Reglages du compte personnel
   Composio -> "Sessions & API Key", surface "FOR YOU"), utilisee par `lib/composio.js` via le
-  canal MCP (`https://connect.composio.dev/mcp`) -- **le seul canal reellement fonctionnel sur ce
-  compte**, verifie le 16/09/2026 (5 commentaires publies pour de vrai). **Ne jamais confondre
-  avec une cle `ak_...`** (couche PLATFORM Composio, admin d'organisation) : ce format n'existe
-  pas sur ce compte et refuse desormais explicitement avant tout appel reseau
-  (`validerCle`, `lib/composio.js`) -- voir `references/actions-composio.md` pour le protocole
-  MCP complet et l'historique de cette confusion (deja rencontree le 12/09/2026, redecouverte a
-  l'identique le 16/09/2026 avant cette correction).
+  canal MCP (`https://connect.composio.dev/mcp`) pour **julien-agency uniquement** -- verifie le
+  16/09/2026 (5 commentaires publies pour de vrai), toujours le seul canal fonctionnel pour ce
+  compte (aucune connexion pour lui sur le projet "ak_", verifie le 17/09/2026).
+- **`COMPOSIO_API_KEY`** -- cle de PROJET (prefixe `ak_`), utilisee pour **julien-partners
+  uniquement** depuis le 17/09/2026, canal REST direct (`backend.composio.dev/api/v3.1`) avec
+  `connected_account_id: "ca_vn1-dhh8VcYf"` explicite -- une connexion LinkedIn ACTIVE reelle pour
+  ce compte, verifiee via `GET /api/v3/connected_accounts`. Le routage entre les deux canaux se
+  fait automatiquement par compte (`../../lib/composio-canal.js`, partage avec
+  `linkedin-carrousel`) : `publierCommentaire({ actorUrn, ... })` derive le bon canal depuis
+  `actorUrn`, aucun changement d'appel necessaire pour les scripts existants.
+  **Ne jamais passer une cle `ak_...` a `validerCle`/canal MCP** (couche PLATFORM Composio) :
+  ce format y est toujours refuse explicitement avant tout appel reseau (`validerCle`,
+  `lib/composio.js`) -- voir `references/actions-composio.md` pour le protocole MCP complet,
+  l'historique de cette confusion (12/09 et 16/09/2026), et le detail du routage par compte
+  tranche le 17/09/2026.
 
 ## Garde-fous automatiques (refus explicite, jamais un avertissement)
 

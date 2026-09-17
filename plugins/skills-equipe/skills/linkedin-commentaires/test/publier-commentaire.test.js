@@ -73,12 +73,16 @@ test('verifierConnexionAvantPublication accepte quand la connexion reelle corres
   }
 });
 
-test('verifierConnexionAvantPublication refuse quand la connexion reelle ne correspond pas -- cas reel du 17/09/2026', async () => {
+test('verifierConnexionAvantPublication refuse quand la connexion MCP reelle ne correspond pas (compte force explicitement)', async () => {
+  // Depuis le 17/09/2026, julien-partners (ZvLHybJZhj) route vers REST, pas MCP -- ce
+  // test force `compte: 'julien-agency'` pour continuer a couvrir la logique de
+  // detection de mismatch sur le canal MCP lui-meme (le risque documente le
+  // 17/09/2026 : une connexion partagee qui ne resout pas vers l'identite attendue).
   const fetchOriginal = global.fetch;
   global.fetch = creerFetchMock('aFqu-W7ClW', { appelsCreationCommentaire: [] });
   try {
     await assert.rejects(
-      () => verifierConnexionAvantPublication('urn:li:person:ZvLHybJZhj', { apiKey: 'ck_test' }),
+      () => verifierConnexionAvantPublication('urn:li:person:ZvLHybJZhj', { compte: 'julien-agency', apiKey: 'ck_test' }),
       /resout vers "aFqu-W7ClW", pas vers "ZvLHybJZhj"/
     );
   } finally {
@@ -86,15 +90,17 @@ test('verifierConnexionAvantPublication refuse quand la connexion reelle ne corr
   }
 });
 
-test('publierCommentaire refuse AVANT tout appel de creation de commentaire si la connexion ne correspond pas', async () => {
+test('publierCommentaire (julien-agency, MCP) refuse AVANT tout appel de creation si la connexion ne correspond pas', async () => {
+  // Simule le cas ou la connexion partagee MCP active ne resout pas vers
+  // l'identite attendue (le risque documente le 17/09/2026).
   const fetchOriginal = global.fetch;
   const appelsCreationCommentaire = [];
-  global.fetch = creerFetchMock('aFqu-W7ClW', { appelsCreationCommentaire });
+  global.fetch = creerFetchMock('id-inattendu', { appelsCreationCommentaire });
   try {
     await assert.rejects(
       () =>
         publierCommentaire({
-          actorUrn: 'urn:li:person:ZvLHybJZhj',
+          actorUrn: 'urn:li:person:aFqu-W7ClW',
           targetUrn: 'urn:li:share:123',
           message: 'texte de test',
           apiKey: 'ck_test',
@@ -107,7 +113,7 @@ test('publierCommentaire refuse AVANT tout appel de creation de commentaire si l
   }
 });
 
-test('publierCommentaire appelle bien la creation du commentaire quand la connexion correspond', async () => {
+test('publierCommentaire (julien-agency, MCP) appelle bien la creation du commentaire quand la connexion correspond', async () => {
   const fetchOriginal = global.fetch;
   const appelsCreationCommentaire = [];
   global.fetch = creerFetchMock('aFqu-W7ClW', { appelsCreationCommentaire });
@@ -120,6 +126,42 @@ test('publierCommentaire appelle bien la creation du commentaire quand la connex
     });
     assert.equal(appelsCreationCommentaire.length, 1);
     assert.equal(appelsCreationCommentaire[0].actor, 'urn:li:person:aFqu-W7ClW');
+  } finally {
+    global.fetch = fetchOriginal;
+  }
+});
+
+/**
+ * Ajoute le 17/09/2026 -- publierCommentaire(julien-partners) doit passer
+ * par le canal REST (backend.composio.dev), jamais par le mock MCP, et
+ * transmettre connected_account_id.
+ */
+test('publierCommentaire (julien-partners, REST) appelle LINKEDIN_CREATE_COMMENT_ON_POST via backend.composio.dev avec connected_account_id', async () => {
+  const fetchOriginal = global.fetch;
+  const urlsAppelees = [];
+  const corpsCreation = [];
+  global.fetch = async (url, opts) => {
+    urlsAppelees.push(String(url));
+    const corps = JSON.parse(opts.body);
+    if (String(url).includes('LINKEDIN_GET_MY_INFO')) {
+      return { ok: true, status: 200, text: async () => JSON.stringify({ successful: true, data: { id: 'ZvLHybJZhj' } }) };
+    }
+    if (String(url).includes('LINKEDIN_CREATE_COMMENT_ON_POST')) {
+      corpsCreation.push(corps);
+      return { ok: true, status: 200, text: async () => JSON.stringify({ successful: true, data: { id: 'comment-rest-test' } }) };
+    }
+    throw new Error(`Mock fetch : requete inattendue -- ${url}`);
+  };
+  try {
+    const resultat = await publierCommentaire({
+      actorUrn: 'urn:li:person:ZvLHybJZhj',
+      targetUrn: 'urn:li:share:456',
+      message: 'texte de test',
+      apiKey: 'ak_test',
+    });
+    assert.equal(resultat.data.id, 'comment-rest-test');
+    assert.ok(urlsAppelees.every((u) => u.startsWith('https://backend.composio.dev/')), 'julien-partners ne doit jamais appeler le canal MCP');
+    assert.equal(corpsCreation[0].connected_account_id, 'ca_vn1-dhh8VcYf');
   } finally {
     global.fetch = fetchOriginal;
   }
