@@ -40,6 +40,58 @@ const ROUTAGE_COMPTES = Object.freeze({
   }),
 });
 
+/**
+ * Masque toute sous-chaine ressemblant a une cle Composio ("ak_..."/"ck_...")
+ * avant journalisation -- defense en profondeur : les messages d'erreur
+ * Composio/LinkedIn ne contiennent normalement pas de cle, mais on ne
+ * journalise jamais un message brut sans ce filtre.
+ */
+function nettoyerMessage(message, max = 300) {
+  const texte = String(message == null ? '' : message).replace(/\b(ak|ck)_[A-Za-z0-9_-]+/g, '$1_***');
+  return texte.length > max ? `${texte.slice(0, max)}...` : texte;
+}
+
+/**
+ * Journalise un echec Composio/LinkedIn -- ajoute le 17/09/2026 (suite) pour
+ * combler le manque signale par le rapport sur le quota du 16/09 (aucune
+ * trace des tentatives echouees, seuls les succes etaient enregistres).
+ *
+ * Best-effort strict : ne leve JAMAIS -- un probleme d'ecriture du registre
+ * ne doit jamais masquer ni remplacer l'erreur d'origine que l'appelant est
+ * en train de propager. Ne recoit et n'ecrit que des metadonnees (compte,
+ * canal, slug, code HTTP, message tronque) -- jamais de cle API ni de
+ * donnee personnelle.
+ */
+function journaliserEchec(cheminFichier, { compte, canal, action, httpStatus, source, message }) {
+  if (!cheminFichier) return;
+  try {
+    const fs = require('fs');
+    const path = require('path');
+    let entrees = [];
+    try {
+      const brut = fs.readFileSync(cheminFichier, 'utf8');
+      const parse = JSON.parse(brut);
+      if (Array.isArray(parse)) entrees = parse;
+    } catch {
+      entrees = [];
+    }
+    entrees.push({
+      horodatage: new Date().toISOString(),
+      compte: compte || null,
+      canal: canal || null,
+      action: action || null,
+      httpStatus: httpStatus == null ? null : httpStatus,
+      source: source || null,
+      message: nettoyerMessage(message),
+    });
+    fs.mkdirSync(path.dirname(cheminFichier), { recursive: true });
+    fs.writeFileSync(cheminFichier, `${JSON.stringify(entrees, null, 2)}\n`);
+  } catch {
+    // Best-effort : un echec d'ecriture du registre ne doit jamais empecher
+    // la propagation de l'erreur d'origine vers l'appelant.
+  }
+}
+
 function resoudreRoutage(compte) {
   const routage = ROUTAGE_COMPTES[compte];
   if (!routage) {
@@ -74,7 +126,7 @@ function resoudreCompteParUrn(urn) {
  * linkedin-carrousel/lib/composio.js pour etre partage avec
  * linkedin-commentaires (compte julien-partners) -- comportement inchange.
  */
-async function executerActionRest(slug, { arguments: args = {}, userId, apiKey, connectedAccountId } = {}) {
+async function executerActionRest(slug, { arguments: args = {}, userId, apiKey, connectedAccountId, compte, cheminRegistreEchecs } = {}) {
   const cle = apiKey || process.env.COMPOSIO_API_KEY;
   if (!cle) {
     throw new Error('COMPOSIO_API_KEY manquant (variable d\'environnement ou parametre apiKey).');
@@ -108,12 +160,22 @@ async function executerActionRest(slug, { arguments: args = {}, userId, apiKey, 
       `(${erreur.message}). Debut du corps recu : "${texteBrut.slice(0, 200)}".`
     );
     err.httpStatus = reponse.status;
+    journaliserEchec(cheminRegistreEchecs, {
+      compte, canal: 'rest', action: slug, httpStatus: reponse.status, source: 'composio', message: err.message,
+    });
     throw err;
   }
   if (!reponse.ok || json.successful === false) {
     const err = new Error(`Composio ${slug} a echoue (HTTP ${reponse.status}) : ${JSON.stringify(json)}`);
     err.httpStatus = reponse.status;
     err.reponse = json;
+    // !reponse.ok : rejet avant relais reel (auth, format de cle, etc.) -- source Composio.
+    // reponse.ok mais successful:false : la relance a fonctionne, l'action elle-meme a echoue
+    // cote LinkedIn -- source linkedin. Distinction reprise du rapport du 17/09 (quota 16/09).
+    journaliserEchec(cheminRegistreEchecs, {
+      compte, canal: 'rest', action: slug, httpStatus: reponse.status,
+      source: reponse.ok ? 'linkedin' : 'composio', message: err.message,
+    });
     throw err;
   }
   return json;
@@ -133,7 +195,7 @@ async function executerActionRest(slug, { arguments: args = {}, userId, apiKey, 
  * "doit etre un FileUploadable"). Cette fonction-ci passe par le bon
  * endpoint -- celui que le SDK Python officiel de Composio utilise.
  */
-async function televerserFichierComposio({ cheminFichier, mimetype, toolSlug, toolkitSlug, apiKey }) {
+async function televerserFichierComposio({ cheminFichier, mimetype, toolSlug, toolkitSlug, apiKey, compte, cheminRegistreEchecs }) {
   const cle = apiKey || process.env.COMPOSIO_API_KEY;
   if (!cle) {
     throw new Error('COMPOSIO_API_KEY manquant pour televerserFichierComposio (variable d\'environnement ou parametre apiKey).');
@@ -154,7 +216,12 @@ async function televerserFichierComposio({ cheminFichier, mimetype, toolSlug, to
   });
   if (!reponseRequest.ok) {
     const texte = await reponseRequest.text();
-    throw new Error(`Composio files/upload/request a echoue (HTTP ${reponseRequest.status}) : ${texte.slice(0, 300)}`);
+    const err = new Error(`Composio files/upload/request a echoue (HTTP ${reponseRequest.status}) : ${texte.slice(0, 300)}`);
+    journaliserEchec(cheminRegistreEchecs, {
+      compte, canal: 'rest', action: 'files/upload/request', httpStatus: reponseRequest.status,
+      source: 'composio', message: err.message,
+    });
+    throw err;
   }
   const donneesRequest = await reponseRequest.json();
   const cleS3 = donneesRequest.key;
@@ -169,7 +236,12 @@ async function televerserFichierComposio({ cheminFichier, mimetype, toolSlug, to
     body: octets,
   });
   if (!reponsePut.ok) {
-    throw new Error(`PUT de ${cheminFichier} vers l'URL S3 presignee a echoue (HTTP ${reponsePut.status}).`);
+    const err = new Error(`PUT de ${cheminFichier} vers l'URL S3 presignee a echoue (HTTP ${reponsePut.status}).`);
+    journaliserEchec(cheminRegistreEchecs, {
+      compte, canal: 'rest', action: 'files/upload/put', httpStatus: reponsePut.status,
+      source: 'composio', message: err.message,
+    });
+    throw err;
   }
 
   return { name: filename, mimetype, s3key: cleS3 };
@@ -181,4 +253,5 @@ module.exports = {
   resoudreCompteParUrn,
   executerActionRest,
   televerserFichierComposio,
+  journaliserEchec,
 };

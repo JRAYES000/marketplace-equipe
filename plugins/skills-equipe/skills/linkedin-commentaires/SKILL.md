@@ -124,6 +124,26 @@ recente correcte mais precedee d'un trou de plusieurs mois) -- a reevaluer a par
   l'historique de cette confusion (12/09 et 16/09/2026), et le detail du routage par compte
   tranche le 17/09/2026.
 
+## Registre des echecs Composio/LinkedIn (`data/registre-echecs.json`)
+
+Ajoute le 17/09/2026 (suite) -- comble un manque signale par un rapport d'investigation sur le
+quota Composio du 16/09/2026 : `data/registre-commentaires.json` n'enregistrait que les succes,
+aucune trace des tentatives echouees (mauvais canal, shareUrn invalide, etc.) n'existait.
+
+Desormais, tout echec reel de `lib/composio.js` (canal MCP ou REST, quel que soit le compte) est
+journalise automatiquement, AVANT que l'erreur ne remonte a l'appelant -- le comportement en cas
+d'echec ne change pas, seule une trace est gardee en plus. Chaque entree : horodatage, compte
+vise, canal (`mcp` ou `rest`), action Composio appelee, code HTTP si disponible, `source`
+(`composio` si le rejet vient d'avant tout relais reel -- cle invalide, session MCP non etablie,
+format de requete refuse ; `linkedin` si Composio a bien relaye mais que l'action elle-meme a
+echoue cote LinkedIn), et un message d'erreur tronque. **Jamais de cle API ni de donnee
+personnelle dans ce fichier.**
+
+Fichier local, jamais commite (voir `.gitignore` racine, meme regle que
+`data/registre-commentaires.json`) -- a consulter en cas d'investigation future sur un incident
+de publication ou de quota, en complement du registre de succes. Implementation partagee avec
+`linkedin-carrousel` : `plugins/skills-equipe/lib/composio-canal.js`, fonction `journaliserEchec`.
+
 ## Garde-fous automatiques (refus explicite, jamais un avertissement)
 
 ### Structure et frequence -- `lib/planifier-commentaires.js`

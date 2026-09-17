@@ -14,7 +14,27 @@
 
 const test = require('node:test');
 const assert = require('node:assert/strict');
+const fs = require('fs');
+const os = require('os');
+const path = require('path');
 const { validerCle, executerActionComposio } = require('../lib/composio');
+
+/**
+ * Chemin de registre d'echecs jetable, un par test -- evite d'ecrire dans le
+ * vrai data/registre-echecs.json du paquet pendant les tests (voir
+ * lib/composio-canal.js, journaliserEchec, ajoute le 17/09/2026 suite).
+ */
+function cheminRegistreJetable() {
+  return path.join(os.tmpdir(), `registre-echecs-test-${Date.now()}-${Math.random().toString(36).slice(2)}.json`);
+}
+
+function lireRegistre(chemin) {
+  try {
+    return JSON.parse(fs.readFileSync(chemin, 'utf8'));
+  } catch {
+    return [];
+  }
+}
 
 test('validerCle refuse une cle absente, message explicite vers COMPOSIO_CONSUMER_API_KEY', () => {
   assert.throws(() => validerCle(undefined), /COMPOSIO_CONSUMER_API_KEY manquant/);
@@ -35,14 +55,16 @@ test('executerActionComposio refuse une cle ak_ avant tout appel reseau (aucun f
     fetchAppele = true;
     throw new Error('fetch n\'aurait jamais du etre appele');
   };
+  const cheminRegistreEchecs = cheminRegistreJetable();
   try {
     await assert.rejects(
-      () => executerActionComposio('LINKEDIN_CREATE_COMMENT_ON_POST', { arguments: {}, apiKey: 'ak_wrong-format' }),
+      () => executerActionComposio('LINKEDIN_CREATE_COMMENT_ON_POST', { arguments: {}, apiKey: 'ak_wrong-format', cheminRegistreEchecs }),
       /format "ak_\.\.\." \(couche PLATFORM\)/
     );
     assert.equal(fetchAppele, false, 'validerCle doit refuser AVANT le premier appel reseau');
   } finally {
     global.fetch = fetchOriginal;
+    fs.rmSync(cheminRegistreEchecs, { force: true });
   }
 });
 
@@ -58,9 +80,10 @@ test('executerActionComposio appelle le canal MCP (connect.composio.dev/mcp), pa
       text: async () => JSON.stringify({ error: 'unauthorized' }),
     };
   };
+  const cheminRegistreEchecs = cheminRegistreJetable();
   try {
     await assert.rejects(() =>
-      executerActionComposio('LINKEDIN_GET_MY_INFO', { arguments: {}, apiKey: 'ck_test' })
+      executerActionComposio('LINKEDIN_GET_MY_INFO', { arguments: {}, apiKey: 'ck_test', cheminRegistreEchecs })
     );
     assert.ok(urlsAppelees.length > 0, 'au moins un appel reseau attendu');
     for (const url of urlsAppelees) {
@@ -68,6 +91,7 @@ test('executerActionComposio appelle le canal MCP (connect.composio.dev/mcp), pa
     }
   } finally {
     global.fetch = fetchOriginal;
+    fs.rmSync(cheminRegistreEchecs, { force: true });
   }
 });
 
@@ -84,13 +108,15 @@ test('executerActionComposio(compte: "julien-agency") reste sur le canal MCP', a
     urlsAppelees.push(String(url));
     return { ok: false, status: 401, headers: { get: () => null }, text: async () => JSON.stringify({ error: 'unauthorized' }) };
   };
+  const cheminRegistreEchecs = cheminRegistreJetable();
   try {
     await assert.rejects(() =>
-      executerActionComposio('LINKEDIN_GET_MY_INFO', { compte: 'julien-agency', arguments: {}, apiKey: 'ck_test' })
+      executerActionComposio('LINKEDIN_GET_MY_INFO', { compte: 'julien-agency', arguments: {}, apiKey: 'ck_test', cheminRegistreEchecs })
     );
     assert.ok(urlsAppelees.every((u) => u === 'https://connect.composio.dev/mcp'), 'julien-agency ne doit jamais appeler le REST direct');
   } finally {
     global.fetch = fetchOriginal;
+    fs.rmSync(cheminRegistreEchecs, { force: true });
   }
 });
 
@@ -123,4 +149,95 @@ test('executerActionComposio(compte: "julien-partners") passe par le REST direct
 test('resoudreRoutage refuse un compte inconnu', () => {
   const { resoudreRoutage } = require('../../../lib/composio-canal');
   assert.throws(() => resoudreRoutage('compte-inexistant'), /Compte Composio inconnu/);
+});
+
+/**
+ * Ajoute le 17/09/2026 (suite) -- comble le manque signale par le rapport du
+ * 16/09 : jusque-la, seuls les succes etaient journalises
+ * (data/registre-commentaires.json), aucune trace des echecs.
+ */
+test('un echec MCP (401) cree une entree dans le registre d\'echecs, sans changer l\'erreur propagee', async () => {
+  const fetchOriginal = global.fetch;
+  global.fetch = async () => ({
+    ok: false,
+    status: 401,
+    headers: { get: () => null },
+    text: async () => 'Invalid API key',
+  });
+  const cheminRegistreEchecs = cheminRegistreJetable();
+  try {
+    await assert.rejects(
+      () => executerActionComposio('LINKEDIN_CREATE_COMMENT_ON_POST', {
+        compte: 'julien-agency', arguments: {}, apiKey: 'ck_test', cheminRegistreEchecs,
+      }),
+      /Composio MCP \(initialize\) a repondu 401/
+    );
+    const entrees = lireRegistre(cheminRegistreEchecs);
+    assert.equal(entrees.length, 1);
+    assert.equal(entrees[0].compte, 'julien-agency');
+    assert.equal(entrees[0].canal, 'mcp');
+    assert.equal(entrees[0].action, 'LINKEDIN_CREATE_COMMENT_ON_POST');
+    assert.equal(entrees[0].httpStatus, 401);
+    assert.equal(entrees[0].source, 'composio');
+    assert.match(entrees[0].message, /Invalid API key/);
+    assert.ok(entrees[0].horodatage, 'un horodatage doit etre present');
+  } finally {
+    global.fetch = fetchOriginal;
+    fs.rmSync(cheminRegistreEchecs, { force: true });
+  }
+});
+
+test('un rejet cote LinkedIn (successful:false, HTTP 200) est journalise avec source "linkedin", pas "composio"', async () => {
+  const fetchOriginal = global.fetch;
+  let appel = 0;
+  global.fetch = async (url, opts) => {
+    appel += 1;
+    const corps = JSON.parse(opts.body);
+    if (corps.method === 'initialize') {
+      return { ok: true, status: 200, headers: { get: (h) => (h.toLowerCase() === 'mcp-session-id' ? 's-test' : null) }, text: async () => JSON.stringify({ jsonrpc: '2.0', id: 1, result: {} }) };
+    }
+    if (corps.method === 'notifications/initialized') {
+      return { ok: true, status: 200, headers: { get: () => null }, text: async () => '' };
+    }
+    const enveloppe = { successful: true, data: { results: [{ response: { successful: false, error: 'shareUrn invalide' } }] } };
+    return { ok: true, status: 200, headers: { get: () => null }, text: async () => JSON.stringify({ jsonrpc: '2.0', id: 2, result: { content: [{ type: 'text', text: JSON.stringify(enveloppe) }] } }) };
+  };
+  const cheminRegistreEchecs = cheminRegistreJetable();
+  try {
+    await assert.rejects(() =>
+      executerActionComposio('LINKEDIN_CREATE_COMMENT_ON_POST', { compte: 'julien-agency', arguments: {}, apiKey: 'ck_test', cheminRegistreEchecs })
+    );
+    const entrees = lireRegistre(cheminRegistreEchecs);
+    assert.equal(entrees.length, 1);
+    assert.equal(entrees[0].source, 'linkedin');
+    assert.equal(entrees[0].httpStatus, null, 'HTTP 200 cote transport : pas de code HTTP d\'echec a rapporter');
+    assert.ok(appel >= 3);
+  } finally {
+    global.fetch = fetchOriginal;
+    fs.rmSync(cheminRegistreEchecs, { force: true });
+  }
+});
+
+test('un succes ne cree AUCUNE entree dans le registre d\'echecs (pas de faux positif)', async () => {
+  const fetchOriginal = global.fetch;
+  global.fetch = async (url, opts) => {
+    const corps = JSON.parse(opts.body);
+    if (corps.method === 'initialize') {
+      return { ok: true, status: 200, headers: { get: (h) => (h.toLowerCase() === 'mcp-session-id' ? 's-test' : null) }, text: async () => JSON.stringify({ jsonrpc: '2.0', id: 1, result: {} }) };
+    }
+    if (corps.method === 'notifications/initialized') {
+      return { ok: true, status: 200, headers: { get: () => null }, text: async () => '' };
+    }
+    const enveloppe = { successful: true, data: { results: [{ response: { successful: true, data: { id: 'aFqu-W7ClW' } } }] } };
+    return { ok: true, status: 200, headers: { get: () => null }, text: async () => JSON.stringify({ jsonrpc: '2.0', id: 2, result: { content: [{ type: 'text', text: JSON.stringify(enveloppe) }] } }) };
+  };
+  const cheminRegistreEchecs = cheminRegistreJetable();
+  try {
+    const resultat = await executerActionComposio('LINKEDIN_GET_MY_INFO', { compte: 'julien-agency', arguments: {}, apiKey: 'ck_test', cheminRegistreEchecs });
+    assert.equal(resultat.data.id, 'aFqu-W7ClW');
+    assert.equal(fs.existsSync(cheminRegistreEchecs), false, 'aucun fichier ne doit meme etre cree en l\'absence d\'echec');
+  } finally {
+    global.fetch = fetchOriginal;
+    fs.rmSync(cheminRegistreEchecs, { force: true });
+  }
 });

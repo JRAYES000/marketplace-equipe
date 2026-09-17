@@ -139,8 +139,15 @@ test('executerActionComposio refuse proprement sur une reponse 429 non-JSON, pas
   });
   delete require.cache[require.resolve('../lib/composio.js')];
   const { executerActionComposio } = require('../lib/composio.js');
-  await assert.rejects(
-    () => executerActionComposio('LINKEDIN_CREATE_COMMENT_ON_POST', { arguments: {}, apiKey: 'x' }),
-    /corps qui n'est pas du JSON exploitable/
-  );
+  // Chemin jetable : depuis le 17/09/2026 (suite), un echec est journalise dans
+  // data/registre-echecs.json (lib/composio-canal.js) -- ne pas ecrire dans le vrai fichier ici.
+  const cheminRegistreEchecs = path.join(os.tmpdir(), `registre-echecs-adversarial-${Date.now()}.json`);
+  try {
+    await assert.rejects(
+      () => executerActionComposio('LINKEDIN_CREATE_COMMENT_ON_POST', { arguments: {}, apiKey: 'x', cheminRegistreEchecs }),
+      /corps qui n'est pas du JSON exploitable/
+    );
+  } finally {
+    fs.rmSync(cheminRegistreEchecs, { force: true });
+  }
 });

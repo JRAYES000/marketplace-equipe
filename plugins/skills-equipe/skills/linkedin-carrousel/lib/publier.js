@@ -1,6 +1,6 @@
 'use strict';
 
-const { executerActionComposio } = require('./composio');
+const { executerActionComposio, CHEMIN_REGISTRE_ECHECS } = require('./composio');
 const { resoudreRoutage, televerserFichierComposio } = require('../../../lib/composio-canal');
 const reglagesComptes = require('../reglages-comptes.json');
 
@@ -27,7 +27,7 @@ const reglagesComptes = require('../reglages-comptes.json');
  * pour les commentaires), donc il refuse explicitement plutot que de
  * pretendre que ca marche.
  */
-async function publierCarrousel({ compte, modeRepli, cheminsImages, commentary, userId, apiKey }) {
+async function publierCarrousel({ compte, modeRepli, cheminsImages, commentary, userId, apiKey, cheminRegistreEchecs }) {
   if (!compte) throw new Error('compte requis ("julien-agency" ou "julien-partners").');
 
   const reglages = reglagesComptes[compte];
@@ -52,6 +52,7 @@ async function publierCarrousel({ compte, modeRepli, cheminsImages, commentary, 
   }
 
   return publierCarrouselViaImage({
+    compte,
     authorUrn: routage.authorUrn,
     connectedAccountId: routage.connectedAccountId,
     modeRepli,
@@ -59,6 +60,7 @@ async function publierCarrousel({ compte, modeRepli, cheminsImages, commentary, 
     commentary,
     userId: userId || routage.userId,
     apiKey,
+    cheminRegistreEchecs,
   });
 }
 
@@ -70,13 +72,15 @@ async function publierCarrousel({ compte, modeRepli, cheminsImages, commentary, 
  * /api/v3/files/upload/request, confirme fonctionnel le 17/09/2026 avec une
  * cle de projet ak_ reelle).
  */
-async function televerserImageComposio({ cheminImage, apiKey }) {
+async function televerserImageComposio({ cheminImage, apiKey, compte, cheminRegistreEchecs }) {
   return televerserFichierComposio({
     cheminFichier: cheminImage,
     mimetype: 'image/png',
     toolSlug: 'LINKEDIN_CREATE_LINKED_IN_POST',
     toolkitSlug: 'linkedin',
     apiKey,
+    compte,
+    cheminRegistreEchecs: cheminRegistreEchecs || CHEMIN_REGISTRE_ECHECS,
   });
 }
 
@@ -85,7 +89,7 @@ async function televerserImageComposio({ cheminImage, apiKey }) {
  * generer-images.js : un seul chemin pour `modeRepli: 'couverture'`,
  * plusieurs pour `modeRepli: 'par-diapo'`.
  */
-async function publierCarrouselViaImage({ authorUrn, connectedAccountId, modeRepli, cheminsImages, commentary, userId, apiKey }) {
+async function publierCarrouselViaImage({ compte, authorUrn, connectedAccountId, modeRepli, cheminsImages, commentary, userId, apiKey, cheminRegistreEchecs }) {
   if (!authorUrn) throw new Error('authorUrn requis (urn:li:person:... ou urn:li:organization:...).');
   if (modeRepli !== 'par-diapo' && modeRepli !== 'couverture') {
     throw new Error('modeRepli requis : "par-diapo" ou "couverture".');
@@ -100,7 +104,7 @@ async function publierCarrouselViaImage({ authorUrn, connectedAccountId, modeRep
 
   const fichiers = [];
   for (const cheminImage of cheminsImages) {
-    fichiers.push(await televerserImageComposio({ cheminImage, apiKey }));
+    fichiers.push(await televerserImageComposio({ cheminImage, apiKey, compte, cheminRegistreEchecs }));
   }
 
   return executerActionComposio('LINKEDIN_CREATE_LINKED_IN_POST', {
@@ -108,6 +112,8 @@ async function publierCarrouselViaImage({ authorUrn, connectedAccountId, modeRep
     userId,
     apiKey,
     connectedAccountId,
+    compte,
+    cheminRegistreEchecs,
   });
 }
 

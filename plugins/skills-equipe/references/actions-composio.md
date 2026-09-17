@@ -685,3 +685,36 @@ d'image (seulement pour des commentaires texte).
 **Limite assumee** : `linkedin-carrousel` ne publie toujours pas le PDF multi-pages lui-meme
 (aucune action Composio ne le permet, constat du 11/09/2026 inchange) -- seulement une image
 (couverture ou par-diapo) pour le compte julien-partners.
+
+### 17/09/2026 (suite) -- registre des echecs Composio/LinkedIn, comble le manque du rapport sur le quota du 16/09
+
+Un rapport d'investigation sur la composition reelle des commentaires publies le 16/09/2026 (voir
+historique de session) a conclu, entre autres, que **le total exact de requetes ayant consomme le
+quota Composio ce jour-la etait irreconstituable** : seuls les succes etaient journalises
+(`linkedin-commentaires/data/registre-commentaires.json`), et aucune trace des tentatives
+echouees (mauvais canal REST/`ak_`, `shareUrn` invalide, etc.) n'existait nulle part. Le rapport
+recommandait explicitement de combler ce manque.
+
+**Corrige** : `plugins/skills-equipe/lib/composio-canal.js` expose desormais `journaliserEchec`,
+appelee par `executerActionRest` (les deux skills) et `executerActionMcp`
+(`linkedin-commentaires`) juste avant chaque `throw` existant -- le comportement d'erreur pour
+l'appelant est strictement inchange, seule une trace est ajoutee en plus. Chaque skill ecrit dans
+son propre `data/registre-echecs.json` (meme convention `.gitignore` que les registres de succes
+existants). Champs enregistres : horodatage, compte, canal (`rest`/`mcp`), action (slug), code
+HTTP si disponible, `source` (`composio` = rejet avant tout relais reel ; `linkedin` = Composio a
+relaye mais l'action a echoue cote LinkedIn -- distinction reprise directement des categories
+identifiees dans le rapport du 16/09), et un message d'erreur tronque (300 caracteres, toute
+sous-chaine ressemblant a une cle `ak_`/`ck_` masquee par defense en profondeur). Aucune cle API
+ni donnee personnelle n'est journalisee.
+
+`linkedin-carrousel` n'avait jusque-la aucun registre du tout (ni succes, ni echec) -- ce chantier
+lui ajoute au passage un premier registre structure, meme s'il ne couvre pour l'instant que les
+echecs (aucun registre de succes equivalent a celui de `linkedin-commentaires` n'existe encore
+cote carrousel).
+
+**Non resolu par ce chantier** (hors perimetre, signale dans le rapport du 16/09 comme point de
+vigilance restant) : la question d'un quota LinkedIn de plateforme partage entre les deux comptes
+malgre la separation de canal (REST/`ak_` vs MCP/`ck_`) -- notamment si `aFqu-W7ClW` et
+`ZvLHybJZhj` correspondent ou non au meme membre LinkedIn physique. Le registre d'echecs donne
+desormais la matiere pour instruire cette question a l'avenir (frequence et nature reelles des
+echecs par compte), mais ne la tranche pas lui-meme.
