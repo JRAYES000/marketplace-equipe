@@ -12,6 +12,7 @@
 
 const fs = require('fs');
 const path = require('path');
+const { resoudreCompteParUrn } = require('../../../lib/composio-canal');
 
 const CHEMIN_PAR_DEFAUT = path.join(__dirname, '..', 'data', 'registre-commentaires.json');
 
@@ -98,10 +99,42 @@ function entreesDuJour(registre, compte, jourISO) {
  * Ajoute une entree au registre et le persiste. A appeler seulement APRES
  * une publication reelle confirmee (pas au moment de la redaction) -- sinon
  * un brouillon jamais publie compterait a tort dans le quota du jour.
+ *
+ * FAILLE REELLE trouvee le 17/09/2026 (suite), a partir d'une question posee
+ * sur l'ecart entre le nombre de commentaires "10" mentionne dans le suivi
+ * de mission et les 5 entrees reellement presentes ici pour le 16/09/2026 :
+ * `compte` etait jusqu'ici un texte libre, jamais confronte a l'identite
+ * LinkedIn REELLEMENT utilisee pour publier. Avant le 17/09/2026 (avant
+ * `verifierConnexionAvantPublication`), le canal MCP resolvait tout appel
+ * vers la connexion "preferee" (julien-agency/aFqu-W7ClW) quel que soit le
+ * compte vise -- un commentaire redige et compte comme "julien-partners"
+ * pouvait donc reellement atterrir sur le profil julien-agency SANS que la
+ * quota d'agency n'en tienne jamais compte, puisque l'entree etait
+ * enregistree sous la cle "julien-partners". La redirection devenait ainsi
+ * un moyen silencieux de depasser le quota reel d'un compte.
+ *
+ * Corrige : si `actorUrn` est fourni, il doit correspondre au `compte`
+ * declare (via `resoudreCompteParUrn`, lib/composio-canal.js) -- refuse
+ * explicitement sinon, plutot que d'enregistrer une entree sous un compte
+ * qui ne correspond pas a l'identite reellement utilisee. `actorUrn` reste
+ * optionnel (retro-compatible avec les appels existants qui ne le
+ * fournissent pas encore) mais DEVRAIT toujours etre passe desormais --
+ * c'est l'URN reellement confirme par `verifierConnexionAvantPublication`
+ * juste avant l'appel qui a produit la publication, jamais suppose.
  */
-function enregistrerCommentairePublie(compte, { date, auteurCible, postId }, chemin = CHEMIN_PAR_DEFAUT) {
+function enregistrerCommentairePublie(compte, { date, auteurCible, postId, actorUrn }, chemin = CHEMIN_PAR_DEFAUT) {
   const compteNormalise = normaliserCompte(compte);
   validerJourISO(date, 'enregistrerCommentairePublie');
+  if (actorUrn) {
+    const compteReel = resoudreCompteParUrn(actorUrn);
+    if (compteReel !== compteNormalise) {
+      throw new Error(
+        `Registre refuse : le compte declare "${compte}" ne correspond pas au compte reel "${compteReel}" ` +
+        `de l'URN "${actorUrn}" -- un commentaire publie sous une identite doit compter dans SON quota, ` +
+        'jamais dans celui d\'un autre compte, meme si c\'etait le compte initialement vise.'
+      );
+    }
+  }
   const registre = chargerRegistre(chemin);
   registre[compteNormalise] = registre[compteNormalise] || [];
   registre[compteNormalise].push({ date, auteurCible, postId });
