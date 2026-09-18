@@ -1211,4 +1211,29 @@ le nom de l'auteur sur la page LinkedIn elle-meme).
 seul ni le style de contenu seul ne suffisent a identifier un canal avec
 certitude -- le premier s'est revele juste, mais seulement verifie a posteriori.
 Toujours confirmer par l'en-tete reel du profil LinkedIn (via "Go to post") avant
-toute publication ou tout brouillon cible sur un compte precis.
+toute publication ou tout brouillon cible sur un compte precis. Confirmation
+supplementaire trouvee le meme jour : les "Views" natives de Buffer (menu lateral
+gauche) labellisent deja les deux canaux "CLAUDE AGENCY" (-> c6b) et
+"CLAUDE PARTNERS" (-> e7f), coherent avec la verification LinkedIn -- ce
+libelle natif aurait suffi seul, pas besoin de passer par "Go to post" la
+prochaine fois.
+
+## Post #1 de veille (Bernard Marr) -- publie le 18/09/2026
+
+**Statut final : PUBLIE** (pas programme) -- via "Publish Now" depuis le
+brouillon, sur decision explicite de Nomena (aucun horaire editorial dedie
+trouve sur ce canal : les creneaux de la Posting Schedule sont les creneaux
+auto-generes par defaut de Buffer, pas un planning choisi par Julien -- juge
+non pertinent pour un post de veille reactif).
+
+- **Canal confirme** : Claude Agency (`6aa87a19ea19ca0bde439c6b`), reconfirme
+  a la publication par l'en-tete reel du post LinkedIn lui-meme ("Julien Rayes
+  ... | Claude Agency").
+- **Date et heure** : 18/09/2026, 20h59 heure de Paris.
+- **Lien direct** : https://www.linkedin.com/feed/update/urn:li:share:7506789066315649024/
+- **Contenu** : texte integral de 1470 caracteres (accroche "Vos equipes
+  foncent sur l'IA agentique...") + image `iteration-4.png` (accent couleur sur
+  "0,05%", logo Claude Agency visible) -- verifie mot pour mot identique entre
+  le brouillon et le rendu LinkedIn reel apres publication.
+- Reste a faire : posts #2 (Allie K. Miller, piste deja identifiee) et #3 de la
+  meme commande de veille.
