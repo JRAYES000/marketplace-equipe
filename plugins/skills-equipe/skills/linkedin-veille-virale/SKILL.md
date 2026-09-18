@@ -11,6 +11,24 @@ demande explicite.
 **Phrase de lancement** : « fais la veille du jour », « cherche un post a recycler pour
 julien-agency ».
 
+## Regles d'ecriture -- retour de Julien, 18/09/2026 (editorial, pas encore code)
+
+Meme retour que sur `linkedin-carrousel` (posts juges "de l'AI slop"), applicable ici aussi
+puisque cette skill redige des posts LinkedIn a publier (pas des commentaires) :
+
+- **Un hook irresistible en ouverture** -- la premiere ligne doit creer un manque ou une tension,
+  jamais une simple annonce de sujet.
+- **Du gras sur les mots/phrases qui portent** (LinkedIn accepte le gras Unicode dans un post,
+  comme pour le carrousel -- voir `linkedin-carrousel/lib/valider-post.js` pour la conversion).
+- **Entre 3 et 6 emojis**, jamais deux a la suite, jamais au milieu d'une phrase.
+
+**Pas encore de garde-fou automatique pour ces trois regles ici**, contrairement au carrousel
+(`lib/valider-post.js`) : cette skill n'a jamais reutilise ce validateur, le texte du post reste
+redige librement par la session Claude (voir "Ce que fait la skill" ci-dessous) et seul
+`lib/valider-orthographe.js` (accents) s'applique reellement en code. A appliquer par jugement
+editorial pour l'instant -- ajouter un vrai controle code resterait a faire si des ecarts reels se
+reproduisent.
+
 ## Ce que fait la skill
 
 1. `lib/veille.js` (`recupererPosts`) interroge l'acteur Apify

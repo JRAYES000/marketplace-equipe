@@ -23,7 +23,7 @@ const LONGUEUR_MIN = 1300;
 const LONGUEUR_MAX = 1900;
 const FENETRE_ACCROCHE = 140;
 const EMOJIS_MIN = 3;
-const EMOJIS_MAX = 5;
+const EMOJIS_MAX = 6;
 const HASHTAGS_MAX = 2;
 
 // Mathematical Bold (U+1D400 serie) -- pas d'equivalent accentue dans ce bloc

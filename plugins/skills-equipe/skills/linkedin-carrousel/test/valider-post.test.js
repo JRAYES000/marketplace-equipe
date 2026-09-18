@@ -64,7 +64,7 @@ test('refuse un emoji au milieu d\'une phrase', () => {
   assert.throws(() => validerEtConvertirPost(brouillon), /au milieu d'une phrase/);
 });
 
-test('refuse hors de la fourchette 3-5 emojis (0 emoji)', () => {
+test('refuse hors de la fourchette 3-6 emojis (0 emoji)', () => {
   const brouillon = BROUILLON_CONFORME
     .replace('🧭 ', '').replace('📅 ', '').replace('🔁 ', '').replace('🤐 ', '');
   assert.throws(() => validerEtConvertirPost(brouillon), /0 emoji\(s\) trouve\(s\)/);

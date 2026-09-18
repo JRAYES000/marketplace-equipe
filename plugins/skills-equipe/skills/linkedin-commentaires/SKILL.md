@@ -206,6 +206,13 @@ de publication ou de quota, en complement du registre de succes. Implementation 
 
 ### Contenu du commentaire -- `lib/valider-commentaire.js`
 
+**Le retour de Julien du 18/09/2026 sur les posts (hook irresistible, gras sur ce qui porte, 3-6
+emojis -- voir `linkedin-carrousel/SKILL.md` et `linkedin-veille-virale/SKILL.md`) ne s'applique
+PAS ici, volontairement.** Un commentaire n'est pas un post : pas de mise en forme (LinkedIn
+n'affiche ni gras ni structure dans un commentaire), et l'interdiction totale d'emoji ci-dessous
+reste en vigueur, inchangee. Note explicite pour ne pas confondre les deux la prochaine fois que
+ce retour sera relu.
+
 - **2 a 4 phrases**, aucune puce/liste numerotee, aucun emoji, aucun lien.
 - **Formulations creuses refusees** ("super post", "tellement vrai", "top", "merci du partage").
 - **Genre coherent avec le contenu** : `information_chiffree` exige un chiffre dans le texte,
