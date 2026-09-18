@@ -1061,3 +1061,109 @@ resultat different sans nouvelle
 information ou un acces different -- pour le televersement de fichiers vers
 Composio, utiliser desormais la methode du point n°3 (bac a sable MCP), pas
 l'endpoint direct.
+
+## Point n°21 -- Veille Buffer : 20 comptes valides, integration Claude connectee, flux LinkedIn plafonnes par le quota gratuit rss.app (18/09/2026)
+
+Nouvelle demande de Julien (mail direct, priorite du mois) : connecter Buffer
+(integration Claude), suivre 20 comptes IA reconnus (10 FR + 10 US, verifies un
+par un -- follower count et activite reelle constates, pas de compte mort ni
+choisi au hasard), publier 3 posts recycles avec les regles du jour (hook, gras,
+3-6 emojis, carrousel avec logo, 5 iterations).
+
+**Etape 1 -- Buffer** : mot de passe de Julien fourni en clair dans le mail --
+jamais saisi par moi ni ecrit nulle part dans ce depot (regle stricte, sans
+exception, meme avec accord explicite). Nomena s'est connectee elle-meme.
+Verifie une fois connecte : integration Claude deja "Connected", bon compte
+(`contact@claudeagency.fr`, Julien Rayes).
+
+**Etape 2 -- liste des 20** : recherche reelle (WebSearch + verification directe
+sur LinkedIn pour la majorite), remplacement de 4 noms initialement lus sur des
+listicles mais dont le contenu reel s'est revele hors-sujet une fois le profil
+rouvert (pivot IA -> humanitaire, IA -> quantique, aucun signal d'audience,
+contenu generaliste). Liste finale validee par Julien :
+- **FR (10)** : Morgan Bancel, Pierrick Chevallier, Yassine Sdiri, Ludo Salenne,
+  Benoit Raphael, Cyril de Sousa Cardoso, Natacha Njongwa Yepnga, Julien
+  Chaumond, Paul Vengeons, Luc Julia.
+- **US (10)** : Ethan Mollick, Allie K. Miller, Steve Nouri, Zain Kahn, Rowan
+  Cheung, Ruben Hassid, Pascal Bornet, Bernard Marr, Cassie Kozyrkov, Andrew Ng.
+
+**Etape 3 -- flux Buffer, plafond de 10 par collection** : Buffer (plan
+Essentials) refuse plus de 10 flux par collection -- la collection YOUTUBE
+existante (10/10, comptes hors liste des 20) et LINKEDIN (3/10 : `andrewyng`,
+`alliekmiller`, `yann-lecun`, deja presents avant ce chantier) n'ont pas ete
+touchees. Deux nouvelles collections creees : **IA-FR** et **IA-US**.
+
+**Deja couverts, sans passer par rss.app** :
+- 3 comptes FR via flux YouTube officiel (`youtube.com/feeds/videos.xml?channel_id=...`,
+  channel ID recupere via le HTML de la chaine) : Pierrick Chevallier, Yassine
+  Sdiri, Ludo Salenne -> **IA-FR 3/10**.
+- Andrew Ng et Allie K. Miller (US) deja dans la collection LINKEDIN d'origine,
+  via un pont maison `https://claudeagency.fr/api/li/<slug>` (decouvert en
+  interceptant l'appel GraphQL `GetFeedDetails` que la page Buffer fait
+  elle-meme -- **pas un service tiers**, un outil construit par Julien sur son
+  propre domaine). **Liste blanche codee en dur cote serveur, testee** : un
+  slug hors liste (`emollick`) renvoie 404 avec le message exact "Profil non
+  autorise. Les profils suivis sont : andrewyng, alliekmiller, yann-lecun." Les
+  14 slugs restants (nom, slug LinkedIn, pays -- tous verifies directement sur
+  LinkedIn, avec correction de 2 slugs canoniques trouves en cours de route :
+  `zainkahn` et non `zain-kahn-93850375`) ont ete transmis a Julien pour ajout
+  manuel a cette liste blanche -- **je n'ai pas et ne peux pas modifier ce
+  backend moi-meme**. Reponse de Julien : il ne gere pas ce backend.
+
+**Etape 4 -- rss.app, alternative testee (Julien ne gere pas claudeagency.fr)** :
+compte gratuit cree par Nomena elle-meme (email+mot de passe, jamais saisis par
+moi). 5 profils testes avant connexion (feeds crees anonymement, verrouilles
+derriere "Sign Up") puis apres connexion confirmee (avatar/nom de compte visible,
+plus de "Sign In/Sign Up") : **5/5 reussite technique reelle** (Ethan Mollick,
+Julien Chaumond, Cassie Kozyrkov, Cyril de Sousa Cardoso, Bernard Marr) --
+contenu LinkedIn reel recupere a chaque fois, malgre le texte marketing du site
+qui ne mentionne que les "Company Pages".
+
+**Quota reel decouvert, plus severe que le tableau de bord affiche** : le
+tableau de bord indique "Feeds 1/10" (essai, 6 jours restants), mais generer un
+**2e** flux LinkedIn (Morgan Bancel, apres connexion) a immediatement renvoye
+"You have reached your plan limit. Please upgrade to a higher tier to generate
+more feeds." -- alors que le compteur affiche n'avait pas bouge. Confirme sur
+la page Plans : le Plan Free permanent exclut "Social media feeds" (Instagram,
+Facebook, X/Twitter nommes explicitement, LinkedIn absent de la liste mais
+traite pareil en pratique) -- le compteur "10" ne couvre que les flux RSS
+generiques (sites/blogs), **pas les flux sociaux, plafonnes bien plus bas** (1
+seul constate). Le 5/5 de reussite technique tenait tant que le compte n'etait
+pas encore connecte (feeds anonymes, sans quota applique) -- une fois connecte,
+un seul flux LinkedIn est reellement utilisable.
+
+**Decision de Julien (pas de budget pour un abonnement rss.app)** : rester sur
+le plan gratuit, prioriser 10 profils sur les 14 restants (impossible en
+pratique -- seul 1 est passe), 4 ecartes explicitement (Luc Julia -- aucun
+signal d'activite recente confirme, contrairement aux 4 autres FR retenus ;
+Zain Kahn, Rowan Cheung, Ruben Hassid -- profils newsletter/media IA plutot que
+conseil direct, face a Pascal Bornet et Steve Nouri).
+
+**Resultat reel** : 1 seul flux LinkedIn ajoutable via rss.app (Bernard Marr --
+`https://rss.app/feeds/0OtYpAVTrw3xvzog.xml`), verifie dans Buffer avec du
+contenu reel recent (6h, 11h, 2j) -> **IA-US 1/10**.
+
+**A SURVEILLER -- expiration reelle de l'essai rss.app : ~24/09/2026** (6 jours
+a partir du 18/09/2026, constate sur la page Plans : "Your plan has 6 days
+left. Choose a plan before your feeds expire."). Passe ce delai, le flux
+Bernard Marr expirera si aucun abonnement n'est active. **Solution temporaire,
+pas perenne** -- a regenerer ou remplacer avant cette date si la situation
+budgetaire ne change pas.
+
+**Etat final des collections Buffer, au 18/09/2026 soir** :
+- IA-FR : 3/10 (Pierrick Chevallier, Yassine Sdiri, Ludo Salenne -- tous YouTube).
+- IA-US : 1/10 (Bernard Marr -- rss.app).
+- LINKEDIN (pre-existante, non touchee) : 3/10 (Andrew Ng, Allie K. Miller,
+  Yann LeCun -- pont `claudeagency.fr/api/li/`).
+
+**En attente, non couverts faute de quota gratuit -- toujours dans la liste
+validee a 20, a ajouter plus tard si la situation change** : Morgan Bancel,
+Benoit Raphael, Natacha Njongwa Yepnga, Julien Chaumond, Cyril de Sousa
+Cardoso, Ethan Mollick, Cassie Kozyrkov, Pascal Bornet, Steve Nouri (9 profils
+-- testes fonctionnels sur rss.app mais bloques par le quota social une fois le
+compte connecte), plus Luc Julia, Zain Kahn, Rowan Cheung, Ruben Hassid (4
+profils ecartes par priorisation, jamais testes). Deux voies possibles pour
+combler ce reliquat : Julien ajoute les 14 slugs transmis a la liste blanche de
+`claudeagency.fr/api/li/` (gratuit, deja fonctionnel, aucune limite constatee
+sur ce canal precis), ou un abonnement rss.app (Basic, 8,32 $/mois facture
+annuellement, 15 flux -- couvrirait les 14).
