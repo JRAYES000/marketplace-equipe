@@ -1167,3 +1167,16 @@ combler ce reliquat : Julien ajoute les 14 slugs transmis a la liste blanche de
 `claudeagency.fr/api/li/` (gratuit, deja fonctionnel, aucune limite constatee
 sur ce canal precis), ou un abonnement rss.app (Basic, 8,32 $/mois facture
 annuellement, 15 flux -- couvrirait les 14).
+
+**Correction/precision (18/09/2026, soir)** : **Paul Vengeons** (FR, l'un des 20
+valides) etait en realite deja actif depuis le debut de ce chantier, present
+dans la collection YOUTUBE preexistante (hors IA-FR, jamais deplace) --
+omis par erreur du recapitulatif ci-dessus au premier passage. **Couverture
+reelle des 20 : 7 comptes actifs**, pas 4 : Andrew Ng, Allie K. Miller (US,
+whitelist claudeagency.fr), Bernard Marr (US, rss.app), Pierrick Chevallier,
+Yassine Sdiri, Ludo Salenne, Paul Vengeons (FR, YouTube). Les 13 autres restent
+en attente de l'arbitrage de Julien sur l'extension de la liste blanche
+`claudeagency.fr/api/li/` (ne pas relancer rss.app ni tester un autre service
+payant en attendant sa reponse, decision explicite de Nomena du 18/09/2026).
+**Cette couverture partielle ne bloque pas la production des 3 posts de veille
+demandes par Julien** -- ils sont rediges a partir des 7 comptes deja actifs.
