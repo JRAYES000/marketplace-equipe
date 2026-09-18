@@ -1,6 +1,11 @@
 'use strict';
 
 const { executerActionComposio } = require('./composio');
+const {
+  convertirGras,
+  validerAccroche,
+  validerEmojis,
+} = require('../../linkedin-carrousel/lib/valider-post');
 
 /**
  * SEUL point d'appel qui publie reellement sur LinkedIn pour cette skill.
@@ -16,13 +21,26 @@ const { executerActionComposio } = require('./composio');
  * doit le fournir explicitement (URN deja verifies par Julien pour
  * julien-partners/julien-agency). Fallback documente si besoin :
  * `resoudreAuteurParDefaut()` plus bas, non appele automatiquement.
+ *
+ * Regles hook/gras/emoji de linkedin-carrousel (retour de Julien, 18/09/2026)
+ * reutilisees ici, avant ce seul point d'appel reseau -- incident reel du
+ * meme jour : ce module ne validait rien du tout avant publication, et
+ * dry-run.js (qui simule le pipeline sans jamais l'importer) ne verifiait que
+ * les accents. Les posts deja publies (Codie Sanchez, Jason Feifer, Justin
+ * Welsh) n'ont donc jamais pu passer par un hook/gras/emoji verifie. Refus
+ * explicite desormais (throw), pas un avertissement -- coherent avec le
+ * reste du depot.
  */
 async function publierPost({ authorUrn, commentary, userId, apiKey }) {
   if (!authorUrn) throw new Error('authorUrn requis (urn:li:person:... ou urn:li:organization:...).');
   if (!commentary) throw new Error('commentary requis (texte du post).');
 
+  const texteGras = convertirGras(commentary);
+  validerAccroche(texteGras);
+  validerEmojis(texteGras);
+
   return executerActionComposio('LINKEDIN_CREATE_LINKED_IN_POST', {
-    arguments: { author: authorUrn, commentary },
+    arguments: { author: authorUrn, commentary: texteGras },
     userId,
     apiKey,
   });

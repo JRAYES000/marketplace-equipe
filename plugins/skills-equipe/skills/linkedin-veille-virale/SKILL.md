@@ -11,7 +11,7 @@ demande explicite.
 **Phrase de lancement** : « fais la veille du jour », « cherche un post a recycler pour
 julien-agency ».
 
-## Regles d'ecriture -- retour de Julien, 18/09/2026 (editorial, pas encore code)
+## Regles d'ecriture -- retour de Julien, 18/09/2026 (codees depuis le 18/09/2026)
 
 Meme retour que sur `linkedin-carrousel` (posts juges "de l'AI slop"), applicable ici aussi
 puisque cette skill redige des posts LinkedIn a publier (pas des commentaires) :
@@ -22,12 +22,20 @@ puisque cette skill redige des posts LinkedIn a publier (pas des commentaires) :
   comme pour le carrousel -- voir `linkedin-carrousel/lib/valider-post.js` pour la conversion).
 - **Entre 3 et 6 emojis**, jamais deux a la suite, jamais au milieu d'une phrase.
 
-**Pas encore de garde-fou automatique pour ces trois regles ici**, contrairement au carrousel
-(`lib/valider-post.js`) : cette skill n'a jamais reutilise ce validateur, le texte du post reste
-redige librement par la session Claude (voir "Ce que fait la skill" ci-dessous) et seul
-`lib/valider-orthographe.js` (accents) s'applique reellement en code. A appliquer par jugement
-editorial pour l'instant -- ajouter un vrai controle code resterait a faire si des ecarts reels se
-reproduisent.
+**Garde-fou automatique en place depuis le 18/09/2026**, meme validateur que le carrousel,
+jamais duplique : `lib/publier.js` (`publierPost`) et `dry-run.js` (`executerPourCompte`)
+importent tous les deux `convertirGras`/`validerAccroche`/`validerEmojis` depuis
+`linkedin-carrousel/lib/valider-post.js` -- refus explicite (throw), avant tout appel reseau cote
+`publierPost`, jamais un simple avertissement. Volontairement limite a ces trois fonctions : pas
+`validerLongueur`/`validerHashtags`/`validerChiffreSource`, propres au format carrousel et jamais
+demandes pour la veille. `lib/valider-orthographe.js` (accents) reste applique en plus, comme
+avant. **Incident qui a motive ce fix** : avant le 18/09/2026, `lib/publier.js` ne validait rien
+du tout avant de publier, et `dry-run.js` ne verifiait que les accents -- les trois posts deja
+publies (Codie Sanchez, Jason Feifer, Justin Welsh) n'avaient donc jamais pu passer par un
+hook/gras/emoji verifie. Voir `test/publier.test.js` (refus avant tout appel reseau) et
+`test/dry-run.test.js`/`test/valider-orthographe.test.js` (ordre des controles : accents d'abord,
+puis hook/gras/emoji -- pour qu'un texte deja ecarte pour accents ne change pas de raison
+affichee).
 
 ## Ce que fait la skill
 
@@ -162,6 +170,17 @@ appelle explicitement `enregistrerPostPublie` juste apres, ce garde-fou ne prote
 lancements ulterieurs de cette skill, pas Buffer directement). Une fois un post reellement en
 ligne (a confirmer explicitement, jamais suppose), mettre a jour son entree Notion (`Etat`:
 "Publie", lien reel).
+
+**Limite assumee du garde-fou hook/gras/emoji ajoute le 18/09/2026** (voir "Regles d'ecriture"
+plus haut) : `convertirGras`/`validerAccroche`/`validerEmojis` protegent `publierPost` (voie
+directe, ci-dessous) et `dry-run.js`, mais **pas la voie Buffer** -- coller un texte dans
+l'interface Buffer est un geste manuel hors de tout code, aucun hook ne peut s'y accrocher. Les
+trois posts deja publies (Codie Sanchez, Jason Feifer, Justin Welsh) sont passes par Buffer, donc
+par aucun garde-fou de contenu. **A faire avant toute programmation Buffer** : passer le texte
+redige par la session Claude dans `validerEtConvertirPost` (ou au minimum
+`convertirGras`/`validerAccroche`/`validerEmojis`) depuis une invocation manuelle avant de le
+coller dans Buffer -- aucune automatisation ne remplace cette etape tant que Buffer reste le
+canal reel.
 
 **Voie directe** (`publierPost`, via Composio/MCP) : `authorUrn` confirme pour julien-agency
 (`urn:li:person:aFqu-W7ClW`) ; julien-partners non confirme cote Composio -- voir
