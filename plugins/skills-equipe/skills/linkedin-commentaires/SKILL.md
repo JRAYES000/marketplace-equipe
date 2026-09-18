@@ -215,6 +215,21 @@ de publication ou de quota, en complement du registre de succes. Implementation 
   incident reel le 16/09/2026 (deux commentaires recyclaient le chiffre du post source), corrige
   a la relecture humaine, aucun garde-fou automatique ne peut le detecter (il faudrait comparer
   au texte du post cible, hors de portee de `validerCommentaire` qui ne voit que le commentaire).
+  **`information_chiffree` est le genre le plus risque des quatre -- consigne de redaction,
+  pas de garde-fou possible (ajoute le 18/09/2026, troisieme incident du meme type)** : deux
+  fois sur trois, le chiffre propose venait deja du post cible (16/09/2026, deux commentaires ;
+  18/09/2026, un brouillon pour Theophile Burnet recyclait le "129 EUR/mois" du post lui-meme,
+  intercepte avant publication et le commentaire rebascule sur `desaccord_argumente`) ; la
+  troisieme fois, le chiffre etait externe mais deformait sa source (14/09/2026, "84% des
+  developpeurs utilisent deja l'IA au quotidien" attribue a tort a Stack Overflow, qui mesure en
+  realite "using or planning to use" -- corrige en "51% ... use AI tools daily", la bonne mesure).
+  Aucun garde-fou mecanique n'est possible dans les deux cas (verifier "externe au post" exige de
+  comparer au texte cible, hors de portee de `validerCommentaire` ; verifier "dit exactement ce
+  que la source mesure" exige de comprendre le sens de la source, pas seulement sa presence) --
+  la verification reste humaine, au moment de la redaction, jamais a posteriori. **Avant de
+  retenir ce genre : verifier que le chiffre est externe au post ET que sa formulation dit
+  exactement ce que la source mesure. En cas de doute sur l'un des deux, choisir un autre genre
+  plutot que forcer celui-ci.**
 - **Aucune experience personnelle non sourcee** : un commentaire qui affirme a la premiere
   personne ("on"/"nous"/"j'ai") avoir vecu une experience professionnelle concrete (client,
   mission, resultat) est **refuse**, sauf si `anecdoteSourcee: true` est passe explicitement --
