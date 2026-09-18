@@ -941,6 +941,31 @@ pretes et inchangees dans `sortants/julien-partners/galerie-0918/` pour une repr
 dans une session neuve, si quelqu'un veut retenter -- detail complet dans
 `linkedin-carrousel/SKILL.md`.
 
+### Incident du 18/09/2026 -- mail envoye reellement via l'outil hostinger-mail-claudeagency, nouvelle regle de canal
+
+Le mail de bilan (contenu ci-dessus, section Commentaires/Carrousel du jour) a ete **envoye pour
+de vrai** via l'outil `hostinger-mail-claudeagency` (`POST /api/v1/mailboxes/.../send`), depuis
+`contact@claudeagency.fr` vers `jrayes000@gmail.com` (adresse personnelle de Julien, retrouvee
+dans l'historique reel des echanges -- voir `INBOX`/`INBOX.Sent` du meme mailbox, uid 1271 et
+283), avec GO explicite de Nomena avant l'envoi. **Ce n'est pas un envoi sans accord** -- le
+brouillon a ete montre integralement avant, confirmation demandee et obtenue -- **mais le canal
+utilise (outil d'envoi direct par API) n'est plus autorise pour la suite**, decision de Nomena
+le jour meme, une fois l'envoi deja parti (irreversible, un envoi ne se retire pas).
+
+**Nouvelle regle, a partir du 18/09/2026, pour toute session future sur ce depot** :
+1. **Plus aucun envoi reel d'email par un outil/CLI** (`hostinger-mail-claudeagency` ou tout
+   autre canal equivalent), pour aucun mail futur -- **meme principe que pour LinkedIn** :
+   preparer, jamais publier/envoyer soi-meme sans repasser par un accord explicite au cas par
+   cas.
+2. **Un mail a preparer se fait desormais en brouillon Gmail**, compte `nomenaf.pro@gmail.com`,
+   via Claude in Chrome -- jamais via `hostinger-mail-claudeagency`. Nomena l'envoie elle-meme
+   depuis l'interface Gmail une fois relu.
+
+**A ne pas reproduire** : ce depot est celui de Nomena (voir l'historique des echanges Gmail
+avec Julien, tous entre `contact@claudeagency.fr` et `nomenaf.pro@gmail.com`) -- l'outil
+`hostinger-mail-claudeagency` reste disponible pour LIRE (retrouver une adresse, verifier
+l'historique) mais plus pour ENVOYER.
+
 ## Recapitulatif
 
 Au 12/09/2026, aucun point bloquant "technique" majeur ne reste ouvert :
