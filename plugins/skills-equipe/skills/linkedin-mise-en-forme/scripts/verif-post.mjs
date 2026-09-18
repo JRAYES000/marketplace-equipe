@@ -1,15 +1,16 @@
 // Controle de forme d'un post LinkedIn de Julien, deux comptes confondus.
-// Reecrit le 2026-09-18 : la version precedente vivait dans ~/.claude/skills/ et a
-// disparu du disque en cours de session. Elle portait deux criteres devenus faux —
-// une fourchette de 900-1300 caracteres abandonnee le 09/09 au profit de 1300-1900,
-// et un refus du lien dans le corps que la consigne de Julien du 03/09 impose au
-// contraire. Les deux sont corriges ici.
+// Reecrit le 2026-09-18 : la version precedente a quitte ~/.claude/skills/ en cours de
+// session, et il n'en subsistait qu'une copie dans un dossier de transit que le prochain
+// nettoyage effacera (AppData/Local/Temp/skill-stage/). Relue depuis, elle portait deux
+// criteres devenus faux — une fourchette de 900-1300 caracteres abandonnee le 09/09 au
+// profit de 1300-1900, et un refus du lien dans le corps que la consigne de Julien du
+// 03/09 impose au contraire. Les deux sont corriges ici.
 //
 //   node verif-post.mjs gras "Trois mois pour rien"     -> le segment en gras Unicode
-//   node verif-post.mjs verif "C:/chemin/brouillon.txt" -> les huit criteres, code 1 si un echoue
+//   node verif-post.mjs verif "C:/chemin/brouillon.txt" -> les neuf criteres, code 1 si un echoue
 //
-// Le brouillon se donne en markdown : le gras s'y ecrit **comme ceci** et c'est l'envoi
-// qui le convertit. Ce script mesure le markdown, il ne le convertit pas.
+// Le brouillon se donne en markdown (**ainsi**) ou deja converti en gras Unicode : les
+// deux formes comptent. Chemins en C:/... — node ne resout pas la forme /c/Users/...
 import { readFileSync } from "node:fs";
 
 // Mathematical Sans-Serif Bold. Aucune lettre accentuee n'existe dans ce bloc : c'est
@@ -30,6 +31,8 @@ const enGras = (s) => [...s].map((c) => {
 const ACCENTUE = /[^\x00-\x7F«»…’—\s]/u;
 const EMOJI = /[\u{1F300}-\u{1FAFF}\u2600-\u27BF\u2B00-\u2BFF\uFE0F]/u;
 const EMOJI_G = new RegExp(EMOJI.source, "gu");
+// Un passage deja converti : une suite de lettres ou chiffres du bloc gras.
+const UNICODE_GRAS = /[\u{1D5D4}-\u{1D607}\u{1D7EC}-\u{1D7F5}\u0020]+/gu;
 
 const [, , action, arg] = process.argv;
 
@@ -58,19 +61,30 @@ const lignes = corps.split("\n");
 const resultats = [];
 const dire = (bon, nom, detail) => resultats.push({ bon, nom, detail });
 
-const accroche = lignes[0];
-dire(accroche.length <= 140, "accroche <= 140 caracteres", `${accroche.length} caracteres`);
-dire(/\?\s*(\*\*)?\s*$/.test(accroche), "accroche formulee en question", accroche.trim().replace(/\*\*/g, "").slice(-1) === "?" ? "finit par ?" : "pas de point d'interrogation");
+// En points de code, et sans les astérisques du markdown : une lettre en gras Unicode
+// occupe deux unites UTF-16, donc `.length` comptait une accroche de 110 signes pour 193
+// et la refusait a tort des qu'on relisait le texte converti (mesure du 18/09). Meme
+// piege que la longueur du corps, note dans LECONS.md le 09/09.
+const accroche = lignes[0].replace(/\*\*/g, "");
+const tailleAccroche = [...accroche].length;
+dire(tailleAccroche <= 140, "accroche <= 140 caracteres", `${tailleAccroche} caracteres`);
+const finAccroche = accroche.trim().replace(/\*\*/g, "").slice(-1);
+dire(finAccroche === "?", "accroche formulee en question", finAccroche === "?" ? "finit par ?" : "pas de point d'interrogation");
 
 const nu = [...corps.replace(/\*\*/g, "")].length;
 dire(nu >= 1300 && nu <= 1900, "longueur 1300-1900", `${nu} caracteres`);
 
-const gras = [...corps.matchAll(/\*\*(.+?)\*\*/g)].map((m) => m[1]);
+// Deux formes acceptees : le markdown, qui est ce qu'on ecrit dans un brouillon de
+// sortants/, et le gras Unicode deja converti, qu'on relit quand le texte revient de
+// LinkedIn. Ne compter que la seconde rendait « 0 gras » sur tout brouillon du depot.
+const gras = [...corps.matchAll(/\*\*(.+?)\*\*/g)].map((m) => m[1])
+  .concat((corps.match(UNICODE_GRAS) || []).map((s) => s.trim()).filter(Boolean));
 dire(gras.length >= 8, "au moins 8 passages en gras", `${gras.length} trouve(s)`);
-const fautifs = gras.filter((g) => ACCENTUE.test(g.replace(EMOJI_G, "")));
+const fautifs = gras.filter((g) => ACCENTUE.test(g.replace(EMOJI_G, "").replace(UNICODE_GRAS, "")));
 dire(fautifs.length === 0, "aucun gras accentue", fautifs.length ? fautifs.join(" | ") : "tous sans accent");
 
-const titres = lignes.filter((l) => new RegExp(`^${EMOJI.source}\\s+\\*\\*[^*]+\\*\\*\\s*$`, "u").test(l));
+const titre = new RegExp(`^${EMOJI.source}\\s+(\\*\\*[^*]+\\*\\*|[\\u{1D5D4}-\\u{1D607}\\u{1D7EC}-\\u{1D7F5}\\u0020]+)\\s*$`, "u");
+const titres = lignes.filter((l) => titre.test(l));
 dire(titres.length === 3, "trois titres de section en gras", titres.length ? titres.join(" / ") : "aucun");
 
 const emojis = corps.match(EMOJI_G) || [];
