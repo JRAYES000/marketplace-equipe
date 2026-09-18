@@ -146,3 +146,36 @@ test('par-diapo et le PDF gardent le contexte "carrousel" par defaut (fleche + n
   assert.match(htmlParDiapo, /<div class="slide"[^>]*data-contexte="carrousel"/);
   assert.doesNotMatch(htmlParDiapo, /<div class="slide"[^>]*data-contexte="image-seule"/);
 });
+
+/**
+ * Second incident du 18/09/2026 : les trois gabarits masquent le logo Claude
+ * Agency sur `[data-role="hook"]` (correct pour un vrai carrousel, ou le
+ * logo apparait a partir de la page 2) -- mais `genererImageCouverture`
+ * rendait justement la diapo hook telle quelle, donc sans logo, alors
+ * qu'une couverture est une image UNIQUE (jamais de page 2 derriere).
+ * Fix : `rendreDiapoEnPng` clone la diapo avec `role: 'contenu'` avant
+ * rendu quand `forcerLogoVisible` est actif, uniquement pour le rendu --
+ * le fichier de diapos source garde `role: "hook"` intact (voir
+ * genererImageCouverture, qui utilise encore `d.role === 'hook'` pour
+ * choisir l'index). Ce test verifie le HTML reellement rendu, pas des
+ * pixels : `data-role` doit valoir "contenu" pour la couverture d'une
+ * diapo hook, alors que le rendu par-diapo (mode carrousel reel) doit
+ * garder "hook" intact sur cette meme diapo.
+ */
+test('la couverture force le logo visible (role "contenu" au rendu) meme sur une diapo hook', async () => {
+  const { chargerGabarit, injecterDiapo } = require('../generer-pdf');
+  const { entete, blocDiapo, pied } = chargerGabarit('julien-partners');
+
+  const diapoHook = diapos.find((d) => d.role === 'hook') || diapos[0];
+  assert.equal(diapoHook.role, 'hook', 'le fixture doit contenir une diapo hook pour que ce test soit probant');
+
+  const htmlCouverture = `${entete}${injecterDiapo(blocDiapo, { ...diapoHook, role: 'contenu' }, 0, { contexte: 'image-seule' })}${pied}`;
+  assert.match(htmlCouverture, /<div class="slide"[^>]*data-role="contenu"/);
+  assert.doesNotMatch(htmlCouverture, /<div class="slide"[^>]*data-role="hook"/);
+
+  // Le rendu par-diapo (vrai carrousel, plusieurs images) doit lui garder
+  // le role reel "hook" sur cette meme diapo -- logo absent, fleche visible,
+  // comportement inchange par ce fix.
+  const htmlParDiapo = `${entete}${injecterDiapo(blocDiapo, diapoHook, 0)}${pied}`;
+  assert.match(htmlParDiapo, /<div class="slide"[^>]*data-role="hook"/);
+});
