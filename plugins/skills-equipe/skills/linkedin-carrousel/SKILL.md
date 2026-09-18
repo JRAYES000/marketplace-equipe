@@ -12,6 +12,37 @@ demande explicite.
 Variantes probables : « genere le carrousel du jour », « carrousel LinkedIn sur <sujet> »,
 « carrousel pour julien-agency/julien-partners », « prepare le carrousel de la semaine ».
 
+## Regles de methode non negociables (retour de Julien, 18/09/2026)
+
+Julien a juge les deux carrousels publies avant cette date comme "de l'AI slop" -- brouillon,
+visiblement fait vite par une IA -- sur la forme, avant meme d'en lire le fond. Regles ajoutees en
+consequence, a appliquer sur **tout** futur carrousel, pas seulement les prochains :
+
+- **Un hook irresistible en ouverture.** Aucun carrousel publie jusqu'ici n'en avait un -- la
+  diapo 1 (role "hook") annoncait un sujet, elle n'accrochait pas. Un hook reussi cree un manque
+  ou une tension immediate (ex. une affirmation contre-intuitive, une consequence concrete et
+  proche, jamais une simple annonce de theme) -- a juger a l'oeil sur le rendu reel, aucun
+  garde-fou mecanique ne peut le verifier (deja documente comme limite assumee, voir plus bas).
+- **Du gras sur les mots/phrases qui portent**, pas seulement pour respecter le garde-fou
+  automatique (`lib/valider-post.js` exige au moins un passage en gras) -- le gras doit tomber sur
+  ce qu'un lecteur retiendrait en diagonale, pas sur un mot choisi au hasard pour passer le
+  controle.
+- **Entre 3 et 6 emojis par post** (elargi depuis 3-5 le 18/09/2026 -- voir
+  `lib/valider-post.js`, `EMOJIS_MAX`), memes regles de position inchangees (jamais deux a la
+  suite, jamais au milieu d'une phrase).
+- **Logo Claude Agency manquant sur les carrousels publies** -- signale par Julien, pas encore
+  corrige au 18/09/2026. Les templates (`templates/*.html`) n'affichent aujourd'hui qu'un nom de
+  marque textuel en pied de page (`.logo`, masque sur la diapo hook), jamais un vrai logo
+  graphique. Corriger exige un vrai fichier logo (SVG ou PNG) fourni par Julien -- rien a inventer
+  ici : ne jamais fabriquer un logo de substitution, meme provisoire, pour une marque reelle.
+- **Un carrousel = environ une heure de travail et au moins 5 iterations avant publication.**
+  Jamais publier une premiere version. Cette skill a jusqu'ici genere-et-publie en une passe --
+  c'est precisement ce qui a produit une qualite "brouillon". A partir du 18/09/2026 : composer un
+  brouillon, le rendre, l'inspecter visuellement page par page (deja fait techniquement via
+  `generer-images.js`), corriger, rerendre, et repeter reellement -- pas symboliquement -- au moins
+  5 fois avant de proposer une publication. Ne jamais presenter une diapo generee une seule fois
+  comme prete.
+
 ## Ce que fait la skill
 
 1. Compose un carrousel (8-12 diapos) sur un sujet donne, dans le ton du compte cible.
@@ -111,7 +142,8 @@ Brouillon redige avec le gras en `**etoiles**` ; `node generer-post.js <brouillo
 convertit et refuse (code de sortie 1) :
 - Gras accentue -> refus (aucune forme Unicode grasse accentuee n'existe).
 - Aucun gras du tout -> refus.
-- Emojis hors de [3, 5], au milieu d'une phrase, ou deux consecutifs -> refus.
+- Emojis hors de [3, 6] (elargi depuis [3, 5] le 18/09/2026, retour de Julien), au milieu d'une
+  phrase, ou deux consecutifs -> refus.
 - Hors de 1300-1900 caracteres -> refus.
 - Accroche sans "?" dans les 140 premiers caracteres -> refus.
 - Plus de 2 mots-dieses, ou places ailleurs qu'en toute fin -> refus.
