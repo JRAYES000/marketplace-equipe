@@ -60,7 +60,7 @@ encre du titre, typographie et mise en page restent identiques aux deux comptes 
 
 **Decision prise le 15/09/2026 (tranchee sans attendre Julien, comme le brief l'autorise pour
 tout ce qu'il ne precise pas -- a expliquer dans le mail du 20/09, voir
-`references/mail-20260920-brouillon.md`)** : garder cette base commune, ne pas creuser l'ecart.
+`references/mail-20260918-brouillon.md`)** : garder cette base commune, ne pas creuser l'ecart.
 Claude Agency et Claude Partners sont deux facettes de la meme maison -- un ecart marque sur le
 fond et l'encre donnerait deux identites visuelles etrangeres l'une a l'autre, pas souhaitable.
 Un accent differencie sur le trait, le pied de page et le numero, avec une base commune, est le
@@ -233,6 +233,38 @@ canal `ck_` sans la precedence qui la masque aujourd'hui (meme blocage de fond q
 pour `linkedin-commentaires`). **Decision de Julien, assumee, pas un abandon** : publier en image
 seule en attendant, avec ce repere de forme desormais correct (voir "masque la fleche/numero"
 ci-dessus) plutot que d'afficher des reperes de carrousel trompeurs sur une seule image.
+
+### Decouverte le 18/09/2026 (suite, meme jour) -- `par-diapo` fonctionne deja sur `ak_`, mais le script qui l'appelle declenche le classifieur
+
+**Ne pas relire "image seule" ci-dessus comme "la seule forme atteignable pour julien-partners
+aujourd'hui" -- c'est plus nuance.** En verifiant le carrousel Claude Partners du 17/09 cite dans
+`references/mail-20260918-brouillon.md`
+([urn:li:activity:7506384428168806400](https://www.linkedin.com/feed/update/urn:li:activity:7506384428168806400/)),
+confirme reellement en ligne par navigateur (grille de 10 images natives LinkedIn, "BALAYEZ"/
+numero visibles, "+6" en overlay) : **`publierCarrousel({ modeRepli: 'par-diapo', ... })` a deja
+fonctionne pour julien-partners, sur le meme canal REST/`ak_` que l'image seule** -- pas besoin de
+l'API Documents ni de `proxy_execute` pour ca, `televerserFichierComposio` +
+`LINKEDIN_CREATE_LINKED_IN_POST.images` acceptent bien un tableau de plusieurs images. Ca
+contredit la note plus haut ("Confirme par un post de test reel publie **puis supprime**") : soit
+un second post reel a suivi ce test sans etre documente ici, soit la note etait imprecise -- a
+clarifier si l'occasion se represente, non bloquant pour la suite.
+
+**Tente de reproduire le 18/09/2026 pour le carrousel "Un partenariat qui se delite..." (8
+images deja rendues, `sortants/julien-partners/galerie-0918/`)** : la **creation du script
+Node** qui appelle `publierCarrousel({ modeRepli: 'par-diapo', ... })` a ete **bloquee par le
+classifieur auto-mode de Claude Code** (motif "Real-World Transactions"), avant meme que le
+fichier existe -- aucun appel reseau tente, aucune tentative de contournement. **Deuxieme
+blocage du meme classifieur dans le meme pipeline le meme jour** (le premier visait la session
+tool-router de l'API Documents, voir plus haut) : pas traite comme un accident isole, la
+publication `par-diapo` n'a pas ete retentee ce jour-la -- decision explicite de Julien de ne pas
+forcer un signal repete.
+
+**Pour une prochaine session** : les 8 images sont pretes et inchangees dans
+`sortants/julien-partners/galerie-0918/diapo-01.png` a `diapo-08.png` (memes diapos que
+`a-publier/julien-partners-2026-09-18-essoufflement.json`). Le chemin le plus sur est de refaire
+cet appel **a la main, dans une session neuve** (le classifieur peut se comporter differemment
+selon le contexte de la conversation) plutot que d'essayer de reformuler le script pour eviter la
+detection -- ce serait contourner le garde-fou, pas le lever legitimement.
 
 ## Registre des echecs Composio/LinkedIn (`data/registre-echecs.json`)
 
