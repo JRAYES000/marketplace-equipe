@@ -961,10 +961,69 @@ le jour meme, une fois l'envoi deja parti (irreversible, un envoi ne se retire p
    via Claude in Chrome -- jamais via `hostinger-mail-claudeagency`. Nomena l'envoie elle-meme
    depuis l'interface Gmail une fois relu.
 
-**A ne pas reproduire** : ce depot est celui de Nomena (voir l'historique des echanges Gmail
-avec Julien, tous entre `contact@claudeagency.fr` et `nomenaf.pro@gmail.com`) -- l'outil
-`hostinger-mail-claudeagency` reste disponible pour LIRE (retrouver une adresse, verifier
-l'historique) mais plus pour ENVOYER.
+**A ne pas reproduire** : ce depot est celui de Nomena -- l'outil `hostinger-mail-claudeagency`
+reste disponible pour LIRE (retrouver une adresse, verifier l'historique) mais plus pour ENVOYER.
+
+**Correction du 18/09/2026 (suite), format d'adresse -- l'inference ci-dessus etait fausse** :
+le paragraphe precedent supposait, a partir du seul historique du dossier Sent de
+`contact@claudeagency.fr`, que Julien et Nomena echangeaient via cette adresse partagee. Faux,
+clarifie par Julien lui-meme en reponse au mail du jour : **Nomena ecrit a Julien depuis SA
+PROPRE adresse** (`nomenaf.pro@gmail.com`), jamais depuis `contact@claudeagency.fr` (reservee aux
+clients). Les mails a Julien vont vers une de SES adresses professionnelles
+(`contact@claudeagency.fr`, `contact@claudepartners.fr` ou `contact@ecole-naturo.fr` selon le
+sujet) -- **jamais vers `jrayes000@gmail.com`**, l'adresse personnelle deduite a tort le 18/09/2026
+matin d'un message isole dans la boite `contact@claudeagency.fr` (uid 1271) : ce n'etait pas la
+bonne piste, meme si l'adresse existe reellement. Regle desormais fixee, a ne plus re-deduire
+depuis l'historique d'une boite partagee.
+
+## Point n°20 -- Retour de Julien sur le mail du jour : forme refusee, trois regles pour les posts, carrousels juges "AI slop" (18/09/2026, apres-midi)
+
+**Le mail de bilan (Point n°19, envoye par erreur via l'outil -- voir plus haut) n'a pas ete lu
+sur le fond.** Julien l'a juge sur la forme avant meme d'ouvrir le contenu : "de l'AI slop". Retour
+texto, documente ici integralement pour ne pas le reduire a une paraphrase :
+
+**1. Format d'adresse** -- couvert et corrige dans la section precedente (expediteur
+`nomenaf.pro@gmail.com`, destinataire une adresse pro de Julien, jamais `jrayes000@gmail.com`).
+
+**2. Le brouillon de 31 824 caracteres est rejete, pas seulement son canal d'envoi.** Nouvelle
+regle stricte pour tout futur mail de bilan :
+- Maximum 50 lignes, lisible en 5 minutes montre en main.
+- Mise en forme reelle (HTML dans Gmail : titres, tailles distinctes, un peu de couleur, gras sur
+  ce qui compte) -- jamais du texte brut liste point par point.
+- Passer le texte par la skill Humanizer (`github.com/blader/humanizer`) avant envoi si possible ;
+  sinon reecrire dans un ton non-robotique, direct, sans lister mecaniquement chaque deviation en
+  detail. **Verifie le jour meme** : `humanizer` n'existe pas dans le marketplace `skills-equipe`
+  ni ailleurs dans les plugins installes sur cette machine -- meme constat deja fait le 15/09/2026
+  pour `contenu-instagram` (voir memoire `meridia-skills-plan-manquantes`). Installer un outil
+  externe non vetted depuis un depot GitHub tiers pour reecrire un mail n'a pas ete tente (execution
+  de code non audite, hors de portee raisonnable pour ce geste precis) -- la voie de repli demandee
+  explicitement par Julien lui-meme ("sinon, au minimum...") a ete appliquee a la place.
+
+**3. Trois regles dures pour tous les futurs posts LinkedIn** (pas seulement notees une fois) --
+detaillees et inscrites dans les skills concernees le jour meme (voir commits du 18/09/2026,
+`linkedin-carrousel/SKILL.md`, `linkedin-veille-virale/SKILL.md`, note explicite d'exclusion dans
+`linkedin-commentaires/SKILL.md`) :
+- Hook irresistible en ouverture -- aucun post actuel n'en a un.
+- Gras sur les mots/phrases qui portent.
+- Entre 3 et 6 emojis (etait 3-5) -- `linkedin-carrousel/lib/valider-post.js` corrige et teste
+  (85/85), pas d'equivalent code cote veille (regle editoriale documentee faute de validateur
+  existant), sans objet cote commentaires (emoji toujours interdit).
+
+**4. Sur les carrousels precisement** :
+- Logo Claude Agency manquant sur les carrousels publies -- documente dans
+  `linkedin-carrousel/SKILL.md` comme manque reel, **aucun logo invente** en remplacement (fichier
+  graphique reel a fournir par Julien avant de pouvoir corriger le template).
+- Qualite jugee insuffisante, "brouillon", visiblement fait vite par une IA.
+- Nouvelle regle de methode, inscrite dans `linkedin-carrousel/SKILL.md` : **un carrousel = environ
+  une heure de travail et au moins 5 iterations avant publication** -- jamais publier une premiere
+  version. Rompt avec la pratique jusqu'ici (composer-rendre-publier en une seule passe), a l'origine
+  directe du jugement "brouillon".
+
+**Consigne explicite de Julien pour la suite immediate** : ne rien republier ni modifier sur le
+contenu LinkedIn deja en ligne tant que ce point de forme/process n'est pas traite avec lui.
+**Prochaine etape** : nouveau brouillon de mail, <=50 lignes, HTML, prepare en brouillon Gmail
+(`nomenaf.pro@gmail.com`, destinataire `contact@claudeagency.fr`), jamais envoye automatiquement,
+montre a Nomena avant meme d'etre laisse en brouillon.
 
 ## Recapitulatif
 
