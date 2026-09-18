@@ -116,6 +116,13 @@ Elles vivent ici maintenant, une fois pour toutes, pour ne plus avoir à les ret
   envoyer un message ou un mail, modifier un réglage partagé : toujours attendre un accord
   explicite donné **dans la conversation en cours**, jamais déduit d'un accord donné une fois
   dans le passé pour un cas différent.
+- **Aucun envoi d'email par outil/CLI, jamais** (règle ajoutée le 18/09/2026, après un envoi réel
+  via `hostinger-mail-claudeagency` — accord explicite obtenu avant l'envoi, mais le canal
+  lui-même n'est plus autorisé, décision prise une fois l'envoi déjà parti et irréversible). Un
+  mail à préparer se fait en **brouillon Gmail, compte `nomenaf.pro@gmail.com`, via Claude in
+  Chrome** — jamais envoyé automatiquement. Nomena l'envoie elle-même depuis l'interface Gmail
+  une fois relu. Les outils mail (`hostinger-mail-claudeagency`/`-lossature`) restent utilisables
+  en lecture (retrouver une adresse, vérifier un historique), jamais pour envoyer.
 - **Ne jamais inventer.** Aucun chiffre sans source réellement ouverte et lue (pas un chiffre "de
   mémoire", pas une estimation présentée comme un fait) ; aucune expérience professionnelle
   attribuée à Julien qui n'a pas réellement eu lieu ; aucune URL non vérifiée. Voir l'incident du
