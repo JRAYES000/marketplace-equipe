@@ -192,6 +192,15 @@
   .slide[data-role="hook"] .swipe-hint { display: flex; }
   .slide[data-role="hook"] .title { font-size: 88px; line-height: 1.05; }
 
+  /* Retour de Julien du 18/09/2026 (3 carrousels de reference : Theophile
+     Burnet, Sebastien Grillot, Benoit Dubos) : les trois mettent UN SEUL
+     mot/chiffre du titre en couleur, jamais tout le titre dans la meme
+     teinte -- nos gabarits jusqu'ici restaient plats (--ink partout). Reutilise
+     --accent-text, deja propre a chaque marque : pas de nouvelle couleur
+     inventee, juste le contraste applique au bon endroit. Uniquement sur le
+     hook -- voir lib/valider-diapos.js (champ "accent" obligatoire sur le hook). */
+  .accent-mot { color: var(--accent-text); }
+
   /* Image seule (post a une seule image, pas de carrousel feuilletable) : masque
      les reperes qui n'ont de sens que dans un document multi-pages. Parametre
      explicite {{CONTEXTE}}, jamais devine depuis le nombre de diapos -- voir

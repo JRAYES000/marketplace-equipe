@@ -67,3 +67,23 @@ test('refuse si la diapo hook porte un texte de soutien', () => {
   const diapos = diapos10Conformes.map((d, i) => (i === 0 ? { ...d, texte: 'Ne devrait pas etre la.' } : d));
   assert.throws(() => validerDiapos(diapos), /accroche seule, sans texte de soutien/);
 });
+
+/**
+ * Retour de Julien du 18/09/2026 (3 carrousels de reference : Theophile
+ * Burnet, Sebastien Grillot, Benoit Dubos) : un seul mot/chiffre du titre en
+ * couleur sur le hook, jamais tout le titre dans la meme teinte. Champ
+ * "accent" obligatoire sur le hook -- voir lib/valider-diapos.js.
+ */
+test('refuse si la diapo hook n\'a pas de champ "accent"', () => {
+  const diapos = diapos10Conformes.map((d, i) => {
+    if (i !== 0) return d;
+    const { accent, ...sansAccent } = d;
+    return sansAccent;
+  });
+  assert.throws(() => validerDiapos(diapos), /champ "accent" non vide/);
+});
+
+test('refuse si le champ "accent" du hook n\'est pas une sous-chaine du titre', () => {
+  const diapos = diapos10Conformes.map((d, i) => (i === 0 ? { ...d, accent: 'mot invente absent du titre' } : d));
+  assert.throws(() => validerDiapos(diapos), /sous-chaine exacte de son "titre"/);
+});

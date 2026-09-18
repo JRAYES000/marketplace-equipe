@@ -9,9 +9,12 @@
  *   node generer-pdf.js <compte> <fichier-diapos.json> [sortie.pdf]
  *
  * <compte>            : page-claude | julien-agency | julien-partners
- * <fichier-diapos.json> : [{ "role": "hook"|"contenu", "titre": "...", "texte": "..." }, ...]
+ * <fichier-diapos.json> : [{ "role": "hook"|"contenu", "titre": "...", "texte": "...", "accent": "..." }, ...]
  *   - "role" absent ou different de "hook" => "contenu"
  *   - "texte" optionnel (la diapo hook n'en a generalement pas)
+ *   - "accent" obligatoire sur le hook (retour de Julien du 18/09/2026, voir
+ *     SKILL.md) : sous-chaine exacte du "titre" a mettre en couleur au rendu
+ *     (lib/valider-diapos.js le refuse sinon). Ignore sur les diapos "contenu".
  * [sortie.pdf]         : chemin de sortie explicite ; sinon nom genere automatiquement
  *                        (convention ci-dessous).
  *
@@ -71,6 +74,27 @@ function echapperHtml(texte) {
     .replaceAll('>', '&gt;');
 }
 
+/**
+ * Retour de Julien du 18/09/2026 (3 carrousels de reference) : un seul
+ * mot/chiffre du titre en couleur, jamais tout le titre dans la meme teinte.
+ * `accent` est verifie ailleurs (lib/valider-diapos.js) comme sous-chaine
+ * exacte du titre pour tout hook -- ici on se contente d'echouer proprement
+ * (repli sur le titre entier, sans span) si ce n'est pas le cas, plutot que
+ * de dupliquer ce controle : ce module ne fait que du rendu.
+ */
+function titreAvecAccent(titre, accent) {
+  const texte = String(titre || '');
+  const segment = String(accent || '');
+  const index = segment ? texte.indexOf(segment) : -1;
+  if (index === -1) {
+    return echapperHtml(texte);
+  }
+  const avant = texte.slice(0, index);
+  const milieu = texte.slice(index, index + segment.length);
+  const apres = texte.slice(index + segment.length);
+  return `${echapperHtml(avant)}<span class="accent-mot">${echapperHtml(milieu)}</span>${echapperHtml(apres)}`;
+}
+
 function chargerGabarit(compte) {
   const fichier = TEMPLATE_PAR_COMPTE[compte];
   if (!fichier) {
@@ -105,8 +129,11 @@ function chargerGabarit(compte) {
  */
 function injecterDiapo(blocDiapo, diapo, index, { contexte = 'carrousel' } = {}) {
   const numero = String(index + 1).padStart(2, '0');
+  const titreHtml = diapo.role === 'hook' && diapo.accent
+    ? titreAvecAccent(diapo.titre, diapo.accent)
+    : echapperHtml(diapo.titre || '');
   return blocDiapo
-    .replaceAll('{{TITRE}}', echapperHtml(diapo.titre || ''))
+    .replaceAll('{{TITRE}}', titreHtml)
     .replaceAll('{{TEXTE}}', echapperHtml(diapo.texte || ''))
     .replaceAll('{{NUMERO}}', numero)
     .replaceAll('{{ROLE}}', diapo.role === 'hook' ? 'hook' : 'contenu')
@@ -241,4 +268,5 @@ module.exports = {
   chargerGabarit,
   injecterDiapo,
   titreDepuisDiapos,
+  titreAvecAccent,
 };

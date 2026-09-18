@@ -106,6 +106,27 @@ function validerDiapos(diapos) {
   if (!String(hook.titre || '').trim()) {
     throw new Error('Carrousel refuse : la diapo 1 ("hook") doit avoir un titre non vide.');
   }
+  // Retour de Julien du 18/09/2026 sur 3 carrousels de reference (Theophile
+  // Burnet, Sebastien Grillot, Benoit Dubos) : les trois mettent un seul
+  // mot/chiffre du titre en couleur -- jamais tout le titre dans une seule
+  // teinte comme nos gabarits jusqu'ici. `accent` porte ce segment ; refuse
+  // s'il est absent (silencieusement plat, comme avant) ou s'il ne correspond
+  // a rien de reellement present dans le titre (accent invente, jamais
+  // affiche). Uniquement sur le hook -- les diapos "contenu" restent planes,
+  // comme chez les 3 references.
+  if (!String(hook.accent || '').trim()) {
+    throw new Error(
+      'Carrousel refuse : la diapo 1 ("hook") doit porter un champ "accent" non vide -- le ' +
+      'segment du titre a mettre en couleur (retour de Julien du 18/09/2026, voir SKILL.md).'
+    );
+  }
+  if (!String(hook.titre).includes(String(hook.accent))) {
+    throw new Error(
+      `Carrousel refuse : le champ "accent" ("${hook.accent}") de la diapo 1 doit etre une ` +
+      `sous-chaine exacte de son "titre" ("${hook.titre}") -- sinon rien de reel n'est mis en ` +
+      'couleur au rendu.'
+    );
+  }
 
   diapos.forEach((diapo, index) => {
     if (index > 0 && !String(diapo.titre || '').trim()) {
