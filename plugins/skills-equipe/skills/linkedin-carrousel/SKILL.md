@@ -21,8 +21,27 @@ consequence, a appliquer sur **tout** futur carrousel, pas seulement les prochai
 - **Un hook irresistible en ouverture.** Aucun carrousel publie jusqu'ici n'en avait un -- la
   diapo 1 (role "hook") annoncait un sujet, elle n'accrochait pas. Un hook reussi cree un manque
   ou une tension immediate (ex. une affirmation contre-intuitive, une consequence concrete et
-  proche, jamais une simple annonce de theme) -- a juger a l'oeil sur le rendu reel, aucun
-  garde-fou mecanique ne peut le verifier (deja documente comme limite assumee, voir plus bas).
+  proche, jamais une simple annonce de theme) -- a juger a l'oeil sur le rendu reel.
+
+  **Consigne de redaction, pas de garde-fou possible (ajoute le 18/09/2026, retour de Julien)** --
+  meme structure que `information_chiffree` dans `linkedin-commentaires/SKILL.md`. **Incident
+  reel** : les carrousels julien-agency du 14/09 et republie le 15/09/2026 partagent le titre
+  "Pourquoi vos meilleurs candidats disparaissent-ils" (confirme par les URLs LinkedIn reelles) --
+  une diapo 1 qui annonce un sujet, sans creer aucune tension -- jamais releve avant que Julien le
+  signale explicitement, sur l'ensemble des carrousels publies a cette date. La seule verification
+  automatique en place (`validerAccroche` dans
+  `lib/valider-post.js`, appliquee au **texte du post**, pas aux diapos) ne verifie qu'un point
+  d'interrogation dans les 140 premiers caracteres. **Ce que le garde-fou peut verifier** :
+  presence d'un "?" tot dans le texte du post -- un signal mecanique faible, purement formel.
+  **Ce qu'il ne peut pas verifier** : si la diapo 1 (image) ou l'ouverture du texte creent
+  reellement une tension ou un manque chez le lecteur -- ca exige un jugement editorial, aucune
+  regle syntaxique ne le remplace (meme famille de limite que le chiffre "EN PLUS du post" pour
+  `information_chiffree`, qui exigerait de comparer a un contenu exterieur au texte controle).
+  **Regle de redaction a appliquer avant publication** : relire la diapo 1 seule, sans le reste du
+  carrousel, et se demander si elle donnerait envie de balayer -- une annonce de theme ("Pourquoi
+  X") ne suffit jamais, il faut une affirmation contre-intuitive, une consequence concrete et
+  proche, ou une question qui expose un vrai manque. Si le doute persiste apres relecture,
+  reecrire la diapo 1, pas la publier "au cas ou ca passe".
 - **Du gras sur les mots/phrases qui portent**, pas seulement pour respecter le garde-fou
   automatique (`lib/valider-post.js` exige au moins un passage en gras) -- le gras doit tomber sur
   ce qu'un lecteur retiendrait en diagonale, pas sur un mot choisi au hasard pour passer le
@@ -35,6 +54,22 @@ consequence, a appliquer sur **tout** futur carrousel, pas seulement les prochai
   marque textuel en pied de page (`.logo`, masque sur la diapo hook), jamais un vrai logo
   graphique. Corriger exige un vrai fichier logo (SVG ou PNG) fourni par Julien -- rien a inventer
   ici : ne jamais fabriquer un logo de substitution, meme provisoire, pour une marque reelle.
+
+  **Bug distinct, corrige le 18/09/2026 : logo absent meme du seul repere textuel sur les images
+  "couverture" (mode image unique).** Les trois gabarits masquent `.logo` via
+  `.slide[data-role="hook"] .logo { display: none; }` et affichent une fleche "Balayez" a la
+  place -- correct pour un vrai carrousel feuilletable, ou le repere textuel apparait des la page 2.
+  Mais `genererImageCouverture` (`generer-images.js`) rend justement la diapo `role: "hook"` telle
+  quelle pour produire une image UNIQUE (pas de page 2 derriere) : logo absent ET fleche "Balayez"
+  pointant vers rien, sur le seul post que Julien voit reellement quand la galerie multi-images
+  echoue et qu'on retombe sur ce mode de repli (voir "Ce qui ne marche pas encore"). Fix : nouveau
+  parametre `forcerLogoVisible` sur `rendreDiapoEnPng` (defaut `false`) ; quand actif, clone la
+  diapo avec `role: 'contenu'` juste avant le rendu Playwright (`{ ...diapo, role: 'contenu' }`) --
+  seul le rendu change, le fichier de diapos source garde `role: "hook"` intact.
+  `genererImageCouverture` l'appelle desormais systematiquement avec `forcerLogoVisible: true` (une
+  couverture est par definition une image unique). `genererImagesParDiapo` (mode multi-images reel)
+  n'est pas touche : chaque diapo y garde son vrai role, comportement inchange. Voir
+  `test/generer-images.test.js` ("la couverture force le logo visible...").
 - **Un carrousel = environ une heure de travail et au moins 5 iterations avant publication.**
   Jamais publier une premiere version. Cette skill a jusqu'ici genere-et-publie en une passe --
   c'est precisement ce qui a produit une qualite "brouillon". A partir du 18/09/2026 : composer un

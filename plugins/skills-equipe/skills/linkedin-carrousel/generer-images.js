@@ -46,8 +46,9 @@ function construireDocumentUneDiapo(compte, diapo, index, { contexte } = {}) {
  * dediee au viewport exact 1080x1350 (meme dimensions que la page PDF, donc
  * meme mise en page CSS -- aucun readapting de gabarit necessaire).
  */
-async function rendreDiapoEnPng({ navigateur, compte, diapo, index, cheminSortie, contexte }) {
-  const html = construireDocumentUneDiapo(compte, diapo, index, { contexte });
+async function rendreDiapoEnPng({ navigateur, compte, diapo, index, cheminSortie, contexte, forcerLogoVisible = false }) {
+  const diapoRendue = forcerLogoVisible ? { ...diapo, role: 'contenu' } : diapo;
+  const html = construireDocumentUneDiapo(compte, diapoRendue, index, { contexte });
   const page = await navigateur.newPage({ viewport: { width: LARGEUR_PX, height: HAUTEUR_PX } });
   try {
     await page.setContent(html, { waitUntil: 'load' });
@@ -111,6 +112,19 @@ async function genererImagesParDiapo({ compte, diapos, dossierSortie }) {
  * (premiere publication image-seule pour julien-partners, "Balayez" visible
  * sans rien a balayer). Le rendu PDF multi-pages (genererPdf) et le mode
  * "par-diapo" ci-dessus gardent le contexte "carrousel" par defaut, inchange.
+ *
+ * Rendue avec `forcerLogoVisible: true` (ajoute le 18/09/2026, second
+ * incident du meme jour) : les trois gabarits masquent le logo Claude Agency
+ * sur la diapo `role: "hook"` (`.slide[data-role="hook"] .logo { display:
+ * none; }`), correct pour un vrai carrousel feuilletable (le logo apparait
+ * a partir de la page 2) mais faux ici -- une "couverture" est une image
+ * UNIQUE, il n'y a jamais de page 2, le logo doit rester visible des la
+ * premiere et seule image. Seul le rendu est modifie (clone de la diapo
+ * avec `role: 'contenu'` juste avant le rendu Playwright) : le fichier de
+ * diapos source, lui, garde `role: "hook"` intact -- ce champ reste correct
+ * et utile ailleurs (ex. detection de l'index dans genererImageCouverture
+ * ci-dessous, mode "par-diapo" qui doit garder le vrai role). Voir
+ * SKILL.md pour le detail de l'incident.
  */
 async function genererImageCouverture({ compte, diapos, sortie }) {
   if (!Array.isArray(diapos) || diapos.length === 0) {
@@ -122,7 +136,15 @@ async function genererImageCouverture({ compte, diapos, sortie }) {
 
   const navigateur = await chromium.launch();
   try {
-    await rendreDiapoEnPng({ navigateur, compte, diapo: diapos[index], index, cheminSortie, contexte: 'image-seule' });
+    await rendreDiapoEnPng({
+      navigateur,
+      compte,
+      diapo: diapos[index],
+      index,
+      cheminSortie,
+      contexte: 'image-seule',
+      forcerLogoVisible: true,
+    });
     return { cheminSortie, indexDiapoUtilisee: index };
   } finally {
     await navigateur.close();
