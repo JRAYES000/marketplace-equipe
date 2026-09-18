@@ -22,6 +22,11 @@ const fs = require('fs');
 const path = require('path');
 const { trierPosts, recupererPosts } = require('./lib/veille');
 const { validerAccents } = require('./lib/valider-orthographe');
+const {
+  convertirGras,
+  validerAccroche,
+  validerEmojis,
+} = require('../linkedin-carrousel/lib/valider-post');
 const { validerQuotaHebdomadaire, dateJourISO } = require('./lib/planifier-veille');
 const { chargerRegistre, entreesDeLaSemaine } = require('./lib/registre');
 const reglages = require('./reglages-comptes.json');
@@ -92,6 +97,7 @@ async function executerPourCompte(compte, config, { cheminRegistre } = {}) {
   let contenuFinal = redactionsCompte[choisi.id] || null;
   let erreurOrthographe = null;
   let erreurQuota = null;
+  let erreurFormatPost = null;
 
   try {
     validerQuotaHebdomadaire(entreesSemaine, { date: aujourdhui });
@@ -105,6 +111,26 @@ async function executerPourCompte(compte, config, { cheminRegistre } = {}) {
       validerAccents(contenuFinal);
     } catch (erreur) {
       erreurOrthographe = erreur.message;
+      contenuFinal = null;
+    }
+  }
+
+  // Regles hook/gras/emoji de linkedin-carrousel (retour de Julien,
+  // 18/09/2026) -- reutilise le meme validateur, jamais duplique. Volontairement
+  // APRES le controle d'accents ci-dessus : un texte deja ecarte pour accents
+  // ne doit jamais reapparaitre ecarte pour une autre raison a la place (voir
+  // test/valider-orthographe.test.js, qui verifie erreurOrthographe precisement
+  // sur ce cas). N'importe que convertirGras/validerAccroche/validerEmojis --
+  // pas validerLongueur/validerHashtags/validerChiffreSource, propres au format
+  // carrousel, jamais demandes pour la veille.
+  if (contenuFinal && !erreurQuota && !erreurOrthographe) {
+    try {
+      const texteGras = convertirGras(contenuFinal);
+      validerAccroche(texteGras);
+      validerEmojis(texteGras);
+      contenuFinal = texteGras;
+    } catch (erreur) {
+      erreurFormatPost = erreur.message;
       contenuFinal = null;
     }
   }
@@ -129,6 +155,7 @@ async function executerPourCompte(compte, config, { cheminRegistre } = {}) {
     contenuFinal,
     erreurOrthographe,
     erreurQuota,
+    erreurFormatPost,
     authorUrn: config.author_urn,
     argumentsPublierPost: contenuFinal
       ? { authorUrn: config.author_urn, commentary: contenuFinal }
