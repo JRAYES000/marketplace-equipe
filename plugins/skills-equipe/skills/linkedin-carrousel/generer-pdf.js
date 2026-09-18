@@ -129,7 +129,15 @@ function chargerGabarit(compte) {
  */
 function injecterDiapo(blocDiapo, diapo, index, { contexte = 'carrousel' } = {}) {
   const numero = String(index + 1).padStart(2, '0');
-  const titreHtml = diapo.role === 'hook' && diapo.accent
+  // Bug trouve le 18/09/2026 en production reelle (premier post de veille genere
+  // avec ce mecanisme) : genererImageCouverture clone TOUJOURS la diapo avec
+  // role: 'contenu' (voir rendreDiapoEnPng, forcerLogoVisible) pour afficher le
+  // logo -- une condition sur `diapo.role === 'hook'` ici desactivait donc
+  // silencieusement l'accent sur CHAQUE image "couverture", le cas d'usage
+  // principal pour lequel l'accent a ete construit. Le champ `accent` est deja
+  // le signal explicite et suffisant (valide comme obligatoire sur le hook par
+  // lib/valider-diapos.js) -- inutile et dangereux de le recroiser avec `role`.
+  const titreHtml = diapo.accent
     ? titreAvecAccent(diapo.titre, diapo.accent)
     : echapperHtml(diapo.titre || '');
   return blocDiapo
