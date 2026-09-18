@@ -32,16 +32,25 @@ test('titreAvecAccent retombe sur le titre simplement echappe si "accent" n\'est
   assert.doesNotMatch(html, /<span/);
 });
 
-test('injecterDiapo applique le span uniquement sur le hook, jamais sur une diapo "contenu"', () => {
+test('injecterDiapo applique le span des que le champ "accent" est fourni, quel que soit le role', () => {
   const { blocDiapo } = chargerGabarit('julien-partners');
 
   const htmlHook = injecterDiapo(blocDiapo, { role: 'hook', titre: 'Le vrai signal a suivre', accent: 'vrai signal' }, 0);
   assert.match(htmlHook, /<span class="accent-mot">vrai signal<\/span>/);
 
-  // Meme si "accent" est present par erreur sur une diapo "contenu", le
-  // garde-fou (lib/valider-diapos.js) ne l'exige que sur le hook -- mais le
-  // rendu, lui, ne doit jamais l'appliquer hors du hook (les 3 references de
-  // Julien ne colorent que la diapo 1).
+  // Bug trouve le 18/09/2026 en production reelle (premier post de veille) :
+  // genererImageCouverture clone TOUJOURS la diapo avec role: 'contenu' pour
+  // afficher le logo (voir generer-images.js, forcerLogoVisible) -- si le
+  // rendu conditionnait l'accent sur `role === 'hook'`, l'accent disparaissait
+  // silencieusement sur CHAQUE image "couverture", le cas d'usage principal de
+  // cette fonctionnalite. Le champ `accent` est desormais le seul signal :
+  // present -> colore, quel que soit `role`.
   const htmlContenu = injecterDiapo(blocDiapo, { role: 'contenu', titre: 'Le vrai signal a suivre', accent: 'vrai signal' }, 1);
-  assert.doesNotMatch(htmlContenu, /<span class="accent-mot">/);
+  assert.match(htmlContenu, /<span class="accent-mot">vrai signal<\/span>/);
+});
+
+test('injecterDiapo ne colore rien sur une diapo "contenu" sans champ "accent" (cas normal, multi-images)', () => {
+  const { blocDiapo } = chargerGabarit('julien-partners');
+  const html = injecterDiapo(blocDiapo, { role: 'contenu', titre: 'Une diapo de contenu normale' }, 2);
+  assert.doesNotMatch(html, /<span class="accent-mot">/);
 });
