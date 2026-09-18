@@ -130,7 +130,7 @@ post programme "aurait du" etre en ligne.**
   {date: '2026-09-15', postId: '7505672128533286914', auteurOriginal: 'Codie A. Sanchez'})`) --
   **premiere entree reelle depuis la creation de ce garde-fou** (audit adversarial du 15/09) :
   premier test grandeur nature reussi, pas seulement une fixture.
-- **Mail du 20** (`references/mail-20260920-brouillon.md`) : lien reel ajoute pour Codie Sanchez.
+- **Mail du 20** (`references/mail-20260918-brouillon.md`) : lien reel ajoute pour Codie Sanchez.
 
 Aucune republication n'a ete necessaire ni tentee -- la programmation Buffer a fait son travail
 normalement, une fois la bonne heure (fuseau Madagascar) prise en compte.

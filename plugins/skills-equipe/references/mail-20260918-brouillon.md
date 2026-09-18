@@ -1,4 +1,4 @@
-# Brouillon du mail du 20/09/2026
+# Brouillon du mail du 18/09/2026
 
 Rédigé le 15/09/2026, régénéré intégralement le 17/09/2026 : tous les liens sont désormais réels
 et vérifiés (carrousel Claude Partners, les 3 posts de veille, tous les commentaires), plus aucun

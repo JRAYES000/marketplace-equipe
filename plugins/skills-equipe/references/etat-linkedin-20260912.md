@@ -752,7 +752,7 @@ de non-anticipation du registre : `linkedin-commentaires/a-publier/README.md`.
 au probleme du Point n°15 (l'API repond "deleted: true" sans que le post disparaisse), Julien a
 tranche de les supprimer lui-meme depuis son profil (**•••** → **Supprimer**), plus rapide et
 plus sur. Les deux URLs exactes et la raison de chacune sont dans le brouillon du mail du 20
-(`references/mail-20260920-brouillon.md`, section carrousel) -- rien de plus a tenter cote
+(`references/mail-20260918-brouillon.md`, section carrousel) -- rien de plus a tenter cote
 code ou API sur ce point.
 
 **Les 4 commentaires refuses (Point n°15) refaits pour julien-agency, pas julien-partners** :
@@ -806,7 +806,7 @@ CRM/prospects sans rapport, ignorees comme deja etabli au Point n°9).
 
 Les deux bases relues via l'API apres remplissage (`POST /v1/data_sources/.../query`) pour
 confirmer le bon nombre de lignes (3 et 5) -- pas suppose. URLs des deux pages dans
-`references/mail-20260920-brouillon.md`.
+`references/mail-20260918-brouillon.md`.
 
 **Verifie plus tard le meme jour, via Claude in Chrome (lecture seule, aucune modification)** :
 le partage avec `contact@claudeagency.fr` est en realite **deja en place** sur les deux pages --

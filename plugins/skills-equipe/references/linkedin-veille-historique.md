@@ -99,7 +99,7 @@ ligne.
   l'integration "Leads site claudeagency.fr". `node creer-page-notion.js` a cree la base "Veille
   & posts" et ses 3 vues par compte. Remplie avec les 3 vrais posts adaptes (metriques reelles
   du post source reprises depuis `data/veille-resultats-reels-20260914.json`), etat "A relire" --
-  verifie en relisant les 3 lignes via l'API. URL de la base : `references/mail-20260920-brouillon.md`.
+  verifie en relisant les 3 lignes via l'API. URL de la base : `references/mail-20260918-brouillon.md`.
 - `creerBaseVeilleEtPosts` (19 colonnes du brief, dont `Score` en formule Notion native) n'avait
   pas ete testee contre l'API avant cette date -- conforme a la documentation consultee,
   confirmee au premier appel reel.
