@@ -841,6 +841,70 @@ moment de cette mise a jour -- a verifier et passer a "Publie" avec le lien reel
 sur demande explicite (ne jamais supposer qu'une programmation Buffer a abouti sans verifier).
 Detail complet : `linkedin-veille-virale/SKILL.md` et `a-publier/README.md`.
 
+## Point n°19 -- Carrousel julien-partners en image seule (impasse documentee), 3 commentaires reels, correction du quota par nom (18/09/2026)
+
+**Correction de code (avant toute action du jour)** : `validerQuotaJournalier` comparait
+`auteurCible` par egalite de chaine stricte -- "Theophile Burnet" et "Theophile Burnet ⚡️"
+(nom exact renvoye par Apify, avec emoji de fin) auraient pu fusionner ou, au contraire, ne
+jamais se reconnaitre comme la meme personne. Deja corrige avant cette session (commit
+`f445857`) via `normaliserAuteurCible` (casse, espaces, emojis/symboles de fin de nom retires --
+jamais les accents ni le contenu du nom). Reverifie ce jour : 112/112 tests verts, aucun
+doublon sous deux formes dans `data/registre-commentaires.json`.
+
+**Carrousel julien-partners -- image seule publiee et confirmee, document feuilletable reste
+une impasse technique**. Objectif initial (un vrai carrousel PDF, comme pour julien-agency) :
+deux pistes reelles tentees avant d'y renoncer -- session tool-router sur le canal REST/`ak_`
+bloquee par le classifieur auto-mode avant tout appel reseau (non contournee) ; separation
+upload(`ck_`)/ecriture(`ak_`) impossible, `proxy_execute` (seul chemin vers l'API Documents de
+LinkedIn) n'existant qu'a l'interieur d'une session `COMPOSIO_REMOTE_WORKBENCH`, elle-meme
+injoignable sur `ak_` (meme blocage) et resolvant vers la mauvaise identite (`averse-cooser`,
+julien-agency) sur `ck_`. Verifie en lecture seule avant d'abandonner : seulement 4 actions
+Composio existent pour le toolkit `linkedin` (aucune pour les documents), et le jeton OAuth du
+`connected_account_id` (`ca_vn1-dhh8VcYf`) est integralement redacte par l'API -- aucun
+contournement possible. Detail complet : `linkedin-carrousel/SKILL.md`, section "Impasse
+technique confirmee le 18/09/2026".
+
+**Repli image publie reellement**, avec un vrai bug corrige au passage : la couverture montrait
+encore la fleche "Balayez" et le numero "01", des reperes de carrousel trompeurs sur une image
+seule sans suite. Nouveau parametre explicite `{{CONTEXTE}}` dans `generer-pdf.js`/
+`generer-images.js` (`"carrousel"` par defaut, inchange pour le PDF et le mode par-diapo ;
+`"image-seule"` uniquement pour `genererImageCouverture`) -- masque fleche et numero via une
+regle CSS dediee dans les 3 templates. 85/85 tests verts.
+
+Publication reelle confirmee : identite verifiee avant l'appel (`LINKEDIN_GET_MY_INFO` ->
+`ZvLHybJZhj`), `LINKEDIN_CREATE_LINKED_IN_POST` reussi (`x_restli_id`), confirme par navigateur
+(texte identique, image affichee sans fleche ni numero) et par une seconde methode independante
+(`data-urn` du DOM) :
+[https://www.linkedin.com/feed/update/urn:li:activity:7506607769375133696/](https://www.linkedin.com/feed/update/urn:li:activity:7506607769375133696/).
+
+**Commentaires julien-partners -- 3/5 aujourd'hui, tous confirmes par ID reel + actor
+coherent avant enregistrement** :
+- Alexis Combeaux (desaccord argumente puis reecrit -- voir plus bas -- finalement vraie
+  question) sur "les 3 erreurs des freelances au depart".
+- Theophile Burnet (desaccord argumente) sur "9 outils IA" -- **chiffre "129 EUR/mois" retire
+  avant publication** : verifie qu'il venait du post cible lui-meme (chiffre recycle, pas une
+  information en plus), pas une vraie source externe. Rebascule du genre initialement prevu
+  (`information_chiffree`, refuse a la relecture) vers `desaccord_argumente`, sans chiffre.
+- Victor Partouche-Sebban (vraie question) sur le 156e RDV NBC, poste 0,7h avant le commentaire
+  -- seul candidat reellement sous les 4h lors du second passage du jour (Alexis Combeaux et
+  Theophile Burnet exclus car deja commentes ce matin, les 4 autres comptes cibles hors du
+  plafond dur de 48h : 79h a 95h).
+
+**Consigne de redaction ajoutee au `SKILL.md`** (troisieme incident du meme type sur
+`information_chiffree` : 16/09 x2, 18/09) : avant de retenir ce genre, verifier que le chiffre
+est externe au post ET qu'il dit exactement ce que sa source mesure -- sinon changer de genre,
+aucun garde-fou mecanique ne peut le faire a la place de la redaction.
+
+**2 commentaires restants du quota (5/jour)** : a tenter plus tard dans la journee, uniquement
+si un des 4 comptes hors-fenetre (Xavier Vincent, Florent Pontiac, Valentin Muller, Virginie
+Caurraze) publie entre-temps -- Alexis Combeaux et Theophile Burnet restent exclus jusqu'au
+19/09 (regle "jamais deux fois la meme personne le meme jour"). Pas d'heure fixe imposee par
+Julien pour ce second passage.
+
+**Relevé a 3 jours des 5 commentaires du 15/09** : toujours en attente, impossible avant le
+21/09 (rappel de passation) -- procedure prete dans
+`references/procedure-18-09-suivi-3-jours-commentaires.md`, rien a changer.
+
 ## Recapitulatif
 
 Au 12/09/2026, aucun point bloquant "technique" majeur ne reste ouvert :
