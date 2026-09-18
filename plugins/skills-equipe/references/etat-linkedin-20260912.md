@@ -1180,3 +1180,35 @@ en attente de l'arbitrage de Julien sur l'extension de la liste blanche
 payant en attendant sa reponse, decision explicite de Nomena du 18/09/2026).
 **Cette couverture partielle ne bloque pas la production des 3 posts de veille
 demandes par Julien** -- ils sont rediges a partir des 7 comptes deja actifs.
+
+## Correspondance canal Buffer <-> compte LinkedIn reel (verifiee le 18/09/2026)
+
+Les deux canaux LinkedIn "Julien Rayes" dans Buffer ne se distinguent par aucun
+nom visible dans l'interface (les deux s'affichent juste "Julien Rayes"). Deux
+signaux indirects s'etaient reveles **contradictoires** avant cette
+verification :
+- le **slug technique Buffer** (visible dans les libelles "Clean Queue" / "Delete
+  All Drafts" / "Empty Queue" des reglages generaux du canal) ;
+- le **style du contenu** des posts deja en file/envoyes (missions freelance vs
+  posts generalistes).
+
+**Preuve retenue -- la seule fiable : l'en-tete reel du profil LinkedIn**, ouvert
+via "Go to post" sur un post reellement envoye de chaque canal (clic sur un post
+dans Insights > Performance per Post > "Go to post", puis lecture du texte sous
+le nom de l'auteur sur la page LinkedIn elle-meme).
+
+- **Canal `6aa87ac6ea19ca0bde439e7f`** (slug technique
+  `julien-rayes-claude-partners`) -> profil LinkedIn dont l'en-tete affiche
+  **"Julien Rayes -- Claude Partners : l'annuaire francophone des prestataires IA
+  en entreprise..."** -> c'est le canal **CLAUDE PARTNERS**. Le slug technique
+  disait vrai ; c'est le style de contenu (posts "missions freelance IA") qui
+  avait induit en erreur le 17-18/09/2026 lors d'une premiere identification.
+- **Canal `6aa87a19ea19ca0bde439c6b`** (slug technique generique `julien-rayes`,
+  sans suffixe) -> profil LinkedIn dont l'en-tete affiche **"Julien Rayes ... |
+  Claude Agency"** -> c'est le canal **CLAUDE AGENCY**.
+
+**A retenir pour la suite** : sur ce compte Buffer precis, ni le slug technique
+seul ni le style de contenu seul ne suffisent a identifier un canal avec
+certitude -- le premier s'est revele juste, mais seulement verifie a posteriori.
+Toujours confirmer par l'en-tete reel du profil LinkedIn (via "Go to post") avant
+toute publication ou tout brouillon cible sur un compte precis.
