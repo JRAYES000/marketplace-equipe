@@ -170,6 +170,14 @@ node "<dossier de la skill>/scripts/verif-post.mjs" verif "C:/chemin/vers/brouil
 Le script sort en code 1 si un critere echoue. Montrer sa sortie brute a Julien
 avec le brouillon — ne jamais ecrire « guardrails passes » sans elle.
 
+**Le brouillon se donne sous l'une ou l'autre forme** : le markdown `**ainsi**`
+d'un brouillon de `sortants/`, ou le texte deja converti en gras Unicode quand on
+relit un post publie. Les deux rendent les memes mesures — verifie le 18/09,
+accroche a 106 caracteres et 9/9 des deux cotes. Tout ce qui se compte en
+caracteres se compte **en points de code** : une lettre en gras Unicode occupe
+deux unites UTF-16, et une mesure naive refusait une accroche de 110 signes en
+la comptant 193.
+
 **Le lien vers le site part dans le corps du post**, jamais en premier
 commentaire : consigne de Julien du 03/09, reaffirmee le 09/09 en connaissance
 du cout mesure (un lien externe coute de 18,8 % a 60 % de portee). Ne pas
