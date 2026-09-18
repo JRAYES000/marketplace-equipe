@@ -111,16 +111,38 @@ test('genererPdf produit un PDF reel et non vide pour le carrousel de test julie
   }
 });
 
-test('couverture et diapo-01 rendent le meme contenu (meme gabarit, meme diapo)', async () => {
+/**
+ * Depuis le 18/09/2026 : la couverture (mode "image seule", pas de document
+ * feuilletable) n'est PLUS identique a diapo-01 du rendu par-diapo (mode
+ * "carrousel", ou chaque image fait partie d'une serie a televerser toutes
+ * ensemble). Incident reel qui a motive ce changement : premiere publication
+ * image-seule pour julien-partners, fleche "Balayez" et numero "01" visibles
+ * sans rien a balayer derriere -- repere de carrousel trompeur sur un post a
+ * une seule image. Voir generer-pdf.js (injecterDiapo, parametre {{CONTEXTE}})
+ * et templates/*.html (regle CSS `[data-contexte="image-seule"]`).
+ */
+test('couverture masque la fleche "Balayez" et le numero de page (contexte image-seule)', async () => {
   const dossierSortie = dossierTemporaire();
   try {
-    const parDiapo = await genererImagesParDiapo({ compte: 'julien-partners', diapos, dossierSortie: path.join(dossierSortie, 'par-diapo') });
     const couverture = await genererImageCouverture({ compte: 'julien-partners', diapos, sortie: path.join(dossierSortie, 'couverture.png') });
-
-    const octetsDiapo01 = fs.readFileSync(parDiapo.chemins[0]);
-    const octetsCouverture = fs.readFileSync(couverture.cheminSortie);
-    assert.ok(octetsDiapo01.equals(octetsCouverture), 'le rendu de la couverture doit etre identique a celui de diapo-01');
+    assert.ok(fs.existsSync(couverture.cheminSortie));
+    // Rendu HTML direct (sans capture d'ecran) pour verifier la regle CSS
+    // appliquee, plutot que d'inspecter des pixels.
+    const { chargerGabarit, injecterDiapo } = require('../generer-pdf');
+    const { entete, blocDiapo, pied } = chargerGabarit('julien-partners');
+    const html = `${entete}${injecterDiapo(blocDiapo, diapos[0], 0, { contexte: 'image-seule' })}${pied}`;
+    // Cible l'attribut sur la balise .slide elle-meme (pas la regle CSS du
+    // <style>, qui contient aussi litteralement la chaine "image-seule").
+    assert.match(html, /<div class="slide"[^>]*data-contexte="image-seule"/);
   } finally {
     fs.rmSync(dossierSortie, { recursive: true, force: true });
   }
+});
+
+test('par-diapo et le PDF gardent le contexte "carrousel" par defaut (fleche + numero inchanges)', async () => {
+  const { chargerGabarit, injecterDiapo } = require('../generer-pdf');
+  const { entete, blocDiapo, pied } = chargerGabarit('julien-partners');
+  const htmlParDiapo = `${entete}${injecterDiapo(blocDiapo, diapos[0], 0)}${pied}`;
+  assert.match(htmlParDiapo, /<div class="slide"[^>]*data-contexte="carrousel"/);
+  assert.doesNotMatch(htmlParDiapo, /<div class="slide"[^>]*data-contexte="image-seule"/);
 });

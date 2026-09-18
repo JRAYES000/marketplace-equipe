@@ -96,13 +96,21 @@ function chargerGabarit(compte) {
   };
 }
 
-function injecterDiapo(blocDiapo, diapo, index) {
+/**
+ * `contexte` : "carrousel" (defaut, flèche + numero visibles -- PDF multi-pages
+ * et rendu par-diapo, inchange) ou "image-seule" (masque flèche "Balayez" et
+ * numero de page, reperes qui n'ont pas de sens sans document feuilletable --
+ * voir generer-images.js, genererImageCouverture). Parametre explicite,
+ * jamais devine depuis le nombre de diapos.
+ */
+function injecterDiapo(blocDiapo, diapo, index, { contexte = 'carrousel' } = {}) {
   const numero = String(index + 1).padStart(2, '0');
   return blocDiapo
     .replaceAll('{{TITRE}}', echapperHtml(diapo.titre || ''))
     .replaceAll('{{TEXTE}}', echapperHtml(diapo.texte || ''))
     .replaceAll('{{NUMERO}}', numero)
-    .replaceAll('{{ROLE}}', diapo.role === 'hook' ? 'hook' : 'contenu');
+    .replaceAll('{{ROLE}}', diapo.role === 'hook' ? 'hook' : 'contenu')
+    .replaceAll('{{CONTEXTE}}', contexte);
 }
 
 function construireDocument(compte, diapos) {

@@ -36,9 +36,9 @@ const SORTANTS_DIR = path.join(SKILL_DIR, 'sortants');
 const LARGEUR_PX = 1080;
 const HAUTEUR_PX = 1350;
 
-function construireDocumentUneDiapo(compte, diapo, index) {
+function construireDocumentUneDiapo(compte, diapo, index, { contexte } = {}) {
   const { entete, blocDiapo, pied } = chargerGabarit(compte);
-  return `${entete}${injecterDiapo(blocDiapo, diapo, index)}${pied}`;
+  return `${entete}${injecterDiapo(blocDiapo, diapo, index, { contexte })}${pied}`;
 }
 
 /**
@@ -46,8 +46,8 @@ function construireDocumentUneDiapo(compte, diapo, index) {
  * dediee au viewport exact 1080x1350 (meme dimensions que la page PDF, donc
  * meme mise en page CSS -- aucun readapting de gabarit necessaire).
  */
-async function rendreDiapoEnPng({ navigateur, compte, diapo, index, cheminSortie }) {
-  const html = construireDocumentUneDiapo(compte, diapo, index);
+async function rendreDiapoEnPng({ navigateur, compte, diapo, index, cheminSortie, contexte }) {
+  const html = construireDocumentUneDiapo(compte, diapo, index, { contexte });
   const page = await navigateur.newPage({ viewport: { width: LARGEUR_PX, height: HAUTEUR_PX } });
   try {
     await page.setContent(html, { waitUntil: 'load' });
@@ -104,6 +104,13 @@ async function genererImagesParDiapo({ compte, diapos, dossierSortie }) {
  * la premiere diapo de la liste. Correspond a l'option (b) documentee dans
  * lib/publier.js -- perd le format feuilletable, mais une seule image a
  * televerser en publication reelle.
+ *
+ * Rendue avec `contexte: 'image-seule'` (ajoute le 18/09/2026) : masque la
+ * fleche "Balayez" et le numero de page, reperes de carrousel qui n'ont pas
+ * de sens sur une seule image sans suite -- incident reel du meme jour
+ * (premiere publication image-seule pour julien-partners, "Balayez" visible
+ * sans rien a balayer). Le rendu PDF multi-pages (genererPdf) et le mode
+ * "par-diapo" ci-dessus gardent le contexte "carrousel" par defaut, inchange.
  */
 async function genererImageCouverture({ compte, diapos, sortie }) {
   if (!Array.isArray(diapos) || diapos.length === 0) {
@@ -115,7 +122,7 @@ async function genererImageCouverture({ compte, diapos, sortie }) {
 
   const navigateur = await chromium.launch();
   try {
-    await rendreDiapoEnPng({ navigateur, compte, diapo: diapos[index], index, cheminSortie });
+    await rendreDiapoEnPng({ navigateur, compte, diapo: diapos[index], index, cheminSortie, contexte: 'image-seule' });
     return { cheminSortie, indexDiapoUtilisee: index };
   } finally {
     await navigateur.close();
