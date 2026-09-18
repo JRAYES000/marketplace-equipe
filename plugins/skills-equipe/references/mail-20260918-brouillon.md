@@ -1,9 +1,16 @@
 # Brouillon du mail du 18/09/2026
 
-Rédigé le 15/09/2026, régénéré intégralement le 17/09/2026 : tous les liens sont désormais réels
-et vérifiés (carrousel Claude Partners, les 3 posts de veille, tous les commentaires), plus aucun
-`[A COMPLETER]`. Le seul point qui reste une action pour Julien lui-même (pas pour moi) est
-signalé explicitement en toutes lettres dans la section Carrousel, pas comme un placeholder muet.
+Rédigé le 15/09/2026, régénéré intégralement le 17/09/2026, complété le 18/09/2026 (deuxième
+carrousel Claude Partners, trois commentaires supplémentaires) : tous les liens sont désormais
+réels et vérifiés, plus aucun `[A COMPLETER]`. Le seul point qui reste une action pour Julien
+lui-même (pas pour moi) est signalé explicitement en toutes lettres dans la section Carrousel,
+pas comme un placeholder muet.
+
+**Ce mail part aujourd'hui sans le relevé de performance des cinq premiers commentaires** (J'aime,
+réponses, vues de profil) : le brief demande d'attendre 3 jours pleins après publication avant de
+relever ces chiffres, et les cinq commentaires du 15/09 n'atteignent ce délai que le 21/09. Je
+t'enverrai ce relevé séparément à ce moment-là — aucun chiffre de performance n'est inclus
+ci-dessous, volontairement, pas un oubli.
 
 Format volontairement "mail", pas "rapport" : liens cliquables, pas de renvoi au dépôt pour
 comprendre une phrase, pas de pièce jointe.
@@ -60,14 +67,46 @@ l'accent de couleur, le pied de page et le numéro — un choix assumé plutôt 
 marques restent reconnaissables comme la même maison. **Si vous voulez deux identités
 franchement distinctes, c'est un réglage à changer dans les templates.**
 
-## Commentaires — douze publiés en trois jours, dont le premier sur Claude Partners
+**Deuxième carrousel Claude Partners, publié le 18/09 — en une seule image, pas en plusieurs
+pages, et c'est volontaire vu ce qui suit.** Sujet : les signes qu'un partenariat commercial
+s'essouffle avant la rupture. [Voir le
+post](https://www.linkedin.com/feed/update/urn:li:activity:7506620435602587650/) — confirmé en
+ligne par navigation directe, texte et image conformes à ce qui a été validé.
 
-**Bilan à date (15 au 17/09)** : 12 commentaires réellement en ligne — 11 sur Claude Agency (5 le
-15/09, 5 le 16/09, 1 le 17/09) et **1 sur Claude Partners aujourd'hui, le tout premier depuis que
-ce compte publie réellement** (voir "Compte Claude Partners" plus bas). Détail jour par jour
-ci-dessous pour le 15/09 (première fois, avec ses deux vraies déviations) ; les jours suivants
-sont résumés avec leurs liens, le détail complet reste dans
+**Pourquoi une image et pas un document feuilletable comme pour Claude Agency** : deux vraies
+tentatives aujourd'hui pour publier un document multi-pages sur ce compte, chacune arrêtée par
+un même garde-fou de sécurité intégré à l'outil (pas par manque d'essai) avant qu'aucun appel
+réseau ne parte. Détail technique complet dans `linkedin-carrousel/SKILL.md`. Un repli
+intermédiaire existe et a déjà fonctionné une fois sur ce compte (galerie de plusieurs images
+balayables, comme le carrousel du 17/09 ci-dessus) : les 8 images du carrousel du 18/09 sont
+prêtes pour cette option, non publiées aujourd'hui pour la même raison de garde-fou — à reprendre
+à la main si tu veux ce format plutôt que l'image unique actuelle.
+
+*Historique de cette publication, pour la transparence* : une première version (image seule)
+avait été publiée ce matin, puis supprimée par mes soins avant cette republication — le sujet et
+le texte n'ont pas changé, seul le lien final a changé d'identifiant technique. Rien de cassé
+n'est resté visible entre les deux.
+
+## Commentaires — quinze publiés en quatre jours, quatre désormais sur Claude Partners
+
+**Bilan à date (15 au 18/09)** : 15 commentaires réellement en ligne — 11 sur Claude Agency (5 le
+15/09, 5 le 16/09, 1 le 17/09) et 4 sur Claude Partners (1 le 17/09, 3 le 18/09 — voir "18/09"
+plus bas). Détail jour par jour ci-dessous pour le 15/09 (première fois, avec ses deux vraies
+déviations) ; les jours suivants sont résumés avec leurs liens, le détail complet reste dans
 `linkedin-commentaires/a-publier/README.md` si tu veux tout voir.
+
+**18/09 (3 commentaires sur Claude Partners, quota du jour 3/5)** :
+[Alexis Combeaux](https://www.linkedin.com/feed/update/urn:li:activity:7506238578012741633/)
+(vraie question), [Théophile
+Burnet](https://www.linkedin.com/feed/update/urn:li:activity:7506261663424143362/) (désaccord
+argumenté — un chiffre initialement prévu a été retiré à la relecture car il ne faisait que
+reprendre celui du post cible, pas une vraie information en plus), et [Victor
+Partouche-Sebban](https://www.linkedin.com/feed/update/urn:li:activity:7506612815982645248/)
+(vraie question, deuxième commentaire réel chez lui, sur un nouveau post). **2 commentaires
+restants du quota** : pas forcés aujourd'hui — sur les 8 comptes cibles, seuls ces trois avaient
+un post exploitable dans la fenêtre autorisée au moment du passage, les autres étaient soit déjà
+commentés le jour même, soit trop anciens (plus de 48h). Je referai un passage plus tard si
+d'autres comptes publient.
 
 **Premier commentaire réel sur Claude Partners (17/09)** :
 [Victor Partouche-Sebban](https://www.linkedin.com/posts/victorpartouche_c%C3%A9tait-le-17-septembre-2026-au-restaurant-activity-7506361684186492928-r_TP)
@@ -241,8 +280,10 @@ Commentaires](https://app.notion.com/p/LinkedIn-Veille-Commentaires-3dbe7fe5dbf8
 - [Veille & posts](https://app.notion.com/p/9aa90eff20334db694ca04fb4182b385) — les 3 posts
   adaptés (voir plus haut : Codie Sanchez, Jason Feifer, Justin Welsh), avec les vraies métriques
   du post source (réactions, commentaires, partages, abonnés) et des vues filtrées par compte.
-- [Commentaires](https://app.notion.com/p/8dd4dc38fdb14e6190fa6b5923baba55) — les 12 commentaires
-  réellement publiés à ce jour (voir plus haut), avec une vue "Commentaires par semaine". La vue
+- [Commentaires](https://app.notion.com/p/8dd4dc38fdb14e6190fa6b5923baba55) — les 12 premiers
+  commentaires (jusqu'au 17/09) y sont enregistrés ; les 3 du 18/09 restent à y ajouter (pas
+  encore fait au moment de l'envoi de ce mail). Voir plus haut pour le détail, avec une vue
+  "Commentaires par semaine". La vue
   croisant aussi les vues de profil et les demandes de contact reste à compléter à la main dans
   Notion (limite réelle de l'API : un seul axe par graphique en un appel).
 
@@ -402,17 +443,20 @@ elle a démarré, et tu testerais une version périmée sans le savoir.
 
 ## Arbitrage
 
-Aucune des trois skills n'a été sacrifiée : les trois ont un livrable réel à ce jour (carrousel
-Claude Partners en ligne, douze commentaires réellement publiés sur les deux comptes, trois
-posts de veille adaptés et confirmés en ligne), et les deux bases Notion sont créées et remplies
-avec des données réelles. Deux points restent ouverts, aucun ne dépend plus du travail sur les
-skills elles-mêmes :
+Aucune des trois skills n'a été sacrifiée : les trois ont un livrable réel à ce jour (deux
+carrousels Claude Partners en ligne, quinze commentaires réellement publiés sur les deux
+comptes, trois posts de veille adaptés et confirmés en ligne), et les deux bases Notion sont
+créées et remplies avec des données réelles (à l'exception des 3 derniers commentaires du 18/09,
+pas encore ajoutés à Notion). Trois points restent ouverts :
 
-1. **Supprimer toi-même les deux anciennes versions du carrousel** (voir la section Carrousel) —
-   je ne peux pas le faire à ta place, l'API refuse ces deux suppressions précises.
+1. **Supprimer toi-même les deux anciennes versions du carrousel Claude Agency** (voir la section
+   Carrousel) — je ne peux pas le faire à ta place, l'API refuse ces deux suppressions précises.
 2. **Confirmer toi-même, dans l'interface Notion, le partage en modification avec
    `contact@claudeagency.fr`** (voir la section Notion) — l'API ne me permet pas de le vérifier
    ni de l'accorder, seulement de constater que la personne est membre de l'espace de travail.
+3. **Décider si tu veux le deuxième carrousel Claude Partners en galerie de plusieurs images**
+   plutôt qu'en image unique (voir la section Carrousel) — techniquement prêt, seulement bloqué
+   aujourd'hui par un garde-fou de sécurité, pas par un problème de contenu.
 
 N'hésite pas à revenir vers moi si tu veux qu'on creuse un point en particulier.
 
