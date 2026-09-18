@@ -125,4 +125,4 @@ plutôt que de supposer que la commande a fonctionné.
   `listeReleves()` (`lib/statistiques-profil.js`) — jamais les deux chiffres lus depuis les
   lignes de commentaires elles-mêmes (voir en tête de ce fichier).
 - Rien d'autre à publier avant le 20 sur ce lot — passer directement à la relecture du mail
-  (voir `references/mail-20260920-brouillon.md`).
+  (voir `references/mail-20260918-brouillon.md`).

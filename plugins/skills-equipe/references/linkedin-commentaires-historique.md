@@ -36,7 +36,7 @@ reel, pas un hasard de mesure, meme si le seuil de 4h n'est toujours pas franchi
 honnete, pas une supposition** : la regle des 4h reste, a ce jour, jamais satisfaite en
 conditions reelles sur ces 16 comptes -- ni preuve qu'elle "marche", ni preuve qu'elle est
 inatteignable, juste deux mesures reelles qui montrent un ecart qui se reduit. Voir
-`references/mail-20260920-brouillon.md`, section "Deviations assumees", inchangee sur le fond
+`references/mail-20260918-brouillon.md`, section "Deviations assumees", inchangee sur le fond
 mais desormais appuyee sur deux passages reels au lieu d'un seul.
 
 **2. Le quota journalier (5/jour), sur le registre reel (pas une fixture).**
@@ -135,7 +135,7 @@ verification de chacun : `references/comptes-cibles-proposition-20260914.md`.
   de l'API (`x_axis`/`y_axis`, `group_by: 'week'`, `sort`), confirme par trois allers-retours
   avec l'API reelle.
 - **Base remplie** avec les 5 vrais commentaires publies le 15/09, verifie en relisant les 5
-  lignes via l'API. URL de la base : `references/mail-20260920-brouillon.md`.
+  lignes via l'API. URL de la base : `references/mail-20260918-brouillon.md`.
 
 ## Bloc de comparaison hebdomadaire -- execution reelle (15/09/2026)
 
