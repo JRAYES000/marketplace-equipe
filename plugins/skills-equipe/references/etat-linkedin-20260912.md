@@ -905,6 +905,42 @@ Julien pour ce second passage.
 21/09 (rappel de passation) -- procedure prete dans
 `references/procedure-18-09-suivi-3-jours-commentaires.md`, rien a changer.
 
+### Suite du meme jour -- suppression confirmee, republication, tentative de galerie abandonnee
+
+**Julien a demande de viser plus haut que l'image seule** ("les pages au pluriel") apres avoir
+vu, en verifiant le mail avant envoi, que le carrousel Claude Partners du 17/09
+(`urn:li:activity:7506384428168806400`) etait reellement en ligne en **10 images (grille native
+LinkedIn, "BALAYEZ"/numero visibles)** -- pas le post de test supprime que documentait
+`linkedin-carrousel/SKILL.md` jusque-la. Decouverte non prevue, verifiee par navigateur avant
+d'agir dessus (voir `linkedin-carrousel/SKILL.md`, section "par-diapo fonctionne deja").
+
+**Sequence reelle, dans l'ordre, chaque etape verifiee avant la suivante** :
+1. **Suppression du post image seule du matin** (`urn:li:activity:7506607769375133696`) via
+   `LINKEDIN_DELETE_LINKED_IN_POST` (canal REST/`ak_`) -- signal `successful: true`, corps vide,
+   **le meme type de signal ambigu deja invalide le 15/09**. Verifie reellement par navigateur,
+   deux methodes independantes : le lien direct affiche desormais "This post cannot be
+   displayed" (different des echecs du 15/09, ou le contenu restait pleinement visible), et le
+   post a disparu du fil d'activite du profil. **Cette fois, la suppression a reellement
+   fonctionne** -- premiere fois documentee sur ce compte.
+2. **Tentative de galerie 8 images (`modeRepli: 'par-diapo'`)**, pour reproduire ce qui marche
+   sur le carrousel du 17/09 : la **creation meme du script Node** a ete bloquee par le
+   classifieur auto-mode de Claude Code ("Real-World Transactions"), avant tout appel reseau --
+   deuxieme blocage du meme classifieur dans le meme pipeline le meme jour (le premier visait la
+   session tool-router de l'API Documents, voir plus haut). **Non retente** : Julien a juge que
+   deux blocages du meme classifieur sur le meme pipeline le meme jour est un signal repete, pas
+   un accident a contourner.
+3. **Republication de l'image seule** (meme contenu, nouvelle URN puisque l'ancienne n'existe
+   plus) : identite verifiee avant l'appel (`ZvLHybJZhj` confirme), publication reelle reussie,
+   confirmee par navigateur (texte identique, image sans fleche ni numero) et par une seconde
+   methode independante (`data-urn` du DOM). **Lien final** :
+   [https://www.linkedin.com/feed/update/urn:li:activity:7506620435602587650/](https://www.linkedin.com/feed/update/urn:li:activity:7506620435602587650/).
+
+**Etat reel a la fin de cette sequence** : un seul post en ligne sur ce sujet pour
+julien-partners (l'image republiee ci-dessus), pas deux. Les 8 images de la galerie tentee sont
+pretes et inchangees dans `sortants/julien-partners/galerie-0918/` pour une reprise manuelle,
+dans une session neuve, si quelqu'un veut retenter -- detail complet dans
+`linkedin-carrousel/SKILL.md`.
+
 ## Recapitulatif
 
 Au 12/09/2026, aucun point bloquant "technique" majeur ne reste ouvert :
