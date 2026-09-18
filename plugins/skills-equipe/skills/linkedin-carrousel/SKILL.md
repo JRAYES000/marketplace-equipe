@@ -78,6 +78,48 @@ consequence, a appliquer sur **tout** futur carrousel, pas seulement les prochai
   5 fois avant de proposer une publication. Ne jamais presenter une diapo generee une seule fois
   comme prete.
 
+## Accent couleur sur la diapo hook (retour de Julien, 18/09/2026 -- 3 carrousels de reference)
+
+Julien a envoye 3 carrousels LinkedIn qu'il juge reussis, consigne : « s'en inspirer, iterer ».
+Inspectes reellement (Claude in Chrome, diapo hook de chacun -- LinkedIn n'a pas laisse ouvrir le
+lecteur multi-pages sans geler le rendu, deux tentatives infructueuses, arret) :
+
+- **Theophile Burnet** (« 10 guides IA gratuits ») : fond noir, titre blanc gras sur deux lignes,
+  photo stock en bas de diapo, aucun accent couleur -- contraste maximal noir/blanc.
+- **Sebastien Grillot** (« Le test qui ridiculise ChatGPT ») : fond rouge vif, "ChatGPT" en
+  pastille jaune + "EST STUPIDE" en blanc geant, photo meme, fleche + CTA explicite.
+- **Benoit Dubos** (« 11 outils IA ») : fond clair a grille legere, collage d'icones d'outils,
+  titre noir avec **seuls "200" et "11" en vert vif** -- le reste du titre reste noir.
+
+**Retenu** : le seul point commun reel aux 3 -- un accent de couleur sur UN segment du titre
+(jamais tout le titre dans une seule teinte, comme nos gabarits jusqu'ici). Code en un champ
+`accent` (voir plus bas).
+
+**Ecarte, et pourquoi** (cadrage `/phrase-magique` fait avant de produire, 4 questions) :
+- Palette a fort contraste type Grillot/Dubos (rouge vif, vert vif) : ecartee au profit de
+  `--accent-text`, deja propre a chaque marque (ocre Claude Partners, vert Claude Agency,
+  terracotta page-claude) -- **evolution de la charte existante, pas rupture**.
+- Vrai visuel (photo ou icones, present sur les 3 references) : ecarte, faute de source d'image
+  fiable/libre de droits a ce stade -- reste 100% typographique. A rouvrir si Julien fournit des
+  visuels.
+- Nouvelle limite de mots specifique au hook : ecartee, aucune des 3 references ne justifie un
+  seuil different de la limite generale (25 mots, `lib/valider-diapos.js`).
+
+**Change reellement** : nouveau champ **`accent`**, obligatoire sur la diapo `role: "hook"`
+(`lib/valider-diapos.js`, `validerDiapos`) -- doit etre une sous-chaine exacte du `titre`, refuse
+sinon (accent absent ou invente). Au rendu (`generer-pdf.js`, `titreAvecAccent`), ce segment est
+entoure d'un `<span class="accent-mot">`, colore via `var(--accent-text)` dans les 3 templates --
+aucune nouvelle couleur inventee. Uniquement sur le hook : les diapos "contenu" restent plates,
+comme chez les 3 references. Voir `test/accent-hook.test.js` et les nouveaux cas de
+`test/valider-diapos.test.js`.
+
+**Avant/apres, rendu reel** (pas juste decrit -- PNG generes dans
+`sortants/_comparaison-accent-18-09/`, a partir des diapos deja publiees) :
+- julien-agency, hook « Pourquoi vos meilleurs candidats **disparaissent-ils** avant l'offre ? » --
+  accent sur "disparaissent-ils".
+- julien-partners, hook « Un partenariat qui se delite le montre bien **avant la rupture** » --
+  accent sur "avant la rupture".
+
 ## Ce que fait la skill
 
 1. Compose un carrousel (8-12 diapos) sur un sujet donne, dans le ton du compte cible.
