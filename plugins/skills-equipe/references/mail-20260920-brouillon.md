@@ -171,7 +171,7 @@ profils LinkedIn — voir plus bas), un par jour distinct pour respecter la règ
 jamais deux le même jour" :
 
 - [Codie A. Sanchez](https://www.linkedin.com/posts/julien-rayes_recrutement-pme-activity-7505672128533286914-zq3h)
-  → julien-agency, **publié aujourd'hui 15/09 à 19h00** (avancé sur demande depuis 21h29 pour un
+  → julien-agency, **publié le 15/09 à 19h00** (avancé sur demande depuis 21h29 pour un
   meilleur créneau). **Confirmé réellement en ligne** : texte, gras, emojis et accents vérifiés
   un par un sur le permalien LinkedIn — rien de supposé. Ligne Notion passée à "Publié" avec ce
   lien, et le registre de quota de la skill (`enregistrerPostPublie`) mis à jour en conséquence —
@@ -417,4 +417,4 @@ skills elles-mêmes :
 N'hésite pas à revenir vers moi si tu veux qu'on creuse un point en particulier.
 
 Bien à toi,
-Julien
+Nomena
