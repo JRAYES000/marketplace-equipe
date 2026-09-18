@@ -191,11 +191,18 @@
   .slide[data-role="hook"] .logo { display: none; }
   .slide[data-role="hook"] .swipe-hint { display: flex; }
   .slide[data-role="hook"] .title { font-size: 88px; line-height: 1.05; }
+
+  /* Image seule (post a une seule image, pas de carrousel feuilletable) : masque
+     les reperes qui n'ont de sens que dans un document multi-pages. Parametre
+     explicite {{CONTEXTE}}, jamais devine depuis le nombre de diapos -- voir
+     generer-images.js (genererImageCouverture). */
+  .slide[data-contexte="image-seule"] .swipe-hint,
+  .slide[data-contexte="image-seule"] .pagenum { display: none; }
 </style>
 </head>
 <body>
 <!-- SLIDE:BEGIN -->
-  <div class="slide" data-role="{{ROLE}}">
+  <div class="slide" data-role="{{ROLE}}" data-contexte="{{CONTEXTE}}">
     <div class="accent-rule"></div>
     <div class="content">
       <h1 class="title">{{TITRE}}</h1>
