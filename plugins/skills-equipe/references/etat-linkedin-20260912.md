@@ -1455,3 +1455,56 @@ Ordre de preference si un remplacement est necessaire : William Goron si sa cade
 plus proche des dirigeants PME), sinon Colin Dargent (cadence plus sure). Aucun autre candidat n'est
 garde en reserve : en cas de deux remplacements simultanes, relancer une recherche avec la methode du
 21/09/2026 (voir plus haut).
+
+## Tentative de publication des 3 commentaires en attente -- BLOQUEE, identifiants Composio absents (21/09/2026)
+
+**Etat : aucun commentaire publie. Les 3 textes (relance Alexis Combeaux, Theophile Burnet, Stephane B.)
+restent "prets, en attente de publication sous la bonne identite".** Aucun moyen legitime de publier
+n'est disponible maintenant.
+
+**Ce qui a ete verifie (sans jamais afficher de valeur)** :
+1. **Variables d'environnement de la session** : `COMPOSIO_API_KEY` (cle projet `ak_`, julien-partners),
+   `COMPOSIO_CONSUMER_API_KEY` (cle consumer `ck_`, julien-agency), `COMPOSIO_KEY`, `COMPOSIO_CONSUMER_KEY`,
+   `APIFY_TOKEN`, `NOTION_TOKEN` : **toutes absentes**. Aucune variable au nom "composio" ou "linkedin".
+2. **Fichiers `.env` du depot** : seuls 3 fichiers `.env.example` existent (linkedin-carrousel,
+   linkedin-commentaires, linkedin-veille-virale), **tous les champs sont vides** -- c'est leur role
+   (le depot est public, aucune cle dedans, voir `CLAUDE.md`).
+3. **Comment le code lit les cles** : uniquement `process.env.COMPOSIO_API_KEY` /
+   `process.env.COMPOSIO_CONSUMER_API_KEY` (`lib/composio-canal.js`, `linkedin-commentaires/lib/composio.js`) --
+   aucun fichier de configuration local, aucun gestionnaire de secrets branche dans le code.
+4. **Journal des echecs** (`data/registre-echecs.json`) : absent -- aucune tentative Composio echouee n'a
+   ete journalisee dans cette copie du depot.
+
+**Ce qui n'a PAS ete tente, volontairement** : lire `JRAYES000/claude-config`, fichier `env/secrets.md`
+(l'endroit ou vivent les cles de l'equipe, voir `CLAUDE.md` racine). Ce chemin a deja ete refuse par le
+classifieur de securite du mode automatique lors de sessions precedentes (voir memoire "Lecture
+secrets.md bloquee" / "Cle Composio bloquee") : un blocage de securite est un arret, pas un obstacle a
+negocier, et on ne relance pas une piste deja bloquee sans element nouveau. Aucun contournement essaye.
+
+**Pourquoi les cles ont disparu entre deux sessions** : les cles ne sont jamais persistees d'une session a
+l'autre (`CLAUDE.md`, "Aucun jeton (API) n'est jamais persiste entre sessions") -- elles avaient ete
+exportees dans l'environnement de la session du 17-18/09/2026 qui a publie les commentaires de
+julien-partners (cle `ak_`, connexion `ca_vn1-dhh8VcYf`) et de julien-agency (cle `ck_`, 5 commentaires
+reels du 16/09). L'etape perdue : **l'export des variables d'environnement au lancement de la session
+courante**, pas une expiration constatee -- la validite de ces cles n'a pas pu etre verifiee (aucun appel
+reseau n'a ete tente sans cle).
+
+**Ce qu'il faut pour debloquer** (a la main de Nomena ou de Julien, qui detient le compte Composio et le
+depot prive `claude-config`) :
+1. Recuperer les deux cles dans `claude-config/env/secrets.md` (ou, si l'une est perdue/expiree, la
+   regenerer : cle `ck_` dans Composio, compte personnel -> "Sessions & API Key", surface "FOR YOU" ; cle
+   `ak_` dans les reglages du projet Composio).
+2. Les exporter dans le terminal qui lance Claude Code, AVANT le lancement :
+   `COMPOSIO_API_KEY` (julien-partners) et `COMPOSIO_CONSUMER_API_KEY` (julien-agency).
+3. Ouvrir une session neuve (une session deja ouverte ne voit pas les variables ajoutees apres coup).
+
+**Etapes restant a faire une fois les cles disponibles (pour ne pas les decouvrir au dernier moment)** :
+- `publierCommentaire` exige le **`shareUrn`** du post cible (jamais `urn:li:activity:`, refuse par l'API).
+  Aujourd'hui on n'a que les URN d'activite : Theophile Burnet `urn:li:activity:7507680084963581953`,
+  Stephane B. `urn:li:activity:7506979597276610560`, Alexis Combeaux `urn:li:activity:7506238578012741633`.
+  Les `shareUrn` sont a retrouver (Apify, ou lien de partage du post) avant publication.
+- **Relance Alexis** : c'est une *reponse* a son commentaire du 19/09 ; `publierCommentaire` la supporte via
+  `parentCommentUrn` (URN du commentaire d'Alexis, a relever aussi).
+- `verifierConnexionAvantPublication` refusera de publier si la connexion Composio reellement active ne
+  correspond pas a l'`actorUrn` demande : garde-fou d'identite, a laisser jouer.
+- Chaque texte sera remontre a Nomena et publie un par un avec accord explicite au moment de l'action.
