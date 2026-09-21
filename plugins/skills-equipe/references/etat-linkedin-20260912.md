@@ -1541,3 +1541,77 @@ post, son acceptation par `LINKEDIN_CREATE_COMMENT_ON_POST` reste a confirmer ; 
 `parentCommentUrn` (`urn:li:activity:` tel qu'affiche par LinkedIn ou `urn:li:share:` de la cible) est a
 confirmer -- en cas de refus, le message d'erreur Composio le dira, aucun commentaire n'est publie sur un
 refus.
+
+## Suppression des deux anciens carrousels Claude Agency (12/09 et 14/09) -- nouvelle piste, cause probable trouvee, SUPPRESSION NON TENTEE (21/09/2026)
+
+**Etat : les deux posts sont TOUJOURS EN LIGNE. Aucune requete de suppression n'a ete envoyee depuis cette
+session** : les cles Composio sont absentes (`COMPOSIO_API_KEY` et `COMPOSIO_CONSUMER_API_KEY` non
+definies, verifie), donc les etapes 2 et 3 du plan (appel via `proxy_execute`, choix du canal) n'ont pas
+pu etre executees. Seule l'etape 1 (identification du type des posts) a ete faite, en lecture seule via
+Chrome. **Aucune suppression via l'interface Chrome non plus** : le compte connecte est celui de Nomena,
+pas l'auteur des posts (Julien Rayes).
+
+### Etape 1 -- ce que ce sont vraiment (releve reel, 21/09/2026)
+- **Les deux posts existent encore** : ouverts via leurs permaliens `linkedin.com/posts/julien-rayes_...`,
+  auteur "Julien Rayes ... | Claude Agency", age "1 sem.".
+  - 12/09 : `https://www.linkedin.com/posts/julien-rayes_carrouselpdf-activity-7505146405649559552-m6yM`
+  - 14/09 : `https://www.linkedin.com/posts/julien-rayes_pourquoi-vos-meilleurs-candidats-disparaissent-ils-activity-7505170085091840000-6DCd`
+- **Ce sont bien des documents PDF** : la page contient le composant de visionneuse de document LinkedIn
+  (classes `update-components-document__container` et `document-s-container`) pour les deux.
+- **Decouverte -- les identifiants utilises le 15/09 etaient faux.** Les URN reels embarques dans chaque
+  page sont de type **`ugcPost`**, et leur numero **differe de celui de l'activite** :
+  | Post | URN d'activite | URN reel a supprimer |
+  | --- | --- | --- |
+  | 12/09 | `urn:li:activity:7505146405649559552` | **`urn:li:ugcPost:7505146404927860736`** |
+  | 14/09 | `urn:li:activity:7505170085091840000` | **`urn:li:ugcPost:7505170084290596864`** |
+  Le Point n°15/17 avait construit `urn:li:share:7505170085091840000` et `urn:li:share:7505146405649559552`,
+  soit **le numero d'activite recopie derriere un prefixe `share`** : ces entites n'existent pas, ce qui
+  explique le `404 NOT_FOUND "Could not find entity"`, y compris pour la forme `ugcPost` essayee alors
+  (meme numero d'activite, donc encore un identifiant inexistant). Le `{"deleted": true}` de l'action
+  native `LINKEDIN_DELETE_POST` etait un faux positif sur un identifiant qui ne designait rien. **Hypothese
+  "posts crees via l'API Documents, non reconnus par /rest/posts" a ecarter : le vrai probleme est
+  l'identifiant, pas le type du post.**
+- **Piege de verification** : ouvrir `linkedin.com/feed/update/urn:li:share:<numero d'activite>/` affiche
+  "This post cannot be displayed" **meme pour un post qui existe** (verifie ce jour sur les deux posts, alors
+  qu'ils sont en ligne). Ce message ne prouve donc PAS une suppression. **Seule verification fiable** :
+  ouvrir le permalien `/posts/julien-rayes_...` (doit afficher la page d'erreur) ET verifier l'absence du
+  post dans `https://www.linkedin.com/in/julien-rayes/recent-activity/all/`.
+
+### Documentation LinkedIn consultee (learn.microsoft.com, Posts API et Documents API, version 2026-09)
+- **Documents API** : operations documentees = `initializeUpload`, upload du fichier, `GET` d'un document,
+  batch get. **Aucun endpoint de suppression de document** -- on ne supprime pas un document, on supprime
+  le post qui l'utilise. La piste "DELETE sur l'API Documents" n'existe donc pas.
+- **Posts API, section "Delete Posts"** : `DELETE https://api.linkedin.com/rest/posts/{encoded ugcPostUrn|shareUrn}`,
+  en-tetes `Linkedin-Version: {AAAAMM}`, `X-Restli-Protocol-Version: 2.0.0`, **`X-RestLi-Method: DELETE`**,
+  reponse de succes **`204`**. Les deux formes d'URN (`ugcPost` ou `share`) sont acceptees ; les URN doivent
+  etre encodes (`urn%3Ali%3AugcPost%3A...`). La suppression est idempotente (un post deja supprime renvoie
+  aussi `204`) : **un `204` ne suffit pas, il faut verifier par le navigateur** (voir plus haut).
+  Suppression par lot non supportee. Note : le point de terminaison ne mentionne aucune restriction pour les
+  posts contenant un document.
+  (Le point d'en-tete `X-RestLi-Method: DELETE` n'est pas mentionne dans le compte rendu du 15/09 : a
+  verifier qu'il est bien envoye.)
+
+### Etape 3 -- quel canal a le droit de supprimer (analyse documentaire, non testee)
+Ces deux carrousels ont ete publies sous l'identite **julien-agency = connexion `averse-cooser`, canal MCP
+partage (cle consumer `ck_`, `COMPOSIO_CONSUMER_API_KEY`)**. Le canal REST dedie Claude Partners (cle
+`ak_`, connexion `ca_vn1-dhh8VcYf`) n'a aucune connexion pour julien-agency (verifie le 17/09/2026, voir
+`linkedin-commentaires/SKILL.md`) : **une suppression tentee avec la cle `ak_` echouerait (403 ou 404)
+et ne prouverait rien.** La suppression doit passer par le **meme canal que la creation** : MCP + cle `ck_`.
+La suppression reussie du 18/09 (post image seule, `LINKEDIN_DELETE_LINKED_IN_POST` via REST/`ak_`) portait
+sur un post julien-partners, elle ne s'applique pas ici.
+
+### Plan pret pour la session neuve (a executer avec accord explicite de Nomena au moment de l'action)
+Prealable : session lancee avec `COMPOSIO_CONSUMER_API_KEY` exportee (`ck_`, voir "Tentative de publication
+des 3 commentaires" plus haut pour l'obtenir). Pour chaque post, dans cet ordre :
+1. `GET https://api.linkedin.com/rest/posts/urn%3Ali%3AugcPost%3A<id>?viewContext=AUTHOR` via
+   `proxy_execute` : doit renvoyer `200` avec `content.media.id = urn:li:document:...` -- confirme que
+   l'identifiant designe bien le post (et le bon auteur) **avant** de supprimer.
+2. `DELETE https://api.linkedin.com/rest/posts/urn%3Ali%3AugcPost%3A<id>` avec `Linkedin-Version: 202608`,
+   `X-Restli-Protocol-Version: 2.0.0`, `X-RestLi-Method: DELETE` ; attendu `204`.
+3. Verification independante : permalien `/posts/julien-rayes_...` (page d'erreur attendue) + absence dans
+   le fil d'activite de `julien-rayes`. Ne jamais declarer "supprime" sur le seul `204`.
+Ordre : 12/09 (`...7505146404927860736`) puis 14/09 (`...7505170084290596864`), une suppression a la fois.
+
+### Si ca echoue aussi (403, ou `204` sans disparition)
+Alors il faut que **Julien les supprime lui-meme** depuis son profil (menu ••• -> Supprimer), avec les deux
+permaliens ci-dessus : ni cette session, ni le CLI, ni le compte Chrome de Nomena ne peuvent le faire.
