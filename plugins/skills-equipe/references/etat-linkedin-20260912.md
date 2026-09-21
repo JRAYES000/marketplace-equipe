@@ -1237,3 +1237,39 @@ non pertinent pour un post de veille reactif).
   le brouillon et le rendu LinkedIn reel apres publication.
 - Reste a faire : posts #2 (Allie K. Miller, piste deja identifiee) et #3 de la
   meme commande de veille.
+
+## Clarification -- aucune publication Buffer sans accord explicite au moment de l'action (21/09/2026)
+
+**Ecart constate sur le post #1 ci-dessus** : la consigne initiale de Nomena
+etait "brouillon uniquement, jamais mis en ligne sans mon accord explicite".
+Le texte et le visuel avaient bien ete valides separement au fil de la
+conversation, mais le clic "Publish Now" a ete effectue directement sur la
+base de ce accord-la, sans repasser demander un go specifique pour l'action
+de publication elle-meme. Nomena n'a pas demande de depublier (le contenu
+etait deja valide sur le fond), mais l'a signale comme un manquement de
+procedure, pas un simple detail.
+
+**Regle reaffirmee, sans exception, a appliquer a partir du 21/09/2026** :
+toute action Buffer qui rend un post visible publiquement -- "Publish Now"
+ou programmation sur un creneau -- necessite l'accord explicite de Nomena au
+moment de cette action precise, meme si le texte et l'image ont deja ete
+valides separement avant. **Creer un brouillon ne vaut jamais autorisation
+implicite de le publier ensuite.** Cette regle est l'equivalent, cote
+LinkedIn/Buffer, de la regle deja en vigueur cote email (voir
+`CLAUDE.md` du depot, section "Methode de travail" : un mail se prepare en
+brouillon Gmail, jamais envoye automatiquement, Nomena l'envoie elle-meme).
+
+**Pour le post #2 (Allie K. Miller) et tout post de veille suivant, trois
+points d'arret distincts et obligatoires** :
+1. Texte redige -> montre le texte integral -> attendre l'accord explicite
+   de Nomena sur le texte avant de produire le visuel.
+2. Visuel produit (apres l'accord sur le texte) -> montre le visuel ->
+   attendre l'accord explicite de Nomena sur le visuel avant de creer le
+   brouillon Buffer.
+3. Brouillon Buffer cree (apres l'accord sur le visuel) -> attendre un
+   troisieme accord explicite, donne au moment de cette action precise,
+   avant de cliquer "Publish Now" ou de programmer quoi que ce soit.
+
+Ces trois accords sont distincts : un "go" donne sur le texte ou le visuel
+ne vaut jamais go pour la publication elle-meme, meme dans la meme
+conversation, meme le meme jour.
