@@ -1293,7 +1293,8 @@ visuel valide, brouillon montre, puis go de publication separe).
 - **Validateur** : ce post a motive l'affinement de `validerChiffreSource` (carrousel 1.3.2) : un
   chiffre-anecdote (ici "79 ans") n'exige plus la parenthese collee si une ligne "Source : ..."
   finale couvre le post.
-- Reste a faire : post #3 de la commande de veille.
+- Reste a faire : post #3 de la commande de veille. **[Fait le 21/09/2026 a 14h17 : voir la section
+  "Post #3 de veille (Andrew Ng)" en fin de fichier.]**
 
 ## Commentaires du 21/09/2026 -- 3 textes prets, EN ATTENTE de publication sous la bonne identite
 
@@ -1615,3 +1616,37 @@ Ordre : 12/09 (`...7505146404927860736`) puis 14/09 (`...7505170084290596864`), 
 ### Si ca echoue aussi (403, ou `204` sans disparition)
 Alors il faut que **Julien les supprime lui-meme** depuis son profil (menu ••• -> Supprimer), avec les deux
 permaliens ci-dessus : ni cette session, ni le CLI, ni le compte Chrome de Nomena ne peuvent le faire.
+
+## Post #3 de veille (Andrew Ng) -- publie le 21/09/2026 ; commande de veille de la semaine TERMINEE
+
+**Statut final : PUBLIE** (pas programme) -- via "Publish Now" depuis le brouillon Buffer, sur go explicite
+de Nomena donne dans la conversation, au moment de l'action (texte et visuel avaient ete montres
+integralement juste avant).
+
+- **Canal** : Claude Agency (`6aa87a19ea19ca0bde439c6b`, canal Buffer "Julien Rayes").
+- **Date et heure** : 21/09/2026, 14h17 (heure affichee par Buffer, fuseau Paris ; 15h17 a Madagascar).
+  Brouillon cree le 21/09/2026 a 9h02. Compteur Sent 57 -> 58, onglet Drafts vide apres publication.
+- **Lien direct** : https://www.linkedin.com/feed/update/urn:li:share:7507774928880885760/
+- **Verification independante sur LinkedIn meme** (permalien ouvert, pas seulement le retour de Buffer) :
+  auteur "Julien Rayes ... | Claude Agency", age "7m" a la lecture ; texte identique au brouillon valide
+  ("Qui audite le logiciel qui entoure votre modele d'IA ?", gras Unicode sur "deux briques", 4 emojis,
+  ligne "Source : post LinkedIn d'Andrew Ng, 25/08/2026.", hashtags #IA #Cybersecurite) ; image sur fond
+  creme, "Des qu'un agent lit vos mails, mieux vaut verifier que croire sur parole." ("verifier" en vert
+  fonce) -- identique a l'image du brouillon (1080x1350).
+- **Limites de la verification** : le pied de page "CLAUDE AGENCY" de l'image n'a pas ete vu dans la partie
+  visible de la capture (present sur le fichier du brouillon) ; le texte de la page LinkedIn mentionnait
+  deux fois "Activate to view larger image" sans que la presence d'une seconde image ait ete controlee.
+
+**Commande de veille de la semaine : les 3 posts sont publies.**
+| # | Source | Publie le | Lien |
+| --- | --- | --- | --- |
+| 1 | Bernard Marr | 18/09/2026, 20h59 | https://www.linkedin.com/feed/update/urn:li:share:7506789066315649024/ |
+| 2 | Allie K. Miller | 21/09/2026, 8h13 | https://www.linkedin.com/feed/update/urn:li:share:7507683335079473152/ |
+| 3 | Andrew Ng | 21/09/2026, 14h17 | https://www.linkedin.com/feed/update/urn:li:share:7507774928880885760/ |
+
+**Note -- "Andrew Ng = post #3" est une DEDUCTION.** Avant cette mise a jour, ce fichier ne nommait pas
+explicitement le post #3 : la section du post #2 disait seulement "Reste a faire : post #3 de la commande
+de veille". L'identification avec le brouillon Andrew Ng vient d'un rapprochement (brouillon unique du canal,
+cree le 21/09 a 9h02, seul candidat restant apres Bernard Marr et Allie K. Miller). Elle a ete signalee
+comme deduction, a consigner comme telle, sur instruction de l'utilisateur de la session (mise a jour du
+21/09/2026) ; aucune mention ecrite anterieure du fichier ne la confirme.
