@@ -1273,3 +1273,24 @@ points d'arret distincts et obligatoires** :
 Ces trois accords sont distincts : un "go" donne sur le texte ou le visuel
 ne vaut jamais go pour la publication elle-meme, meme dans la meme
 conversation, meme le meme jour.
+
+## Post #2 de veille (Allie K. Miller) -- publie le 21/09/2026
+
+**Statut final : PUBLIE** (pas programme) -- via "Publish Now" depuis le brouillon, sur go explicite
+de Nomena donne au moment de l'action (regle des trois points d'arret respectee : texte valide,
+visuel valide, brouillon montre, puis go de publication separe).
+
+- **Canal confirme** : Claude Agency (`6aa87a19ea19ca0bde439c6b`). Verification independante sur
+  LinkedIn meme : auteur affiche "Julien Rayes ... | Claude Agency". Le titre de profil a change
+  depuis le post #1 ("Consultants IA a 100 EUR HT/jour : SEO, SEA, setting..." au lieu de "Vos relances
+  administratives..."), mais le suffixe "| Claude Agency" reste le repere fiable.
+- **Date et heure** : 21/09/2026, 8h13 heure de Paris (9h13 a Madagascar), affiche "Sent 57" dans Buffer.
+- **Lien direct** : https://www.linkedin.com/feed/update/urn:li:share:7507683335079473152/
+- **Contenu** : texte final avec ligne "Source : post LinkedIn d'Allie K. Miller, 17/09/2026." avant les
+  hashtags (#IA #Entrepreneuriat), 1391 caracteres UTF-16 ; image `iteration-6.png`
+  (`sortants/_veille-post2-allie-miller/`, accent "bowling", logo Claude Agency). Texte et image
+  relus sur la page LinkedIn reelle apres publication : identiques au brouillon valide.
+- **Validateur** : ce post a motive l'affinement de `validerChiffreSource` (carrousel 1.3.2) : un
+  chiffre-anecdote (ici "79 ans") n'exige plus la parenthese collee si une ligne "Source : ..."
+  finale couvre le post.
+- Reste a faire : post #3 de la commande de veille.
