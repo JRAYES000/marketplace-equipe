@@ -1358,3 +1358,30 @@ Virginie Caurraze 5 j, Leonel Adagbe 5 j, Cecilia Boavista 1 sem, Jean Zendji 1 
 2 sem, Romain Charissou 1 mois, Benjamin Lacroix 2 mois, Raphael Mizrahi 2 mois. **Page d'activite
 illisible (vide apres deux essais) : Alexandre Touraine, Pierre-Emmanuel Cochet, Mohamed Houmadi
 Baydama** -- a controler a part, l'inactivite n'est pas etablie.
+
+### Controle des 3 comptes a page d'activite illisible (21/09/2026, second passage, methode differente)
+
+Le premier passage (`/recent-activity/all/`, attente de 3,5 a 7 s) avait renvoye une page vide pour
+ces trois comptes. Cause reelle : ces pages sont lentes a charger et mon extraction ne reconnaissait
+pas les ages en annees ("1yr", "3yr"). **Methode qui fonctionne** : ouvrir l'onglet Posts
+(`/recent-activity/shares/`), attendre environ 9 s, faire defiler par paliers, lire la ligne
+"Loaded N Posts posts" puis les ages (regex incluant `yr`). Verifie aussi en ouvrant le profil
+lui-meme (section "Activity") pour Alexandre Touraine.
+
+**Resultat : aucun des trois n'a de post frais (<4 h), ni meme recent. Tous sont inactifs comme auteurs.**
+- **Alexandre Touraine** : 7 posts charges, le plus recent est un *repost* d'un contenu d'un autre
+  auteur vieux d'**1 an**. Section Activity du profil : seulement des commentaires (il y a 3 sem.,
+  1 mois, 2 mois). Aucun post original recent.
+- **Pierre-Emmanuel Cochet** : 13 posts charges, le plus recent est un *repost* vieux de **3 ans** ;
+  les suivants datent de 5 et 6 ans. Compte dormant.
+- **Mohamed Houmadi Baydama** : 20 posts charges, le plus recent est un post original vieux de
+  **5 mois**.
+
+**Consequence** : aucun commentaire prepare pour ces comptes. Les trois depassent largement
+`SEUIL_INACTIVITE_JOURS` (28 jours) de `genererRepliAucunCandidat` : la recommandation de la skill
+s'applique -- les remplacer dans `comptes_cibles` de julien-agency (14 comptes configures) par des
+comptes qui publient reellement, comme pour le complement du 16/09/2026 (voir
+`references/comptes-cibles-proposition-20260916-complement-agence.md`). **Non fait** : aucune
+modification de `reglages-comptes.json` sans decision de Nomena.
+Statut des 3 textes de commentaires prets du 21/09/2026 : inchange, toujours en attente de
+publication sous la bonne identite.
