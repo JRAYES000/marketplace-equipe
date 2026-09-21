@@ -1294,3 +1294,67 @@ visuel valide, brouillon montre, puis go de publication separe).
   chiffre-anecdote (ici "79 ans") n'exige plus la parenthese collee si une ligne "Source : ..."
   finale couvre le post.
 - Reste a faire : post #3 de la commande de veille.
+
+## Commentaires du 21/09/2026 -- 3 textes prets, EN ATTENTE de publication sous la bonne identite
+
+**Statut : aucun commentaire publie.** Decision de Nomena (21/09/2026) : ne rien publier sous la
+mauvaise identite. Le LinkedIn ouvert dans le Chrome de la session est celui de **Nomena ANDRIAN...**
+(profil de la colonne de gauche sur toutes les pages lues), pas celui de **Julien Rayes**, sous
+lequel partent les commentaires de julien-partners et julien-agency (via Composio). Poster a la main
+depuis ce navigateur les aurait signes Nomena. Aucun jeton n'est defini dans la session (ni
+`APIFY_TOKEN`, ni `COMPOSIO_API_KEY`/`COMPOSIO_CONSUMER_API_KEY`, ni `NOTION_TOKEN`) : recherche de
+posts faite a la main via Chrome (repli documente), publication API impossible.
+
+**Deux voies pour publier ensuite (a la main de Nomena)** :
+1. Nomena se connecte elle-meme a LinkedIn en tant que Julien Rayes dans ce Chrome ; Claude publie
+   ensuite un par un, avec accord explicite sur chaque texte au moment de l'action.
+2. On attend que les cles Composio soient exportees pour publier via l'API sous le bon compte (canal
+   deja utilise pour les posts).
+
+### Suivi a 3 jours (mesure sur LinkedIn le 21/09/2026, ~9h Paris)
+- **Alexis Combeaux** (post du 17/09, 15 commentaires, un commentaire encore ajoute la veille) : notre
+  commentaire du 18/09 a **1 j'aime et 1 reponse de l'auteur** (19/09) : "C'est exactement ca, la peur
+  de perdre des prospects mais au final tu tombes simplement dans l'oubli et personne ne te
+  recommandera". Interaction en retour reelle -> relance de cloture retenue.
+- **Theophile Burnet** (post du 17/09, 117 reactions, 28 commentaires) : les 18 commentaires charges
+  datent tous de "3 j", notre commentaire a 0 j'aime et 0 reponse -> discussion morte, **pas de
+  relance**.
+
+### Textes prets (validateur du depot passe, sauf remarque)
+1. **Alexis Combeaux -- reponse de cloture** (julien-partners), UNE phrase, statut *pret, en attente de
+   publication sous la bonne identite* :
+   "Se faire recommander suppose d'abord d'etre identifiable en une phrase, et c'est precisement ce
+   que la specialisation offre a un freelance."
+   Remarque : `validerCommentaire` exige 2 a 4 phrases (`PHRASES_MIN = 2`) et refuse ce texte sur ce
+   seul point ; experience inventee, quantification vague et accents passent. Une reponse de cloture
+   d'une phrase est un choix assume de Nomena, pas une exception de la regle.
+2. **Theophile Burnet -- post ChatGPT/Astra** (julien-partners, post `urn:li:activity:7507680084963581953`,
+   publie 21/09 ~1h avant le releve, 30 reactions / 24 commentaires), genre vraie_question, valide par
+   Nomena, statut *pret, en attente de publication sous la bonne identite* :
+   "Tester chaque outil sur une vraie tache plutot que de choisir un camp, c'est le conseil de ce post
+   qui me parait le plus utile pour un dirigeant qui ne sait pas par ou commencer. Classer dix-sept
+   ressources par usage evite aussi de repartir de zero a chaque nouveau modele. Sur quelle tache
+   precise Astra t'a-t-il fait changer d'avis en premier ?"
+   (accents corrects dans la version a poster ; ici ecrits sans accents comme le reste du fichier.)
+3. **Stephane B. -- post "quel outil d'IA choisir"** (julien-agency, post
+   `urn:li:activity:7506979597276610560`, ~24 h : **derogation** au plafond de fraicheur de 4 h accordee
+   par Nomena pour pertinence audience, sous le plafond dur de 48 h), genre vraie_question, validateur
+   complet passe (2 phrases, 395 caracteres), statut *pret, en attente de publication sous la bonne
+   identite* :
+   "Le passage ou l'IA arrive par mise a jour et repart de la meme facon change la maniere de gouverner
+   une entreprise, puisqu'un projet avait au moins un debut et une fin. Parmi vos quatre questions,
+   laquelle revele le plus souvent un angle mort chez un dirigeant : les fonctions d'IA activees sans
+   decision, les acces aux donnees, l'anciennete des cles ou les developpements qui ne tournent plus ?"
+
+### Abandonne
+- **Theo Meuriot** (post IDE, julien-agency) : abandonne par Nomena, aucun commentaire (sujet eloigne de
+  la cible, 3e passage en 6 jours).
+
+### Releve des comptes cibles (21/09/2026, ~9h Paris) -- 2 posts de moins de 4 h sur 22 comptes
+Frais : Theophile Burnet (1 h), Theo Meuriot (1 h). Autres derniers posts : Florent Pontiac 1 j,
+Yohann Nezri 1 j, Stephane B. 1 j, Victor Partouche-Sebban 1 j (invitations d'evenements, peu utile),
+Valentin Muller 2 j, Emmanuel Brisseau 2 j, Xavier Vincent 3 j, Alexis Combeaux 3 j, Mehdi Stili 3 j,
+Virginie Caurraze 5 j, Leonel Adagbe 5 j, Cecilia Boavista 1 sem, Jean Zendji 1 sem, Georges Solutions
+2 sem, Romain Charissou 1 mois, Benjamin Lacroix 2 mois, Raphael Mizrahi 2 mois. **Page d'activite
+illisible (vide apres deux essais) : Alexandre Touraine, Pierre-Emmanuel Cochet, Mohamed Houmadi
+Baydama** -- a controler a part, l'inactivite n'est pas etablie.
