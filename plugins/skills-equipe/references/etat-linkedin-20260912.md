@@ -1,30 +1,29 @@
-> **PAUSE PUBLICATION -- 21/09/2026, en attente de confirmation explicite de Julien sur le point n°20 du 18/09**
+> **PAUSE PUBLICATION LEVEE -- 21/09/2026** (l'ancienne bannière "PAUSE PUBLICATION -- 21/09/2026" est retirée)
 >
-> Decision explicite de Nomena : **pause sur les actions listees ci-dessous** (perimetre precis
-> plus bas, avec une exception pour Buffer) tant que le point n°20 de Julien du 18/09/2026 n'est pas referme
-> avec lui. L'instruction du 18/09
-> disait de ne rien republier ni modifier sur le contenu LinkedIn deja en ligne tant que le point de
-> forme/process n'etait pas traite avec lui, et personne ne peut confirmer que c'est fait.
+> **Pourquoi elle est levée.** La pause du 21/09/2026 citait "l'instruction de Julien du 18/09/2026 -- point
+> n°20" : ne rien republier ni modifier sur le contenu LinkedIn déjà en ligne tant que le point de
+> forme/process n'était pas traité avec lui. Vérification faite le 21/09/2026 :
+> - "Point n°20" est le numéro d'une **section de ce fichier** (rédigée par une session d'assistant, commit
+>   `01097b9`, 18/09/2026), pas un point numéroté par Julien.
+> - La phrase "Consigne explicite de Julien pour la suite immediate" (section "Point n°20") est une
+>   **paraphrase sans citation exacte, datée, de Julien**. Les seuls mots de Julien cités dans cette section
+>   sont "de l'AI slop" et "sinon, au minimum...". Aucun autre fichier du dépôt (SKILL.md, references,
+>   brouillon de mail, audits) ne contient d'interdiction de republier venant de lui.
+> - Nomena a relu le fil d'e-mails réel avec Julien : aucune citation exacte de lui n'interdit de republier
+>   ou de modifier du contenu LinkedIn déjà en ligne. Le mail du 18/09 (13:22), seul à porter des règles
+>   strictes ce jour-là, traite de la forme de l'e-mail (adresses, 50 lignes, mise en forme, Humanizer) et du
+>   fond des posts (hook/gras/emojis, logo carrousel manquant, 5 itérations minimum).
 >
-> - **Perimetre PRECISE de la pause (precision de Nomena, 21/09/2026)** -- elle est limitee a :
->   1. les **nouvelles publications de commentaires / relances** : Alexis Combeaux, Theophile Burnet,
->      Stephane B. (ne pas appeler `LINKEDIN_CREATE_COMMENT_ON_POST` dessus) ;
->   2. la **galerie julien-partners de 8 images** ;
->   3. la **suppression des deux anciens carrousels** (12/09 et 14/09).
-> - **EXCEPTION EXPLICITE -- les posts Buffer deja programmes au 21/09/2026 ne sont PAS suspendus.** Les
->   10 posts de "Up Next" dans Buffer (dont un le 22/09 a 8h et deux le 23/09) partent normalement : decision
->   explicite de Nomena, ils ont ete programmes avant la pause. **Ne pas les suspendre, ne pas les
->   deprogrammer, ne pas les couper "par prudence".**
-> - **Toute autre action de publication LinkedIn NON listee ici** (nouveau post de veille, nouveau carrousel,
->   ou toute autre publication non anticipee) **doit etre confirmee avec Nomena avant d'agir** : ne pas la
->   traiter comme autorisee par defaut simplement parce qu'elle n'apparait pas dans la liste des trois
->   actions en pause.
-> - **Reste pret, documente, NON publie** : la relance a Alexis Combeaux, les commentaires Theophile Burnet et
->   Stephane B. (voir plus bas).
-> - **Ce qui est deja publie reste tel quel** (Andrew Ng, etc.) : la pause porte sur les NOUVELLES actions,
->   pas sur un rollback.
-> - **Levee de la pause** : uniquement sur une instruction explicite de Nomena confirmant l'accord de Julien --
->   jamais sur une deduction ni un silence prolonge.
+> La pause reposait donc sur une déduction ou une mauvaise attribution, pas sur une instruction réelle de
+> Julien. **Décision de Nomena, 21/09/2026 : pause levée.** Les publications qui étaient en attente peuvent
+> reprendre normalement : relance Alexis Combeaux, commentaires Théophile Burnet et Stéphane B., galerie
+> julien-partners de 8 images, suppression des deux anciens carrousels (12/09 et 14/09).
+>
+> **Ce qui ne change pas** (règles de fond, sans lien avec la pause) : accord explicite de Nomena au moment de
+> chaque publication ou suppression (`CLAUDE.md`, "Rien de public sans feu vert explicite") ; trois accords
+> distincts pour Buffer (texte, visuel, publication) ; garde-fou d'identité Composio ; d'après le point n°16,
+> Julien supprime lui-même les deux anciens carrousels, sauf nouvelle décision. Les 10 posts Buffer déjà
+> programmés au 21/09/2026 n'ont jamais été suspendus.
 
 # Etat des lieux -- skills linkedin-* (mis a jour le 12/09/2026, identite `averse-cooser` confirmee le meme jour)
 
@@ -1049,6 +1048,9 @@ detaillees et inscrites dans les skills concernees le jour meme (voir commits du
 
 **Consigne explicite de Julien pour la suite immediate** : ne rien republier ni modifier sur le
 contenu LinkedIn deja en ligne tant que ce point de forme/process n'est pas traite avec lui.
+**[Correction du 21/09/2026 : cette phrase est une paraphrase d'une session d'assistant, sans citation
+exacte, datée, de Julien ; le fil d'e-mails réel ne contient aucune interdiction de republier ou de modifier.
+Elle n'a jamais valu consigne de pause -- voir la note de levée en tête de fichier.]**
 **Prochaine etape** : nouveau brouillon de mail, <=50 lignes, HTML, prepare en brouillon Gmail
 (`nomenaf.pro@gmail.com`, destinataire `contact@claudeagency.fr`), jamais envoye automatiquement,
 montre a Nomena avant meme d'etre laisse en brouillon.
