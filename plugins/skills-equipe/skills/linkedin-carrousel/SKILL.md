@@ -227,7 +227,14 @@ convertit et refuse (code de sortie 1) :
 - Formulations interdites (demande d'engagement, tiret long, "ce n'est pas X c'est Y", "ravi de
   vous annoncer", "taguez quelqu'un", critique de LinkedIn, MAJUSCULES) -> refus.
 - Chiffre sans `(source : ...)` attache -> refus -- un nombre en toutes lettres ("sept") n'est
-  jamais concerne, seule une suite de chiffres l'est.
+  jamais concerne, seule une suite de chiffres l'est. **Affine le 21/09/2026** (demande de Nomena, post
+  de veille Allie K. Miller) : la source collee n'est exigee que pour un chiffre-PREUVE (pourcentage,
+  volume, classement, montant, donnee d'etude). Un chiffre-ANECDOTE (age "79 ans", annee/date, duree,
+  "12 personnes" dans une salle) est dispense de la parenthese collee **si et seulement si** le post
+  porte une ligne `Source : ...` non vague (avant les hashtags) qui couvre l'anecdote. Liste fermee de
+  motifs : un chiffre hors liste reste strict ; "N personnes/ans" dans une phrase de sondage/etude reste
+  une donnee d'etude (refuse). Voir `estDetailAnecdote` et les 7 tests du 21/09 dans
+  `test/valider-post.test.js`.
 
 ### Accents manquants -- `lib/valider-orthographe.js`
 

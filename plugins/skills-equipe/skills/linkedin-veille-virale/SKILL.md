@@ -28,7 +28,11 @@ importent tous les deux `convertirGras`/`validerAccroche`/`validerEmojis` depuis
 `linkedin-carrousel/lib/valider-post.js` -- refus explicite (throw), avant tout appel reseau cote
 `publierPost`, jamais un simple avertissement. Volontairement limite a ces trois fonctions : pas
 `validerLongueur`/`validerHashtags`/`validerChiffreSource`, propres au format carrousel et jamais
-demandes pour la veille. `lib/valider-orthographe.js` (accents) reste applique en plus, comme
+demandes pour la veille. **Precision du 21/09/2026 (0.2.1)** : un post de veille prepare par la voie Buffer
+(texte passe dans `linkedin-carrousel/generer-post.js`, comme le post #2) beneficie du
+`validerChiffreSource` affine ce jour-la : la source collee n'est plus exigee pour un detail d'anecdote
+(age, date, duree) tant qu'une ligne `Source : ...` finale couvre le post -- le code modifie est dans
+`linkedin-carrousel`, aucun changement de comportement dans cette skill. `lib/valider-orthographe.js` (accents) reste applique en plus, comme
 avant. **Incident qui a motive ce fix** : avant le 18/09/2026, `lib/publier.js` ne validait rien
 du tout avant de publier, et `dry-run.js` ne verifiait que les accents -- les trois posts deja
 publies (Codie Sanchez, Jason Feifer, Justin Welsh) n'avaient donc jamais pu passer par un
