@@ -1424,3 +1424,34 @@ Comme pour Mehdi Stili, **a revalider dans 2-3 semaines** (autour du 12/10/2026)
 julien-agency toujours a 14 comptes (3 URL remplacees, note `_comptes_cibles_source` completee),
 `node --test` : 112 tests OK. `linkedin-commentaires` 1.2.5, plugin 1.23.3, README a jour.
 Rien d'autre touche (Buffer, posts, les 3 commentaires en attente : inchanges).
+
+### RAPPEL -- revalider les 3 nouveaux comptes de julien-agency vers le 12/10/2026
+
+**Echeance : autour du 12/10/2026** (trois semaines apres l'integration du 21/09/2026). Ce n'est qu'un
+rappel ecrit : aucune tache automatique n'est planifiee, il faut penser a ouvrir ce paragraphe a la date.
+A faire en meme temps que la revalidation de Mehdi Stili (`en_observation`, a reevaluer des le
+30/09/2026, voir `reglages-comptes.json`).
+
+**Comptes a revalider** :
+- Christine Humberset -- `https://www.linkedin.com/in/christine-humberset-5a95b210a/`
+- Farouk Houjri -- `https://www.linkedin.com/in/farouk-houjri-a04043161/`
+- Julien D. (Dutartre) -- `https://www.linkedin.com/in/julien-dutartre/`
+
+**Comment (meme methode que le 21/09/2026)** : pour chacun, ouvrir l'onglet Posts
+(`.../recent-activity/shares/`), attendre environ 9 s, defiler par paliers, lire les 5 derniers posts
+un par un (age, original ou repost -- reconnaitre aussi les ages en annees "yr"). **Critere de maintien** :
+au moins 3 des 5 derniers posts originaux dans les 7 derniers jours (rappel : "1 sem." = 7 a 13 jours).
+Un compte qui retombe sous ce seuil sur deux releves d'affilee, ou dont le dernier post original
+depasse 28 jours, est remplace.
+
+**Alternatives deja verifiees le 21/09/2026 (a reverifier avant de les integrer, leur activite a pu
+changer)** :
+1. **Colin Dargent** -- `https://www.linkedin.com/in/colindargent/` : "Freelance | Transformation IA",
+   5 posts en ~1 jour au releve du 21/09 ; plutot veille IA/outils que dirigeants PME.
+2. **William Goron** -- `https://www.linkedin.com/in/william-goron/` : "Consultant IA & No-Code pour
+   TPE-PME & solo preneurs" ; tres proche de la cible, mais seulement 2 posts sur 7 jours au releve
+   (les 2 suivants a "1 sem.").
+Ordre de preference si un remplacement est necessaire : William Goron si sa cadence a monte (audience
+plus proche des dirigeants PME), sinon Colin Dargent (cadence plus sure). Aucun autre candidat n'est
+garde en reserve : en cas de deux remplacements simultanes, relancer une recherche avec la methode du
+21/09/2026 (voir plus haut).
