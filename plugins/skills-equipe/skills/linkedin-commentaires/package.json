@@ -1,7 +1,7 @@
 {
   "name": "linkedin-commentaires",
   "private": true,
-  "version": "1.2.4",
+  "version": "1.2.5",
   "description": "Trouve des posts pertinents et publie un commentaire (Composio) pour julien-partners ou julien-agency",
   "type": "commonjs",
   "scripts": {

@@ -25,12 +25,12 @@
     "_source_urn": "Verifie par Julien le 11/09/2026, a utiliser tel quel.",
     "comptes_cibles": [
       "https://www.linkedin.com/in/georges-solutions-9b7957432",
-      "https://www.linkedin.com/in/alexandre-touraine/",
+      "https://www.linkedin.com/in/christine-humberset-5a95b210a/",
       "https://www.linkedin.com/in/benjamin-lacroix-fr/",
       "https://www.linkedin.com/in/jean-zendji-zenfia/",
-      "https://www.linkedin.com/in/mh-baydama/",
+      "https://www.linkedin.com/in/farouk-houjri-a04043161/",
       "https://www.linkedin.com/in/raphaelmizrahi/",
-      "https://www.linkedin.com/in/pierre-emmanuel-cochet-0053205a/",
+      "https://www.linkedin.com/in/julien-dutartre/",
       "https://www.linkedin.com/in/romain-charissou-meteor/",
       "https://www.linkedin.com/in/emmanuel-brisseau/",
       "https://www.linkedin.com/in/theo-meuriot/",
@@ -39,7 +39,7 @@
       "https://www.linkedin.com/in/sbenoist/",
       "https://www.linkedin.com/in/leoneladagbe/"
     ],
-    "_comptes_cibles_source": "8 profils reels verifies par navigation, VALIDES par Julien le 14/09/2026 (voir references/comptes-cibles-proposition-20260914.md) + 6 comptes complementaires VALIDES par Nomena le 16/09/2026 apres 3 passages consecutifs a zero candidat (voir references/comptes-cibles-proposition-20260916-complement-agence.md) : ces 6 ont ete verifies sur leur FREQUENCE DE PUBLICATION REELLE (5 derniers posts releves un par un), pas seulement leur pertinence thematique -- c'etait precisement le trou du 14/09/2026. `mehdi-stili-6769a6174` marque `_statut: en_observation` (voir ci-dessous) : cadence recente bonne mais precedee d'un trou de 3-4 mois, a reevaluer sur sa cadence reelle dans 2 semaines plutot que traite comme un compte fiable d'emblee.",
+    "_comptes_cibles_source": "8 profils reels verifies par navigation, VALIDES par Julien le 14/09/2026 (voir references/comptes-cibles-proposition-20260914.md) + 6 comptes complementaires VALIDES par Nomena le 16/09/2026 apres 3 passages consecutifs a zero candidat (voir references/comptes-cibles-proposition-20260916-complement-agence.md) : ces 6 ont ete verifies sur leur FREQUENCE DE PUBLICATION REELLE (5 derniers posts releves un par un), pas seulement leur pertinence thematique -- c'etait precisement le trou du 14/09/2026. `mehdi-stili-6769a6174` marque `_statut: en_observation` (voir ci-dessous) : cadence recente bonne mais precedee d'un trou de 3-4 mois, a reevaluer sur sa cadence reelle dans 2 semaines plutot que traite comme un compte fiable d'emblee. + 3 remplacements le 21/09/2026 : Alexandre Touraine, Pierre-Emmanuel Cochet et Mohamed Houmadi Baydama (inactivite confirmee : dernier post original 1 an / 3 ans / 5 mois) remplaces par Christine Humberset, Farouk Houjri et Julien D. (actifs verifies poste par poste, voir references/etat-linkedin-20260912.md).",
     "_critere_pays_corrige_20260916": "Le critere \"base en France\" a ete initialement applique pour ecarter Leonel ADAGBE (base a Lome, Togo), avant d'etre corrige par Nomena le 16/09/2026 : ce qui compte pour un commentaire sous un post concurrent, c'est que l'AUDIENCE soit francophone et proche de celle de Julien (dirigeants/PME francophones), pas le pays de residence de l'auteur du post cible. Verifie reellement pour Leonel ADAGBE avant integration : 5 derniers posts entierement en francais, adresses explicitement \"Chers dirigeants\"/\"Si vous dirigez une PME\" -- audience cible identique a celle des 13 autres comptes malgre une base a Lome. Ne plus utiliser \"pays de residence\" comme filtre pour un futur candidat -- verifier la langue des posts et le public vise, uniquement.",
     "comptes_cibles_statut": {
       "https://www.linkedin.com/in/mehdi-stili-6769a6174/": "en_observation"

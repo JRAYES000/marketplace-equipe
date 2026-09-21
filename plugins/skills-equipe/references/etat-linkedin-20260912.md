@@ -1385,3 +1385,42 @@ comptes qui publient reellement, comme pour le complement du 16/09/2026 (voir
 modification de `reglages-comptes.json` sans decision de Nomena.
 Statut des 3 textes de commentaires prets du 21/09/2026 : inchange, toujours en attente de
 publication sous la bonne identite.
+
+### Remplacement des 3 comptes inactifs de julien-agency (21/09/2026)
+
+**Retires de `comptes_cibles` de julien-agency** (inactivite > 28 jours confirmee au second passage
+du 21/09, voir plus haut) :
+- **Alexandre Touraine** : dernier post = repost vieux d'1 an, seulement des commentaires depuis.
+- **Pierre-Emmanuel Cochet** : dernier post = repost vieux de 3 ans.
+- **Mohamed Houmadi Baydama** : dernier post original vieux de 5 mois.
+
+**Ajoutes (meme methode que le complement du 16/09)** : recherches LinkedIn de contenus tries par date
+(`search/results/content`, "Latest") sur des formulations proches du positionnement de julien-agency
+(automatiser IA PME dirigeants ; agent IA TPE gagner du temps ; automatisation IA dirigeants de PME ;
+n8n automatisation entreprise PME ; consultant IA automatisation PME workflow ; etc.), puis lecture
+reelle de l'onglet Posts (`recent-activity/shares/`, attente ~9 s, defilement par paliers) de chaque
+candidat : 5 derniers posts releves un par un (age, original ou repost). Retenu : audience
+francophone dirigeants/PME, au moins 3 des 5 derniers posts ORIGINAUX dans les 7 derniers jours.
+
+| Nom | URL | Positionnement observe | 5 derniers posts releves |
+| --- | --- | --- | --- |
+| **Christine Humberset** | `https://www.linkedin.com/in/christine-humberset-5a95b210a/` | "Fondatrice Pixel Soul, Automatisation & IA pour independants et PME" | 1 post du jour, 3 j, 4 j, 5 j, 6 j -- 5 originaux sur 5 dans la semaine |
+| **Farouk Houjri** | `https://www.linkedin.com/in/farouk-houjri-a04043161/` | "Consultant IA & Automatisation chez Datasulting, Ambassadeur n8n" | 2 j, 4 j, 5 j, 1 sem., 1 sem. -- 5 originaux, 3 dans les 7 jours |
+| **Julien D.** (Dutartre) | `https://www.linkedin.com/in/julien-dutartre/` | "Consultant et Formateur en Gestion de Projet, Gouvernance du SI, IA generative dans le Grand Est" (AI Act pour les entreprises) | 1 post du jour, 2 j, 6 j, 1 sem. + 1 repost a 4 j -- 4 originaux, 3 dans les 7 jours |
+
+**Candidats verifies puis ecartes** : Julie Floch (rafale isolee, puis reposts de 3 mois et posts de
+6 ans), Souleyman Huet (post du jour + 2 a 1 sem., puis trou de 3 mois : rafale, pas une cadence),
+Christophe Didion (quasi uniquement des reposts), Jerome Hugueny (1 post recent puis reposts de 3 ans
+et posts de 4 ans). **Reserves gardees** : Colin Dargent (5 posts en ~1 jour, tres actif mais plutot
+veille IA/outils que dirigeants PME) et William Goron ("Consultant IA & No-Code pour TPE-PME", tres
+proche de la cible mais seulement 2 posts sur 7 jours, les 2 suivants a "1 sem.") -- a reconsiderer
+si l'un des 3 nouveaux ralentit.
+
+**Limites assumees** : les ages LinkedIn "1 sem." couvrent 7 a 13 jours, donc le critere "3 sur 5 dans
+les 7 jours" est lu au plus juste ; aucun profil n'est dit fiable durablement, juste actif a date.
+Comme pour Mehdi Stili, **a revalider dans 2-3 semaines** (autour du 12/10/2026).
+
+**Fichier modifie** : `linkedin-commentaires/reglages-comptes.json` (versionne) -- `comptes_cibles` de
+julien-agency toujours a 14 comptes (3 URL remplacees, note `_comptes_cibles_source` completee),
+`node --test` : 112 tests OK. `linkedin-commentaires` 1.2.5, plugin 1.23.3, README a jour.
+Rien d'autre touche (Buffer, posts, les 3 commentaires en attente : inchanges).
