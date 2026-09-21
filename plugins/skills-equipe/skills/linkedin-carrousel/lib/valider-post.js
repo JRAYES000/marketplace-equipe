@@ -255,12 +255,14 @@ function validerInterdits(texte) {
  */
 function validerChiffreSource(texte) {
   const REGEX_CHIFFRE = /[\d\u{1D7CE}-\u{1D7FF}]+/gu;
+  const sourceFinale = contientLigneSourceFinale(texte);
   let correspondance;
   while ((correspondance = REGEX_CHIFFRE.exec(texte)) !== null) {
     const debutFenetre = Math.max(0, correspondance.index - 80);
     const finFenetre = correspondance.index + correspondance[0].length + 60;
     const fenetre = texte.slice(debutFenetre, finFenetre);
     if (!/\(\s*source\s*:/i.test(fenetre)) {
+      if (sourceFinale && estDetailAnecdote(texte, correspondance)) continue;
       throw new Error(
         `Post refuse : le chiffre "${correspondance[0]}" n'a pas de source attachee ` +
         `(attendu : "(source : ...)" juste avant ou apres). Contexte : "${fenetre}".`
@@ -268,6 +270,60 @@ function validerChiffreSource(texte) {
     }
     verifierSourceNonVague(fenetre, correspondance[0]);
   }
+}
+
+/**
+ * Affinement du 21/09/2026 (demande de Nomena, post de veille Allie K. Miller) : une source
+ * collee "(source : ...)" n'est exigee que pour un chiffre qui sert de PREUVE (pourcentage,
+ * volume/comptage, classement, montant, donnee d'etude). Un chiffre qui n'est qu'un DETAIL
+ * DESCRIPTIF d'anecdote (age, annee/date, duree, nombre de personnes) est dispense de la
+ * parenthese collee A CONDITION que le post porte une ligne "Source : ..." unique (non vague)
+ * qui couvre l'ensemble de l'anecdote. Liste FERMEE de motifs : tout chiffre qui n'y entre pas
+ * reste soumis a la regle stricte, donc un oubli de la liste ne dispense jamais. Garde-fou :
+ * "N personnes"/"N ans" dans une fenetre de sondage/etude/enquete ("1 000 personnes
+ * interrogees") est une donnee d'etude, jamais un detail d'anecdote.
+ */
+function contientLigneSourceFinale(texte) {
+  const correspondance = texte.match(/^[ \t]*Source[ \t]*:[ \t]*(.+)$/im);
+  if (!correspondance) return false;
+  const contenu = correspondance[1].trim();
+  return contenu.length > 0 && !SOURCES_VAGUES.some((regex) => regex.test(contenu));
+}
+
+function versAscii(fragment) {
+  // Gras Unicode ("Mathematical Bold") -> ASCII, pour lire "𝟕𝟗 𝐚𝐧𝐬" comme "79 ans".
+  return [...fragment].map((c) => {
+    const cp = c.codePointAt(0);
+    if (cp >= 0x1D7CE && cp <= 0x1D7D7) return String.fromCharCode(48 + cp - 0x1D7CE);
+    if (cp >= 0x1D400 && cp <= 0x1D419) return String.fromCharCode(65 + cp - 0x1D400);
+    if (cp >= 0x1D41A && cp <= 0x1D433) return String.fromCharCode(97 + cp - 0x1D41A);
+    return c;
+  }).join('');
+}
+
+const MOTS_ETUDE = /(sondage|[eé]tudes?|enqu[eê]te|barom[eè]tre|interrog|selon|rapport|classement|index)/i;
+
+function estDetailAnecdote(texte, correspondance) {
+  const chiffre = versAscii(correspondance[0]);
+  const debut = correspondance.index;
+  const fin = debut + correspondance[0].length;
+  const apres = versAscii(texte.slice(fin, fin + 30));
+  const avant = versAscii(texte.slice(Math.max(0, debut - 12), debut));
+  const fenetreLarge = versAscii(texte.slice(Math.max(0, debut - 80), fin + 60));
+
+  // Date jj/mm(/aaaa) : le chiffre fait partie d'une date.
+  if (/\d{1,2}\/\d{1,2}(\/\d{2,4})?/.test(versAscii(texte.slice(Math.max(0, debut - 6), fin + 6)))) return true;
+  // Annee isolee (ni suivie de %, ni collee a un autre chiffre).
+  if (/^(19|20)\d{2}$/.test(chiffre) && !/^\s*%/.test(apres) && !/[\d.,]$/.test(avant.trimEnd())) return true;
+
+  // Un signe de preuve a cote (pourcentage, monnaie, +/-) n'est jamais un detail d'anecdote.
+  if (/^\s*(%|€|\$|euros?)/i.test(apres) || /[+\-€$]\s*$/.test(avant)) return false;
+
+  if (/^\s*(h|heures?|minutes?|min|secondes?|jours?|semaines?|mois)\b/i.test(apres)) return true;
+  if (/^\s*(ans?|ann[eé]es?|personnes?|participants?|salari[eé]s?|collaborateurs?|invit[eé]s?|convives?)\b/i.test(apres)) {
+    return !MOTS_ETUDE.test(fenetreLarge);
+  }
+  return false;
 }
 
 /**

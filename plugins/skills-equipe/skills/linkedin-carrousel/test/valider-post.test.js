@@ -153,3 +153,50 @@ test('n\'accuse pas a tort l\'annee ecrite a l\'interieur de sa propre citation'
   );
   assert.doesNotThrow(() => validerEtConvertirPost(brouillon));
 });
+
+/**
+ * Affinement du 21/09/2026 (post de veille Allie K. Miller) : la source collee n'est exigee
+ * que pour un chiffre-PREUVE ; un chiffre-ANECDOTE (age, annee/date, duree, nombre de
+ * personnes) passe avec une ligne "Source : ..." unique en fin de post.
+ */
+const AJOUT_ANECDOTE = "Une aidante familiale de 79 ans a suivi l'atelier pendant 4 semaines avec 12 personnes en salle, le 17/09/2026.";
+const AVEC_LIGNE_SOURCE = (b) => b.replace('\n\n#recrutement #rh', '\n\nSource : post LinkedIn d\'Allie K. Miller, 17/09/2026.\n\n#recrutement #rh');
+
+test('chiffre-anecdote (age, duree, nombre de personnes, date) sans source collee mais avec ligne Source finale : passe', () => {
+  const brouillon = AVEC_LIGNE_SOURCE(BROUILLON_CONFORME.replace('Rarement pour le salaire.', AJOUT_ANECDOTE));
+  assert.doesNotThrow(() => validerEtConvertirPost(brouillon));
+});
+
+test('chiffre-anecdote en gras Unicode ("**79 ans**") reconnu comme detail d\'anecdote avec ligne Source finale', () => {
+  const brouillon = AVEC_LIGNE_SOURCE(BROUILLON_CONFORME.replace('Rarement pour le salaire.', 'Une aidante de **79 ans** a suivi l\'atelier.'));
+  assert.doesNotThrow(() => validerEtConvertirPost(brouillon));
+});
+
+test('chiffre-anecdote SANS ligne Source finale : refuse (la dispense exige la ligne Source)', () => {
+  const brouillon = BROUILLON_CONFORME.replace('Rarement pour le salaire.', AJOUT_ANECDOTE);
+  assert.throws(() => validerEtConvertirPost(brouillon), /n'a pas de source attachee/);
+});
+
+test('chiffre-preuve (pourcentage) sans source collee : refuse MEME avec une ligne Source finale', () => {
+  const brouillon = AVEC_LIGNE_SOURCE(BROUILLON_CONFORME.replace('Rarement pour le salaire.', "42% des candidats partent avant l'offre."));
+  assert.throws(() => validerEtConvertirPost(brouillon), /n'a pas de source attachee/);
+});
+
+test('chiffre-preuve (volume "16 541 offres", "+2000%") sans source collee : refuse meme avec ligne Source finale', () => {
+  const volume = AVEC_LIGNE_SOURCE(BROUILLON_CONFORME.replace('Rarement pour le salaire.', 'Les mentions passent a 16 541 offres.'));
+  assert.throws(() => validerEtConvertirPost(volume), /n'a pas de source attachee/);
+  const hausse = AVEC_LIGNE_SOURCE(BROUILLON_CONFORME.replace('Rarement pour le salaire.', 'Les postes ont bondi de +2000%.'));
+  assert.throws(() => validerEtConvertirPost(hausse), /n'a pas de source attachee/);
+});
+
+test('"N personnes" dans une phrase de sondage reste une donnee d\'etude : refuse meme avec ligne Source finale', () => {
+  const brouillon = AVEC_LIGNE_SOURCE(BROUILLON_CONFORME.replace('Rarement pour le salaire.', 'Un sondage a interroge 1 000 personnes.'));
+  assert.throws(() => validerEtConvertirPost(brouillon), /n'a pas de source attachee/);
+});
+
+test('une ligne Source finale vague ("Source : une etude") ne dispense de rien', () => {
+  const brouillon = BROUILLON_CONFORME
+    .replace('Rarement pour le salaire.', AJOUT_ANECDOTE)
+    .replace('\n\n#recrutement #rh', '\n\nSource : une etude\n\n#recrutement #rh');
+  assert.throws(() => validerEtConvertirPost(brouillon), /n'a pas de source attachee/);
+});

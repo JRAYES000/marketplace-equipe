@@ -1,7 +1,7 @@
 {
   "name": "linkedin-veille-virale",
   "private": true,
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "Veille des comptes suivis (Apify) et publication d'un post recycle/inspire (Composio)",
   "type": "commonjs",
   "scripts": {
