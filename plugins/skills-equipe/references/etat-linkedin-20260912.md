@@ -1508,3 +1508,36 @@ depot prive `claude-config`) :
 - `verifierConnexionAvantPublication` refusera de publier si la connexion Composio reellement active ne
   correspond pas a l'`actorUrn` demande : garde-fou d'identite, a laisser jouer.
 - Chaque texte sera remontre a Nomena et publie un par un avec accord explicite au moment de l'action.
+
+### Identifiants retrouves pour la publication des 3 commentaires (21/09/2026) -- publication TOUJOURS bloquee
+
+**Cles Composio toujours invisibles dans la session** : `COMPOSIO_API_KEY` et `COMPOSIO_CONSUMER_API_KEY`
+absentes du processus ET des variables utilisateur Windows (verifie Bash + PowerShell, valeurs jamais
+affichees), malgre l'annonce de Nomena que la cle `ak_` est disponible. Cause la plus probable : une
+session deja ouverte ne voit pas les variables exportees apres son demarrage (`CLAUDE.md`, "Aucun jeton
+n'est jamais persiste entre sessions") -> **ouvrir une session neuve depuis un terminal ou les variables
+sont deja exportees**. De plus, **la cle `ak_` ne couvre que julien-partners** : le commentaire de
+Stephane B. (julien-agency) exige `COMPOSIO_CONSUMER_API_KEY` (cle `ck_`).
+
+**Identifiants publics retrouves et verifies** (en lecture seule via LinkedIn, chaque URN reouvert pour
+confirmer auteur et texte du post) :
+| Cible | Compte | `object` / `target_urn` a utiliser | Verification |
+| --- | --- | --- | --- |
+| Theophile Burnet (post ChatGPT/Astra) | julien-partners | `urn:li:share:7507556309379108865` | ouvert : auteur Theophile Burnet, texte "Je n'ai presque pas ouvert ChatGPT...", lie a `urn:li:activity:7507680084963581953` |
+| Alexis Combeaux (post "3 erreurs des freelances") | julien-partners | `urn:li:share:7505208123096485888` | ouvert : auteur Alexis Combeaux, texte "Les 3 erreurs que font presque tous les freelances...", lie a `urn:li:activity:7506238578012741633` |
+| Stephane B. (post "quel outil d'IA choisir") | julien-agency | **pas de `share` : `urn:li:ugcPost:7506979596827820033`** | ouvert : auteur Stephane B., texte "Un dirigeant m'a demande la semaine dernière...", lie a `urn:li:activity:7506979597276610560` |
+
+**Commentaires du fil d'Alexis** (format `urn:li:comment:({postUrn},{id})`) :
+- **Notre commentaire du 18/09 (racine du fil)** : id `7506584607304167424`
+  (`urn:li:comment:(activity:7506238578012741633,7506584607304167424)` tel qu'affiche par LinkedIn).
+- **Reponse d'Alexis du 19/09**, enfant de notre commentaire : id `7506612823326912512`.
+- **Parent a passer pour la relance** : LinkedIn range les reponses sous le commentaire RACINE (deux
+  niveaux) -> `parentCommentUrn` = notre commentaire (`...6584607304167424`), pas la reponse d'Alexis ;
+  la relance citera son prenom dans le texte.
+
+**Deux points a valider au premier appel reel (non verifiables sans cle)** : (1) `publierCommentaire`
+documente `targetUrn` comme "shareUrn" -- l'URN `ugcPost` de Stephane B. est le seul identifiant de son
+post, son acceptation par `LINKEDIN_CREATE_COMMENT_ON_POST` reste a confirmer ; (2) le prefixe du
+`parentCommentUrn` (`urn:li:activity:` tel qu'affiche par LinkedIn ou `urn:li:share:` de la cible) est a
+confirmer -- en cas de refus, le message d'erreur Composio le dira, aucun commentaire n'est publie sur un
+refus.
