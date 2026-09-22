@@ -11,35 +11,50 @@ demande explicite.
 **Phrase de lancement** : « fais la veille du jour », « cherche un post a recycler pour
 julien-agency ».
 
-## Regles d'ecriture -- retour de Julien, 18/09/2026 (codees depuis le 18/09/2026)
+## Regles d'ecriture -- linkedin-mise-en-forme, source de verite (rebranche le 22/09/2026)
 
-Meme retour que sur `linkedin-carrousel` (posts juges "de l'AI slop"), applicable ici aussi
-puisque cette skill redige des posts LinkedIn a publier (pas des commentaires) :
+Cette skill redige des posts LinkedIn a publier (pas des commentaires) : elle applique donc les
+douze criteres documentes dans `linkedin-mise-en-forme/SKILL.md` (accroche en question, au moins
+huit passages en gras, trois titres de section, 3 a 6 emojis en tete de ligne, aucune formulation
+interdite, etc.) -- ce fichier-ci ne les redecrit pas, `linkedin-mise-en-forme` fait foi.
 
-- **Un hook irresistible en ouverture** -- la premiere ligne doit creer un manque ou une tension,
-  jamais une simple annonce de sujet.
-- **Du gras sur les mots/phrases qui portent** (LinkedIn accepte le gras Unicode dans un post,
-  comme pour le carrousel -- voir `linkedin-carrousel/lib/valider-post.js` pour la conversion).
-- **Entre 3 et 6 emojis**, jamais deux a la suite, jamais au milieu d'une phrase.
+**Garde-fou automatique**, jamais duplique : `lib/publier.js` (`publierPost`) et `dry-run.js`
+(`executerPourCompte`) importent tous les deux `convertirGras`/`validerMiseEnForme` depuis
+`lib/valider-mise-en-forme.js` -- un pont local qui charge reellement
+`linkedin-mise-en-forme/scripts/lib.mjs` par import dynamique (interop CommonJS/ESM, voir ce
+fichier pour le detail) et convertit son rapport en refus explicite (throw), avant tout appel
+reseau cote `publierPost`, jamais un simple avertissement.
 
-**Garde-fou automatique en place depuis le 18/09/2026**, meme validateur que le carrousel,
-jamais duplique : `lib/publier.js` (`publierPost`) et `dry-run.js` (`executerPourCompte`)
-importent tous les deux `convertirGras`/`validerAccroche`/`validerEmojis` depuis
-`linkedin-carrousel/lib/valider-post.js` -- refus explicite (throw), avant tout appel reseau cote
-`publierPost`, jamais un simple avertissement. Volontairement limite a ces trois fonctions : pas
-`validerLongueur`/`validerHashtags`/`validerChiffreSource`, propres au format carrousel et jamais
-demandes pour la veille. **Precision du 21/09/2026 (0.2.1)** : un post de veille prepare par la voie Buffer
-(texte passe dans `linkedin-carrousel/generer-post.js`, comme le post #2) beneficie du
-`validerChiffreSource` affine ce jour-la : la source collee n'est plus exigee pour un detail d'anecdote
-(age, date, duree) tant qu'une ligne `Source : ...` finale couvre le post -- le code modifie est dans
-`linkedin-carrousel`, aucun changement de comportement dans cette skill. `lib/valider-orthographe.js` (accents) reste applique en plus, comme
-avant. **Incident qui a motive ce fix** : avant le 18/09/2026, `lib/publier.js` ne validait rien
-du tout avant de publier, et `dry-run.js` ne verifiait que les accents -- les trois posts deja
-publies (Codie Sanchez, Jason Feifer, Justin Welsh) n'avaient donc jamais pu passer par un
-hook/gras/emoji verifie. Voir `test/publier.test.js` (refus avant tout appel reseau) et
-`test/dry-run.test.js`/`test/valider-orthographe.test.js` (ordre des controles : accents d'abord,
-puis hook/gras/emoji -- pour qu'un texte deja ecarte pour accents ne change pas de raison
-affichee).
+**Avant le 22/09/2026**, ce pont visait `linkedin-carrousel/lib/valider-post.js` et n'en
+reutilisait que 3 fonctions (`convertirGras`/`validerAccroche`/`validerEmojis`, donc 3 criteres
+sur 12 : ni les trois titres de section, ni la police de gras, ni les formulations interdites
+n'etaient verifies). Trouve en auditant les trois skills LinkedIn le 22/09/2026, avec les deux
+posts de veille deja publies (Bernard Marr 18/09, Andrew Ng 21/09) comme preuve concrete : aucun
+des deux n'atteint que 6/12 sur les criteres reels de `linkedin-mise-en-forme`, alors que le
+garde-fou de l'epoque les aurait laisses passer.
+
+**Bug corrige au meme moment, dans les trois skills LinkedIn** (`lib/valider-orthographe.js`,
+duplique a l'identique dans `linkedin-carrousel`, `linkedin-commentaires` et cette skill-ci) :
+la liste fermee de mots toujours accentues scannait le texte AVANT conversion du gras dans
+`dry-run.js`, donc un mot deliberement sans accent a l'interieur d'un `**...**` (accroche ou
+titre, jamais accentues par construction -- regle 2 de `linkedin-mise-en-forme`) etait signale a
+tort comme une faute. `linkedin-carrousel` evitait deja ce piege en appelant `validerAccents`
+APRES `convertirGras` ; corrige a la source (dans `valider-orthographe.js` lui-meme, qui ignore
+desormais le contenu des `**...**`) pour que l'ordre d'appel n'ait plus d'importance.
+
+**Incident qui a motive ce garde-fou, a l'origine (18/09/2026)** : avant cette date,
+`lib/publier.js` ne validait rien du tout avant de publier, et `dry-run.js` ne verifiait que les
+accents -- les trois posts deja publies (Codie Sanchez, Jason Feifer, Justin Welsh) n'avaient
+donc jamais pu passer par un controle de forme verifie. Voir `test/publier.test.js` (refus avant
+tout appel reseau) et `test/dry-run.test.js`/`test/valider-orthographe.test.js` (ordre des
+controles : accents d'abord, puis mise en forme -- pour qu'un texte deja ecarte pour accents ne
+change pas de raison affichee).
+
+**Precision du 21/09/2026** : un post de veille prepare par la voie Buffer (texte passe dans
+`linkedin-carrousel/generer-post.js`, comme le post #2) beneficie du `validerChiffreSource`
+affine ce jour-la : la source collee n'est plus exigee pour un detail d'anecdote (age, date,
+duree) tant qu'une ligne `Source : ...` finale couvre le post -- le code modifie est dans
+`linkedin-carrousel`, aucun changement de comportement dans cette skill.
 
 ## Ce que fait la skill
 
@@ -175,16 +190,15 @@ lancements ulterieurs de cette skill, pas Buffer directement). Une fois un post 
 ligne (a confirmer explicitement, jamais suppose), mettre a jour son entree Notion (`Etat`:
 "Publie", lien reel).
 
-**Limite assumee du garde-fou hook/gras/emoji ajoute le 18/09/2026** (voir "Regles d'ecriture"
-plus haut) : `convertirGras`/`validerAccroche`/`validerEmojis` protegent `publierPost` (voie
-directe, ci-dessous) et `dry-run.js`, mais **pas la voie Buffer** -- coller un texte dans
+**Limite assumee du garde-fou de mise en forme** (voir "Regles d'ecriture" plus haut) :
+`convertirGras`/`validerMiseEnForme` (`lib/valider-mise-en-forme.js`) protegent `publierPost`
+(voie directe, ci-dessous) et `dry-run.js`, mais **pas la voie Buffer** -- coller un texte dans
 l'interface Buffer est un geste manuel hors de tout code, aucun hook ne peut s'y accrocher. Les
 trois posts deja publies (Codie Sanchez, Jason Feifer, Justin Welsh) sont passes par Buffer, donc
 par aucun garde-fou de contenu. **A faire avant toute programmation Buffer** : passer le texte
-redige par la session Claude dans `validerEtConvertirPost` (ou au minimum
-`convertirGras`/`validerAccroche`/`validerEmojis`) depuis une invocation manuelle avant de le
-coller dans Buffer -- aucune automatisation ne remplace cette etape tant que Buffer reste le
-canal reel.
+redige par la session Claude dans `convertirGras`/`validerMiseEnForme` (`lib/valider-mise-en-forme.js`)
+depuis une invocation manuelle avant de le coller dans Buffer -- aucune automatisation ne
+remplace cette etape tant que Buffer reste le canal reel.
 
 **Voie directe** (`publierPost`, via Composio/MCP) : `authorUrn` confirme pour julien-agency
 (`urn:li:person:aFqu-W7ClW`) ; julien-partners non confirme cote Composio -- voir

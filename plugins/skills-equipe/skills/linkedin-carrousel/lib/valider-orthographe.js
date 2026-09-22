@@ -114,12 +114,26 @@ const MOTS_SANS_ACCENT_VERS_CORRECT = {
 /**
  * Repere chaque mot de la liste fermee ci-dessus, sans accent, dans `texte`.
  * Insensible a la casse pour la detection ; renvoie le mot tel qu'ecrit.
+ *
+ * Ignore le contenu des passages `**en gras**` (bug reel trouve le 22/09/2026, en
+ * verifiant linkedin-veille-virale contre un texte reellement bien accente partout
+ * SAUF dans son accroche/ses titres -- exemption normale, voir la regle 2 du SKILL.md
+ * de linkedin-mise-en-forme : le gras Unicode n'a pas de forme accentuee, donc un mot
+ * comme "recoit" ou "ca" a l'interieur d'un `**...**` est volontaire, pas une faute.
+ * Une fois le texte CONVERTI en gras Unicode reel, ce probleme n'existe plus (les
+ * caracteres Unicode Mathematical Bold ne sont pas dans la plage `A-Za-zÀ-ÖØ-öø-ÿ`
+ * ci-dessous, donc invisibles a cette regex) -- linkedin-carrousel/lib/valider-post.js
+ * appelle deja validerAccents() APRES convertirGras() pour cette raison, mais
+ * linkedin-veille-virale/dry-run.js l'appelait AVANT, sur le markdown brut, d'ou le
+ * faux positif. Stripper les `**...**` ici rend la fonction correcte quel que soit
+ * l'ordre d'appel, dans les trois paquets qui la dupliquent.
  */
 function detecterMotsSansAccent(texte) {
   const trouves = [];
+  const texteSansGras = String(texte || '').replace(/\*\*(.+?)\*\*/g, ' ');
   const regexMot = /[A-Za-zÀ-ÖØ-öø-ÿ']+/gu;
   let correspondance;
-  while ((correspondance = regexMot.exec(String(texte || ''))) !== null) {
+  while ((correspondance = regexMot.exec(texteSansGras)) !== null) {
     const mot = correspondance[0];
     const clef = mot.toLowerCase();
     if (Object.prototype.hasOwnProperty.call(MOTS_SANS_ACCENT_VERS_CORRECT, clef)) {
