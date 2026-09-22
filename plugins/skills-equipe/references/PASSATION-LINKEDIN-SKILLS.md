@@ -55,3 +55,58 @@ dispose de `NOTION_TOKEN` -- fonctions deja pretes : `ajouterLigneCommentaire`
 d'abord (1) le contenu reel de la page Notion, (2) le `git log` depuis la derniere ligne connue,
 (3) les registres locaux, (4) la presence de `NOTION_TOKEN` en session -- dans cet ordre, avec
 sortie brute a chaque etape, avant de conclure.
+
+## 22/09/2026 (suite, meme jour) -- backfill Notion fait, NOTION_TOKEN fourni par Julien pour cet usage ponctuel
+
+**Jeton recu dans le message, jamais ecrit dans un fichier du depot** : passe uniquement en
+variable d'environnement pour deux scripts ponctuels ecrits dans le scratchpad (hors depot),
+supprimes juste apres execution. Conforme a la regle "Ce depot est public : aucune cle dedans" du
+`CLAUDE.md` racine.
+
+**Etendue reelle du reliquat, plus large que ce que le diagnostic du matin laissait supposer** :
+en recomptant le registre local complet (pas seulement le Point n°19), 9 lignes manquaient dans
+Notion "Commentaires", pas 3 -- toutes les entrees `julien-agency` du 16 et 17/09 (Theo Meuriot,
+Yohann Nezri, Mehdi Stili, Leonel Adagbe) manquaient aussi, en plus des 3 `julien-partners` du
+18/09 et d'une 4e (Victor Partouche-Sebban, 17/09) deja publiee mais jamais remontee non plus.
+
+**Texte des commentaires : aucun n'etait sauvegarde localement** (les fichiers `a-publier/` du
+15/09 ne couvrent pas ces dates). Recupere en lisant directement les 9 posts LinkedIn cibles dans
+le navigateur (session Nomena authentifiee), texte du commentaire de Julien Rayes copie mot pour
+mot depuis la page reelle -- jamais reconstitue de memoire. Genre (`vraie_question` /
+`desaccord_argumente`) attribue par inference sur la forme du texte (presence ou non d'une
+question finale a l'auteur), coherent avec les lignes deja en base (ex. "Georges Solutions" :
+memes ingredients -- reformulation puis question -- deja classee `vraie_question`) -- **pas une
+donnee d'origine retrouvee**, a signaler si Julien veut verifier.
+
+**Ecrit reellement dans Notion "Commentaires"** (`dataSourceId`
+`7a80342b-3ce9-416b-91c1-80deb64efb39`) :
+- 1 page completee (la ligne vide "Theo Meuriot -- 2026-09-16", `Compte`/`Personne visee`/`Lien du
+  post`/`Date`/`Texte`/`Genre` ajoutes -- page deja existante retrouvee par filtre `Date is_empty`,
+  pas de doublon cree).
+- 8 pages creees : Yohann Nezri (16/09), Mehdi Stili (16/09), Leonel Adagbe (16/09), Theo Meuriot
+  (17/09), Victor Partouche-Sebban (17/09), Alexis Combeaux (18/09), Theophile Burnet (18/09),
+  Victor Partouche-Sebban (18/09).
+
+**Base "Veille & posts"** (`dataSourceId` `6a62dda7-58aa-41fd-9416-eccfaef04d4b`) : la ligne
+Justin Welsh (17/09) etait bien bloquee a "Programme" alors que le post est reellement publie et
+confirme en ligne depuis le 17/09 (`references/mail-20260918-brouillon.md`, ligne 224-229) --
+verifie en rouvrant le permalien reel dans le navigateur avant d'ecrire (post toujours visible,
+texte conforme). Mise a jour : `Etat` -> `Publie`, `Lien du post publie` renseigne, `Date de
+publication` = 2026-09-17.
+
+**Non fait, hors perimetre demande** : les posts de veille publies via le flux Buffer manuel
+(Bernard Marr 18/09, Allie K. Miller et Andrew Ng 21/09 -- voir Point n°21 de
+`etat-linkedin-20260912.md`) ne sont dans aucune des deux bases Notion. Ce sont un flux de
+selection editoriale distinct du pipeline `comptes_a_surveiller`/score qui alimente "Veille &
+posts", pas une reprise de ce pipeline -- ne pas les y ajouter sans decision de Julien/Nomena sur
+si ce flux doit desormais y ecrire aussi.
+
+**Verification finale, nouvelle lecture directe (pas la sortie des scripts)** : les deux pages
+Notion relues dans le navigateur apres ecriture. "Commentaires" affiche 15 lignes completes (11
+julien-agency, 4 julien-partners) -- correspond exactement au bilan du brouillon de mail du 18/09
+("15 commentaires reellement en ligne -- 11 sur Claude Agency ... et 4 sur Claude Partners").
+"Veille & posts" affiche 3 lignes, toutes `Publie`.
+
+**Pour la prochaine session** : le pipeline reste a activation manuelle -- ce backfill ne relance
+rien, il corrige seulement des donnees passees. Prochain declenchement reel (commentaires ou
+veille du jour) : sur demande explicite de Julien, comme toujours.
