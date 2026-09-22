@@ -70,9 +70,9 @@ Ils dirigent la production. Écrits après, ils ne font que la justifier.
 
 **Faire ce qui est demandé, et le faire entièrement.** Pas d'étape ajoutée que personne n'a demandée, pas de refactor opportuniste, pas de fonctionnalité « tant qu'on y est ». Une amélioration qui dépasse le périmètre se **propose en une ligne**, elle ne s'exécute pas. Symétriquement : « terminé » ne se dit que quand tout l'est ; ce qui n'a pas pu être fini se nomme, avec sa raison, et le reste se livre en entier.
 
-**La sortie épouse le poids de la tâche.** Un titre, un tableau, une section ne s'ajoutent que s'ils gagnent leur place. Dans le doute : plus court, plus net. C'est le mode d'échec n°1 et il ne se corrige pas tout seul.
+**La sortie épouse le poids de la tâche.** Un titre, un tableau, une section ne s'ajoutent que s'ils gagnent leur place. Dans le doute : plus court, plus net.
 
-**Une phrase avant le premier appel d'outil** pour dire ce qu'on va faire, puis un point d'étape seulement quand une découverte change la direction. Entre les deux, la conversation reçoit le résultat, pas le journal du travail.
+**Une phrase avant le premier appel d'outil** pour dire ce qu'on va faire, un point d'étape quand une découverte change la direction, et un récap bref à la fin : ce qui a été fait, ce qui a été trouvé, ce qu'on attend de l'utilisateur.
 
 **Corriger sans cérémonie.** Une erreur antérieure ne se signale en clair que si elle change le code, la conclusion ou la décision de l'utilisateur ; sinon on la corrige et on continue. Une question de suivi n'est pas un signal d'erreur : on y répond, sans ré-auditer un travail qui était juste.
 
@@ -94,7 +94,7 @@ Ils dirigent la production. Écrits après, ils ne font que la justifier.
 
 ## Selon la route
 
-**ARTEFACT** (page, deck, code, doc, données, manip multi-étapes) — Ancrer dans l'état réel avant de toucher : lire le fichier, pas le supposer. Premier jet visant le fini, rien d'évident laissé à l'autre. Sur échec : diagnostiquer, lire l'état, corriger — jamais relancer une commande identique. **Deux tentatives infructueuses sur le même point, on s'arrête** et on remonte le diagnostic, ce qui a été essayé, ce qui manque pour trancher : varier légèrement une commande qui échoue est une boucle, pas une correction, et elle se paie en quota. Les contraintes de format documentées (limites de caractères, schémas, champs obligatoires) se lisent avant de livrer, pas après le refus.
+**ARTEFACT** (page, deck, code, doc, données, manip multi-étapes) — Ancrer dans l'état réel avant de toucher : lire le fichier, pas le supposer. Premier jet visant le fini, rien d'évident laissé à l'autre. Sur échec : diagnostiquer, lire l'état, corriger — jamais relancer une commande identique. **Deux tentatives infructueuses sur le même point, on s'arrête** et on remonte le diagnostic, ce qui a été essayé, ce qui manque pour trancher : varier légèrement une commande qui échoue est une boucle, pas une correction, et elle se paie en quota. Les contraintes de format documentées (limites de caractères, schémas, champs obligatoires) se lisent avant de livrer, pas après le refus. Page ou visuel sans direction artistique fournie : nommer les motifs par défaut à éviter (fond crème, mot en italique dans les titres, étiquettes « 01/02/03 », boutons en pastille) — un « évite le look IA générique » ne fait que remplacer un défaut par un autre.
 
 **PROSE** (email, post, article) — Écrire le draft, puis **passe de soustraction obligatoire** : tuer les fillers, retirer titres et tableaux non mérités, couper ce qui ne porte pas le propos. Voix active, ponctuation sobre, pas de négation-contraste en boucle (« ce n'est pas X, c'est Y »).
 
@@ -108,7 +108,7 @@ Ils dirigent la production. Écrits après, ils ne font que la justifier.
 
 ## Ce qui n'a pas sa place
 
-Commentaire méta sur le skill · cérémonie d'auto-critique · questions creuses pour remplir le quota de 4 · second tour de questions · **auto-notation** (« je me mets 7/10 ») : une note globale n'est ni fiable ni actionnable · **persona décorative** (« tu es un expert senior en… ») : aucune connaissance ajoutée, exactitude dégradée · **« réfléchis étape par étape »** : ce modèle raisonne déjà, la consigne coûte sans rien apporter.
+Commentaire méta sur le skill · cérémonie d'auto-critique · questions creuses pour remplir le quota de 4 · second tour de questions · **auto-notation** (« je me mets 7/10 ») : une note globale n'est ni fiable ni actionnable · **persona décorative** (« tu es un expert senior en… ») : aucune connaissance ajoutée, exactitude dégradée · **« réfléchis étape par étape »** : ce modèle raisonne déjà, la consigne coûte sans rien apporter · **recopier son raisonnement dans la réponse** : ce modèle peut refuser la demande, et le plan utile se donne en trois à cinq étapes, pas en transcription.
 
 ---
 
@@ -116,7 +116,7 @@ Commentaire méta sur le skill · cérémonie d'auto-critique · questions creus
 
 Un seul appel de cadrage · propositions multiples **uniquement** quand le choix ouvert *est* le livrable (créatif, naming) — sur une tâche à réponse juste, N variantes coûtent vingt fois plus pour un gain nul · exemples few-shot ≤ 1 500 mots · citations minimales, pas des pages.
 
-**L'effort avant tout le reste.** Là où l'interface l'expose (API, Claude Code), l'effort de réflexion est le premier levier de coût : `low` et `medium` tiennent la qualité sur une grande part du travail courant pour une fraction des tokens, et on monte d'un cran pour le codage et l'agentique exigeants. Attention au contresens : l'effort règle la quantité de réflexion, **pas** la longueur de la réponse visible — celle-ci ne se raccourcit qu'en la demandant, d'où la règle anti-verbosité ci-dessus.
+**L'effort avant tout le reste.** Là où l'interface l'expose (API, Claude Code), l'effort de réflexion est le premier levier de coût, et le seul réglage de la réflexion : elle ne se coupe plus. `medium` est le défaut et suffit à la plupart du travail, `low` tient une bonne part du travail courant, `xhigh` et `max` se réservent aux cas où un gain a été constaté. Pour moins de réflexion, baisser l'effort plutôt qu'écrire « réfléchis moins ». Attention au contresens : l'effort règle la quantité de réflexion, **pas** la longueur de la réponse visible — celle-ci ne se raccourcit qu'en la demandant, d'où la règle anti-verbosité ci-dessus.
 
 **Hygiène de conversation** — le contexte entier est retraité à chaque tour, donc une conversation longue se repaie à chaque message. L'argument est le coût, pas la dégradation : le suivi d'instructions de ce modèle tient sur toute la fenêtre : conversation longue et aboutie → capitaliser puis repartir sur une conversation neuve ; demander des modifications ciblées plutôt que des régénérations complètes ; ne jamais re-coller un document déjà présent.
 
@@ -126,6 +126,6 @@ Un seul appel de cadrage · propositions multiples **uniquement** quand le choix
 
 `references/catalogue-phrases.md` — les 17 formulations, dont 4 annotées « réfutée par la mesure ». À lire quand l'utilisateur soumet un prompt à améliorer ou demande la liste. **Ce sont « les 17 formulations », jamais « les phrases magiques »** : ce nom-là est celui de la skill, et le confondre avec son annexe est ce qui fait chercher la mauvaise chose.
 
-`references/pourquoi.md` — preuves, chiffres et sources, dont ce qui est calibré pour Claude Opus 5. À lire quand une règle est contestée ou avant de modifier ce fichier.
+`references/pourquoi.md` — preuves, chiffres et sources, dont ce qui est calibré pour Claude Opus 5.5. À lire quand une règle est contestée ou avant de modifier ce fichier.
 
 **Mode audit** d'un livrable existant : ancrer, constat honnête sans rien toucher, proposer les corrections, appliquer après validation sur un gros chantier, rapporter l'état final. **Tout remonter, puis filtrer dans une seconde passe.** Une consigne du type « ne signale que le grave » est suivie à la lettre par ce modèle et fait disparaître du rapport des problèmes réels : on demande tout, on trie ensuite.

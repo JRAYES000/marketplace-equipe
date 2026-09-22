@@ -1,10 +1,22 @@
 # Pourquoi ces règles — preuves et sources
 
-Sommaire : [Calibrage Claude Opus 5](#calibrage-claude-opus-5) · [Ce qui est étayé](#ce-qui-est-étayé) · [Ce qui est réfuté](#ce-qui-est-réfuté) · [Ce qui reste une hypothèse](#ce-qui-reste-une-hypothèse) · [Réserves de portée](#réserves-de-portée) · [Sources](#sources)
+Sommaire : [Calibrage Claude Opus 5.5](#calibrage-claude-opus-55) · [Calibrage Claude Opus 5](#calibrage-claude-opus-5) · [Ce qui est étayé](#ce-qui-est-étayé) · [Ce qui est réfuté](#ce-qui-est-réfuté) · [Ce qui reste une hypothèse](#ce-qui-reste-une-hypothèse) · [Réserves de portée](#réserves-de-portée) · [Sources](#sources)
+
+## Calibrage Claude Opus 5.5
+
+Recalibrage du 22/09/2026, sur le guide de migration Opus 5.5 livré avec Claude Code (2.1.280). Le guide dit que les prompts écrits pour Opus 5 marchent tels quels, et désigne trois familles de consignes à re-tester : verbosité, sur-vérification, périmètre. Aucune mesure faite ici : ce qui suit applique la doc.
+
+**Retiré.** « C'est le mode d'échec n°1 et il ne se corrige pas tout seul », qui décrivait la verbosité d'Opus 5 : Opus 5.5 finit les mêmes tâches avec moins de tokens et rend des comptes « with less jargon and fewer stock phrases ». La règle de longueur reste ; l'affirmation sur le modèle part. « La conversation reçoit le résultat, pas le journal du travail » : le guide classe les consignes du type « don't narrate » parmi celles qui font sous-narrer Opus 5.5, et recommande de dire *quand* parler — une phrase d'intention avant le premier outil, un récap bref à la fin. La règle est réécrite en ce sens.
+
+**Réécrit.** L'effort : la réflexion ne peut plus être coupée (`thinking: disabled` renvoie une erreur), l'effort est le seul réglage, et son défaut passe à `medium`. Opus 5.5 en `medium` dépasse Opus 5 en `high` sur le code et le travail d'analyse ; « baisser l'effort réduit la réflexion plus sûrement que le prompt ».
+
+**Ajouté.** Deux comportements nouveaux. Le design d'interface : sans direction, le modèle retombe sur quelques styles par défaut, et « évite le look IA générique » ne fait qu'en changer ; nommer les motifs à éviter marche. Le raisonnement recopié : une demande de reproduire sa réflexion dans la réponse peut être refusée (`reasoning_extraction`), sans repli sur un autre modèle.
+
+**Conservé après examen.** Périmètre et « finir toute la tâche », sous-agents, corrections sans cérémonie, « tout remonter puis filtrer » : désignés « à re-tester », pas « à retirer », et leur coût est faible s'ils sont devenus inutiles. Étiqueter les chiffres : Opus 5.5 invente beaucoup moins de chiffres, mais l'étiquette sert le lecteur, pas le modèle. Aucune vérification déclarative : règle d'honnêteté, indépendante du modèle.
 
 ## Calibrage Claude Opus 5
 
-Ce skill est écrit pour Claude Opus 5, dont la documentation officielle change ce qu'il faut prescrire.
+Ce skill a d'abord été écrit pour Claude Opus 5, dont la documentation officielle change ce qu'il faut prescrire.
 
 **Retiré parce que le modèle le fait déjà.** « Claude Opus 5 verifies its own work without being told to. If your prompt contains explicit verification instructions […] remove them : instructions like these cause over-verification […] removing them reduces wasted tokens with no loss in quality. » La system card ajoute que le modèle produit parfois « elaborate verification pipelines that distract from the primary task ». La passe de vérification explicite a donc été supprimée du skill. **Ce qui reste, c'est la règle d'honnêteté du socle** — ne pas annoncer « vérifié » sans signal constaté — qui répond à un travers documenté ailleurs dans la même system card : « a surprising number of cases in which Opus 5 confidently stated an answer about which it was in fact unsure ».
 
