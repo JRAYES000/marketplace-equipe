@@ -89,7 +89,8 @@ Une escalade coûte moins cher qu'un Opus systématique.
 **Deuxième dimension : l'effort.** L'étage n'est que la moitié du réglage. Là où
 l'interface l'expose (API, Claude Code), l'effort de réflexion se règle indépendamment
 du modèle, et `low`/`medium` tiennent la qualité sur une grande part du travail courant
-pour une fraction des tokens. Conséquence pratique : **un Opus à effort bas est souvent
+pour une fraction des tokens. Sur Opus 5.5, la réflexion ne se coupe plus : l'effort
+est le seul réglage, et son défaut est `medium`. Conséquence pratique : **un Opus à effort bas est souvent
 un meilleur choix qu'un Sonnet à effort haut**, à coût comparable. Descendre l'effort
 avant de descendre d'étage.
 
