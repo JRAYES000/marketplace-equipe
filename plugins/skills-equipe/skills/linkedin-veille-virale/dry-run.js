@@ -22,11 +22,7 @@ const fs = require('fs');
 const path = require('path');
 const { trierPosts, recupererPosts } = require('./lib/veille');
 const { validerAccents } = require('./lib/valider-orthographe');
-const {
-  convertirGras,
-  validerAccroche,
-  validerEmojis,
-} = require('../linkedin-carrousel/lib/valider-post');
+const { convertirGras, validerMiseEnForme } = require('./lib/valider-mise-en-forme');
 const { validerQuotaHebdomadaire, dateJourISO } = require('./lib/planifier-veille');
 const { chargerRegistre, entreesDeLaSemaine } = require('./lib/registre');
 const reglages = require('./reglages-comptes.json');
@@ -115,19 +111,18 @@ async function executerPourCompte(compte, config, { cheminRegistre } = {}) {
     }
   }
 
-  // Regles hook/gras/emoji de linkedin-carrousel (retour de Julien,
-  // 18/09/2026) -- reutilise le meme validateur, jamais duplique. Volontairement
-  // APRES le controle d'accents ci-dessus : un texte deja ecarte pour accents
-  // ne doit jamais reapparaitre ecarte pour une autre raison a la place (voir
-  // test/valider-orthographe.test.js, qui verifie erreurOrthographe precisement
-  // sur ce cas). N'importe que convertirGras/validerAccroche/validerEmojis --
-  // pas validerLongueur/validerHashtags/validerChiffreSource, propres au format
-  // carrousel, jamais demandes pour la veille.
+  // Douze criteres de linkedin-mise-en-forme (source de verite, voir
+  // lib/valider-mise-en-forme.js), plus depuis le 22/09/2026 -- avant cette date,
+  // ce paquet importait linkedin-carrousel/lib/valider-post et n'en verifiait
+  // que 3 sur 12 (pas les trois titres de section, pas la police de gras, pas
+  // les formulations interdites). Volontairement APRES le controle d'accents
+  // ci-dessus : un texte deja ecarte pour accents ne doit jamais reapparaitre
+  // ecarte pour une autre raison a la place (voir test/valider-orthographe.test.js,
+  // qui verifie erreurOrthographe precisement sur ce cas).
   if (contenuFinal && !erreurQuota && !erreurOrthographe) {
     try {
-      const texteGras = convertirGras(contenuFinal);
-      validerAccroche(texteGras);
-      validerEmojis(texteGras);
+      const texteGras = await convertirGras(contenuFinal);
+      await validerMiseEnForme(texteGras);
       contenuFinal = texteGras;
     } catch (erreur) {
       erreurFormatPost = erreur.message;

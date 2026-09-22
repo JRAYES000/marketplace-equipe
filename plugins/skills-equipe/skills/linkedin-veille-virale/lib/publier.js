@@ -1,11 +1,7 @@
 'use strict';
 
 const { executerActionComposio } = require('./composio');
-const {
-  convertirGras,
-  validerAccroche,
-  validerEmojis,
-} = require('../../linkedin-carrousel/lib/valider-post');
+const { convertirGras, validerMiseEnForme } = require('./valider-mise-en-forme');
 
 /**
  * SEUL point d'appel qui publie reellement sur LinkedIn pour cette skill.
@@ -22,22 +18,24 @@ const {
  * julien-partners/julien-agency). Fallback documente si besoin :
  * `resoudreAuteurParDefaut()` plus bas, non appele automatiquement.
  *
- * Regles hook/gras/emoji de linkedin-carrousel (retour de Julien, 18/09/2026)
- * reutilisees ici, avant ce seul point d'appel reseau -- incident reel du
- * meme jour : ce module ne validait rien du tout avant publication, et
- * dry-run.js (qui simule le pipeline sans jamais l'importer) ne verifiait que
- * les accents. Les posts deja publies (Codie Sanchez, Jason Feifer, Justin
- * Welsh) n'ont donc jamais pu passer par un hook/gras/emoji verifie. Refus
- * explicite desormais (throw), pas un avertissement -- coherent avec le
- * reste du depot.
+ * Douze criteres de linkedin-mise-en-forme (source de verite, voir
+ * lib/valider-mise-en-forme.js) verifies ici, avant ce seul point d'appel reseau --
+ * incident reel du 18/09/2026 : ce module ne validait rien du tout avant publication,
+ * et dry-run.js (qui simule le pipeline sans jamais l'importer) ne verifiait que les
+ * accents. Les posts deja publies (Codie Sanchez, Jason Feifer, Justin Welsh) n'ont donc
+ * jamais pu passer par un controle de forme verifie. Un premier pont a ete branche ce
+ * jour-la vers linkedin-carrousel/lib/valider-post (3 criteres sur 12 seulement) ;
+ * remplace le 22/09/2026 par un import reel de linkedin-mise-en-forme, la source de
+ * verite documentee pour les posts texte (le carrousel garde son propre validateur pour
+ * ses propres besoins). Refus explicite (throw), pas un avertissement -- coherent avec
+ * le reste du depot.
  */
 async function publierPost({ authorUrn, commentary, userId, apiKey }) {
   if (!authorUrn) throw new Error('authorUrn requis (urn:li:person:... ou urn:li:organization:...).');
   if (!commentary) throw new Error('commentary requis (texte du post).');
 
-  const texteGras = convertirGras(commentary);
-  validerAccroche(texteGras);
-  validerEmojis(texteGras);
+  const texteGras = await convertirGras(commentary);
+  await validerMiseEnForme(texteGras);
 
   return executerActionComposio('LINKEDIN_CREATE_LINKED_IN_POST', {
     arguments: { author: authorUrn, commentary: texteGras },
