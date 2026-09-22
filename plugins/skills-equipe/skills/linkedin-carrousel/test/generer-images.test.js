@@ -5,6 +5,7 @@ const assert = require('node:assert/strict');
 const fs = require('fs');
 const os = require('os');
 const path = require('path');
+const { chromium } = require('playwright');
 const {
   genererImagesParDiapo,
   genererImageCouverture,
@@ -178,4 +179,65 @@ test('la couverture force le logo visible (role "contenu" au rendu) meme sur une
   // comportement inchange par ce fix.
   const htmlParDiapo = `${entete}${injecterDiapo(blocDiapo, diapoHook, 0)}${pied}`;
   assert.match(htmlParDiapo, /<div class="slide"[^>]*data-role="hook"/);
+});
+
+/**
+ * Trou de couverture trouve le 22/09/2026 en diagnostiquant un retour de
+ * Julien ("aucun logo sur les 10 pages du carrousel julien-partners du
+ * 17/09") : le bug ne s'est pas reproduit (logo bien present, source et
+ * gabarit inchanges depuis), mais aucun test existant ne verifiait la
+ * visibilite reelle du logo pour le mode `genererImagesParDiapo` -- seul
+ * `genererImageCouverture` (mode image-seule) etait couvert. Une regression
+ * future sur ce point (regle CSS `.logo` cassee, template qui oublie le
+ * bloc `.logo`, injecterDiapo qui perd le role) serait donc passee inapercue
+ * jusqu'a ce qu'un client la remarque -- exactement le scenario diagnostique.
+ *
+ * Rendu Playwright reel (comme le fait `genererImagesParDiapo`), verifie
+ * avec `isVisible()` plutot qu'une simple presence dans le HTML source :
+ * une regle CSS qui masquerait le logo par erreur laisserait le texte dans
+ * le DOM mais invisible a l'ecran -- un test sur le HTML brut ne l'aurait
+ * pas detecte.
+ */
+test('le logo (mention de marque) est visible sur une diapo "contenu" et absent sur une diapo "hook", pour les 3 comptes', async () => {
+  const { chargerGabarit, injecterDiapo } = require('../generer-pdf');
+  const marqueAttendueParCompte = {
+    'julien-agency': 'Claude Agency',
+    'julien-partners': 'Claude Partners',
+    'page-claude': 'Claude',
+  };
+  const diapoHook = { role: 'hook', titre: 'Titre de test pour la diapo hook' };
+  const diapoContenu = { role: 'contenu', titre: 'Titre de test pour une diapo contenu', texte: 'Texte de test.' };
+
+  const navigateur = await chromium.launch();
+  try {
+    for (const [compte, marqueAttendue] of Object.entries(marqueAttendueParCompte)) {
+      const { entete, blocDiapo, pied } = chargerGabarit(compte);
+
+      for (const [role, diapo] of [['hook', diapoHook], ['contenu', diapoContenu]]) {
+        const html = `${entete}${injecterDiapo(blocDiapo, diapo, 0)}${pied}`;
+        const page = await navigateur.newPage({ viewport: { width: 1080, height: 1350 } });
+        try {
+          await page.setContent(html, { waitUntil: 'load' });
+          await page.evaluate(() => document.fonts.ready);
+          const logo = page.locator('.logo');
+          const estVisible = await logo.isVisible();
+
+          if (role === 'contenu') {
+            assert.ok(estVisible, `logo devrait etre visible sur une diapo "contenu" (${compte})`);
+            const texte = await logo.textContent();
+            assert.ok(
+              texte.includes(marqueAttendue),
+              `logo devrait contenir "${marqueAttendue}" pour ${compte}, recu : "${texte}"`
+            );
+          } else {
+            assert.ok(!estVisible, `logo devrait etre absent (masque par CSS) sur la diapo "hook" (${compte})`);
+          }
+        } finally {
+          await page.close();
+        }
+      }
+    }
+  } finally {
+    await navigateur.close();
+  }
 });
