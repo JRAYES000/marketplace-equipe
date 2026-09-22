@@ -37,6 +37,17 @@ const REGEX_EMOJI = /\p{Extended_Pictographic}/gu;
 // d'URL exhaustive). Limite assumee : un TLD hors de cette liste (ex. ".xyz", ".shop")
 // reste un angle mort.
 const REGEX_LIEN = /(https?:\/\/|www\.|lnkd\.in|\b[a-z0-9-]+\.(?:com|fr|net|org|io|co|ly|be|info|app|dev|ai)\b)/i;
+// Bug reel trouve par test adversarial le 22/09/2026 (meme session que celui
+// du dessus) : "mon site . fr" (espace(s) insere(s) autour du point) echappe
+// entierement a REGEX_LIEN -- celle-ci exige le mot et le TLD colles l'un a
+// l'autre. LinkedIn affiche pourtant "site . fr" comme texte plat, pas un
+// lien cliquable (contrairement au domaine colle), mais le contournement visé
+// ici n'est pas le rendu LinkedIn : c'est de faire dire a un lecteur humain
+// "va voir sur mon site . fr" sans jamais ecrire un domaine detectable
+// mecaniquement -- le meme resultat en pratique qu'un lien nu, pour ce garde-
+// fou. Meme liste FERMEE de TLD que REGEX_LIEN (memes limites assumees),
+// simplement tolerante a des espaces autour du point.
+const REGEX_LIEN_ESPACE = /\b[a-z0-9-]+\s*\.\s*(?:com|fr|net|org|io|co|ly|be|info|app|dev|ai)\b/i;
 const REGEX_PUCE = /(^|\n)\s*[-*•‣▪]\s|(^|\n)\s*\d+[.)]\s/;
 
 // Commentaires vides explicitement cites par le brief, plus les variantes les
@@ -114,7 +125,7 @@ function validerFormeGenerale(texte) {
   if (REGEX_EMOJI.test(texte)) {
     throw new Error('Commentaire refuse : aucun emoji autorise.');
   }
-  if (REGEX_LIEN.test(texte)) {
+  if (REGEX_LIEN.test(texte) || REGEX_LIEN_ESPACE.test(texte)) {
     throw new Error('Commentaire refuse : aucun lien autorise.');
   }
   if (REGEX_PUCE.test(texte)) {

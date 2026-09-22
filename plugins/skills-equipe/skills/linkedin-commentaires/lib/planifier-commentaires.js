@@ -52,12 +52,39 @@ function filtrerPostsFrais(posts, maintenant = new Date()) {
  * appele explicitement avant tout commentaire sur un post hors de la fenetre
  * des 4h (le repli documente), jamais un simple avertissement. `maintenant`
  * injectable pour des tests deterministes, comme filtrerPostsFrais.
+ *
+ * Bug reel trouve par test adversarial le 22/09/2026 : une date de
+ * publication FUTURE ou manifestement invalide (chaine non parsable)
+ * passait ce garde-fou SANS ERREUR. Cause : `ageHeures > FRAICHEUR_MAX_HEURES`
+ * est `false` a la fois pour un age negatif (post future : `new Date(...)`
+ * dans le futur donne un `ageMs` negatif) et pour un age `NaN` (date
+ * invalide : `new Date('n-importe-quoi').getTime()` vaut `NaN`, et toute
+ * comparaison avec `NaN` est `false` en JavaScript) -- l'absence de rejet
+ * etait silencieusement interpretee comme "assez frais". Contrairement a
+ * `filtrerPostsFrais` (simple tri/filtre pour la fenetre de 4h, ou l'age
+ * negatif est deja exclu via `age >= 0`), cette fonction-ci est le
+ * VERITABLE garde-fou dur avant publication -- son role est justement de ne
+ * jamais laisser passer une donnee suspecte sans le dire. Les deux cas
+ * levent desormais une erreur explicite, distincte du cas "trop vieux".
  */
 function validerFraicheurMaximale(post, maintenant = new Date()) {
   if (!post || !post.postedAt) {
     throw new Error('Commentaire refuse : post sans date de publication (postedAt), fraicheur non verifiable.');
   }
-  const ageMs = maintenant.getTime() - new Date(post.postedAt).getTime();
+  const datePublication = new Date(post.postedAt);
+  const ageMs = maintenant.getTime() - datePublication.getTime();
+  if (Number.isNaN(ageMs)) {
+    throw new Error(
+      `Commentaire refuse : date de publication "${post.postedAt}" invalide (non parsable), ` +
+      'fraicheur non verifiable -- jamais suppose "assez frais" faute de pouvoir calculer un age.'
+    );
+  }
+  if (ageMs < 0) {
+    throw new Error(
+      `Commentaire refuse : post avec une date de publication future ("${post.postedAt}"), ` +
+      'manifestement invalide -- un post ne peut pas avoir ete publie apres maintenant.'
+    );
+  }
   const ageHeures = ageMs / (60 * 60 * 1000);
   if (ageHeures > FRAICHEUR_MAX_HEURES) {
     throw new Error(
@@ -88,10 +115,21 @@ function dateJourISO(date = new Date()) {
  * la meme personne le meme jour" tomberait silencieusement.
  *
  * Normalisation volontairement CONSERVATRICE : casse, espaces de debut/fin,
- * et emojis/symboles de fin de nom uniquement. Les accents sont preserves
- * (deux vraies personnes ne doivent jamais fusionner), tout comme le
- * contenu du nom lui-meme -- seule la mise en forme de fin de chaine est
- * ignoree.
+ * espaces INTERNES multiples, et emojis/symboles de fin de nom uniquement.
+ * Les accents sont preserves (deux vraies personnes ne doivent jamais
+ * fusionner), tout comme le contenu du nom lui-meme -- seule la mise en
+ * forme (espaces, decoration de fin) est ignoree.
+ *
+ * Bug reel trouve par test adversarial le 22/09/2026 : avant l'ajout du
+ * `.replace(/\s+/g, ' ')` ci-dessous, "Theophile Burnet" et
+ * "Theophile  Burnet" (double espace entre prenom et nom -- variation
+ * plausible d'une extraction Apify ou d'une frappe manuelle) restaient deux
+ * chaines DIFFERENTES apres normalisation, malgre `.trim()` : celui-ci ne
+ * touche que les extremites, jamais l'interieur. La regle "jamais deux fois
+ * la meme personne le meme jour" tombait donc silencieusement pour la MEME
+ * personne reelle, exactement comme la casse ou la decoration de fin avant
+ * elles. `\s` en JavaScript capture aussi l'espace insecable (U+00A0),
+ * couvert par le meme remplacement sans configuration supplementaire.
  */
 const REGEX_DECORATION_FIN_NOM = /[\s‍️\p{Extended_Pictographic}]+$/u;
 
@@ -100,6 +138,7 @@ function normaliserAuteurCible(auteurCible) {
     .trim()
     .replace(REGEX_DECORATION_FIN_NOM, '')
     .trim()
+    .replace(/\s+/g, ' ')
     .toLowerCase();
 }
 
