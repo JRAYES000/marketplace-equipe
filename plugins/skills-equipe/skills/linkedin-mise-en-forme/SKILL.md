@@ -149,8 +149,9 @@ le fait qu'on supprime.
 
 ## Guardrails — avant depot dans sortants/
 
-Les criteres de `contenu-linkedin`, plus les six suivants. Le script les mesure
-tous sauf le niveau de lecture, qui se relit :
+Les criteres de `contenu-linkedin`, plus les neuf suivants (douze au total avec
+les criteres 2 et 4, qui comptent double). Le script les mesure tous sauf le
+niveau de lecture, qui se relit :
 
 ```bash
 node "<dossier de la skill>/scripts/verif-post.mjs" verif "C:/chemin/vers/brouillon.txt"
@@ -158,7 +159,8 @@ node "<dossier de la skill>/scripts/verif-post.mjs" verif "C:/chemin/vers/brouil
 
 1. L'accroche tient en **140 caracteres** et **se termine par un point
    d'interrogation**.
-2. **Au moins huit passages en gras**, aucun caractere accentue dedans.
+2. **Au moins huit passages en gras**, aucun caractere accentue dedans, tous
+   dans la **bonne police** (voir plus bas).
 3. **Trois titres de section**, chacun sur sa ligne, en gras, precede d'un emoji.
 4. Entre 3 et 6 emojis, tous en tete de ligne.
 5. Aucune phrase de plus de 20 mots ; aucun terme technique non explique.
@@ -166,9 +168,47 @@ node "<dossier de la skill>/scripts/verif-post.mjs" verif "C:/chemin/vers/brouil
    fourchette la plus engageante, mesuree le 09/09 sur le corpus de van der
    Blom. Une version anterieure de ce fichier disait 900-1 300 : c'est elle qui
    tirait les posts vers le bas, elle est abandonnee.
+7. **Aucune formulation interdite** — banque reprise telle quelle de
+   `linkedin-carrousel/lib/valider-post.js` (meme retour de Julien du
+   10/09/2026) : demande d'engagement (« commentez OUI », « partagez si... »),
+   exclamations en rafale, tiret long, « ce n'est pas X, c'est Y », « ravi de
+   vous annoncer », « taguez quelqu'un », critique de LinkedIn, mot tout en
+   MAJUSCULES. Ajoutee le 22/09/2026 : rien ne verifiait cette skill contre les
+   formulations qui ont deja fait juger un carrousel « AI slop » ailleurs dans
+   ce depot.
+8. **Accroche non degeneree (3 mots minimum).** Ne mesure PAS si le hook est
+   « irresistible » — ca reste un jugement de Julien, aucun code ne le
+   remplace. Attrape seulement le cas degenere (« ? » seul, ou un mot suivi
+   d'un point d'interrogation) qui passait les deux premiers controles avant
+   ce critere. Ajoutee le 22/09/2026, apres avoir cherche un critere de
+   longueur minimale plus fort et l'avoir ecarte : un hook court et vraiment
+   percutant existe (« Et si tout s'arretait demain ? »), un plancher de
+   caracteres l'aurait refuse a tort. La force d'un hook reste a l'oeil.
+9. **Le gras Unicode deja converti doit etre dans la bonne police** —
+   *Mathematical Sans-Serif Bold*, celle que fabrique `enGras()`. Ajoutee le
+   22/09/2026 : verification reelle des deux premiers posts de veille publies
+   (Bernard Marr le 18/09, Andrew Ng le 21/09) contre ces criteres — leur gras
+   existe bien mais dans une AUTRE police Unicode, *Mathematical Bold avec
+   empattement* (celle que produit `linkedin-carrousel/lib/valider-post.js`,
+   sans lien avec cette skill-ci). Avant ce correctif, le script les comptait
+   a tort comme « 0 gras trouve » — il ne reconnaissait qu'une seule des deux
+   polices. Corrige dans `scripts/lib.mjs` : le comptage du critere 2
+   reconnait desormais les deux polices (pour ne pas sous-compter un gras
+   reel), et ce critere-ci signale specifiquement un gras dans la mauvaise
+   police, avec le segment fautif.
 
 Le script sort en code 1 si un critere echoue. Montrer sa sortie brute a Julien
 avec le brouillon — ne jamais ecrire « guardrails passes » sans elle.
+
+**Verifie le 22/09/2026 contre les deux posts de veille deja publies** (Bernard
+Marr 18/09, Andrew Ng 21/09) : aucun des deux n'est passe par cette skill —
+`linkedin-veille-virale` redige ses propres regles d'ecriture, dupliquees dans
+son SKILL.md, sans jamais charger ni citer `linkedin-mise-en-forme` (verifie
+par recherche sur tout le depot : zero mention). Les deux posts obtiennent
+6/12 une fois le correctif de police applique (4/9 avant). Cet ecart entre les
+deux skills n'est pas corrige ici — ce n'est pas un defaut mecanisable de
+`linkedin-mise-en-forme`, c'est une decision de Nomena/Julien sur si
+`linkedin-veille-virale` doit desormais s'appuyer sur celle-ci.
 
 **Le brouillon se donne sous l'une ou l'autre forme** : le markdown `**ainsi**`
 d'un brouillon de `sortants/`, ou le texte deja converti en gras Unicode quand on
