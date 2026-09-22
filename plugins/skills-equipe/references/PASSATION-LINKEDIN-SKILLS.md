@@ -110,3 +110,42 @@ julien-agency, 4 julien-partners) -- correspond exactement au bilan du brouillon
 **Pour la prochaine session** : le pipeline reste a activation manuelle -- ce backfill ne relance
 rien, il corrige seulement des donnees passees. Prochain declenchement reel (commentaires ou
 veille du jour) : sur demande explicite de Julien, comme toujours.
+
+## 22/09/2026 (suite) -- verification du genre des 9 commentaires backfilles : aucune correction necessaire
+
+Julien a demande de reverifier le genre des 9 lignes backfillees plus haut, attribue lors du
+backfill par inference sur la forme (texte termine par "?" ou non), pas retrouve dans une donnee
+d'origine. Verification demandee sur le fond, pas la forme.
+
+**Methode** : relecture directe de Notion "Commentaires" (les 9 lignes, genre actuel), puis
+reouverture reelle des 9 permaliens LinkedIn cibles (nouvel appel navigateur, pas la memoire de la
+session precedente) pour juger chaque commentaire dans son contexte complet -- post cible et
+reponses eventuelles de l'auteur ou de tiers, pas le texte isole.
+
+**Resultat, genre avant / genre apres (identiques pour les 9 -- aucune correction ecrite dans
+Notion)** :
+
+| Commentaire | Date | Genre avant | Genre apres verification |
+| --- | --- | --- | --- |
+| Alexis Combeaux | 18/09 | vraie_question | vraie_question -- confirme (l'auteur repond directement a la question posee) |
+| Theophile Burnet | 18/09 | desaccord_argumente | desaccord_argumente -- confirme (position argumentee, aucune question, "neuf" reprend le compte du post lui-meme -- pas un chiffre externe) |
+| Victor Partouche-Sebban (17/09) | 17/09 | vraie_question | vraie_question -- confirme (l'auteur repond directement) |
+| Victor Partouche-Sebban (18/09) | 18/09 | vraie_question | vraie_question -- confirme (l'auteur repond directement, "156" reprend le titre du post -- pas un chiffre externe) |
+| Theo Meuriot | 16/09 | desaccord_argumente | desaccord_argumente -- confirme (l'auteur repond "Exactement", aucune question posee) |
+| Theo Meuriot | 17/09 | vraie_question | vraie_question -- confirme (l'auteur repond directement a la question) |
+| Leonel Adagbe | 16/09 | vraie_question | vraie_question -- confirme (un tiers, "Chief IA Officer", repond concretement a la question posee -- preuve la plus forte que la question est lue comme sincere) |
+| Mehdi Stili | 16/09 | desaccord_argumente | desaccord_argumente -- confirme (position argumentee, aucune question) |
+| Yohann Nezri | 16/09 | vraie_question | vraie_question -- confirme (question concrete et actionnable, sans reponse visible mais sincere sur le fond) |
+
+**Aucun des 9 ne relevait de `information_chiffree`** : verifie explicitement pour Theophile
+Burnet ("neuf abonnements", "neuf outils") et les deux Victor Partouche-Sebban ("156 editions",
+"156e rendez-vous") -- ces nombres reprennent tous un chiffre deja present dans le post cible
+lui-meme, pas une information externe apportee par le commentaire. Le genre le plus a risque du
+brief (regle SKILL.md du 18/09) ne s'applique a aucun des 9 -- correctement evite des le backfill.
+Aucun ne relevait non plus de `histoire_vecue` (aucune experience personnelle affirmee).
+
+**Conclusion : dossier ferme, aucune ecriture Notion necessaire pour cette verification.** Les 9
+genres attribues lors du backfill etaient corrects sur le fond, pas seulement coherents en forme.
+
+**Rien d'autre fait** : pas d'ajout des posts Buffer, pas de relance du pipeline quotidien --
+conforme a la demande.
