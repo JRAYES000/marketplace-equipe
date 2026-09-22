@@ -182,6 +182,75 @@ test('la couverture force le logo visible (role "contenu" au rendu) meme sur une
 });
 
 /**
+ * Non-regression du 22/09/2026, demandee explicitement apres l'integration
+ * du vrai logo (commit 9bbffeb) : le test precedent ne verifie que
+ * l'attribut `data-role` du HTML source, jamais si l'element `.logo` qui en
+ * depend est une vraie image chargee -- un fichier logo qui redeviendrait un
+ * chemin relatif casse (au lieu du base64 attendu), ou qui serait retire par
+ * erreur d'un gabarit, passerait inapercu par ce seul test. Celui-ci exerce
+ * le VRAI chemin de code (`genererImageCouverture`, avec son
+ * `forcerLogoVisible` interne), genere un PNG reel, puis rend independamment
+ * le meme HTML que produirait ce chemin pour verifier que `.logo` est une
+ * `<img>` avec des dimensions naturelles > 0 -- pas de texte residuel, pas
+ * d'image cassee, sur une diapo dont le role source est "hook".
+ */
+test('genererImageCouverture affiche la vraie image du logo (pas de texte, pas d\'image cassee) quand forcerLogoVisible force le role "contenu" sur une diapo hook', async () => {
+  const dossierSortie = dossierTemporaire();
+  const cheminCouverture = path.join(dossierSortie, 'couverture-logo.png');
+  try {
+    const diapoHook = diapos.find((d) => d.role === 'hook') || diapos[0];
+    assert.equal(diapoHook.role, 'hook', 'le fixture doit contenir une diapo hook pour que ce test soit probant');
+
+    // Chemin de code reel : produit effectivement un PNG, sans planter.
+    const resultat = await genererImageCouverture({ compte: 'julien-partners', diapos, sortie: cheminCouverture });
+    assert.ok(fs.existsSync(resultat.cheminSortie));
+    const { largeur, hauteur, tailleOctets } = lireDimensionsPng(resultat.cheminSortie);
+    assert.equal(largeur, 1080);
+    assert.equal(hauteur, 1350);
+    assert.ok(tailleOctets > 5000, `couverture suspicieusement petite (${tailleOctets} octets)`);
+
+    // Verification du contenu visuel reel : meme HTML que celui que
+    // genererImageCouverture construit en interne (role force "contenu",
+    // contexte "image-seule"), rendu independamment pour inspecter le DOM.
+    const { chargerGabarit, injecterDiapo } = require('../generer-pdf');
+    const { entete, blocDiapo, pied } = chargerGabarit('julien-partners');
+    const html = `${entete}${injecterDiapo(blocDiapo, { ...diapoHook, role: 'contenu' }, 0, { contexte: 'image-seule' })}${pied}`;
+
+    const navigateur = await chromium.launch();
+    try {
+      const page = await navigateur.newPage({ viewport: { width: 1080, height: 1350 } });
+      try {
+        await page.setContent(html, { waitUntil: 'load' });
+        await page.evaluate(() => document.fonts.ready);
+        const logo = page.locator('.logo');
+        assert.ok(await logo.isVisible(), 'le logo devrait etre visible sur la couverture (role force "contenu")');
+
+        const balise = await logo.evaluate((el) => el.tagName.toLowerCase());
+        assert.equal(balise, 'img', `.logo devrait etre une balise <img>, recu : <${balise}>`);
+
+        const texte = await logo.evaluate((el) => el.textContent.trim());
+        assert.equal(texte, '', `.logo ne devrait contenir aucun texte residuel (ancien "Claude Partners"), recu : "${texte}"`);
+
+        const { largeurNaturelle, hauteurNaturelle } = await logo.evaluate((el) => ({
+          largeurNaturelle: el.naturalWidth,
+          hauteurNaturelle: el.naturalHeight,
+        }));
+        assert.ok(
+          largeurNaturelle > 0 && hauteurNaturelle > 0,
+          `le logo de la couverture devrait reellement se charger, pas etre casse -- naturalWidth=${largeurNaturelle}, naturalHeight=${hauteurNaturelle}`
+        );
+      } finally {
+        await page.close();
+      }
+    } finally {
+      await navigateur.close();
+    }
+  } finally {
+    fs.rmSync(dossierSortie, { recursive: true, force: true });
+  }
+});
+
+/**
  * Trou de couverture trouve le 22/09/2026 en diagnostiquant un retour de
  * Julien ("aucun logo sur les 10 pages du carrousel julien-partners du
  * 17/09") : le bug ne s'est pas reproduit (logo bien present, source et
