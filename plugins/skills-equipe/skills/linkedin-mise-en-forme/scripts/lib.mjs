@@ -50,12 +50,29 @@ export const EMOJI_G = new RegExp(EMOJI.source, "gu");
 // Un passage deja converti, dans l'une OU l'autre police : une suite de lettres/chiffres
 // des deux blocs gras Unicode, espaces compris (pour ne pas couper "seize mille" en deux
 // segments). Sert a COMPTER qu'un gras existe, quelle que soit sa police.
+//
+// L'apostrophe (droite ' ou courbe ’) est incluse dans la plage : bug reel trouve le
+// 22/09/2026 sur un titre "Ce que j'en retiens" -- une fois converti en gras, l'Unicode
+// Mathematical Bold ne fabrique aucune forme grasse pour l'apostrophe (elle reste telle
+// quelle, comme l'accent, voir enGras() plus haut), ce qui coupait le titre en deux runs
+// autour d'elle et le faisait rater le regex "titre" ci-dessous (`^EMOJI run$`, qui exige
+// un seul run contigu jusqu'a la fin de ligne). L'apostrophe est de la ponctuation
+// courante, pas un accent : l'inclure ici ne relache rien de la regle 2 (aucune LETTRE
+// accentuee n'est ajoutee).
 const PLAGE_SANS_SERIF = "\\u{1D5D4}-\\u{1D607}\\u{1D7EC}-\\u{1D7F5}";
 const PLAGE_SERIF = "\\u{1D400}-\\u{1D433}\\u{1D7CE}-\\u{1D7D7}";
-export const UNICODE_GRAS = new RegExp(`[${PLAGE_SANS_SERIF}${PLAGE_SERIF}\\u0020]+`, "gu");
+const PONCTUATION_RUN = "'’";
+export const UNICODE_GRAS = new RegExp(`[${PLAGE_SANS_SERIF}${PLAGE_SERIF}${PONCTUATION_RUN}\\u0020]+`, "gu");
 // Sert a REPERER un usage de l'AUTRE police (serif), non conforme a la regle de Julien.
 export const UNICODE_GRAS_SERIF = new RegExp(`[${PLAGE_SERIF}]`, "u");
-const UNICODE_GRAS_SERIF_RUN = new RegExp(`[${PLAGE_SERIF}\\u0020]+`, "gu");
+const UNICODE_GRAS_SERIF_RUN = new RegExp(`[${PLAGE_SERIF}${PONCTUATION_RUN}\\u0020]+`, "gu");
+// Un match de UNICODE_GRAS/UNICODE_GRAS_SERIF_RUN peut, apres inclusion de l'apostrophe
+// ci-dessus, etre compose UNIQUEMENT d'apostrophes et d'espaces (ex. une simple
+// apostrophe de texte courant comme "l'offre", jamais un gras) -- bug reel trouve le
+// 22/09/2026 en corrigeant celui du titre avec apostrophe : ce filtre exige qu'un match
+// contienne au moins UN vrai caractere gras Unicode pour compter (meme principe que le
+// `.trim()+filter(Boolean)` deja en place, qui ecarte deja les matchs tout-espace).
+const contientUnVraiGras = (s) => new RegExp(`[${PLAGE_SANS_SERIF}${PLAGE_SERIF}]`, "u").test(s);
 
 // Formulations interdites -- reprises telles quelles de
 // linkedin-carrousel/lib/valider-post.js (meme motif, meme retour de Julien du
@@ -110,7 +127,7 @@ export function verifierTexte(corps) {
   // Deux formes acceptees pour compter un gras : le markdown, et le gras Unicode deja
   // converti -- dans l'une ou l'autre police (voir UNICODE_GRAS plus haut).
   const gras = [...corps.matchAll(/\*\*(.+?)\*\*/g)].map((m) => m[1])
-    .concat((corps.match(UNICODE_GRAS) || []).map((s) => s.trim()).filter(Boolean));
+    .concat((corps.match(UNICODE_GRAS) || []).map((s) => s.trim()).filter(Boolean).filter(contientUnVraiGras));
   resultats.push(dire(gras.length >= 8, "au moins 8 passages en gras", `${gras.length} trouve(s)`));
   const fautifs = gras.filter((g) => ACCENTUE.test(g.replace(EMOJI_G, "").replace(UNICODE_GRAS, "")));
   resultats.push(dire(fautifs.length === 0, "aucun gras accentue", fautifs.length ? fautifs.join(" | ") : "tous sans accent"));
@@ -118,14 +135,14 @@ export function verifierTexte(corps) {
   // Nouveau critere (22/09/2026) : le gras deja converti doit etre dans la police que
   // Julien a choisie (Sans-Serif Bold), pas l'autre (voir SERIF plus haut). Un
   // segment en markdown **ainsi** n'est pas concerne, il n'est pas encore converti.
-  const segmentsSerif = (corps.match(UNICODE_GRAS_SERIF_RUN) || []).map((s) => s.trim()).filter(Boolean);
+  const segmentsSerif = (corps.match(UNICODE_GRAS_SERIF_RUN) || []).map((s) => s.trim()).filter(Boolean).filter(contientUnVraiGras);
   resultats.push(dire(
     segmentsSerif.length === 0,
     "gras dans la bonne police (Sans-Serif Bold)",
     segmentsSerif.length ? `Mathematical Bold (avec empattement) trouve : ${segmentsSerif.join(" | ")}` : "aucun gras serif"
   ));
 
-  const titre = new RegExp(`^${EMOJI.source}\\s+(\\*\\*[^*]+\\*\\*|[${PLAGE_SANS_SERIF}${PLAGE_SERIF}\\u0020]+)\\s*$`, "u");
+  const titre = new RegExp(`^${EMOJI.source}\\s+(\\*\\*[^*]+\\*\\*|[${PLAGE_SANS_SERIF}${PLAGE_SERIF}${PONCTUATION_RUN}\\u0020]+)\\s*$`, "u");
   const titres = lignes.filter((l) => titre.test(l));
   resultats.push(dire(titres.length === 3, "trois titres de section en gras", titres.length ? titres.join(" / ") : "aucun"));
 
