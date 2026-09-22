@@ -24,9 +24,17 @@ Six regles de forme, decidees par Julien les 2026-09-18. Elles s'appliquent aux
 
 ## Ordre de travail
 
+**Note du 22/09/2026** : `contenu-linkedin` existe reellement, mais c'est une skill de PROJET
+(dossier `.claude/skills/` du depot prive `visibilite-ops`), pas une skill de ce paquet
+`skills-equipe` -- elle n'est donc chargeable que dans une session dont le dossier de travail
+est ce depot-la. Verifie le 22/09/2026 en auditant les trois skills LinkedIn : ce n'est pas un
+oubli ni un nom errone, juste une skill qui ne voyage pas avec ce paquet. Dans une session
+ailleurs (comme celle qui a ecrit cette note), l'etape 1 ci-dessous n'est pas realisable telle
+quelle -- rediger le fond a la main, sans le charger.
+
 1. **Charger `contenu-linkedin`** pour le fond, les formules de hook et les
-   regles d'algorithme 2026. Cette skill-ci ne remplace rien : elle se pose
-   par-dessus.
+   regles d'algorithme 2026, si le dossier de travail le permet (voir note
+   ci-dessus). Cette skill-ci ne remplace rien : elle se pose par-dessus.
 2. Rediger le fond.
 3. Appliquer les six regles ci-dessous.
 4. **Passe `humanizer`** — la skill, pas seulement le fichier de references de

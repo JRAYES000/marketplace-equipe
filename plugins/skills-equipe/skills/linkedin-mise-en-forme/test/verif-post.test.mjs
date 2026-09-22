@@ -197,3 +197,30 @@ test("une formulation interdite (banque reprise de linkedin-carrousel) est refus
   assert.equal(r.bon, false);
   assert.match(r.detail, /engagement/);
 });
+
+// Bug reel trouve le 22/09/2026 en rebranchant linkedin-veille-virale sur cette skill :
+// un titre "Ce qui a change" passait, mais "Ce que j'en retiens" non -- l'apostrophe,
+// une fois le titre converti en gras Unicode, coupait le run en deux et le regex de
+// titre (qui exige un seul run contigu jusqu'a la fin de ligne) ne matchait plus rien.
+test("un titre en gras Unicode contenant une apostrophe est reconnu comme un titre valide", () => {
+  const titreConverti = "\u{1F4BC} " + enGras("Ce que j'en retiens");
+  const corps = CONFORME.replace("\u{2705} **Ce qui reste**", titreConverti);
+  const { resultats } = verifierTexte(corps);
+  const r = resultats.find((x) => x.nom === "trois titres de section en gras");
+  assert.equal(r.bon, true, r.detail);
+  assert.equal(r.detail.split(" / ").length, 3, r.detail);
+});
+
+// Meme correctif, envers oppose : une apostrophe de texte COURANT (donc jamais grasse,
+// ex. "l'offre" en clair dans le corps) ne doit pas se compter comme un passage en gras
+// a elle seule -- regression trouvee en corrigeant le cas ci-dessus (l'apostrophe avait
+// ete ajoutee sans filtre a la plage UNICODE_GRAS, gonflant artificiellement le compte).
+test("une apostrophe de texte courant, hors de tout gras, ne compte jamais comme un passage en gras", () => {
+  const corps = CONFORME.replace(
+    "coute des candidats avant meme l'offre",
+    "coute des candidats avant meme l'offre, qu'il s'agisse d'un stage ou d'un poste"
+  );
+  const { resultats } = verifierTexte(corps);
+  const r = resultats.find((x) => x.nom === "au moins 8 passages en gras");
+  assert.equal(r.detail, "9 trouve(s)", "les apostrophes de texte courant ajoutees ne doivent pas faire monter le compte");
+});
