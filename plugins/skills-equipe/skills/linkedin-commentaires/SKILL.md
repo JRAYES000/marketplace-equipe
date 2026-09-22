@@ -321,6 +321,25 @@ verrouillee par un test dans `test/adversarial-15-09.test.js` :
   message explicite desormais (`lib/notion.js`, `lib/composio.js`), au lieu d'un `SyntaxError`
   brut.
 
+## Audit adversarial du 22/09/2026 (demande explicite de Nomena, meme methode)
+
+Meme sous-agent/methode, applique aux quatre skills LinkedIn a la fois (voir aussi
+`linkedin-carrousel` et `linkedin-mise-en-forme`). Faille reellement reproduite et corrigee le
+meme jour, verrouillee par `test/adversarial-22-09.test.js` :
+
+- **Domaine nu sans "www." ni "http(s)://" echappait a `REGEX_LIEN`** : "monsite.fr" ou
+  "bit.ly/abc123" passaient entierement inapercus, alors que LinkedIn les rend cliquables comme
+  n'importe quel autre lien. `REGEX_LIEN` reconnait desormais aussi une liste fermee des TLD les
+  plus courants (`.com`, `.fr`, `.net`, `.org`, `.io`, `.co`, `.ly`, `.be`, `.info`, `.app`,
+  `.dev`, `.ai`) precedes d'un nom de domaine plausible. **Limite assumee** : un TLD hors de
+  cette liste (ex. ".xyz", ".shop") reste un angle mort -- meme philosophie que les autres listes
+  fermees de ce depot (`MOTS_SANS_ACCENT_VERS_CORRECT`, `INTERDITS`), pas une detection d'URL
+  exhaustive.
+- **Verifie sans trouver de faille** : le pronom "on" combine a du vocabulaire d'experience (deja
+  couvert), et l'ouverture creuse "Super post !" suivie d'une vraie question -- confirmee comme un
+  comportement VOULU, tranche le 15/09/2026 ("le but reste de bloquer le vide integral, pas de
+  punir une accroche informelle"), pas une nouvelle faille.
+
 ## Suivi a 3 jours (regle 3 du brief -- lecture par capture d'ecran)
 
 Aucun OCR : c'est la **session Claude** qui lit les chiffres visibles sur la capture d'ecran

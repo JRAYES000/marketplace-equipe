@@ -157,7 +157,7 @@ le fait qu'on supprime.
 
 ## Guardrails — avant depot dans sortants/
 
-Les criteres de `contenu-linkedin`, plus les neuf suivants (douze au total avec
+Les criteres de `contenu-linkedin`, plus les dix suivants (treize au total avec
 les criteres 2 et 4, qui comptent double). Le script les mesure tous sauf le
 niveau de lecture, qui se relit :
 
@@ -203,20 +203,57 @@ node "<dossier de la skill>/scripts/verif-post.mjs" verif "C:/chemin/vers/brouil
    polices. Corrige dans `scripts/lib.mjs` : le comptage du critere 2
    reconnait desormais les deux polices (pour ne pas sous-compter un gras
    reel), et ce critere-ci signale specifiquement un gras dans la mauvaise
-   police, avec le segment fautif.
+   police, avec le segment fautif. L'apostrophe (droite ou courbe) est traitee
+   comme de la ponctuation courante dans un run gras, jamais comme un accent —
+   corrige le 22/09/2026 apres qu'un titre "Ce que j'en retiens" ait casse ce
+   critere (l'apostrophe n'a pas de forme grasse, comme un accent, ce qui
+   coupait le run en deux).
+10. **Aucun chiffre sans source** — reprise telle quelle de
+    `linkedin-carrousel/lib/valider-post.js` (`validerChiffreSource`, meme
+    fenetre de 80 caracteres avant / 60 apres, meme exemption pour un detail
+    d'anecdote couvert par une ligne finale `Source : ...`, meme liste fermee
+    de sources trop vagues). Ajoutee le 22/09/2026, trouvee par un test
+    adversarial : un chiffre-preuve invente ("40% des recruteurs...") passait
+    les douze criteres precedents sans encombre, rien ici ne verifiait le
+    sourcage. Bug reel trouve PENDANT ce portage : la premiere version
+    reutilisait les plages de caracteres gras completes (qui couvrent aussi
+    les lettres) pour reperer un "chiffre", ce qui faisait matcher des mots
+    entiers en gras ("offres", "en") comme des chiffres — corrige avec une
+    plage chiffres-seuls dediee.
 
 Le script sort en code 1 si un critere echoue. Montrer sa sortie brute a Julien
 avec le brouillon — ne jamais ecrire « guardrails passes » sans elle.
 
-**Verifie le 22/09/2026 contre les deux posts de veille deja publies** (Bernard
-Marr 18/09, Andrew Ng 21/09) : aucun des deux n'est passe par cette skill —
-`linkedin-veille-virale` redige ses propres regles d'ecriture, dupliquees dans
-son SKILL.md, sans jamais charger ni citer `linkedin-mise-en-forme` (verifie
-par recherche sur tout le depot : zero mention). Les deux posts obtiennent
-6/12 une fois le correctif de police applique (4/9 avant). Cet ecart entre les
-deux skills n'est pas corrige ici — ce n'est pas un defaut mecanisable de
-`linkedin-mise-en-forme`, c'est une decision de Nomena/Julien sur si
-`linkedin-veille-virale` doit desormais s'appuyer sur celle-ci.
+**Rebranchee sur `linkedin-veille-virale` le 22/09/2026** : cette skill importait
+jusque-la seulement 3 criteres sur 12/13 via `linkedin-carrousel`. Verifie contre
+les deux posts de veille deja publies (Bernard Marr 18/09, Andrew Ng 21/09) :
+aucun des deux n'obtenait plus de 6 ou 7 sur 13 au vrai bareme. Voir
+`linkedin-veille-virale/lib/valider-mise-en-forme.js` (le pont) et son SKILL.md
+pour le detail du rebranchement.
+
+**Limite sciemment non couverte, trouvee par test adversarial le 22/09/2026** :
+un gras ecrit dans une TROISIEME police Unicode (ni Sans-Serif Bold, ni
+Mathematical Bold avec empattement — ex. Double-Struck, Fullwidth, Fraktur) n'est
+NI compte comme un gras existant, NI signale comme une police fautive : il
+disparait silencieusement du calcul, comme s'il n'existait pas. Verifie avec un
+segment en Double-Struck (`𝕡𝕣𝕠𝕔𝕖𝕤𝕤 𝕥𝕣𝕠𝕡 𝕝𝕖𝕟𝕥`) : le critere 2 continue de passer
+tant que les AUTRES segments suffisent a atteindre huit, sans jamais signaler
+que ce segment-la ne rendra pas en gras sur LinkedIn. Pas corrige : il existe
+plus d'une dizaine de styles Unicode "alphanumeriques stylises" (Double-Struck,
+Fullwidth, Fraktur, Script, Sans Italic, Monospace...) — en couvrir un troisieme
+sans preuve qu'il circule reellement dans le corpus (contrairement au Mathematical
+Bold avec empattement, trouve deux fois en usage reel) serait un garde-fou
+fragile et disproportionne. A rouvrir seulement si un post reel l'utilise.
+
+**Confirme comme un comportement voulu, pas une faille (test adversarial du
+22/09/2026)** : une accroche redigee dans une autre langue que le francais et
+finissant par "?" passe le critere — le controle est mecanique (un point
+d'interrogation dans les 140 premiers caracteres), il ne restreint aucune
+langue et n'a jamais pretendu le faire.
+
+**Bornes de longueur verifiees exactement le 22/09/2026** : 1 300 et 1 900
+caracteres sont tous deux INCLUS (`nu >= 1300 && nu <= 1900`), 1 299 et 1 901
+sont refuses. Comportement voulu, desormais verrouille par un test.
 
 **Le brouillon se donne sous l'une ou l'autre forme** : le markdown `**ainsi**`
 d'un brouillon de `sortants/`, ou le texte deja converti en gras Unicode quand on

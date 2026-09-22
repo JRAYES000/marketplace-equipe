@@ -280,6 +280,30 @@ verrouillee par un test dans `test/adversarial-15-09.test.js` :
   plantaient avec des erreurs brutes -- messages explicites desormais
   (`generer-pdf.js`, `lib/composio.js`).
 
+## Audit adversarial du 22/09/2026 (demande explicite de Nomena, meme methode)
+
+Tente reellement de faire passer du contenu hors-regle a travers `lib/valider-post.js`, sans
+modifier son code, sur les quatre skills LinkedIn a la fois (voir aussi `linkedin-mise-en-forme`
+et `linkedin-commentaires`). Failles reellement reproduites et corrigees le meme jour, verrouillees
+par `test/adversarial-22-09.test.js` :
+
+- **"commentez OUI" et "partagez si" contournables par espacement/ponctuation** : `C O M M E N T
+  E Z   O U I` (une lettre par groupe), `commentez-oui` (tiret) et `commentez : oui` (ponctuation
+  intercalee) passaient tous a travers `validerInterdits`, qui n'attrapait le separateur qu'en
+  espace(s) simple(s). Corrige en verifiant EN PLUS une version du texte normalisee (lettres
+  minuscules uniquement, tout separateur retire) pour ces deux motifs precis -- pas pour toute la
+  banque, les autres motifs dependant d'une syntaxe qui perdrait son sens une fois compactee.
+- **Hashtag ecrit avec le caractere fullwidth "＃" (U+FF03) echappait entierement a la limite de
+  2** : `validerHashtags` ne reconnaissait que le diese ASCII "#". Les deux caracteres sont
+  desormais equivalents.
+- **Limite deja documentee, confirmee toujours vraie** : un chiffre en toutes lettres reste hors
+  de portee de `validerChiffreSource` (voir plus haut, 15/09/2026) -- ce n'est pas une regression,
+  la limite tient toujours.
+- **Verifie sans trouver de faille** : le comptage d'emojis face aux modificateurs de teint
+  (👍🏽, compte correctement comme 1 seul emoji) et aux sequences ZWJ (👨‍👩‍👧‍👦, compte 4 emoji pour
+  1 glyphe visuel -- rend le controle plus strict, jamais plus permissif, donc pas une faille
+  exploitable).
+
 ## Convention de nommage des fichiers de sortie
 
 `sortants/<compte>/<Titre lisible en francais>.pdf` -- sans date ni numero, casse et accents

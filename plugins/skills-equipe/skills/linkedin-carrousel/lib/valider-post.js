@@ -174,13 +174,19 @@ function validerAccroche(texte) {
   }
 }
 
+// Bug reel trouve par test adversarial le 22/09/2026 : le caractere fullwidth "＃"
+// (U+FF03, visuellement identique au diese ASCII, parfois utilise par un clavier ou un
+// copier-coller) n'etait pas reconnu du tout -- "＃un ＃deux ＃trois" passait sans
+// declencher la limite de 2. Les deux caracteres sont desormais equivalents ici.
+const CARACTERE_DIESE = '[#＃]';
+
 function validerHashtags(texte) {
   const texteSansFin = texte.trimEnd();
-  const REGEX_BLOC_FINAL = /(?:^|\s)((?:#[^\s#]+\s*){1,})$/;
+  const REGEX_BLOC_FINAL = new RegExp(`(?:^|\\s)((?:${CARACTERE_DIESE}[^\\s#＃]+\\s*){1,})$`);
   const correspondanceFinale = texteSansFin.match(REGEX_BLOC_FINAL);
   const hashtagsFinaux = correspondanceFinale ? correspondanceFinale[1].trim().split(/\s+/) : [];
 
-  const totalHashtags = (texte.match(/#[^\s#]+/g) || []).length;
+  const totalHashtags = (texte.match(new RegExp(`${CARACTERE_DIESE}[^\\s#＃]+`, 'g')) || []).length;
   if (totalHashtags !== hashtagsFinaux.length) {
     throw new Error(
       'Post refuse : des mots-diese apparaissent ailleurs qu\'en toute fin de post -- ' +
@@ -212,7 +218,33 @@ const INTERDITS = [
   { regex: /\b[A-ZÀ-Ý]{5,}\b/, motif: 'mot ecrit tout en majuscules' },
 ];
 
+// Bug reel trouve par test adversarial le 22/09/2026 : "commentez\s+oui" et "partagez\s+si"
+// n'attrapent le separateur qu'en espace(s) simple(s) -- "C O M M E N T E Z   O U I"
+// (une lettre par groupe), "commentez-oui" (tiret) et "commentez : oui" (ponctuation)
+// passaient tous les trois sans etre detectes, alors que ce sont la meme demande
+// d'engagement que la regle interdit deja. Verifie sur une version du texte NORMALISEE
+// (lettres minuscules uniquement, tout separateur retire) en plus des regex ci-dessus --
+// cette normalisation ne s'applique qu'a ces deux motifs precis, pas a toute la banque
+// (les autres motifs dependent d'un ordre de mots ou d'une syntaxe qui perdrait son sens
+// une fois compactee).
+const MOTIFS_COMPACTS = [
+  { motif: 'demande d\'engagement ("commentez OUI")', compact: /commentezoui/ },
+  { motif: 'demande d\'engagement ("partagez si...")', compact: /partagezsi/ },
+];
+
 function validerInterdits(texte) {
+  const compact = texte
+    .normalize('NFD').replace(/[̀-ͯ]/g, '') // retire les accents
+    .toLowerCase()
+    .replace(/[^a-z]/g, ''); // ne garde que les lettres : espaces, tirets, ponctuation disparaissent
+  for (const { motif, compact: regexCompact } of MOTIFS_COMPACTS) {
+    if (regexCompact.test(compact)) {
+      throw new Error(
+        `Post refuse : formulation interdite detectee (${motif}), meme espacee/ponctuee pour ` +
+        `contourner la detection.`
+      );
+    }
+  }
   for (const { regex, motif } of INTERDITS) {
     const correspondance = texte.match(regex);
     if (correspondance) {

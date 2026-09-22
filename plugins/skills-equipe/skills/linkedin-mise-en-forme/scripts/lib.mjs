@@ -80,6 +80,104 @@ const contientUnVraiGras = (s) => new RegExp(`[${PLAGE_SANS_SERIF}${PLAGE_SERIF}
 // deja en usage, voir valider-orthographe.js duplique dans les 3 paquets), donc
 // dupliquees ici plutot qu'importees. Aucune formulation nouvelle inventee pour cette
 // skill : seules celles deja eprouvees par Julien sur linkedin-carrousel.
+// Chiffre sans source -- reprise telle quelle de linkedin-carrousel/lib/valider-post.js
+// (validerChiffreSource, contientLigneSourceFinale, estDetailAnecdote, SOURCES_VAGUES,
+// versAscii), meme motif que INTERDITS ci-dessous. Trou reel trouve le 22/09/2026 en
+// testant cette skill de facon adversariale : rien ici ne verifiait qu'un chiffre-preuve
+// ("40% des recruteurs...") porte une source -- un post pouvait donc citer n'importe
+// quel chiffre invente et passer les douze criteres sans encombre. `contenu-linkedin`
+// (voir Ordre de travail) est cense fournir des chiffres deja sources en amont, mais
+// rien ne le verifiait mecaniquement dans CETTE skill si elle etait utilisee seule.
+const MOTS_ETUDE = /(sondage|[eé]tudes?|enqu[eê]te|barom[eè]tre|interrog|selon|rapport|classement|index)/i;
+const SOURCES_VAGUES = [
+  /^\s*(une|des|plusieurs)?\s*[eé]tudes?(\s+r[eé]centes?)?\s*$/i,
+  /^\s*(les|des)?\s*chiffres?\s*$/i,
+  /^\s*(les|des)?\s*donn[eé]es?\s*$/i,
+  /^\s*(une)?\s*enqu[eê]te(\s+r[eé]cente)?\s*$/i,
+  /^\s*(certaines?|diverses?)\s+sources?\s*$/i,
+  /^\s*internet\s*$/i,
+];
+function versAscii(fragment) {
+  // Gras Unicode (les deux polices, voir SANS_SERIF/SERIF plus haut) -> ASCII, pour lire
+  // "𝟳𝟵 𝗮𝗻𝘀" (Sans-Serif) ou "𝟳𝟵 𝐚𝐧𝐬" (Serif) comme "79 ans".
+  return [...fragment].map((c) => {
+    const cp = c.codePointAt(0);
+    if (cp >= SANS_SERIF.chiffres && cp <= SANS_SERIF.chiffres + 9) return String.fromCharCode(48 + cp - SANS_SERIF.chiffres);
+    if (cp >= SERIF.chiffres && cp <= SERIF.chiffres + 9) return String.fromCharCode(48 + cp - SERIF.chiffres);
+    if (cp >= SANS_SERIF.maj && cp <= SANS_SERIF.maj + 25) return String.fromCharCode(65 + cp - SANS_SERIF.maj);
+    if (cp >= SANS_SERIF.min && cp <= SANS_SERIF.min + 25) return String.fromCharCode(97 + cp - SANS_SERIF.min);
+    if (cp >= SERIF.maj && cp <= SERIF.maj + 25) return String.fromCharCode(65 + cp - SERIF.maj);
+    if (cp >= SERIF.min && cp <= SERIF.min + 25) return String.fromCharCode(97 + cp - SERIF.min);
+    return c;
+  }).join("");
+}
+function contientLigneSourceFinale(texte) {
+  const correspondance = texte.match(/^[ \t]*Source[ \t]*:[ \t]*(.+)$/im);
+  if (!correspondance) return false;
+  const contenu = correspondance[1].trim();
+  return contenu.length > 0 && !SOURCES_VAGUES.some((regex) => regex.test(contenu));
+}
+function estDetailAnecdote(texte, correspondance) {
+  const chiffre = versAscii(correspondance[0]);
+  const debut = correspondance.index;
+  const fin = debut + correspondance[0].length;
+  const apres = versAscii(texte.slice(fin, fin + 30));
+  const avant = versAscii(texte.slice(Math.max(0, debut - 12), debut));
+  const fenetreLarge = versAscii(texte.slice(Math.max(0, debut - 80), fin + 60));
+  if (/\d{1,2}\/\d{1,2}(\/\d{2,4})?/.test(versAscii(texte.slice(Math.max(0, debut - 6), fin + 6)))) return true;
+  if (/^(19|20)\d{2}$/.test(chiffre) && !/^\s*%/.test(apres) && !/[\d.,]$/.test(avant.trimEnd())) return true;
+  if (/^\s*(%|€|\$|euros?)/i.test(apres) || /[+\-€$]\s*$/.test(avant)) return false;
+  if (/^\s*(h|heures?|minutes?|min|secondes?|jours?|semaines?|mois)\b/i.test(apres)) return true;
+  if (/^\s*(ans?|ann[eé]es?|personnes?|participants?|salari[eé]s?|collaborateurs?|invit[eé]s?|convives?)\b/i.test(apres)) {
+    return !MOTS_ETUDE.test(fenetreLarge);
+  }
+  return false;
+}
+// Version "rapport" (jamais un throw) de validerChiffreSource pour s'integrer au style de
+// verifierTexte ci-dessous -- meme logique exacte que linkedin-carrousel.
+// Chiffres uniquement (ASCII + les deux polices grasses) -- bug reel trouve et corrige le
+// 22/09/2026 pendant le portage : reutiliser PLAGE_SANS_SERIF/PLAGE_SERIF ici (qui couvrent
+// aussi les LETTRES, construites pour le comptage du gras) faisait matcher des mots entiers
+// ("offres", "en") comme des "chiffres". Plages chiffres seules, distinctes des plages gras.
+const PLAGE_CHIFFRES = "\\u{1D7CE}-\\u{1D7D7}\\u{1D7EC}-\\u{1D7F5}";
+function chiffresSansSource(texte) {
+  const REGEX_CHIFFRE = new RegExp(`[\\d${PLAGE_CHIFFRES}]+`, "gu");
+  const sourceFinale = contientLigneSourceFinale(texte);
+  const fautifs = [];
+  let correspondance;
+  while ((correspondance = REGEX_CHIFFRE.exec(texte)) !== null) {
+    const debutFenetre = Math.max(0, correspondance.index - 80);
+    const finFenetre = correspondance.index + correspondance[0].length + 60;
+    const fenetre = texte.slice(debutFenetre, finFenetre);
+    if (!/\(\s*source\s*:/i.test(fenetre)) {
+      if (sourceFinale && estDetailAnecdote(texte, correspondance)) continue;
+      fautifs.push(`"${versAscii(correspondance[0])}" sans source`);
+      continue;
+    }
+    const correspondanceSource = fenetre.match(/\(\s*source\s*:\s*([^)]*)\)/i);
+    if (correspondanceSource && SOURCES_VAGUES.some((r) => r.test(correspondanceSource[1].trim()))) {
+      fautifs.push(`"${versAscii(correspondance[0])}" avec une source trop vague ("${correspondanceSource[1].trim()}")`);
+    }
+  }
+  return fautifs;
+}
+
+// Bug reel trouve par test adversarial le 22/09/2026 (meme trou trouve et corrige le
+// meme jour dans linkedin-carrousel, source de cette banque) : "commentez\s+oui" et
+// "partagez\s+si" n'attrapent le separateur qu'en espace(s) simple(s) --
+// "C O M M E N T E Z   O U I" (une lettre par groupe), "commentez-oui" (tiret) et
+// "commentez : oui" (ponctuation) passaient tous les trois. Verifie sur une version du
+// texte NORMALISEE (lettres minuscules uniquement, separateurs retires) en plus des
+// regex ci-dessous -- seulement pour ces deux motifs precis, les autres dependant d'une
+// syntaxe qui perdrait son sens une fois compactee.
+const MOTIFS_COMPACTS = [
+  { motif: "demande d'engagement (\"commentez OUI\")", compact: /commentezoui/ },
+  { motif: "demande d'engagement (\"partagez si...\")", compact: /partagezsi/ },
+];
+function compacter(texte) {
+  return texte.normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase().replace(/[^a-z]/g, "");
+}
+
 export const INTERDITS = [
   { regex: /commentez\s+["']?oui["']?/i, motif: "demande d'engagement (\"commentez OUI\")" },
   { regex: /partagez\s+si/i, motif: "demande d'engagement (\"partagez si...\")" },
@@ -159,11 +257,29 @@ export function verifierTexte(corps) {
   // linkedin-carrousel (voir INTERDITS plus haut). Sert directement l'objectif de
   // Julien ("les posts les plus viraux") -- ce sont des formulations qui ont deja fait
   // juger un contenu "fabrique"/"AI slop" ailleurs dans ce meme depot.
+  const compact = compacter(corps);
+  const compactTrouve = MOTIFS_COMPACTS.find(({ compact: r }) => r.test(compact));
   const interditTrouve = INTERDITS.find(({ regex }) => regex.test(corps));
   resultats.push(dire(
-    !interditTrouve,
+    !interditTrouve && !compactTrouve,
     "aucune formulation interdite",
-    interditTrouve ? `${interditTrouve.motif} -- "${corps.match(interditTrouve.regex)[0]}"` : "aucune trouvee"
+    compactTrouve
+      ? `${compactTrouve.motif}, meme espacee/ponctuee pour contourner la detection`
+      : interditTrouve
+        ? `${interditTrouve.motif} -- "${corps.match(interditTrouve.regex)[0]}"`
+        : "aucune trouvee"
+  ));
+
+  // Nouveau critere (22/09/2026, trouve par test adversarial) : aucun chiffre sans
+  // source, reprise de linkedin-carrousel (voir chiffresSansSource plus haut). Avant ce
+  // critere, un chiffre-preuve invente ("40% des recruteurs...") passait les douze
+  // criteres existants sans encombre -- rien ici ne verifiait le sourcage, contrairement
+  // a linkedin-carrousel qui le fait depuis le 15/09/2026.
+  const chiffresFautifs = chiffresSansSource(corps);
+  resultats.push(dire(
+    chiffresFautifs.length === 0,
+    "aucun chiffre sans source",
+    chiffresFautifs.length ? chiffresFautifs.join(" ; ") : "aucun chiffre, ou tous sources"
   ));
 
   const passes = resultats.filter((r) => r.bon).length;

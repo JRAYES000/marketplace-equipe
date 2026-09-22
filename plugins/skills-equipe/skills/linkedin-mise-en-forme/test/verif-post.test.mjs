@@ -28,7 +28,7 @@ const CONFORME = [
   "",
   "\u{26A1} **Trois gestes**",
   "",
-  "On evite les **memes questions posees deux fois**. On repond sous 48 heures. On explique chaque etape.",
+  "On evite les **memes questions posees deux fois**. On repond sous deux jours. On explique chaque etape.",
   "",
   "\u{2705} **Ce qui reste**",
   "",
@@ -38,10 +38,10 @@ const CONFORME = [
   "Les **trois signes a reperer** tiennent en une phrase, et **dix minutes suffisent** pour les corriger.",
 ].join("\n");
 
-test("fixture conforme : 12/12 criteres passes", () => {
+test("fixture conforme : 13/13 criteres passes", () => {
   const { resultats, passes, total } = verifierTexte(CONFORME);
-  assert.equal(total, 12);
-  assert.equal(passes, 12, resultats.filter((r) => !r.bon).map((r) => `${r.nom}: ${r.detail}`).join("; "));
+  assert.equal(total, 13);
+  assert.equal(passes, 13, resultats.filter((r) => !r.bon).map((r) => `${r.nom}: ${r.detail}`).join("; "));
 });
 
 test("enGras fabrique du Sans-Serif Bold, jamais l'autre police -- verifie par point de code", () => {
@@ -223,4 +223,109 @@ test("une apostrophe de texte courant, hors de tout gras, ne compte jamais comme
   const { resultats } = verifierTexte(corps);
   const r = resultats.find((x) => x.nom === "au moins 8 passages en gras");
   assert.equal(r.detail, "9 trouve(s)", "les apostrophes de texte courant ajoutees ne doivent pas faire monter le compte");
+});
+
+// Nouveau critere (22/09/2026, trouve par test adversarial demande par Nomena) : reprise
+// de linkedin-carrousel/lib/valider-post.js (validerChiffreSource). Avant ce critere, un
+// chiffre-preuve invente passait les douze criteres existants sans qu'aucun ne verifie le
+// sourcage -- verifie reellement avec "40% des recruteurs..., sans aucune source" (passait
+// 12/12 avant ce correctif).
+test("un chiffre-preuve (pourcentage) sans source est refuse", () => {
+  const corps = CONFORME.replace(
+    "Personne ne s'en rend compte a temps.",
+    "Personne ne s'en rend compte a temps. 40% des recruteurs le confirment."
+  );
+  const { resultats } = verifierTexte(corps);
+  const r = resultats.find((x) => x.nom === "aucun chiffre sans source");
+  assert.equal(r.bon, false);
+  assert.match(r.detail, /40.*sans source/);
+});
+
+test("un chiffre-preuve avec une source collee (source : ...) est accepte", () => {
+  const corps = CONFORME.replace(
+    "Personne ne s'en rend compte a temps.",
+    "Personne ne s'en rend compte a temps. 40% des recruteurs le confirment (source : Bpifrance Le Lab, 2025)."
+  );
+  const { resultats } = verifierTexte(corps);
+  const r = resultats.find((x) => x.nom === "aucun chiffre sans source");
+  assert.equal(r.bon, true, r.detail);
+});
+
+// Bug reel trouve PENDANT le portage de ce critere (22/09/2026) : reutiliser les plages
+// gras completes (qui couvrent aussi les LETTRES) pour reperer un "chiffre" faisait
+// matcher des mots entiers en gras ("offres", "en") comme des chiffres -- corrige avec
+// une plage chiffres-seuls dediee (PLAGE_CHIFFRES).
+test("un mot en gras n'est jamais confondu avec un chiffre", () => {
+  const corps = CONFORME.replace(
+    "**process trop lent**",
+    "**seize mille cinq cents offres**"
+  );
+  const { resultats } = verifierTexte(corps);
+  const r = resultats.find((x) => x.nom === "aucun chiffre sans source");
+  assert.equal(r.bon, true, r.detail);
+});
+
+// Bornes exactes de la fourchette de longueur -- jamais testees explicitement avant
+// l'audit adversarial du 22/09/2026. Le code (`nu >= 1300 && nu <= 1900`) inclut les deux
+// bornes ; verifie ici caractere pres, pas approxime.
+test("la fourchette de longueur inclut ses deux bornes (1300 et 1900 passent, 1299 et 1901 refusent)", () => {
+  const auBout = (n) => {
+    const codepoints = [...CONFORME];
+    let corps = codepoints.slice(0, Math.min(n + 20, codepoints.length)).join("");
+    let nu = [...corps.replace(/\*\*/g, "")].length;
+    while (nu < n) { corps += "x"; nu++; }
+    while (nu > n) { corps = corps.slice(0, -1); nu = [...corps.replace(/\*\*/g, "")].length; }
+    return corps;
+  };
+  const attendu = { 1299: false, 1300: true, 1900: true, 1901: false };
+  for (const [n, ok] of Object.entries(attendu)) {
+    const corps = auBout(Number(n));
+    const { resultats } = verifierTexte(corps);
+    const r = resultats.find((x) => x.nom === "longueur 1300-1900");
+    assert.equal(r.bon, ok, `attendu a ${n} caracteres : ${ok}, obtenu : ${r.bon} (${r.detail})`);
+  }
+});
+
+// Confirme un comportement VOULU, pas un bug : le controle "accroche formulee en question"
+// est mecanique et ne restreint aucune langue -- verifie a la demande de l'audit
+// adversarial du 22/09/2026 ("une accroche en anglais passe-t-elle a tort ?"). Reponse :
+// elle passe, et c'est le comportement prevu (aucune regle de langue dans le SKILL.md).
+// Bug reel trouve par test adversarial le 22/09/2026 (meme trou trouve et corrige le
+// meme jour dans linkedin-carrousel, source de cette banque) : le separateur entre
+// "commentez" et "oui" n'etait reconnu qu'en espace(s) simple(s).
+test("\"commentez OUI\" espacee lettre par lettre, ou separee par un tiret/de la ponctuation, reste refusee", () => {
+  const cas = [
+    "C O M M E N T E Z   O U I si concerne.",
+    "commentez-oui si concerne.",
+    "commentez : oui si concerne.",
+  ];
+  for (const variante of cas) {
+    const corps = CONFORME.replace(
+      "Personne ne s'en rend compte a temps.",
+      `Personne ne s'en rend compte a temps. ${variante}`
+    );
+    const { resultats } = verifierTexte(corps);
+    const r = resultats.find((x) => x.nom === "aucune formulation interdite");
+    assert.equal(r.bon, false, `variante non detectee : "${variante}"`);
+  }
+});
+
+test("un texte qui contient reellement \"commentez\" et \"oui\" sans lien entre eux n'est pas refuse a tort", () => {
+  const corps = CONFORME.replace(
+    "Personne ne s'en rend compte a temps.",
+    "Personne ne s'en rend compte a temps. Vous pouvez commentez si vous le souhaitez, ou repondre oui plus tard."
+  );
+  const { resultats } = verifierTexte(corps);
+  const r = resultats.find((x) => x.nom === "aucune formulation interdite");
+  assert.equal(r.bon, true, r.detail);
+});
+
+test("une accroche redigee dans une autre langue que le francais passe (comportement voulu, pas une faille)", () => {
+  const corps = CONFORME.replace(
+    CONFORME.split("\n")[0],
+    "**Why do your best candidates disappear before the offer even arrives ?**"
+  );
+  const { resultats } = verifierTexte(corps);
+  const r = resultats.find((x) => x.nom === "accroche formulee en question");
+  assert.equal(r.bon, true);
 });
