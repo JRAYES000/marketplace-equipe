@@ -340,6 +340,39 @@ meme jour, verrouillee par `test/adversarial-22-09.test.js` :
   comportement VOULU, tranche le 15/09/2026 ("le but reste de bloquer le vide integral, pas de
   punir une accroche informelle"), pas une nouvelle faille.
 
+### Deuxieme passage le meme jour (4 pistes demandees explicitement, apres l'integration du logo dans `linkedin-carrousel`)
+
+Trois failles reelles confirmees et corrigees, une piste verifiee sans rien trouver de nouveau.
+Verrouillees dans `test/adversarial-22-09.test.js` (memes fichiers de test, section dediee) :
+
+- **Lien avec espaces inseres autour du point echappait a `REGEX_LIEN`** : "mon site . fr",
+  "site .fr" ou "site. fr" passaient entierement inapercus -- `REGEX_LIEN` exigeait le nom de
+  domaine et le TLD colles l'un a l'autre. Nouvelle regex `REGEX_LIEN_ESPACE`, meme liste fermee
+  de TLD que `REGEX_LIEN` (memes limites assumees), tolerante a des espaces avant/apres le point.
+- **`normaliserAuteurCible` ne collabait pas les espaces INTERNES** : "Theophile Burnet" et
+  "Theophile  Burnet" (double espace, tabulation, espace insecable -- variation plausible d'une
+  extraction Apify ou d'une frappe manuelle) restaient deux chaines differentes malgre `.trim()`,
+  qui ne touche que les extremites. La regle "jamais deux fois la meme personne le meme jour"
+  tombait donc silencieusement pour la MEME personne reelle -- meme famille de faille que la
+  casse/decoration de fin deja corrigees le 17/09/2026, angle mort different (interieur du nom, pas
+  ses bords). `normaliserAuteurCible` collabe desormais tout espace interne en un seul
+  (`.replace(/\s+/g, ' ')`), avant la mise en minuscule.
+- **`validerFraicheurMaximale` (plafond dur 48h) laissait passer une date future ou invalide SANS
+  ERREUR** : `ageHeures > FRAICHEUR_MAX_HEURES` vaut `false` aussi bien pour un age negatif (post
+  "publie" dans le futur) que pour un age `NaN` (date non parsable) -- toute comparaison avec `NaN`
+  etant `false` en JavaScript, l'absence de rejet etait interpretee a tort comme "assez frais".
+  Contrairement a `filtrerPostsFrais` (simple tri de la fenetre 4h, deja protege par `age >= 0`),
+  cette fonction est le VERITABLE garde-fou dur avant publication : elle leve desormais une erreur
+  explicite et distincte pour une date future ("manifestement invalide -- un post ne peut pas avoir
+  ete publie apres maintenant") et pour une date non parsable ("fraicheur non verifiable").
+- **Verifie sans trouver de faille nouvelle** : un genre declare sans que le contenu corresponde.
+  "information_chiffree" sans aucun chiffre est deja bloque par `validerGenre`. "histoire_vecue" et
+  "desaccord_argumente" ne verifient, eux, aucune coherence de contenu -- mais c'est une limite
+  **deja documentee explicitement** en tete de `lib/valider-commentaire.js` ("juger si un argument
+  est solide ou une histoire credible reste hors de portee d'une regle mecanique, assume comme
+  limite"), pas une faille nouvellement decouverte. Fige par un test qui confirme ce comportement
+  CONNU plutot que de forcer un "correctif" pour un cas deja assume.
+
 ## Suivi a 3 jours (regle 3 du brief -- lecture par capture d'ecran)
 
 Aucun OCR : c'est la **session Claude** qui lit les chiffres visibles sur la capture d'ecran
