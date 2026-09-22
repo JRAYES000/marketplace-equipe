@@ -194,23 +194,32 @@ test('la couverture force le logo visible (role "contenu" au rendu) meme sur une
  *
  * Rendu Playwright reel (comme le fait `genererImagesParDiapo`), verifie
  * avec `isVisible()` plutot qu'une simple presence dans le HTML source :
- * une regle CSS qui masquerait le logo par erreur laisserait le texte dans
+ * une regle CSS qui masquerait le logo par erreur laisserait l'element dans
  * le DOM mais invisible a l'ecran -- un test sur le HTML brut ne l'aurait
  * pas detecte.
+ *
+ * Mis a jour le 22/09/2026 : Julien a fourni le vrai logo Claude Agency
+ * (etoile a 8 branches, terracotta) -- le bloc ".logo" (texte + petit carre
+ * de couleur) qui repondait a son retour du 18/09/2026 n'etait jamais que le
+ * NOM de la marque en texte stylise, pas un vrai logo. Ce test verifiait
+ * jusque-la la presence du texte ("Claude Agency"/"Claude Partners"/"Claude")
+ * -- il verifie desormais que ".logo" est une image (<img>) reellement
+ * chargee (naturalWidth/naturalHeight > 0, pas une image cassee), pas la
+ * presence d'un texte qui n'existe plus. Meme fichier logo pour les 3
+ * comptes : c'est LE logo de l'entreprise, pas une declinaison par marque
+ * (confirme par Julien, aucune variante fournie) -- d'ou le meme test
+ * applique identiquement aux 3 gabarits plutot qu'une marque attendue
+ * differente par compte.
  */
-test('le logo (mention de marque) est visible sur une diapo "contenu" et absent sur une diapo "hook", pour les 3 comptes', async () => {
+test('le logo (image Claude Agency) est visible et charge sur une diapo "contenu", et absent sur une diapo "hook", pour les 3 comptes', async () => {
   const { chargerGabarit, injecterDiapo } = require('../generer-pdf');
-  const marqueAttendueParCompte = {
-    'julien-agency': 'Claude Agency',
-    'julien-partners': 'Claude Partners',
-    'page-claude': 'Claude',
-  };
+  const comptes = ['julien-agency', 'julien-partners', 'page-claude'];
   const diapoHook = { role: 'hook', titre: 'Titre de test pour la diapo hook' };
   const diapoContenu = { role: 'contenu', titre: 'Titre de test pour une diapo contenu', texte: 'Texte de test.' };
 
   const navigateur = await chromium.launch();
   try {
-    for (const [compte, marqueAttendue] of Object.entries(marqueAttendueParCompte)) {
+    for (const compte of comptes) {
       const { entete, blocDiapo, pied } = chargerGabarit(compte);
 
       for (const [role, diapo] of [['hook', diapoHook], ['contenu', diapoContenu]]) {
@@ -224,10 +233,19 @@ test('le logo (mention de marque) est visible sur une diapo "contenu" et absent 
 
           if (role === 'contenu') {
             assert.ok(estVisible, `logo devrait etre visible sur une diapo "contenu" (${compte})`);
-            const texte = await logo.textContent();
+
+            const balise = await logo.evaluate((el) => el.tagName.toLowerCase());
+            assert.equal(balise, 'img', `.logo devrait etre une balise <img> (${compte}), recu : <${balise}>`);
+
+            const { largeurNaturelle, hauteurNaturelle, srcCommenceParDataUri } = await logo.evaluate((el) => ({
+              largeurNaturelle: el.naturalWidth,
+              hauteurNaturelle: el.naturalHeight,
+              srcCommenceParDataUri: el.getAttribute('src').startsWith('data:image/'),
+            }));
+            assert.ok(srcCommenceParDataUri, `.logo doit etre embarque en base64 (data:image/...), pas un chemin relatif qui ne se resoudrait pas dans page.setContent() (${compte})`);
             assert.ok(
-              texte.includes(marqueAttendue),
-              `logo devrait contenir "${marqueAttendue}" pour ${compte}, recu : "${texte}"`
+              largeurNaturelle > 0 && hauteurNaturelle > 0,
+              `l'image du logo devrait reellement se charger, pas etre cassee (${compte}) -- naturalWidth=${largeurNaturelle}, naturalHeight=${hauteurNaturelle}`
             );
           } else {
             assert.ok(!estVisible, `logo devrait etre absent (masque par CSS) sur la diapo "hook" (${compte})`);
