@@ -29,7 +29,14 @@ const PHRASES_MAX = 4;
 const GENRES = ['information_chiffree', 'desaccord_argumente', 'histoire_vecue', 'vraie_question'];
 
 const REGEX_EMOJI = /\p{Extended_Pictographic}/gu;
-const REGEX_LIEN = /(https?:\/\/|www\.|lnkd\.in)/i;
+// Bug reel trouve par test adversarial le 22/09/2026 : un domaine nu sans "www." ni
+// "http(s)://" ("monsite.fr", "bit.ly/abc123") passait entierement inapercu -- LinkedIn
+// le rend pourtant cliquable comme n'importe quel lien. Liste FERMEE des TLD les plus
+// courants (meme philosophie que MOTS_SANS_ACCENT_VERS_CORRECT ou INTERDITS ailleurs
+// dans ce depot : un garde-fou approximatif documente comme tel, pas une detection
+// d'URL exhaustive). Limite assumee : un TLD hors de cette liste (ex. ".xyz", ".shop")
+// reste un angle mort.
+const REGEX_LIEN = /(https?:\/\/|www\.|lnkd\.in|\b[a-z0-9-]+\.(?:com|fr|net|org|io|co|ly|be|info|app|dev|ai)\b)/i;
 const REGEX_PUCE = /(^|\n)\s*[-*•‣▪]\s|(^|\n)\s*\d+[.)]\s/;
 
 // Commentaires vides explicitement cites par le brief, plus les variantes les
