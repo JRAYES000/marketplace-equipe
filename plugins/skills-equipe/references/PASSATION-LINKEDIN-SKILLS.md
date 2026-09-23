@@ -149,3 +149,47 @@ genres attribues lors du backfill etaient corrects sur le fond, pas seulement co
 
 **Rien d'autre fait** : pas d'ajout des posts Buffer, pas de relance du pipeline quotidien --
 conforme a la demande.
+
+## 23/09/2026 -- posts Buffer ajoutes a Notion "Veille & posts", sur accord explicite du client
+
+Le client (Ecole de Naturopathie & Sophrologie, thread Gmail "Page Veille & Posts") a repondu
+"OUI JE VEUX BIEN, MERCI" (23/09/2026, 12h20) a la proposition faite par Nomena le meme jour
+(08h06) d'integrer au reporting Notion les posts de veille publies via Buffer, restes hors du
+pipeline `comptes_a_surveiller`/score qui alimente "Veille & posts".
+
+**Verification de la liste, pas seulement reprise de la memoire de session precedente** :
+1. Relecture de Buffer (`publish.buffer.com`, onglet Sent, canal Julien Rayes / Claude Agency) :
+   83 posts envoyes au total, parcourus jusqu'au 15/09 en remontant depuis aujourd'hui -- aucun
+   post de veille recyclee (contenu repris d'un tiers) trouve en dehors des trois deja identifies
+   dans ce fichier (Bernard Marr 18/09, Allie K. Miller et Andrew Ng 21/09). Rien de nouveau entre
+   le 21/09 et aujourd'hui.
+2. Lecture directe de la base Notion "Veille & posts" avant ecriture : 3 lignes existantes
+   (Codie A. Sanchez 15/09, Jason Feifer 16/09, Justin Welsh 17/09), aucune des trois ne
+   correspond aux posts Buffer -- confirme que rien n'etait deja importe.
+
+**3 lignes ajoutees dans "Veille & posts"** (memes colonnes que les lignes existantes, statut
+reel "Publie" avec lien -- pas "Programme") :
+
+| Titre | Auteur | Compte | Date de publication | Lien du post publie |
+| --- | --- | --- | --- | --- |
+| Vos equipes foncent sur l'IA agentique -- adapte de Bernard Marr | Bernard Marr | julien-agency | 18 septembre 2026 | linkedin.com/feed/update/urn:li:share:7506789066315649024/ |
+| Qui a dit qu'il fallait etre ingenieur pour construire un agent IA -- adapte de Allie K. Miller | Allie K. Miller | julien-agency | 21 septembre 2026 | linkedin.com/feed/update/urn:li:share:7507683335079473152/ |
+| Qui audite le logiciel qui entoure votre modele d'IA -- adapte de Andrew Ng | Andrew Ng | julien-agency | 21 septembre 2026 | linkedin.com/feed/update/urn:li:share:7507774928880885760/ |
+
+**Champs volontairement laisses "Vide" -- pas invente** : `Abonnes`, `Commentaires`, `Partages`,
+`Reactions` et `Lien d'origine` (statistiques et lien du post ORIGINAL de l'auteur source) ne
+sont pas renseignes pour ces trois lignes. Contrairement aux lignes du pipeline automatique
+(Sanchez/Feifer/Welsh), qui capturent ces donnees au moment de la selection via
+`comptes_a_surveiller`/score, le flux Buffer manuel ne les a jamais captees -- aucune trace dans
+`data/registre-veille.json` (qui s'arrete au 16/09) ni dans les brouillons locaux. Aucune de ces
+valeurs n'a ete recherchee a posteriori ni estimee : conforme a la regle du depot "aucun chiffre
+sans source reellement ouverte et lue". A signaler a Julien/Nomena si ces stats doivent
+malgre tout etre retrouvees (ouverture des posts originaux des trois auteurs).
+
+**Verification finale, nouvelle lecture directe (pas la sortie de l'edition)** : la base "Veille &
+posts" relue apres ecriture affiche 6 lignes, toutes correctes (3 anciennes inchangees + les 3
+nouvelles ci-dessus, dates et comptes conformes).
+
+**Pour la prochaine session** : le flux Buffer manuel reste distinct du pipeline automatique --
+cette integration est un rattrapage ponctuel, pas un branchement permanent. Si Buffer publie de
+nouveaux posts de veille recyclee, ils n'apparaitront pas automatiquement dans Notion.
