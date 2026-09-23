@@ -193,3 +193,59 @@ nouvelles ci-dessus, dates et comptes conformes).
 **Pour la prochaine session** : le flux Buffer manuel reste distinct du pipeline automatique --
 cette integration est un rattrapage ponctuel, pas un branchement permanent. Si Buffer publie de
 nouveaux posts de veille recyclee, ils n'apparaitront pas automatiquement dans Notion.
+
+## 23/09/2026 (suite) -- champs Abonnes/Commentaires/Partages/Reactions/Lien d'origine completes
+## pour les 3 posts Buffer, sur decision explicite de Julien (via Nomena)
+
+Les 5 champs laisses "Vide" ce matin (voir section precedente) ont ete completes en rouvrant
+chacun des 3 posts ORIGINAUX (pas les posts recycles publies via Buffer). Aucune estimation :
+uniquement des chiffres reellement lus sur le post source au moment de la lecture.
+
+**Methode de recherche du post original** : le texte du post recycle (connu depuis le backfill
+du matin) contenait des indices verifiables -- citations chiffrees exactes (Bernard Marr,
+Andrew Ng) ou details factuels distinctifs (Allie K. Miller) -- utilises pour retrouver le post
+source avec certitude (recherche Google + activite LinkedIn du compte), jamais une simple
+supposition sur "probablement le bon post".
+
+**Relevé fait le 23/09/2026, entre ~14h40 et ~15h05 (heure de la session) -- chiffres a un
+instant T, pas des faits stables, appeles a evoluer** :
+
+| Auteur | Lien d'origine (post source) | Abonnes (profil) | Reactions | Commentaires | Partages |
+| --- | --- | --- | --- | --- | --- |
+| Bernard Marr | linkedin.com/pulse/ai-skills-employers-actually-want-2026-bernard-marr-nrtle/ | 1 568 310 | 88 | 35 | 8 |
+| Allie K. Miller | linkedin.com/posts/alliekmiller_the-last-group-i-taught-to-build-ai-agents-share-7506416309870477313-3oBF/ | 1 674 951 | 152 | 65 | 4 |
+| Andrew Ng | linkedin.com/posts/andrewyng_openworker-an-open-source-agent-that-doesnt-share-7498080861230137344-tIop/ | 2 638 625 | 8 986 | 307 | 614 |
+
+**Detail de l'identification, par auteur** :
+- **Bernard Marr** : le post recycle citait "16 541 offres d'emploi en IA agentique" et "0,05%"
+  (gouvernance IA) attribues a l'AI Index 2026 de Stanford. Son activite LinkedIn recente ne
+  montrait aucun post reprenant ces chiffres mot pour mot -- recherche Google ciblee sur ces deux
+  chiffres exacts, qui a mene a l'article LinkedIn "The AI Skills Employers Actually Want In
+  2026" (publie le 18/09/2026, meme date que le post recycle), contenant les deux chiffres
+  textuellement ("16,541 in 2025" pour l'IA agentique, "just 0.05 percent" pour l'ethique/
+  gouvernance IA). Correspondance certaine.
+- **Allie K. Miller** : le post recycle mentionnait un groupe forme incluant un patron de
+  bowling et une femme s'occupant de sa mere de 79 ans. Trouve directement dans l'activite
+  LinkedIn du compte (post du "5d" au moment de la lecture, soit ~18/09/2026) : texte identique
+  mot pour mot ("a bowling alley owner, a woman caring for her 79-year-old mother"). Correspondance
+  certaine.
+- **Andrew Ng** : le post recycle citait "OpenWorker" (nouvelle version, theme audit/securite).
+  Recherche Google ciblee "Enhanced Security Workflows with Open Source Agent" (theme exact du
+  post recycle) -- resultat date du 25/08/2026, meme date que celle deja notee dans ce fichier
+  comme source. Post retrouve dans l'activite LinkedIn du compte, texte confirme
+  ("OpenWorker -- an open source agent that doesn't just chat... just released a new version
+  with many features for security workflows"). Correspondance certaine.
+
+**Aucun champ laisse vide cette fois** : les 3 posts originaux ont ete retrouves avec certitude,
+aucune ambiguite sur "lequel est le bon post".
+
+**Verification finale, nouvelle lecture directe (pas la sortie de l'edition)** : la base "Veille &
+posts" relue apres ecriture affiche les 6 lignes avec, pour les 3 lignes Buffer, `Lien d'origine`,
+`Abonnes`, `Commentaires`, `Partages` et `Reactions` tous renseignes aux valeurs du tableau
+ci-dessus -- confirme colonne par colonne dans la vue tableau (scroll horizontal), pas seulement
+page par page.
+
+**Pour la prochaine session** : ces chiffres (abonnes, reactions, commentaires, partages) sont
+un instantane du 23/09/2026 en debut d'apres-midi -- ne pas les considerer comme les chiffres
+"au moment de la publication" du post original, qui sont plus anciens et non retrouves (LinkedIn
+n'affiche pas l'historique de ces compteurs).
