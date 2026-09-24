@@ -1,3 +1,41 @@
+## Etat au 24/09/2026 -- relance de Julien, publication reelle bloquee dans cette session
+
+Julien relance (email du 23/09 21h32) pour obtenir les URL des trois carrousels regeneres
+avec le vrai logo et l'accent teal officiel (voir `sortants/` et le scratchpad de la session
+precedente `regen-preuve/` -- non commite, scratch local). Verification faite ce jour, par
+lecture directe des fichiers de ce depot (pas de memoire de session precedente) :
+
+- **`partners-ia-pme`** (julien-partners, "IA pour les PME", 10 diapos) -- **deja publie le
+  17/09/2026**, `urn:li:ugcPost:7506384426956783618`,
+  [voir le post](https://www.linkedin.com/feed/update/urn:li:activity:7506384428168806400/).
+  **Ne pas republier** (creerait un doublon).
+- **`agency-candidats`** (julien-agency, "pourquoi vos meilleurs candidats disparaissent avant
+  l'offre", version v2 du 14/09/2026, 10 diapos) -- **jamais publie pour de vrai**. Seule
+  l'ancienne version a 5 diapos du 12/09/2026 (angle different, voir plus bas) a fait l'objet
+  d'une tentative, au contenu visible jamais confirme. Candidat a publication, **mais bloque
+  par un garde-fou explicite du depot** : `reglages-comptes.json` fixe
+  `"canal_publication_reel": false` pour `julien-agency`, et `lib/publier.js` leve une erreur
+  volontaire ("Ne pas contourner ce garde-fou") tant que la publication d'image reelle via le
+  canal MCP/ck_ de ce compte n'a pas ete testee et validee. Ce chantier n'a pas ete rouvert ce
+  jour -- pas de contournement tente.
+- **`partners-essoufflement`** (julien-partners, sujet essoufflement, 5 diapos) -- **jamais
+  publie**. Techniquement supporte (`canal_publication_reel: true` pour julien-partners, canal
+  REST `ak_`), mais **publication non tentee dans cette session** : aucun outil MCP
+  Composio/LinkedIn n'est charge (verifie par recherche d'outils), et `COMPOSIO_API_KEY` ne
+  peut pas etre lu ni meme sonde (l'exploration d'environnement a ete refusee par le
+  classifieur auto-mode -- meme blocage deja documente le 18/09/2026, voir memoire d'equipe).
+  Conforme a la regle du depot : aucun jeton n'est jamais persiste entre sessions, donc ce
+  n'est probablement pas un oubli mais un etat reel de la session. Piste non retentee a
+  l'identique, documentee ici pour la session suivante.
+
+**Consequence** : aucune des trois publications demandees par Julien n'a ete effectuee (ou
+retentee) ce jour. Aucun ID ni URL n'est invente. Voir le message a Nomena pour la marche a
+suivre (session avec `COMPOSIO_API_KEY` exporte + acces MCP Composio/LinkedIn requise pour
+`partners-essoufflement` ; decision explicite de Julien/Nomena requise pour rouvrir le
+chantier `julien-agency` avant de lever son garde-fou).
+
+---
+
 # A publier -- julien-agency, identite ET accord confirmes -- carrousel publie techniquement, contenu visible NON CONFIRME
 
 **Identite `averse-cooser` confirmee par test reel le 12/09/2026** (voir
