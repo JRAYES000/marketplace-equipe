@@ -36,9 +36,9 @@ const SORTANTS_DIR = path.join(SKILL_DIR, 'sortants');
 const LARGEUR_PX = 1080;
 const HAUTEUR_PX = 1350;
 
-function construireDocumentUneDiapo(compte, diapo, index, { contexte } = {}) {
+function construireDocumentUneDiapo(compte, diapo, index, { contexte, total } = {}) {
   const { entete, blocDiapo, pied } = chargerGabarit(compte);
-  return `${entete}${injecterDiapo(blocDiapo, diapo, index, { contexte })}${pied}`;
+  return `${entete}${injecterDiapo(blocDiapo, diapo, index, { contexte, total })}${pied}`;
 }
 
 /**
@@ -46,9 +46,9 @@ function construireDocumentUneDiapo(compte, diapo, index, { contexte } = {}) {
  * dediee au viewport exact 1080x1350 (meme dimensions que la page PDF, donc
  * meme mise en page CSS -- aucun readapting de gabarit necessaire).
  */
-async function rendreDiapoEnPng({ navigateur, compte, diapo, index, cheminSortie, contexte, forcerLogoVisible = false }) {
+async function rendreDiapoEnPng({ navigateur, compte, diapo, index, cheminSortie, contexte, total, forcerLogoVisible = false }) {
   const diapoRendue = forcerLogoVisible ? { ...diapo, role: 'contenu' } : diapo;
-  const html = construireDocumentUneDiapo(compte, diapoRendue, index, { contexte });
+  const html = construireDocumentUneDiapo(compte, diapoRendue, index, { contexte, total });
   const page = await navigateur.newPage({ viewport: { width: LARGEUR_PX, height: HAUTEUR_PX } });
   try {
     await page.setContent(html, { waitUntil: 'load' });
@@ -92,7 +92,7 @@ async function genererImagesParDiapo({ compte, diapos, dossierSortie }) {
     for (let index = 0; index < diapos.length; index += 1) {
       const numero = String(index + 1).padStart(2, '0');
       const cheminSortie = path.join(dossier, `diapo-${numero}.png`);
-      chemins.push(await rendreDiapoEnPng({ navigateur, compte, diapo: diapos[index], index, cheminSortie }));
+      chemins.push(await rendreDiapoEnPng({ navigateur, compte, diapo: diapos[index], index, cheminSortie, total: diapos.length }));
     }
     return { dossier, chemins, nombreImages: chemins.length };
   } finally {
@@ -143,6 +143,7 @@ async function genererImageCouverture({ compte, diapos, sortie }) {
       index,
       cheminSortie,
       contexte: 'image-seule',
+      total: diapos.length,
       forcerLogoVisible: true,
     });
     return { cheminSortie, indexDiapoUtilisee: index };

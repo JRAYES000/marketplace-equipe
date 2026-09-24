@@ -57,14 +57,39 @@ lui, reste inchange) :
 | `photo-julien-rayes.png` | Photo de Julien, affichee en medaillon <=240px de large (96px reel dans les gabarits) sur chaque diapo | **Provisoire au 24/09/2026** : capture d'ecran de son profil LinkedIn (`linkedin.com/in/julien-rayes`), ~362x389px -- pas le fichier original (son URL contient des jetons que l'outil de navigation bloque d'extraire, mesure de confidentialite). Suffisant pour un medaillon <=240px (verifie visuellement, aucun flou a 96px), mais A REMPLACER par le fichier source des que Julien le fournit -- remplacer ce meme fichier suffit, aucun changement de template |
 | `fonts/bricolage-grotesque-variable.woff2`, `fonts/schibsted-grotesk-variable.woff2` | Polices variables completes (poids 200-900 / 400-900) | -- |
 
-### Limite assumee (pas corrigee dans cette refonte)
+### Correction du 24/09/2026 (retour de Julien sur le premier carrousel de test)
 
-`lib/valider-diapos.js` compte les mots sur `titre`+`texte` uniquement -- les champs propres aux
-nouveaux modeles (`chiffre`, `items`, `colonneGauche`/`colonneDroite`, `citation`) ne sont PAS
-comptes dans la limite de 25 mots/diapo. Une checklist a items tres longs pourrait donc passer la
-validation tout en debordant visuellement -- a verifier a l'oeil (comme "une idee par diapo" deja
-documente plus bas), pas garanti par un garde-fou automatique aujourd'hui. Idem pour les accents
-manquants (`lib/valider-orthographe.js`, `validerAccents`) : seuls `titre`/`texte` sont controles.
+Quatre corrections demandees apres inspection du premier carrousel de test des 6 modeles :
+
+1. **Limite de mots relevee a 60 (avant : 25), et comptee sur TOUS les champs visibles** -- pas
+   seulement `titre`+`texte`. `lib/modeles.js` (`champsVisibles`) liste, pour le modele resolu
+   d'une diapo, exactement les champs que le gabarit affiche vraiment (`chiffre`, `items` de
+   checklist/comparaison, `citation`+`auteur`, `bouton`...) ; `lib/valider-diapos.js` les compte
+   tous, ainsi que les accents (`validerAccents` s'applique desormais au meme texte complet).
+   Avant cette correction, une checklist a items tres longs pouvait passer la validation en
+   debordant reellement de la diapo -- voir `test/valider-diapos.test.js` pour la preuve directe.
+2. **Nombre de diapos ramene a [6, 10]** (avant : [8, 12]) -- conforme au brief initial de Julien
+   du 24/09/2026, qui l'avait deja specifie sans que le garde-fou soit mis a jour en consequence.
+3. **Numero de page reformule en "N/Total"** (ex. "3/10"), a la place de "01"/"03" a deux chiffres
+   fixes -- cite par Julien parmi les defauts du dessin (trop technique/pesant). Fonction partagee
+   par les 3 gabarits (`injecterDiapo`, `generer-pdf.js`) : `page-claude` en herite aussi, meme si
+   la refonte des 6 modeles ne le touche pas par ailleurs (compte en pause).
+4. **Modele "citation" : `titre` n'est plus jamais requis** -- ce modele ne l'affiche pas (voir
+   `templates/*.html`, `.layout-citation`), l'exiger forcait a fournir un champ invisible rien que
+   pour passer la validation (c'est ce qui s'est produit sur le carrousel de test initial).
+
+### Regle de contenu -- aucune citation ni temoignage invente
+
+**Jamais de citation, de temoignage ou de propos attribue a une personne (nommee ou non, reelle ou
+generique comme "un dirigeant de PME") qui n'a pas reellement eu lieu ou n'est pas reellement
+source.** Incident reel : le premier carrousel de test (24/09/2026) contenait une citation
+inventee attribuee a "un dirigeant de PME, secteur services" -- signale par Nomena avant
+publication, jamais publie. Le modele "citation" reste utilisable sans attribution (`auteur`
+absent -- voir `templates/*.html`, `.citation-auteur:empty`) pour un propos editorial general, ou
+avec une citation reelle et sa source verifiee. Meme famille de regle que "Ne jamais inventer"
+dans le CLAUDE.md racine du depot, precisee ici pour ce cas specifique aux carrousels
+(temoignages/citations attribues a des tiers, pas seulement des chiffres ou l'experience de
+Julien).
 
 ## Regles de methode non negociables (retour de Julien, 18/09/2026)
 
@@ -176,7 +201,7 @@ comme chez les 3 references. Voir `test/accent-hook.test.js` et les nouveaux cas
 
 ## Ce que fait la skill
 
-1. Compose un carrousel (8-12 diapos) sur un sujet donne, dans le ton du compte cible.
+1. Compose un carrousel (6-10 diapos) sur un sujet donne, dans le ton du compte cible.
 2. `generer-pdf.js` rend le PDF multi-page a partir d'un template de `templates/` et d'une
    liste de diapos (entierement local via Playwright, aucun service externe). `generer-images.js`
    fait le meme rendu en PNG (repli image -- voir "Ce qui ne marche pas encore" plus bas, ne pas
@@ -257,9 +282,14 @@ carrousel de test) et `test/generer-images.test.js` (le PDF reel se genere et n'
 ### Structure du carrousel -- `lib/valider-diapos.js`
 
 Appele automatiquement par `genererPdf()`, avant tout rendu :
-- Nombre de diapos hors de [8, 12] -> refus.
-- Une diapo (titre + texte) au-dela de 25 mots -> refus (numero de la diapo fautive et nombre de
-  mots donnes). Aucune reduction de police n'existe : le seul geste possible est de raccourcir.
+- Nombre de diapos hors de [6, 10] -> refus (mis a jour le 24/09/2026, retour de Julien -- avant :
+  [8, 12]).
+- Une diapo au-dela de 60 mots -> refus (mis a jour le 24/09/2026 -- avant : 25 mots). Compte
+  desormais TOUS les champs reellement affiches par le modele resolu de la diapo (`lib/modeles.js`,
+  `champsVisibles`) -- titre, texte, chiffre, items de checklist/comparaison, citation, auteur,
+  bouton -- pas seulement titre+texte comme avant cette correction (numero de la diapo fautive et
+  nombre de mots donnes). Aucune reduction de police n'existe : le seul geste possible est de
+  raccourcir.
 - Diapo 1 doit porter `role: "hook"` et n'avoir aucun texte de soutien -> refus sinon.
 - Titres >=64px, texte >=40px, numero sur chaque diapo, fleche sur la premiere : mesures
   reellement via Playwright (pas lues dans le CSS).
