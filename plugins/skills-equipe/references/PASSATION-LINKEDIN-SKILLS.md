@@ -1,5 +1,15 @@
 # Passation -- skills linkedin-commentaires / linkedin-veille-virale
 
+## 24/09/2026 -- linkedin-carrousel : tentative de publication via l'interface web Composio, bloquee (voir le detail complet dans `linkedin-carrousel/a-publier/README.md`)
+
+Hors perimetre direct de ce fichier (commentaires/veille), note ici uniquement parce que la
+demande visait explicitement les deux fichiers. Resume : PDF `partners-essoufflement` regenere
+avec succes (logo + accent terracotta officiel, pas teal -- voir divergence signalee dans le
+README carrousel), mais publication non effectuee : le Playground du dashboard Composio n'offre
+aucun moyen de joindre un fichier local a un post, et `LINKEDIN_CREATE_LINKED_IN_POST` exige un
+`s3key` de fichier deja televerse, jamais une URL ou un chemin local -- meme mur technique que
+celui deja documente via script les 12 et 18/09. Aucune URL publiee, aucun ID invente.
+
 ## 22/09/2026 -- reporting Notion muet depuis le 17/09 : PAS UN BUG, diagnostic confirme par preuves brutes
 
 **Question posee par Julien** : la page Notion "LinkedIn -- Veille & Commentaires" ne montre plus
