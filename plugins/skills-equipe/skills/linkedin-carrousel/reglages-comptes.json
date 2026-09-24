@@ -10,6 +10,10 @@
   "julien-agency": {
     "author_urn": "urn:li:person:aFqu-W7ClW",
     "_source_urn": "Verifie par Julien le 11/09/2026, a utiliser tel quel.",
+    "zernio_account_id": "6ab50c438d284ffb213b7c55",
+    "zernio_linkedin_url": "https://www.linkedin.com/in/julien-rayes/",
+    "zernio_platform_user_id": "krROWTZg4y",
+    "_source_zernio": "Verifie par appel direct GET /v1/accounts de l'API Zernio le 24/09/2026 (Nomena, lecture seule). L'URL du profil LinkedIn est la preuve fiable du bon rattachement au profil Zernio -- confirmee correcte. platformUserId (krROWTZg4y) differe volontairement de l'author_urn Composio ci-dessus (aFqu-W7ClW) : LinkedIn attribue un identifiant d'utilisateur distinct par application connectee (Composio et Zernio sont deux applications OAuth separees), donc les deux identifiants ne se comparent pas entre eux -- seule l'URL du profil (stable, publique) permet de verifier qu'il s'agit du meme compte humain sur les deux plateformes. Ne pas utiliser zernio_platform_user_id a la place d'author_urn dans un appel Composio, et inversement.",
     "ton": ["confiant", "direct", "pedagogue", "oriente-dirigeants"],
     "palette": ["#CC785C", "#46603F", "#7D9B76", "#FBF7F1"],
     "concurrents": [],
@@ -20,6 +24,10 @@
   "julien-partners": {
     "author_urn": "urn:li:person:ZvLHybJZhj",
     "_source_urn": "Verifie par Julien le 11/09/2026, a utiliser tel quel.",
+    "zernio_account_id": "6ab50c738d284ffb213b7d22",
+    "zernio_linkedin_url": "https://www.linkedin.com/in/julien-rayes-claude-partners/",
+    "zernio_platform_user_id": "75MjBbHPKu",
+    "_source_zernio": "Verifie par appel direct GET /v1/accounts de l'API Zernio le 24/09/2026 (Nomena, lecture seule). L'URL du profil LinkedIn est la preuve fiable du bon rattachement au profil Zernio -- confirmee correcte. platformUserId (75MjBbHPKu) differe volontairement de l'author_urn Composio ci-dessus (ZvLHybJZhj) : LinkedIn attribue un identifiant d'utilisateur distinct par application connectee (Composio et Zernio sont deux applications OAuth separees), donc les deux identifiants ne se comparent pas entre eux -- seule l'URL du profil (stable, publique) permet de verifier qu'il s'agit du meme compte humain sur les deux plateformes. Ne pas utiliser zernio_platform_user_id a la place d'author_urn dans un appel Composio, et inversement.",
     "ton": ["chaleureux", "professionnel", "facilitateur", "oriente-reseau"],
     "palette": ["#CC785C", "#9C503A", "#C6B49A", "#FBF7F1"],
     "concurrents": [],
