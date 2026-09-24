@@ -122,14 +122,7 @@ const PHOTO_FICHIER = 'photo-julien-rayes.png';
 const POLICE_BRICOLAGE = 'fonts/bricolage-grotesque-variable.woff2';
 const POLICE_SCHIBSTED = 'fonts/schibsted-grotesk-variable.woff2';
 
-const MODELES_VALIDES = new Set([
-  'accroche',
-  'gros-chiffre',
-  'comparaison',
-  'checklist',
-  'citation',
-  'cta',
-]);
+const { resoudreModele } = require('./lib/modeles');
 
 const MARQUEUR_DEBUT = '<!-- SLIDE:BEGIN -->';
 const MARQUEUR_FIN = '<!-- SLIDE:END -->';
@@ -244,8 +237,13 @@ function chargerGabarit(compte) {
  * voir generer-images.js, genererImageCouverture). Parametre explicite,
  * jamais devine depuis le nombre de diapos.
  */
-function injecterDiapo(blocDiapo, diapo, index, { contexte = 'carrousel' } = {}) {
-  const numero = String(index + 1).padStart(2, '0');
+function injecterDiapo(blocDiapo, diapo, index, { contexte = 'carrousel', total } = {}) {
+  // Format "3/10" (retour de Julien du 24/09/2026 : "01" cite parmi les
+  // defauts du dessin -- trop technique/pesant pour un numero de page).
+  // `total` doit venir de l'appelant (construireDocument, generer-images.js) --
+  // sans lui, on suppose que cette diapo est la derniere de son propre
+  // carrousel (repli sur `index + 1`, jamais un "undefined" affiche).
+  const numero = `${index + 1}/${total || index + 1}`;
   // Bug trouve le 18/09/2026 en production reelle (premier post de veille genere
   // avec ce mecanisme) : genererImageCouverture clone TOUJOURS la diapo avec
   // role: 'contenu' (voir rendreDiapoEnPng, forcerLogoVisible) pour afficher le
@@ -258,12 +256,10 @@ function injecterDiapo(blocDiapo, diapo, index, { contexte = 'carrousel' } = {})
     ? titreAvecAccent(diapo.titre, diapo.accent)
     : echapperHtml(diapo.titre || '');
 
-  // Modele de page (refonte du 24/09/2026) : "accroche" par defaut sur le
-  // hook (comportement historique), sinon absent -> rendu generique
-  // titre+texte inchange depuis avant cette refonte (aucune des 5 valeurs
-  // ci-dessous n'est activee tant que "modele" n'est pas explicitement pose).
-  const modeleDemande = MODELES_VALIDES.has(diapo.modele) ? diapo.modele : '';
-  const modele = modeleDemande || (diapo.role === 'hook' ? 'accroche' : '');
+  // Modele de page (refonte du 24/09/2026, voir lib/modeles.js -- source
+  // unique de verite, partagee avec lib/valider-diapos.js pour que rendu et
+  // comptage de mots s'accordent toujours sur "ce qui s'affiche vraiment").
+  const modele = resoudreModele(diapo);
 
   const colonneGauche = diapo.colonneGauche || {};
   const colonneDroite = diapo.colonneDroite || {};
@@ -282,7 +278,10 @@ function injecterDiapo(blocDiapo, diapo, index, { contexte = 'carrousel' } = {})
     .replaceAll('{{COMP_DROITE_ITEMS}}', listeHtml(colonneDroite.items, 'comp-item'))
     .replaceAll('{{CHECKLIST_ITEMS}}', listeHtml(diapo.items, 'checklist-item'))
     .replaceAll('{{CITATION}}', echapperHtml(diapo.citation || ''))
-    .replaceAll('{{CITATION_AUTEUR}}', echapperHtml(diapo.auteur || ''))
+    // Le tiret cadratin ne fait plus partie du gabarit statique (voir
+    // templates/*.html, .citation-auteur) : sans auteur, la ligne doit
+    // disparaitre entierement (:empty), pas laisser un "— " orphelin.
+    .replaceAll('{{CITATION_AUTEUR}}', diapo.auteur ? `— ${echapperHtml(diapo.auteur)}` : '')
     .replaceAll('{{CTA_BOUTON}}', echapperHtml(diapo.bouton || ''))
     .replaceAll('{{IMAGE_BLOC}}', blocImage(diapo));
 }
@@ -290,7 +289,7 @@ function injecterDiapo(blocDiapo, diapo, index, { contexte = 'carrousel' } = {})
 function construireDocument(compte, diapos) {
   const { entete, blocDiapo, pied } = chargerGabarit(compte);
   const diapositives = diapos
-    .map((diapo, index) => injecterDiapo(blocDiapo, diapo, index))
+    .map((diapo, index) => injecterDiapo(blocDiapo, diapo, index, { total: diapos.length }))
     .join('\n');
   return `${entete}${diapositives}${pied}`;
 }

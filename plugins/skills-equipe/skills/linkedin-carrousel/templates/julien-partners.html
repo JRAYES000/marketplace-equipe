@@ -327,6 +327,8 @@
     color: var(--muted);
   }
 
+  .citation-auteur:empty { display: none; margin-top: 0; }
+
   /* ---------- Modele "cta" (fermeture, fond contraste comme le hook) ---------- */
   .slide[data-modele="cta"] .layout-cta { display: flex; flex-direction: column; }
 
@@ -566,7 +568,7 @@
       <div class="layout layout-citation">
         <div class="citation-marque" aria-hidden="true">”</div>
         <p class="citation-texte">{{CITATION}}</p>
-        <p class="citation-auteur">— {{CITATION_AUTEUR}}</p>
+        <p class="citation-auteur">{{CITATION_AUTEUR}}</p>
       </div>
       <div class="layout layout-cta">
         <h1 class="cta-titre">{{TITRE}}</h1>

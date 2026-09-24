@@ -110,7 +110,8 @@ function main() {
   if (comptes.length === 0) {
     console.log('Aucun compte n\'a de brouillon ni de carrousel genere pour l\'instant.');
     console.log(
-      'Repli propose : commencez par "fixtures/diapos-exemple.json" (4 diapos de demonstration) ' +
+      'Repli propose : commencez par "fixtures/diapos-exemple.json" (4 diapos de demonstration, ' +
+      'a completer jusqu\'a 6 minimum avant generation -- voir lib/valider-diapos.js) ' +
       'ou redigez un premier brouillon dans a-publier/<compte>-<sujet>.json.'
     );
     return;

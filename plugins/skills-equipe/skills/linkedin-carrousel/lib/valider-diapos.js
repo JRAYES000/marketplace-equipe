@@ -18,18 +18,26 @@
  */
 
 const { validerAccents } = require('./valider-orthographe');
+const { resoudreModele, champsVisibles } = require('./modeles');
 
-const DIAPOS_MIN = 8;
-const DIAPOS_MAX = 12;
-const DIAPOS_DEFAUT = 10;
-const MOTS_MAX_PAR_DIAPO = 25;
+// Bornes et limite de mots mises a jour le 24/09/2026 (retour de Julien
+// apres le premier carrousel de test des 6 modeles) : 6 a 10 diapos (avant :
+// 8 a 12) et moins de 60 mots par page (avant : 25) -- conforme au brief du
+// 24/09/2026, section "Regles de contenu". La limite de 25 mots datait d'un
+// brief anterieur (10/09/2026) qui n'avait pas ete mise a jour lors de la
+// refonte des 6 modeles -- oubli corrige ici.
+const DIAPOS_MIN = 6;
+const DIAPOS_MAX = 10;
+const DIAPOS_DEFAUT = 8;
+const MOTS_MAX_PAR_DIAPO = 60;
 // Audit adversarial du 15/09/2026 : filet de securite en caracteres, en plus
 // du compte de "mots" -- voir compterMots ci-dessous pour pourquoi le compte
-// de mots seul ne suffit pas. 260 caracteres laisse une marge large au-dessus
-// du texte le plus long reellement observe dans un carrousel conforme
-// (~140 caracteres, fixtures/diapos-10-conformes.json) tout en bloquant un
-// bloc de texte massif.
-const CARACTERES_MAX_PAR_DIAPO = 260;
+// de mots seul ne suffit pas. Mis a l'echelle le 24/09/2026 avec le nouveau
+// plafond de 60 mots (meme ratio qu'avant, ~10,4 caracteres/mot : 260 pour
+// 25 mots -> 650 pour 60), pas juste garde a l'ancienne valeur -- un
+// carrousel a 60 vrais mots depasserait sinon systematiquement 260
+// caracteres et serait refuse a tort.
+const CARACTERES_MAX_PAR_DIAPO = 650;
 // Caracteres de controle C0 (hors saut de ligne/tabulation, deja ecartes
 // ailleurs) : jamais legitimes dans un titre/texte de diapo -- rendu
 // imprevisible en HTML/PDF, souvent invisible dans les logs/diffs.
@@ -129,33 +137,46 @@ function validerDiapos(diapos) {
   }
 
   diapos.forEach((diapo, index) => {
-    if (index > 0 && !String(diapo.titre || '').trim()) {
-      throw new Error(`Carrousel refuse : diapo n°${index + 1} doit avoir un titre non vide.`);
+    const modele = resoudreModele(diapo);
+    // Le modele "citation" n'affiche jamais de "titre" (voir
+    // templates/*.html, layout-citation) -- l'exiger forcerait a fournir un
+    // champ invisible rien que pour passer ce controle, comme c'etait le cas
+    // avant cette correction (24/09/2026). Tous les autres modeles utilisent
+    // "titre" comme texte affiche (accroche, eyebrow du gros-chiffre, titre
+    // de comparaison/checklist, ligne du cta).
+    if (index > 0 && modele !== 'citation' && !String(diapo.titre || '').trim()) {
+      throw new Error(`Carrousel refuse : diapo n°${index + 1} (modele "${modele}") doit avoir un titre non vide.`);
     }
     validerTexteDiapo(diapo.titre, `diapo n°${index + 1} (titre)`);
     validerTexteDiapo(diapo.texte, `diapo n°${index + 1} (texte)`);
 
-    const texteAffiche = index === 0 ? diapo.titre : `${diapo.titre || ''} ${diapo.texte || ''}`;
+    // Correction du 24/09/2026 (retour de Julien) : compte desormais TOUS
+    // les champs reellement affiches par le modele resolu de cette diapo
+    // (lib/modeles.js, champsVisibles) -- pas seulement titre+texte. Avant
+    // cette correction, une checklist ou une comparaison a items tres longs
+    // passait la validation en debordant reellement de la diapo (les items
+    // n'etaient jamais comptes).
+    const texteAffiche = champsVisibles(diapo, modele).filter(Boolean).join(' ');
     const mots = compterMots(texteAffiche);
     const caracteres = String(texteAffiche || '').trim().length;
     if (mots > MOTS_MAX_PAR_DIAPO) {
       throw new Error(
-        `Carrousel refuse : diapo n°${index + 1} ("${diapo.titre || ''}") contient ${mots} mots, ` +
-        `maximum autorise ${MOTS_MAX_PAR_DIAPO}. Raccourcissez le texte de cette diapo -- la ` +
-        `police ne doit jamais etre reduite pour faire rentrer un texte trop long.`
+        `Carrousel refuse : diapo n°${index + 1} ("${diapo.titre || diapo.citation || ''}") contient ${mots} mots ` +
+        `(tous les champs visibles du modele "${modele}" compris), maximum autorise ${MOTS_MAX_PAR_DIAPO}. ` +
+        `Raccourcissez le texte de cette diapo -- la police ne doit jamais etre reduite pour faire rentrer un texte trop long.`
       );
     }
     if (caracteres > CARACTERES_MAX_PAR_DIAPO) {
       throw new Error(
-        `Carrousel refuse : diapo n°${index + 1} ("${diapo.titre || ''}") contient ${caracteres} ` +
-        `caracteres, maximum autorise ${CARACTERES_MAX_PAR_DIAPO} -- meme si le compte de mots ` +
-        'passe (mots colles sans espaces, par exemple), un texte de cette longueur deborde de la diapo.'
+        `Carrousel refuse : diapo n°${index + 1} ("${diapo.titre || diapo.citation || ''}") contient ${caracteres} ` +
+        `caracteres (tous les champs visibles compris), maximum autorise ${CARACTERES_MAX_PAR_DIAPO} -- meme si ` +
+        'le compte de mots passe (mots colles sans espaces, par exemple), un texte de cette longueur deborde de la diapo.'
       );
     }
     try {
       validerAccents(texteAffiche);
     } catch (erreur) {
-      throw new Error(`Carrousel refuse : diapo n°${index + 1} ("${diapo.titre || ''}") -- ${erreur.message}`);
+      throw new Error(`Carrousel refuse : diapo n°${index + 1} ("${diapo.titre || diapo.citation || ''}") -- ${erreur.message}`);
     }
   });
 }
