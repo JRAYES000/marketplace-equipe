@@ -204,10 +204,12 @@ comme chez les 3 references. Voir `test/accent-hook.test.js` et les nouveaux cas
 1. Compose un carrousel (6-10 diapos) sur un sujet donne, dans le ton du compte cible.
 2. `generer-pdf.js` rend le PDF multi-page a partir d'un template de `templates/` et d'une
    liste de diapos (entierement local via Playwright, aucun service externe). `generer-images.js`
-   fait le meme rendu en PNG (repli image -- voir "Ce qui ne marche pas encore" plus bas, ne pas
-   utiliser pour publier).
+   fait le meme rendu en PNG -- utile pour l'inspection visuelle page par page avant publication
+   (voir "Regles de methode non negociables"), plus utilise pour publier depuis le 24/09/2026
+   (voir "Publication reelle").
 3. Redige le texte du post ; `generer-post.js` le valide et convertit le gras.
-4. Publie reellement sur LinkedIn via l'API Documents (voir "Publication reelle" plus bas).
+4. Publie reellement sur LinkedIn via Zernio, en document PDF feuilletable (voir "Publication
+   reelle" plus bas).
 
 ## Point de situation
 
@@ -219,15 +221,19 @@ qu'aucun brouillon ni carrousel n'existe pour un compte -- jamais les mains vide
 
 ## Comptes
 
-- **julien-agency** -- seul compte avec un acces Composio reellement confirme
-  (`urn:li:person:aFqu-W7ClW`). Seul compte sur lequel publier reellement aujourd'hui.
-- **julien-partners** -- acces Composio non confirme (`urn:li:person:ZvLHybJZhj` dans
-  `reglages-comptes.json`, mais aucune connexion partagee active a ce jour).
+- **julien-agency** -- connecte et verifie sur Zernio (`zernio_account_id`
+  `6ab50c438d284ffb213b7c55`, verifie via `GET /v1/accounts` le 24/09/2026 -- voir
+  `reglages-comptes.json`). Publication reelle possible depuis le 24/09/2026 (voir "Publication
+  reelle").
+- **julien-partners** -- connecte et verifie sur Zernio (`zernio_account_id`
+  `6ab50c738d284ffb213b7d22`, meme verification le 24/09/2026). Publication reelle possible.
 - **page-claude** -- en pause sur decision de Julien. `author_urn` reste `null`
   (`LINKEDIN_GET_COMPANY_INFO` repond 403, autorisation d'organisation a valider cote LinkedIn).
+  Pas de `zernio_account_id` non plus -- non repris dans ce chantier.
 
-`reglages-comptes.json` existe (structure a 3 comptes) mais n'est lu par aucun code de cette
-skill -- le compte/gabarit vient toujours de l'argument CLI.
+`reglages-comptes.json` porte desormais le compte/gabarit ET les identifiants Zernio
+(`zernio_account_id`, `zernio_linkedin_url`) lus par `lib/publier-zernio.js` -- le gabarit HTML
+(templates/generer-pdf.js) continue de venir de l'argument CLI, independamment.
 
 ### Un fichier de style par compte -- verifie reellement le 15/09/2026
 
@@ -267,13 +273,10 @@ carrousel de test) et `test/generer-images.test.js` (le PDF reel se genere et n'
 
 ## Variables d'environnement (`.env.example`)
 
-- **`COMPOSIO_API_KEY`** -- cle de PROJET Composio ("ak_..."), canal REST direct. Depuis le
-  17/09/2026, c'est le canal reel de publication pour **julien-partners uniquement**
-  (connected_account_id `ca_vn1-dhh8VcYf`, verifie via `GET /api/v3/connected_accounts` -- voir
-  `references/actions-composio.md`). Ne pas la confondre avec une cle consumer "ck_..." (canal
-  MCP, utilise par `linkedin-commentaires` pour julien-agency) : les deux formats ne sont pas
-  interchangeables, voir `lib/composio-canal.js`. Laisser vide reste correct si seul
-  julien-agency est concerne (non implemente dans ce paquet, voir "Publication reelle").
+- **`ZERNIO_API_KEY`** -- cle API Zernio (format "sk_..."), commune aux deux comptes
+  (`julien-agency` et `julien-partners`) : seul l'`accountId` transmis dans la requete distingue
+  le compte cible, pas la cle. Lue depuis l'environnement par `publier-zernio.js`
+  (`.env` local, jamais commite -- voir "Ce depot est public" dans le `CLAUDE.md` racine).
 - **`PDF_RENDER_API_KEY`** -- **vestigiale**, ne rien y mettre : le rendu est 100% local
   (Playwright), aucun service externe n'est appele.
 
@@ -396,101 +399,63 @@ Anti-collision : `" (2)"`, `" (3)"`... jamais d'ecrasement silencieux d'un fichi
 
 ## Publication reelle
 
-**Mis a jour le 17/09/2026 -- routage par compte, voir `lib/composio-canal.js` et
-`references/actions-composio.md` pour le detail complet.**
+**Basculee sur Zernio le 24/09/2026 (mail de Julien du 24/09/2026).** Jusqu'a cette date, la
+publication passait par Composio (`lib/composio.js`, `lib/publier.js`, encore presents dans le
+depot pour memoire mais plus utilises par cette skill) : aucune de ses actions ne depose un
+document/PDF sur LinkedIn, seulement des images -- ce qui partait comme "carrousel" etait en
+realite une grille d'images separees, jamais un vrai document feuilletable. Le blocage recurrent
+du classifieur auto-mode de Claude Code sur les tentatives d'atteindre l'API Documents LinkedIn
+via Composio (`COMPOSIO_REMOTE_WORKBENCH`/`proxy_execute`, motif "Real-World Transactions",
+18/09/2026) est desormais sans objet : Zernio expose directement un type de media `document`
+qui n'a pas besoin de ce mecanisme.
 
-- **julien-partners** : fonctionnel. `publierCarrousel({ compte: 'julien-partners', ... })`
-  publie une IMAGE (couverture ou par-diapo, jamais le PDF multi-pages lui-meme -- aucune action
-  Composio ne le permet) via le canal REST direct (`COMPOSIO_API_KEY`, cle de projet "ak_"),
-  avec `connected_account_id: "ca_vn1-dhh8VcYf"` explicite. Televersement via
-  `POST /api/v3/files/upload/request` (corrige l'impasse FileUploadable du 12/09/2026), puis
-  `LINKEDIN_CREATE_LINKED_IN_POST`. Confirme par un post de test reel publie puis supprime le
-  17/09/2026 (`LINKEDIN_DELETE_POST`, `{deleted: true}`).
-- **julien-agency** : NON implemente dans ce paquet. Ce compte route vers le canal MCP/ck_ (voir
-  `linkedin-commentaires`, qui l'utilise deja pour des commentaires) mais `linkedin-carrousel` n'a
-  jamais teste de publication d'image via ce canal -- `publierCarrousel()` refuse explicitement
-  ce compte (`canal_publication_reel: false` dans `reglages-comptes.json`) plutot que de
-  pretendre que ca marche.
-- **page-claude** : abandonne (voir plus haut), `canal_publication_reel: false`.
+**Ce que fait `publier-zernio.js`** (`lib/zernio.js` pour les appels HTTP bas niveau,
+`lib/publier-zernio.js` pour la logique de publication) :
 
-**Ce qui reste vrai, inchange depuis le 11/09/2026** : aucune action Composio ne depose un
-document/PDF multi-pages sur LinkedIn. Cette skill ne publiera donc jamais le PDF du carrousel
-tel quel, seulement une image de repli.
+1. **Verification du compte, avant tout envoi.** `verifierCompteZernio()` appelle reellement
+   `GET /v1/accounts` et confirme que le `zernio_account_id` renseigne dans
+   `reglages-comptes.json` pour le compte demande existe, est actif, porte sur LinkedIn, et
+   correspond (quand l'API renvoie `profileUrl`) a l'URL de profil attendue -- refus explicite
+   sinon, jamais un envoi "au cas ou l'accountId soit le bon".
+2. **`POST /v1/media/presign`** avec `filename`/`contentType`/`size` -- renvoie une `uploadUrl`
+   signee (valide 1h) et une `publicUrl` (stockage temporaire Zernio, 7 jours).
+3. **`PUT` du PDF vers cette `uploadUrl`** (aucun en-tete `Authorization` sur ce televersement --
+   l'URL est deja signee).
+4. **`POST /v1/posts`**, uniquement avec le drapeau CLI `--publier` explicite : media de type
+   `document` (`mediaItems: [{ type: 'document', url: publicUrl }]`) et
+   `platforms[].platformSpecificData.documentTitle` pour le titre affiche sous le post --
+   LinkedIn exige ce titre, sans lui il retombe sur le nom de fichier (jamais souhaitable, voir
+   "Convention de nommage des fichiers de sortie").
 
-### Impasse technique confirmee le 18/09/2026 -- pourquoi julien-partners reste en image seule
+**Usage CLI** :
 
-Julien voulait un vrai document feuilletable pour julien-partners (pas seulement l'image de
-repli). Verifie reellement avant d'abandonner, deux pistes tentees dans l'ordre :
+```
+node publier-zernio.js <compte> <pdf> <documentTitle> [texte-post.txt] [--publier]
+```
 
-1. **Ouvrir une session tool-router sur le canal REST/`ak_`** (`POST /api/v3.1/tool_router/session`)
-   pour atteindre `COMPOSIO_REMOTE_WORKBENCH` (seul point d'entree de `proxy_execute`, le
-   mecanisme qui a reellement publie les deux carrousels julien-agency les 14-15/09, voir
-   `references/etat-linkedin-20260912.md` Points n°6/7/15). La session s'ouvre (`HTTP 201`,
-   `session_id` obtenu), mais l'appeler ensuite (`tools/call COMPOSIO_REMOTE_WORKBENCH`) a ete
-   **bloque par le classifieur auto-mode de Claude Code** (motif "Real-World Transactions"),
-   avant tout appel reseau vers LinkedIn -- non contourne, conformement a la regle du depot.
-2. **Separer l'upload (canal `ck_`/MCP, qui fonctionne) de l'ecriture (canal `ak_`/REST, la
-   bonne identite julien-partners)** : l'upload d'octets ne pose pas de probleme sur `ck_`, mais
-   `proxy_execute` -- indispensable pour parler a l'API Documents brute de LinkedIn -- n'existe
-   qu'A L'INTERIEUR d'une session `COMPOSIO_REMOTE_WORKBENCH`. Or cette session est bloquee sur
-   `ak_` (piste 1 ci-dessus) et, sur `ck_`, elle resout systematiquement vers `averse-cooser`
-   (julien-agency, meme precedence documentee pour `linkedin-commentaires` -- voir
-   `references/actions-composio.md`, 16-17/09/2026) : y publier un document reviendrait a le
-   publier sous la mauvaise identite, silencieusement.
-   **Verifie en plus, en lecture seule, avant d'abandonner** : la liste reelle des actions
-   Composio du toolkit `linkedin` (`GET /api/v3/tools?toolkit_slug=linkedin`, cle `ak_`) ne
-   contient que 4 slugs (`LINKEDIN_CREATE_LINKED_IN_POST`, `LINKEDIN_DELETE_LINKED_IN_POST`,
-   `LINKEDIN_GET_COMPANY_INFO`, `LINKEDIN_GET_MY_INFO`) -- aucune action document nommee
-   n'existe, `proxy_execute` est bien le seul chemin. Et `GET /api/v3/connected_accounts/<id>`
-   confirme le compte actif (`contact@claudepartners.fr`, scope `w_member_social`) mais
-   redacte integralement `access_token`/`refresh_token` -- impossible de recuperer le jeton pour
-   appeler LinkedIn en direct en contournant Composio.
+Sans `--publier`, le script s'arrete apres l'upload (etapes 1-3) et n'appelle jamais
+`/v1/posts` -- c'est le mode utilise pour tester l'envoi avant tout accord de publication.
+`ZERNIO_API_KEY` est lue depuis `.env` (voir "Variables d'environnement"), jamais affichee ;
+les URL signees sont masquees dans les logs (parametres de requete retires).
 
-**Conclusion, sur les deux canaux disponibles aujourd'hui** : `proxy_execute` (donc l'API
-Documents, donc un vrai carrousel feuilletable) est injoignable pour julien-partners --
-bloque par le classifieur sur le canal a la bonne identite (`ak_`), et resout vers la
-mauvaise identite sur l'autre (`ck_`). **Pas une limite theorique** : les deux pistes ont ete
-testees pour de vrai le 18/09/2026, avec preuve a l'appui (session `ak_` ouverte puis bloquee ;
-liste d'actions et jeton verifies en lecture seule). Debloquer necessite soit une exception au
-classifieur pour ce geste precis, soit une connexion LinkedIn de julien-partners partagee sur le
-canal `ck_` sans la precedence qui la masque aujourd'hui (meme blocage de fond que celui documente
-pour `linkedin-commentaires`). **Decision de Julien, assumee, pas un abandon** : publier en image
-seule en attendant, avec ce repere de forme desormais correct (voir "masque la fleche/numero"
-ci-dessus) plutot que d'afficher des reperes de carrousel trompeurs sur une seule image.
+**Test reel effectue le 24/09/2026** (presign + upload seulement, sans `--publier`) : PDF de
+test `sortants/julien-agency/_test-6-modeles.pdf` (696 970 octets) televerse avec succes pour
+`julien-agency` ET `julien-partners`, verification de compte passee dans les deux cas contre
+`GET /v1/accounts` reel. Aucun post reel n'a ete cree a cette occasion.
 
-### Decouverte le 18/09/2026 (suite, meme jour) -- `par-diapo` fonctionne deja sur `ak_`, mais le script qui l'appelle declenche le classifieur
-
-**Ne pas relire "image seule" ci-dessus comme "la seule forme atteignable pour julien-partners
-aujourd'hui" -- c'est plus nuance.** En verifiant le carrousel Claude Partners du 17/09 cite dans
-`references/mail-20260918-brouillon.md`
-([urn:li:activity:7506384428168806400](https://www.linkedin.com/feed/update/urn:li:activity:7506384428168806400/)),
-confirme reellement en ligne par navigateur (grille de 10 images natives LinkedIn, "BALAYEZ"/
-numero visibles, "+6" en overlay) : **`publierCarrousel({ modeRepli: 'par-diapo', ... })` a deja
-fonctionne pour julien-partners, sur le meme canal REST/`ak_` que l'image seule** -- pas besoin de
-l'API Documents ni de `proxy_execute` pour ca, `televerserFichierComposio` +
-`LINKEDIN_CREATE_LINKED_IN_POST.images` acceptent bien un tableau de plusieurs images. Ca
-contredit la note plus haut ("Confirme par un post de test reel publie **puis supprime**") : soit
-un second post reel a suivi ce test sans etre documente ici, soit la note etait imprecise -- a
-clarifier si l'occasion se represente, non bloquant pour la suite.
-
-**Tente de reproduire le 18/09/2026 pour le carrousel "Un partenariat qui se delite..." (8
-images deja rendues, `sortants/julien-partners/galerie-0918/`)** : la **creation du script
-Node** qui appelle `publierCarrousel({ modeRepli: 'par-diapo', ... })` a ete **bloquee par le
-classifieur auto-mode de Claude Code** (motif "Real-World Transactions"), avant meme que le
-fichier existe -- aucun appel reseau tente, aucune tentative de contournement. **Deuxieme
-blocage du meme classifieur dans le meme pipeline le meme jour** (le premier visait la session
-tool-router de l'API Documents, voir plus haut) : pas traite comme un accident isole, la
-publication `par-diapo` n'a pas ete retentee ce jour-la -- decision explicite de Julien de ne pas
-forcer un signal repete.
-
-**Pour une prochaine session** : les 8 images sont pretes et inchangees dans
-`sortants/julien-partners/galerie-0918/diapo-01.png` a `diapo-08.png` (memes diapos que
-`a-publier/julien-partners-2026-09-18-essoufflement.json`). Le chemin le plus sur est de refaire
-cet appel **a la main, dans une session neuve** (le classifieur peut se comporter differemment
-selon le contexte de la conversation) plutot que d'essayer de reformuler le script pour eviter la
-detection -- ce serait contourner le garde-fou, pas le lever legitimement.
+**Ce qui reste a faire avant la premiere publication reelle** : composer un vrai sujet (pas le
+carrousel de test des 6 modeles), le faire valider par les regles de methode ci-dessus (au moins
+5 iterations, hook relu seul), rediger le texte du post via `linkedin-mise-en-forme` puis le
+valider avec `generer-post.js`, et alors seulement relancer `publier-zernio.js` avec
+`--publier` -- apres accord explicite dans la conversation (voir "Rien de public sans feu vert
+explicite" dans le `CLAUDE.md` racine).
 
 ## Registre des echecs Composio/LinkedIn (`data/registre-echecs.json`)
+
+**Ne couvre plus le chemin de publication reel de cette skill depuis le 24/09/2026** (bascule
+sur Zernio, voir "Publication reelle") -- `lib/composio.js`/`lib/publier.js` restent dans le
+depot mais ne sont plus appeles par `publier-zernio.js`. Section gardee pour memoire et parce que
+le mecanisme partage (`lib/composio-canal.js`) sert encore a `linkedin-commentaires`.
 
 Ajoute le 17/09/2026 (suite) -- comble un manque signale par un rapport d'investigation sur le
 quota Composio du 16/09/2026 : jusque-la, aucune trace des tentatives de publication echouees
