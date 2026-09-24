@@ -21,6 +21,17 @@ Chacun a coûté du temps une fois. La parade suit.
    - extension Chrome « not connected » : mettre la fenêtre Chrome au premier plan quelques
      secondes, puis réessayer. Après deux échecs, demander à la personne de relancer
      l'extension.
+   Sur X :
+   - l'appel JavaScript coupe au bout de 45 secondes : lancer la boucle de défilement sans
+     l'attendre, puis l'interroger par des appels courts ;
+   - le retour d'un appel JavaScript est tronqué vers 1 000 caractères : écrire les données
+     dans un `<article>` de la page et les lire avec `get_page_text` ;
+   - un `browser_batch` qui enchaîne des attentes a déconnecté l'extension : des appels
+     séparés, une capture d'écran entre deux ;
+   - changer de page (Posts → Replies) efface les variables `window` : sortir les données
+     avant de naviguer ;
+   - « Replying to » ne se repère pas de façon fiable dans le DOM : distinguer les réponses
+     par l'adresse (`/<compte>/status/…`) absente de l'onglet Posts.
 7. **Le budget de recherches web d'une session est partagé** entre tous les sous-agents :
    trois l'ont épuisé en une analyse. Donne un plafond à chacun.
 8. **Un sous-agent peut lire une page de travers.** Un prix ou une règle qui porte une
