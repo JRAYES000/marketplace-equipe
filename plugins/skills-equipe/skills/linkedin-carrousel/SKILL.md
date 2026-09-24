@@ -12,6 +12,60 @@ demande explicite.
 Variantes probables : « genere le carrousel du jour », « carrousel LinkedIn sur <sujet> »,
 « carrousel pour julien-agency/julien-partners », « prepare le carrousel de la semaine ».
 
+## Refonte du design -- 6 modeles de page (24/09/2026, demande de Julien)
+
+Avant cette date, les gabarits `julien-agency.html`/`julien-partners.html` n'avaient qu'un seul
+modele (titre + texte), un fond crème, les polices Fraunces/Inter ("font IA", retirees du site
+claudeagency.fr), aucune image, et le logo masque sur la diapo 1 (`.slide[data-role="hook"] .logo
+{ display: none }`). Julien a demande une refonte complete du dessin (le moteur HTML+Playwright,
+lui, reste inchange) :
+
+- **6 modeles de page**, choisis par le champ `modele` d'une diapo (voir l'en-tete de
+  `generer-pdf.js` pour le detail des champs de chacun) : `accroche` (gabarit historique),
+  `gros-chiffre`, `comparaison` (deux colonnes), `checklist`, `citation`, `cta` (fermeture).
+  `modele` absent retombe sur le rendu d'avant cette refonte (`accroche` implicite sur le hook,
+  titre+texte generique sinon) -- **aucune regression sur un carrousel existant**.
+- **Logo, photo et couleurs de marque sur CHAQUE page, page 1 comprise** -- avant cette refonte,
+  seul un nom de marque textuel apparaissait, jamais sur le hook. Logo et photo vivent dans
+  `assets/` (voir plus bas) et sont injectes en base64 au chargement du gabarit
+  (`lib/assets.js`, `chargerGabarit`), jamais bakes a la main dans le HTML -- remplacer un fichier
+  ne demande aucun changement de template ni de code.
+- **Polices Bricolage Grotesque (titres) + Schibsted Grotesk (corps)**, a la place de
+  Fraunces/Inter -- confirme reellement les memes sur les deux marques : `DESIGN.md` du depot
+  `JRAYES000/CLAUDEAGENCY` pour Claude Agency, `getComputedStyle` releve en direct sur
+  claudepartners.fr pour Claude Partners (les deux sites partagent la meme base typographique).
+  Polices variables completes, fichiers dans `assets/fonts/` (telechargees depuis Google Fonts,
+  auto-hebergees ensuite -- aucun CDN charge au rendu).
+- **Chartes de couleur mesurees, pas inventees** :
+  - Claude Agency (`DESIGN.md`) : fond `#FBF7F1`, encre `#2B2724`, accent terracotta `#CC785C` /
+    `#934E3A`, fond sombre de bandeau `#934E3A` (hook et `cta`).
+  - Claude Partners (mesure live sur claudepartners.fr, variables CSS `--brand-600`/`--sand`/etc.) :
+    fond `#FBF7F1`, encre `#2B2724`, texte attenue `#584F45`, accent `#CC785C` / `#9C503A`, fond
+    sombre `#763D2C` -- volontairement distinct de celui de Claude Agency (mesure reelle, pas la
+    meme teinte), meme si les deux marques partagent la meme base cream/ink/police.
+- **Emplacement image optionnel, tout modele** : champ `image` (chemin reel, une fois fal.ai
+  accessible) ou `imageEmplacement: true` (encadre en pointilles "Emplacement image IA (fal.ai) —
+  a generer", jamais un vide silencieux). fal.ai n'etait pas encore accessible au 24/09/2026 --
+  aucune image reelle generee, uniquement l'emplacement signale.
+
+### Fichiers de marque (`assets/`)
+
+| Fichier | Contenu | Remplacement |
+|---|---|---|
+| `logo-claude-agency-512.png` | Logo reel Claude Agency (soleil 8 branches, terracotta), 512x512, depuis `JRAYES000/CLAUDEAGENCY` (`app/public/logo.png`) | Remplacer le fichier suffit |
+| `logo-claude-partners.svg` | Logo reel Claude Partners (medaille, coche evidee), vectoriel, releve en direct sur claudepartners.fr (`header svg`) | Remplacer le fichier suffit |
+| `photo-julien-rayes.png` | Photo de Julien, affichee en medaillon <=240px de large (96px reel dans les gabarits) sur chaque diapo | **Provisoire au 24/09/2026** : capture d'ecran de son profil LinkedIn (`linkedin.com/in/julien-rayes`), ~362x389px -- pas le fichier original (son URL contient des jetons que l'outil de navigation bloque d'extraire, mesure de confidentialite). Suffisant pour un medaillon <=240px (verifie visuellement, aucun flou a 96px), mais A REMPLACER par le fichier source des que Julien le fournit -- remplacer ce meme fichier suffit, aucun changement de template |
+| `fonts/bricolage-grotesque-variable.woff2`, `fonts/schibsted-grotesk-variable.woff2` | Polices variables completes (poids 200-900 / 400-900) | -- |
+
+### Limite assumee (pas corrigee dans cette refonte)
+
+`lib/valider-diapos.js` compte les mots sur `titre`+`texte` uniquement -- les champs propres aux
+nouveaux modeles (`chiffre`, `items`, `colonneGauche`/`colonneDroite`, `citation`) ne sont PAS
+comptes dans la limite de 25 mots/diapo. Une checklist a items tres longs pourrait donc passer la
+validation tout en debordant visuellement -- a verifier a l'oeil (comme "une idee par diapo" deja
+documente plus bas), pas garanti par un garde-fou automatique aujourd'hui. Idem pour les accents
+manquants (`lib/valider-orthographe.js`, `validerAccents`) : seuls `titre`/`texte` sont controles.
+
 ## Regles de methode non negociables (retour de Julien, 18/09/2026)
 
 Julien a juge les deux carrousels publies avant cette date comme "de l'AI slop" -- brouillon,
