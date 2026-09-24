@@ -1,6 +1,6 @@
 # Gabarit d'un onglet « analyse réseau »
 
-Squelette commun aux onglets YouTube et Instagram. Garde l'ordre et les titres : le client
+Squelette commun aux onglets YouTube, Instagram et X. Garde l'ordre et les titres : le client
 passe d'un onglet à l'autre et retrouve les mêmes repères. Adapte le contenu des sections 3
 et 4 au réseau. Supprime une section vide plutôt que de la remplir pour la forme.
 
@@ -71,9 +71,10 @@ sommes pas juristes » si c'est du droit>
 
 ---
 
-## 3. <Le format propre au réseau : les stories / les Shorts>
+## 3. <Le format propre au réseau : les stories / les Shorts / la vidéo sur X>
 
-## 4. <La vitrine : couvertures ou miniatures, légendes ou titres, commentaires>
+## 4. <La vitrine : couvertures ou miniatures, légendes, titres ou textes, commentaires ou réponses>
+Sur X, ajoute un tableau « Ce qu'on voudrait faire | Règle de X » pour l'automatisation.
 Pour chaque sujet : **Ce qu'on voit**, puis **Nos recommandations**, puis un tableau
 « Actuel → Proposition » quand on réécrit (les crochets [montant] sont à compléter par le
 client, on n'invente pas).

@@ -1,19 +1,19 @@
 ---
 name: analyse-reseau-client
 description: >-
-  Analyse le compte Instagram ou la chaîne YouTube d'un client de Claude Agency
-  et en fait un onglet de son espace client : un fichier .md rangé dans le
-  dépôt des livrables, hors challenge-N, affiché tel quel au client. Chiffres
-  relevés et datés, publications gagnantes et perdantes, stories ou Shorts,
-  couvertures, légendes et commentaires, outils conseillés avec prix vérifiés,
-  comptes de référence mesurés, plan d'action daté, mode d'emploi pour
-  l'assistant du client, note d'équipe. Activation MANUELLE uniquement :
-  seulement sur demande explicite (ex. « analyse le compte Instagram du client
-  X », « fais l'onglet YouTube de Y », « mets à jour l'analyse Instagram de Z
-  »). Ne se déclenche jamais d'elle-même sur une conversation qui parle
-  seulement d'Instagram ou de YouTube. NE PAS utiliser pour les comptes de
-  l'agence elle-même, pour publier, commenter ou écrire à quelqu'un sur un
-  réseau, ni pour X, TikTok ou LinkedIn : la méthode n'y a pas encore été
+  Analyse le compte Instagram, le compte X (Twitter) ou la chaîne YouTube d'un
+  client de Claude Agency et en fait un onglet de son espace client : un
+  fichier .md rangé dans le dépôt des livrables, hors challenge-N, affiché tel
+  quel au client. Chiffres relevés et datés, publications gagnantes et
+  perdantes, stories, Shorts ou vidéos, couvertures, textes et réponses, outils
+  conseillés avec prix vérifiés, comptes de référence mesurés, plan d'action
+  daté, mode d'emploi pour l'assistant du client, note d'équipe. Activation
+  MANUELLE uniquement : seulement sur demande explicite (ex. « analyse le
+  compte Instagram du client X », « fais l'onglet Twitter de Y », « mets à jour
+  l'analyse YouTube de Z »). Ne se déclenche jamais d'elle-même sur une
+  conversation qui parle seulement d'un réseau social. NE PAS utiliser pour les
+  comptes de l'agence elle-même, pour publier, commenter ou écrire à quelqu'un
+  sur un réseau, ni pour TikTok ou LinkedIn : la méthode n'y a pas encore été
   éprouvée.
 ---
 
@@ -25,10 +25,10 @@ tel quel dans un onglet à lui. **Ce fichier est la page du client** : pas de br
 d'interne. Tout ce qui est interne va dans le `CLAUDE.md` du dossier client, zone
 « Notes de l'équipe ».
 
-La méthode vient de deux onglets réels, faits en septembre 2026 pour un même client :
-YouTube puis Instagram. Pour voir le niveau attendu, ouvre les onglets déjà publiés dans le
-dépôt des livrables (cherche `*/YOUTUBE/analyse-youtube.md` et
-`*/INSTAGRAM/analyse-instagram.md`).
+La méthode vient de trois onglets réels, faits en septembre 2026 pour un même client :
+YouTube, Instagram, puis X. Pour voir le niveau attendu, ouvre les onglets déjà publiés dans
+le dépôt des livrables (cherche `*/YOUTUBE/analyse-youtube.md`,
+`*/INSTAGRAM/analyse-instagram.md` et `*/TWITTER/analyse-twitter.md`).
 
 ## Ce que le site client fait de ton fichier
 
@@ -75,15 +75,20 @@ Pose en une seule fois les questions que le dossier ne tranche pas. Les cas déj
   « mode d'emploi ») ;
 - **ce que « automatiser » veut dire** quand la demande reste floue : premier commentaire
   programmé, mot-clé qui déclenche un message privé, boîte de réception unique, ou réponses
-  publiques automatiques (déconseillées : le ton sonne faux).
+  publiques automatiques (déconseillées : le ton sonne faux). Sur X, les règles de la
+  plateforme et les outils disponibles limitent déjà le choix : voir `references/x.md` ;
+- **une offre sensible selon le réseau** (jeux d'argent, produit réglementé) : l'onglet
+  la traite-t-il avec un avis sur les risques, ou de façon neutre ? Exemple vécu : même
+  offre, avis de risque sur l'onglet Instagram, traitement neutre sur l'onglet X.
 
 Une position fausse publiée chez le client coûte plus cher qu'une question.
 
 ## Étape 3 — Relever les chiffres
 
-Lis la fiche du réseau : `references/instagram.md` ou `references/youtube.md`.
+Lis la fiche du réseau : `references/instagram.md`, `references/x.md` ou
+`references/youtube.md`.
 
-Règles communes aux deux :
+Règles communes :
 
 - **Chaque chiffre a une date et un statut.** La date de relevé figure en tête de page ;
   « *(estimé)* » marque un calcul d'ordre de grandeur ; « non relevé » marque un trou. Jamais
@@ -155,7 +160,7 @@ Pars de `references/gabarit-onglet.md`. En écrivant :
 1. Lance le contrôle, en ajoutant à `--interdits` ce que le client a demandé de taire :
 
    ```bash
-   node scripts/verifier-onglet.mjs <dossier-client>/INSTAGRAM/analyse-instagram.md --dossier-client <dossier-client> --interdits "mot1,mot2"
+   node scripts/verifier-onglet.mjs <dossier-client>/<RESEAU>/analyse-<reseau>.md --dossier-client <dossier-client> --interdits "mot1,mot2"
    ```
 
    Il doit répondre **CONFORME** : titre et nom d'onglet, ligne de mise à jour, sections,
