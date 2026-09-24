@@ -190,9 +190,13 @@ test('la couverture force le logo visible (role "contenu" au rendu) meme sur une
  * erreur d'un gabarit, passerait inapercu par ce seul test. Celui-ci exerce
  * le VRAI chemin de code (`genererImageCouverture`, avec son
  * `forcerLogoVisible` interne), genere un PNG reel, puis rend independamment
- * le meme HTML que produirait ce chemin pour verifier que `.logo` est une
+ * le meme HTML que produirait ce chemin pour verifier que `.logo-img` est une
  * `<img>` avec des dimensions naturelles > 0 -- pas de texte residuel, pas
  * d'image cassee, sur une diapo dont le role source est "hook".
+ *
+ * Selecteur `.logo-img` depuis la refonte du 24/09/2026 (demande de Julien) :
+ * julien-partners a son propre fichier logo et sa propre classe, voir
+ * templates/julien-partners.html.
  */
 test('genererImageCouverture affiche la vraie image du logo (pas de texte, pas d\'image cassee) quand forcerLogoVisible force le role "contenu" sur une diapo hook', async () => {
   const dossierSortie = dossierTemporaire();
@@ -222,14 +226,14 @@ test('genererImageCouverture affiche la vraie image du logo (pas de texte, pas d
       try {
         await page.setContent(html, { waitUntil: 'load' });
         await page.evaluate(() => document.fonts.ready);
-        const logo = page.locator('.logo');
+        const logo = page.locator('.logo-img');
         assert.ok(await logo.isVisible(), 'le logo devrait etre visible sur la couverture (role force "contenu")');
 
         const balise = await logo.evaluate((el) => el.tagName.toLowerCase());
-        assert.equal(balise, 'img', `.logo devrait etre une balise <img>, recu : <${balise}>`);
+        assert.equal(balise, 'img', `.logo-img devrait etre une balise <img>, recu : <${balise}>`);
 
         const texte = await logo.evaluate((el) => el.textContent.trim());
-        assert.equal(texte, '', `.logo ne devrait contenir aucun texte residuel (ancien "Claude Partners"), recu : "${texte}"`);
+        assert.equal(texte, '', `.logo-img ne devrait contenir aucun texte residuel (ancien "Claude Partners"), recu : "${texte}"`);
 
         const { largeurNaturelle, hauteurNaturelle } = await logo.evaluate((el) => ({
           largeurNaturelle: el.naturalWidth,
@@ -272,23 +276,38 @@ test('genererImageCouverture affiche la vraie image du logo (pas de texte, pas d
  * de couleur) qui repondait a son retour du 18/09/2026 n'etait jamais que le
  * NOM de la marque en texte stylise, pas un vrai logo. Ce test verifiait
  * jusque-la la presence du texte ("Claude Agency"/"Claude Partners"/"Claude")
- * -- il verifie desormais que ".logo" est une image (<img>) reellement
+ * -- il verifie desormais que le logo est une image (<img>) reellement
  * chargee (naturalWidth/naturalHeight > 0, pas une image cassee), pas la
- * presence d'un texte qui n'existe plus. Meme fichier logo pour les 3
- * comptes : c'est LE logo de l'entreprise, pas une declinaison par marque
- * (confirme par Julien, aucune variante fournie) -- d'ou le meme test
- * applique identiquement aux 3 gabarits plutot qu'une marque attendue
- * differente par compte.
+ * presence d'un texte qui n'existe plus.
+ *
+ * Mis a jour le 24/09/2026 (refonte des 6 modeles de page, demande de
+ * Julien) : julien-agency et julien-partners ont desormais chacun leur
+ * propre fichier logo (plus un seul fichier partage par les 3 comptes) et
+ * l'affichent sur classe `.logo-img` (dans un chip `.brandmark`), visible
+ * sur TOUTE diapo -- y compris le hook, qui le masquait avant cette refonte
+ * (retour explicite de Julien : "le logo doit etre visible en page 1 dans
+ * le fil"). page-claude n'est pas touche par cette refonte (compte en
+ * pause, voir SKILL.md) : il garde son ancien comportement, classe `.logo`,
+ * masque sur le hook. Le test verifie donc les deux regles, une par
+ * groupe de comptes -- ni l'ancienne ni la nouvelle regle n'est
+ * "la bonne" dans l'absolu, chaque gabarit assume la sienne.
  */
-test('le logo (image Claude Agency) est visible et charge sur une diapo "contenu", et absent sur une diapo "hook", pour les 3 comptes', async () => {
+test('le logo est visible et charge sur toute diapo pour julien-agency/julien-partners (page 1 comprise), et sur "contenu" seulement pour page-claude (compte inchange)', async () => {
   const { chargerGabarit, injecterDiapo } = require('../generer-pdf');
-  const comptes = ['julien-agency', 'julien-partners', 'page-claude'];
-  const diapoHook = { role: 'hook', titre: 'Titre de test pour la diapo hook' };
+  const diapoHook = { role: 'hook', titre: 'Titre de test pour la diapo hook', accent: 'test' };
   const diapoContenu = { role: 'contenu', titre: 'Titre de test pour une diapo contenu', texte: 'Texte de test.' };
+
+  // { compte, selecteur, logoVisibleSurHook } -- la seule chose qui varie
+  // reellement entre les deux groupes de comptes (voir commentaire plus haut).
+  const CAS = [
+    { compte: 'julien-agency', selecteur: '.logo-img', logoVisibleSurHook: true },
+    { compte: 'julien-partners', selecteur: '.logo-img', logoVisibleSurHook: true },
+    { compte: 'page-claude', selecteur: '.logo', logoVisibleSurHook: false },
+  ];
 
   const navigateur = await chromium.launch();
   try {
-    for (const compte of comptes) {
+    for (const { compte, selecteur, logoVisibleSurHook } of CAS) {
       const { entete, blocDiapo, pied } = chargerGabarit(compte);
 
       for (const [role, diapo] of [['hook', diapoHook], ['contenu', diapoContenu]]) {
@@ -297,27 +316,30 @@ test('le logo (image Claude Agency) est visible et charge sur une diapo "contenu
         try {
           await page.setContent(html, { waitUntil: 'load' });
           await page.evaluate(() => document.fonts.ready);
-          const logo = page.locator('.logo');
+          const logo = page.locator(selecteur);
           const estVisible = await logo.isVisible();
+          const attendu = role === 'contenu' || logoVisibleSurHook;
 
-          if (role === 'contenu') {
-            assert.ok(estVisible, `logo devrait etre visible sur une diapo "contenu" (${compte})`);
+          assert.equal(
+            estVisible,
+            attendu,
+            `logo (${selecteur}) devrait etre ${attendu ? 'visible' : 'absent'} sur une diapo "${role}" (${compte})`
+          );
 
+          if (attendu) {
             const balise = await logo.evaluate((el) => el.tagName.toLowerCase());
-            assert.equal(balise, 'img', `.logo devrait etre une balise <img> (${compte}), recu : <${balise}>`);
+            assert.equal(balise, 'img', `${selecteur} devrait etre une balise <img> (${compte}), recu : <${balise}>`);
 
             const { largeurNaturelle, hauteurNaturelle, srcCommenceParDataUri } = await logo.evaluate((el) => ({
               largeurNaturelle: el.naturalWidth,
               hauteurNaturelle: el.naturalHeight,
               srcCommenceParDataUri: el.getAttribute('src').startsWith('data:image/'),
             }));
-            assert.ok(srcCommenceParDataUri, `.logo doit etre embarque en base64 (data:image/...), pas un chemin relatif qui ne se resoudrait pas dans page.setContent() (${compte})`);
+            assert.ok(srcCommenceParDataUri, `${selecteur} doit etre embarque en base64 (data:image/...), pas un chemin relatif qui ne se resoudrait pas dans page.setContent() (${compte})`);
             assert.ok(
               largeurNaturelle > 0 && hauteurNaturelle > 0,
               `l'image du logo devrait reellement se charger, pas etre cassee (${compte}) -- naturalWidth=${largeurNaturelle}, naturalHeight=${hauteurNaturelle}`
             );
-          } else {
-            assert.ok(!estVisible, `logo devrait etre absent (masque par CSS) sur la diapo "hook" (${compte})`);
           }
         } finally {
           await page.close();

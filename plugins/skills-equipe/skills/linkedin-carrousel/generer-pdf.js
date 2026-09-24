@@ -9,14 +9,44 @@
  *   node generer-pdf.js <compte> <fichier-diapos.json> [sortie.pdf]
  *
  * <compte>            : page-claude | julien-agency | julien-partners
- * <fichier-diapos.json> : [{ "role": "hook"|"contenu", "titre": "...", "texte": "...", "accent": "..." }, ...]
+ * <fichier-diapos.json> : [{ "role": "hook"|"contenu", "modele": "...", "titre": "...", "texte": "...", "accent": "..." }, ...]
  *   - "role" absent ou different de "hook" => "contenu"
  *   - "texte" optionnel (la diapo hook n'en a generalement pas)
  *   - "accent" obligatoire sur le hook (retour de Julien du 18/09/2026, voir
  *     SKILL.md) : sous-chaine exacte du "titre" a mettre en couleur au rendu
  *     (lib/valider-diapos.js le refuse sinon). Ignore sur les diapos "contenu".
+ *   - "modele" optionnel (refonte du 24/09/2026, demande de Julien) : un des
+ *     6 gabarits de page -- voir "Modeles de page" plus bas. Absent =>
+ *     "accroche" si role "hook", sinon rendu generique titre+texte (comme
+ *     avant cette refonte).
  * [sortie.pdf]         : chemin de sortie explicite ; sinon nom genere automatiquement
  *                        (convention ci-dessous).
+ *
+ * -----------------------------------------------------------------------
+ * MODELES DE PAGE (refonte du 24/09/2026, demande de Julien -- SKILL.md)
+ * -----------------------------------------------------------------------
+ * Champ "modele" d'une diapo, un des 6 :
+ *   - "accroche"     : gabarit historique (titre seul en grand sur le hook,
+ *                      ou titre+texte en page de contenu). Fond contraste
+ *                      (plein terracotta fonce) uniquement sur le hook.
+ *   - "gros-chiffre" : { chiffre: "3x", titre: "...", texte: "..." } -- un
+ *                      chiffre/statistique en tres grand, titre en eyebrow
+ *                      au-dessus, texte en legende en-dessous.
+ *   - "comparaison"  : { titre, colonneGauche: { titre, items: [] },
+ *                      colonneDroite: { titre, items: [] } } -- deux
+ *                      colonnes cote a cote.
+ *   - "checklist"    : { titre, items: [] } -- une liste a puces cochees.
+ *   - "citation"     : { citation, auteur } -- une citation en grand avec
+ *                      son attribution.
+ *   - "cta"          : { titre, texte, bouton } -- appel a l'action unique,
+ *                      fond contraste comme le hook (page de fermeture).
+ *
+ * Sur n'importe quel modele, un emplacement image optionnel :
+ *   - "image": "chemin/vers/fichier.png|jpg" -- image reelle (generee par
+ *     fal.ai), inseree telle quelle.
+ *   - "imageEmplacement": true -- pas encore d'image reelle : affiche un
+ *     encadre en pointilles signalant clairement l'emplacement prevu,
+ *     jamais un vide silencieux.
  *
  * -----------------------------------------------------------------------
  * CONVENTION DE NOMMAGE DES FICHIERS DE SORTIE (brief Julien du 10/09/2026)
@@ -53,6 +83,7 @@ const fs = require('fs');
 const path = require('path');
 const { chromium } = require('playwright');
 const { validerDiapos } = require('./lib/valider-diapos');
+const { dataUriDepuisAsset, dataUriDepuisChemin } = require('./lib/assets');
 
 const SKILL_DIR = __dirname;
 const TEMPLATES_DIR = path.join(SKILL_DIR, 'templates');
@@ -63,6 +94,42 @@ const TEMPLATE_PAR_COMPTE = {
   'julien-agency': 'julien-agency.html',
   'julien-partners': 'julien-partners.html',
 };
+
+// Refonte du 24/09/2026 : logo reel par marque (plus le meme fichier partage
+// pour les 3 comptes) -- Claude Agency a un soleil a 8 branches (soleil,
+// assets/logo-claude-agency-512.png, 512x512, fourni par le depot du site
+// JRAYES000/CLAUDEAGENCY), Claude Partners une medaille/coche (SVG vectoriel,
+// relevee reellement sur claudepartners.fr, voir assets/logo-claude-partners.svg).
+// page-claude n'est pas touche par cette refonte (compte en pause, voir SKILL.md).
+const LOGO_FICHIER_PAR_COMPTE = {
+  'julien-agency': 'logo-claude-agency-512.png',
+  'julien-partners': 'logo-claude-partners.svg',
+};
+
+const NOM_MARQUE_PAR_COMPTE = {
+  'julien-agency': 'Claude Agency',
+  'julien-partners': 'Claude Partners',
+};
+
+// Photo de Julien Rayes, partagee par les deux comptes (c'est lui l'auteur
+// des deux). Fichier unique et facile a remplacer : au 24/09/2026 c'est une
+// capture d'ecran de son profil LinkedIn (~362x389px, pas le fichier
+// original) -- suffisant pour un medaillon <=240px de large, pas plus. Des
+// que Julien fournit le fichier original, le remplacer SOUS CE MEME NOM ne
+// demande aucun changement de template ni de code.
+const PHOTO_FICHIER = 'photo-julien-rayes.png';
+
+const POLICE_BRICOLAGE = 'fonts/bricolage-grotesque-variable.woff2';
+const POLICE_SCHIBSTED = 'fonts/schibsted-grotesk-variable.woff2';
+
+const MODELES_VALIDES = new Set([
+  'accroche',
+  'gros-chiffre',
+  'comparaison',
+  'checklist',
+  'citation',
+  'cta',
+]);
 
 const MARQUEUR_DEBUT = '<!-- SLIDE:BEGIN -->';
 const MARQUEUR_FIN = '<!-- SLIDE:END -->';
@@ -95,6 +162,38 @@ function titreAvecAccent(titre, accent) {
   return `${echapperHtml(avant)}<span class="accent-mot">${echapperHtml(milieu)}</span>${echapperHtml(apres)}`;
 }
 
+/**
+ * Une <li> par element d'une liste (checklist, colonne de comparaison).
+ * Tableau absent/invalide -> liste vide (jamais une exception ici, la forme
+ * du contenu n'est pas le role de ce module de rendu).
+ */
+function listeHtml(items, classeLi) {
+  if (!Array.isArray(items)) return '';
+  return items.map((item) => `<li class="${classeLi}">${echapperHtml(item)}</li>`).join('');
+}
+
+/**
+ * Emplacement image optionnel (brief du 24/09/2026 : 1 a 3 images generees
+ * par fal.ai par carrousel, acces en cours de demande au 24/09). Trois cas :
+ *   - `diapo.image` fourni -> image reelle, inseree en data URI.
+ *   - `diapo.imageEmplacement` vrai -> encadre en pointilles, signale
+ *     explicitement comme en attente (jamais un vide silencieux).
+ *   - ni l'un ni l'autre -> chaine vide, aucun emplacement reserve.
+ */
+function blocImage(diapo) {
+  if (diapo.image) {
+    const uri = dataUriDepuisChemin(diapo.image);
+    return `<div class="image-slot"><img src="${uri}" alt=""></div>`;
+  }
+  if (diapo.imageEmplacement) {
+    return (
+      '<div class="image-slot image-slot--vide"><span>Emplacement image IA (fal.ai)' +
+      ' — à générer</span></div>'
+    );
+  }
+  return '';
+}
+
 function chargerGabarit(compte) {
   const fichier = TEMPLATE_PAR_COMPTE[compte];
   if (!fichier) {
@@ -103,7 +202,25 @@ function chargerGabarit(compte) {
     );
   }
   const cheminTemplate = path.join(TEMPLATES_DIR, fichier);
-  const html = fs.readFileSync(cheminTemplate, 'utf-8');
+  let html = fs.readFileSync(cheminTemplate, 'utf-8');
+
+  // Refonte du 24/09/2026 : polices, logo et photo ne sont plus bakes a la
+  // main dans le HTML source (illisible, impossible a remplacer sans
+  // regenerer un base64) -- ils sont injectes ici, a partir de vrais
+  // fichiers sous assets/ (voir lib/assets.js). Un template qui ne contient
+  // pas un de ces marqueurs (page-claude.html, non touche par cette
+  // refonte) n'est pas affecte : replaceAll sur une chaine absente ne fait
+  // rien.
+  html = html
+    .replaceAll('{{FONT_BRICOLAGE_DATAURI}}', dataUriDepuisAsset(POLICE_BRICOLAGE))
+    .replaceAll('{{FONT_SCHIBSTED_DATAURI}}', dataUriDepuisAsset(POLICE_SCHIBSTED))
+    .replaceAll('{{PHOTO_DATAURI}}', dataUriDepuisAsset(PHOTO_FICHIER))
+    .replaceAll('{{NOM_MARQUE}}', NOM_MARQUE_PAR_COMPTE[compte] || '');
+
+  const logoFichier = LOGO_FICHIER_PAR_COMPTE[compte];
+  if (logoFichier) {
+    html = html.replaceAll('{{LOGO_DATAURI}}', dataUriDepuisAsset(logoFichier));
+  }
 
   const debut = html.indexOf(MARQUEUR_DEBUT);
   const fin = html.indexOf(MARQUEUR_FIN);
@@ -140,12 +257,34 @@ function injecterDiapo(blocDiapo, diapo, index, { contexte = 'carrousel' } = {})
   const titreHtml = diapo.accent
     ? titreAvecAccent(diapo.titre, diapo.accent)
     : echapperHtml(diapo.titre || '');
+
+  // Modele de page (refonte du 24/09/2026) : "accroche" par defaut sur le
+  // hook (comportement historique), sinon absent -> rendu generique
+  // titre+texte inchange depuis avant cette refonte (aucune des 5 valeurs
+  // ci-dessous n'est activee tant que "modele" n'est pas explicitement pose).
+  const modeleDemande = MODELES_VALIDES.has(diapo.modele) ? diapo.modele : '';
+  const modele = modeleDemande || (diapo.role === 'hook' ? 'accroche' : '');
+
+  const colonneGauche = diapo.colonneGauche || {};
+  const colonneDroite = diapo.colonneDroite || {};
+
   return blocDiapo
     .replaceAll('{{TITRE}}', titreHtml)
     .replaceAll('{{TEXTE}}', echapperHtml(diapo.texte || ''))
     .replaceAll('{{NUMERO}}', numero)
     .replaceAll('{{ROLE}}', diapo.role === 'hook' ? 'hook' : 'contenu')
-    .replaceAll('{{CONTEXTE}}', contexte);
+    .replaceAll('{{CONTEXTE}}', contexte)
+    .replaceAll('{{MODELE}}', modele)
+    .replaceAll('{{CHIFFRE}}', echapperHtml(diapo.chiffre || ''))
+    .replaceAll('{{COMP_GAUCHE_TITRE}}', echapperHtml(colonneGauche.titre || ''))
+    .replaceAll('{{COMP_GAUCHE_ITEMS}}', listeHtml(colonneGauche.items, 'comp-item'))
+    .replaceAll('{{COMP_DROITE_TITRE}}', echapperHtml(colonneDroite.titre || ''))
+    .replaceAll('{{COMP_DROITE_ITEMS}}', listeHtml(colonneDroite.items, 'comp-item'))
+    .replaceAll('{{CHECKLIST_ITEMS}}', listeHtml(diapo.items, 'checklist-item'))
+    .replaceAll('{{CITATION}}', echapperHtml(diapo.citation || ''))
+    .replaceAll('{{CITATION_AUTEUR}}', echapperHtml(diapo.auteur || ''))
+    .replaceAll('{{CTA_BOUTON}}', echapperHtml(diapo.bouton || ''))
+    .replaceAll('{{IMAGE_BLOC}}', blocImage(diapo));
 }
 
 function construireDocument(compte, diapos) {

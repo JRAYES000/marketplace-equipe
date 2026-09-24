@@ -1,0 +1,95 @@
+[
+  {
+    "role": "hook",
+    "modele": "accroche",
+    "titre": "Vos meilleurs clients partent sans jamais se plaindre",
+    "accent": "sans jamais se plaindre"
+  },
+  {
+    "role": "contenu",
+    "modele": "gros-chiffre",
+    "titre": "Ce qu'on n'a pas vu venir",
+    "chiffre": "68%",
+    "texte": "Des clients insatisfaits ne le disent jamais avant de partir."
+  },
+  {
+    "role": "contenu",
+    "modele": "comparaison",
+    "titre": "Ce qui change une fois le suivi automatisé",
+    "colonneGauche": {
+      "titre": "Avant",
+      "items": ["Relance au hasard", "Aucune alerte de silence", "Un seul canal de contact"]
+    },
+    "colonneDroite": {
+      "titre": "Après",
+      "items": ["Relance au bon moment", "Alerte dès 15 jours de silence", "Trois canaux suivis"]
+    }
+  },
+  {
+    "role": "contenu",
+    "modele": "checklist",
+    "titre": "Trois signaux à surveiller chaque semaine",
+    "items": [
+      "Un client qui ouvre moins vos emails",
+      "Une commande qui recule en fréquence",
+      "Un contact qui ne répond plus au téléphone"
+    ]
+  },
+  {
+    "role": "contenu",
+    "modele": "checklist",
+    "titre": "Ce qu'un bon suivi change concrètement",
+    "items": [
+      "Moins de surprises en fin de trimestre",
+      "Des relances qui arrivent au bon moment",
+      "Une équipe qui sait où regarder"
+    ],
+    "imageEmplacement": true
+  },
+  {
+    "role": "contenu",
+    "modele": "citation",
+    "titre": "Le silence qui coûte le plus cher",
+    "citation": "On a perdu ce client six mois avant de s'en rendre compte.",
+    "auteur": "Un dirigeant de PME, secteur services"
+  },
+  {
+    "role": "contenu",
+    "modele": "comparaison",
+    "titre": "Deux façons de réagir à un silence client",
+    "colonneGauche": {
+      "titre": "Réflexe courant",
+      "items": ["Attendre la prochaine commande", "Espérer que ça passe"]
+    },
+    "colonneDroite": {
+      "titre": "Réflexe utile",
+      "items": ["Relancer sous 48 heures", "Poser une question ouverte"]
+    },
+    "imageEmplacement": true
+  },
+  {
+    "role": "contenu",
+    "modele": "gros-chiffre",
+    "titre": "Le vrai coût d'un client perdu",
+    "chiffre": "5x",
+    "texte": "Regagner un client coûte cinq fois plus cher que le garder."
+  },
+  {
+    "role": "contenu",
+    "modele": "checklist",
+    "titre": "Avant de relancer un client silencieux",
+    "items": [
+      "Vérifiez sa dernière interaction réelle",
+      "Choisissez un seul sujet par message",
+      "Proposez une date, jamais un vague bientôt"
+    ],
+    "imageEmplacement": true
+  },
+  {
+    "role": "contenu",
+    "modele": "cta",
+    "titre": "Mettez un suivi client en place cette semaine",
+    "texte": "Un audit gratuit de trente minutes suffit pour voir où ça fuit.",
+    "bouton": "Réserver l'audit"
+  }
+]
