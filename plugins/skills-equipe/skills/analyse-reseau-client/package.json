@@ -1,0 +1,10 @@
+{
+  "name": "analyse-reseau-client",
+  "private": true,
+  "version": "1.0.0",
+  "description": "Controle des onglets « analyse reseau » (Instagram, YouTube) de l'espace client Claude Agency, et insertion des notes d'equipe",
+  "type": "module",
+  "scripts": {
+    "test": "node --test"
+  }
+}
