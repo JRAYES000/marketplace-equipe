@@ -7,10 +7,10 @@
   {
     "role": "contenu",
     "modele": "gros-chiffre",
-    "titre": "Un chiffre qui ne bouge pas",
-    "chiffre": "4,9%",
-    "texte": "Des offres d'emploi ont été abandonnées faute de candidats en 2025, un niveau stable par rapport à 2024.",
-    "source": "France Travail, 21/04/2026"
+    "titre": "Le vrai délai de patience",
+    "chiffre": "4/5",
+    "texte": "Candidats jugent deux semaines comme le délai maximum acceptable pour recevoir une réponse à leur candidature.",
+    "source": "Yaggo/Ifop, baromètre expérience candidat, janvier 2026"
   },
   {
     "role": "contenu",
@@ -30,22 +30,22 @@
     "titre": "Comment repérer un processus qui s'essouffle",
     "items": [
       "Un délai de réponse qui s'allonge chaque semaine",
-      "Exemple : un candidat qui relance avant vous, signe d'un vivier trop mince",
-      "Activez votre réseau de recommandations avant d'ouvrir un nouveau poste"
-    ],
+      "Exemple : un candidat qui relance avant vous",
+      "Un vivier trop mince pour tenir la cadence"
+    ]
+  },
+  {
+    "role": "contenu",
+    "titre": "Activez votre réseau",
+    "texte": "Le réseau de recommandations reste le canal le plus rapide pour retrouver un candidat sérieux, avant même les jobboards.",
     "image": "a-publier/images/julien-partners-2026-09-25-reseau-noeud.jpg",
     "imagePrompt": "Illustration minimaliste d'un réseau en étoile (un nœud central relié à une douzaine de nœuds secondaires), palette terracotta sur fond crème, pour représenter un réseau de recommandations professionnelles."
   },
   {
     "role": "contenu",
-    "titre": "Ce qui change concrètement",
-    "texte": "Un délai de réponse plus court protège votre réputation employeur autant que votre vivier de candidats. Le réseau de recommandations devient alors votre meilleur canal, avant même les jobboards."
-  },
-  {
-    "role": "contenu",
     "modele": "cta",
     "titre": "Passez à l'action cette semaine",
-    "texte": "Repérez le poste où vos candidats mettent le plus de temps à répondre, et activez votre réseau avant de le rouvrir.",
-    "bouton": "En savoir plus"
+    "texte": "Écrivez-moi « recrutement » en message privé, je vous partage la checklist complète.",
+    "bouton": "Écrivez-moi « recrutement »"
   }
 ]
