@@ -59,7 +59,14 @@ function champsVisibles(diapo, modele = resoudreModele(diapo)) {
     case 'checklist':
       return [diapo.titre, ...(Array.isArray(diapo.items) ? diapo.items : [])];
     case 'citation':
-      return [diapo.citation, diapo.auteur];
+      // Retour de Julien par mail (25/09/2026, verification du carrousel de
+      // test) : une citation attribuee sans source reelle (URL/document ou
+      // elle apparait mot pour mot) ne doit jamais afficher son attribution --
+      // voir generer-pdf.js (injecterDiapo, CITATION_AUTEUR) qui applique la
+      // meme regle au rendu. `auteur` n'est donc compte ici que s'il sera
+      // reellement affiche (meme condition que le rendu), pour que le compte
+      // de mots ne penalise jamais un champ qui de toute facon disparait.
+      return [diapo.citation, diapo.citationSource ? diapo.auteur : null];
     case 'cta':
       return [diapo.titre, diapo.texte, diapo.bouton];
     case 'accroche':

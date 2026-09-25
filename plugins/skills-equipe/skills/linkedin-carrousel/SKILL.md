@@ -215,6 +215,68 @@ la diapo hook par l'operateur, pas derive automatiquement) : `publierDocumentZer
 toujours nettoye, meme si l'appelant ne l'a pas fait lui-meme. Voir
 `test/regles-mail-25-09.test.js`, section "Point final en double".
 
+## Verification du carrousel de test (25/09/2026, deuxieme relecture)
+
+Nomena a verifie page par page le carrousel de test genere pour prouver les 5 regles ci-dessus
+(`a-publier/julien-agency-2026-09-25-test-regles-mail.json`) et remonte 4 corrections, avant de
+considerer ces regles reellement en place :
+
+1. **Citation inventee (grave).** La page 5 attribuait a « Julien Rayes, Claude Agency » une
+   phrase qu'il n'a jamais publiee -- exactement l'incident deja documente plus haut ("Regle de
+   contenu -- aucune citation ni temoignage invente"), reproduit malgre la regle ecrite. Nouveau
+   champ **`citationSource`** sur une diapo "citation" : URL du post ou document reel ou la
+   citation apparait mot pour mot. `auteur` ne s'affiche desormais **QUE si `citationSource` est
+   aussi fourni** (`generer-pdf.js`, `injecterDiapo`, `{{CITATION_AUTEUR}}`) -- sans lui,
+   l'attribution ne s'affiche JAMAIS, quel que soit le contenu de `auteur` : la citation retombe
+   silencieusement sur un propos editorial general (deja un usage autorise du modele "citation").
+   Volontairement PAS un refus a la generation (`validerDiapos` n'exige rien de plus qu'avant) --
+   le choix retenu est une degradation automatique et sure au rendu, jamais un blocage qui
+   forcerait a re-ecrire tout le carrousel pour une seule ligne d'attribution. `lib/modeles.js`
+   (`champsVisibles`) suit la meme regle pour le compte de mots : `auteur` n'est compte que s'il
+   sera reellement affiche. Voir `test/verif-carrousel-25-09.test.js`.
+2. **Source visible pour tout chiffre affiche.** Toute page qui affiche un chiffre montre
+   desormais sa source en petit en bas de page (organisme, annee) -- nouveau champ `source` sur
+   n'importe quelle diapo, nouveau `.source-ligne` dans les deux gabarits (juste au-dessus du
+   filet horizontal, masque par `:empty` sur une page sans chiffre). **Le validateur refuse un
+   chiffre-preuve (pourcentage ou multiplicateur) sans ce champ** (`lib/valider-diapos.js`,
+   `validerSourceChiffre`) -- meme distinction chiffre-preuve/chiffre-anecdote que
+   `lib/valider-post.js` (`estDetailAnecdote`), mais appliquee ici aux diapos, pas au texte du
+   post. **Limite assumee** : ne declenche que sur "%" ou "Nx" -- un chiffre-preuve ecrit
+   autrement (toutes lettres, ratio "1 sur 2") n'est jamais detecte, meme limite deja documentee
+   pour `validerChiffreSource`.
+3. **Texte gris unifie sur tous les modeles.** Le texte de corps du modele "accroche"/contenu
+   (`.body-text`, utilise aussi par la page 7 du carrousel de test) restait a l'ancien format
+   (42px, `var(--muted)`) alors que la correction du 25/09/2026 sur les pages "gros-chiffre"
+   (`.chiffre-legende`) etait deja passee a 46px/`var(--ink)`. Aligne dans les deux gabarits :
+   memes 46px/`var(--ink)` desormais sur `.body-text` -- un texte de lecture ne reste jamais
+   dilue, quel que soit le modele. **Une page de contenu ne reste pas a moitie vide** :
+   `.content` centre deja verticalement son contenu (`justify-content: center`, non-regression
+   verifiee par `test/verif-carrousel-25-09.test.js`) -- pour une page qui reste malgre tout
+   clairsemee une fois centree, preferer la fusionner avec la diapo voisine plutot que de la
+   laisser seule (meme logique que la citation, voir plus haut) : consigne de redaction, pas un
+   garde-fou automatisable (aucun code ne mesure "a moitie vide").
+4. **Un seul fil.** Exemples, avant/apres et chiffres doivent TOUS servir le sujet de l'accroche --
+   pas des illustrations disparates qui documentent chacune une idee vraie mais etrangere aux
+   autres. Incident reel sur le carrousel de test initial : le hook portait sur la disparition des
+   candidats avant l'offre, mais le chiffre choc (page 2) portait sur l'adoption de l'IA dans les
+   TPE-PME -- vrai et sourcable, mais sans lien avec le sujet du hook. **Limite assumee, meme
+   famille que le hook et "une idee par diapo"** (voir plus bas) : aucun garde-fou ne peut verifier
+   qu'un exemple, une comparaison ou un chiffre sert reellement le meme sujet que l'accroche -- ca
+   exige de lire le carrousel entier et de juger sa coherence narrative, pas une regle syntaxique.
+   **Regle de redaction a appliquer avant publication** : relire le carrousel entier d'une traite et
+   se demander si chaque page renforce la meme idee que la diapo 1, ou si une page a ete choisie
+   pour elle-meme (un chiffre choc, un exemple frappant) sans verifier qu'elle sert le meme fil.
+
+**Carrousel de test regenere le 25/09/2026 avec ces 4 corrections, jamais publie** (nouveau sujet,
+coherent de bout en bout autour du hook "candidats qui disparaissent avant l'offre") :
+`a-publier/julien-agency-2026-09-25-test-regles-mail.json`, chiffre reel et sourcee (4,9% des
+offres abandonnees faute de candidats en 2025, source France Travail, publie le 21/04/2026 --
+verifie par lecture directe de la page officielle, pas de memoire), citation sans attribution
+(aucune `citationSource` reelle disponible pour ce test), une VRAIE image fal.ai deja presente dans
+le depot (`a-publier/images/julien-partners-2026-09-25-reseau-noeud.jpg`, illustration d'un reseau
+en etoile -- sert le sous-theme "activer son reseau de recommandations" du meme fil). Rendu en PDF
+et en PNG par diapo, chaque page inspectee visuellement.
+
 ## Regles de methode non negociables (retour de Julien, 18/09/2026)
 
 Julien a juge les deux carrousels publies avant cette date comme "de l'AI slop" -- brouillon,

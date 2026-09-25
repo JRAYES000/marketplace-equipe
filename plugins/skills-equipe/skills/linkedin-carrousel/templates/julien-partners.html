@@ -147,13 +147,17 @@
     max-width: 888px;
   }
 
+  /* Retour de Julien par mail (25/09/2026, verification du carrousel de
+     test, page 7) : meme gris/taille que la correction du 25/09 sur les
+     pages "gros-chiffre" (.chiffre-legende, 40px gris -> 46px encre) -- un
+     texte de lecture ne doit jamais rester dilue, sur aucun modele. */
   .body-text {
     margin: 40px 0 0 0;
     font-family: 'Schibsted Grotesk', sans-serif;
     font-weight: 400;
-    font-size: 42px;
-    line-height: 1.45;
-    color: var(--muted);
+    font-size: 46px;
+    line-height: 1.4;
+    color: var(--ink);
     max-width: 760px;
   }
 
@@ -422,6 +426,22 @@
   /* ---------- Pied de page (commun aux 6 modeles) ---------- */
   .footer-wrap { flex: none; }
 
+  /* Retour de Julien par mail (25/09/2026, verification du carrousel de
+     test) : toute page qui affiche un chiffre montre sa source en petit en
+     bas de page (organisme, annee) -- lib/valider-diapos.js
+     (validerSourceChiffre) refuse un chiffre-preuve sans "source". Vide sur
+     toute page sans chiffre -- :empty la masque, jamais un espace reserve
+     pour rien. */
+  .source-ligne {
+    margin: 0 0 16px 0;
+    font-family: 'Schibsted Grotesk', sans-serif;
+    font-weight: 500;
+    font-size: 24px;
+    color: var(--muted);
+  }
+
+  .source-ligne:empty { display: none; margin: 0; }
+
   .hairline {
     height: 1px;
     background: var(--ink);
@@ -535,6 +555,12 @@
   .slide[data-modele="citation"] .swipe-hint {
     color: var(--cream);
   }
+  .slide[data-role="hook"] .source-ligne,
+  .slide[data-modele="cta"] .source-ligne,
+  .slide[data-modele="citation"] .source-ligne {
+    color: var(--cream);
+    opacity: 0.7;
+  }
   .slide[data-modele="cta"] .cta-bouton {
     background: var(--cream);
     color: var(--bg-sombre);
@@ -614,6 +640,7 @@
       </div>
     </div>
     <div class="footer-wrap">
+      <p class="source-ligne">{{SOURCE_LIGNE}}</p>
       <div class="hairline"></div>
       <div class="footer">
         <div class="auteur">
