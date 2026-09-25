@@ -297,6 +297,42 @@
     justify-content: center;
   }
 
+  /* ---------- Emplacement image (checklist/comparaison) ----------
+     Meme correctif que julien-agency.html (25/09/2026) : sans hauteur
+     contrainte, une vraie image fait deborder le bloc au-dela de l'espace
+     disponible et le centrage vertical de .content la fait chevaucher le
+     bandeau logo. */
+  .image-slot {
+    flex: none;
+    margin-top: 32px;
+    border-radius: 24px;
+    overflow: hidden;
+    height: 480px;
+  }
+
+  .image-slot img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .image-slot--vide {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 2px dashed var(--muted);
+    background: rgba(0, 0, 0, 0.03);
+  }
+
+  .image-slot--vide span {
+    font-family: 'Schibsted Grotesk', sans-serif;
+    font-size: 28px;
+    color: var(--muted);
+    text-align: center;
+    padding: 0 40px;
+  }
+
   /* ---------- Modele "citation" ---------- */
   .slide[data-modele="citation"] .layout-citation { display: flex; flex-direction: column; }
 

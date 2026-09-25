@@ -443,12 +443,29 @@ test `sortants/julien-agency/_test-6-modeles.pdf` (696 970 octets) televerse ave
 `julien-agency` ET `julien-partners`, verification de compte passee dans les deux cas contre
 `GET /v1/accounts` reel. Aucun post reel n'a ete cree a cette occasion.
 
-**Ce qui reste a faire avant la premiere publication reelle** : composer un vrai sujet (pas le
-carrousel de test des 6 modeles), le faire valider par les regles de methode ci-dessus (au moins
-5 iterations, hook relu seul), rediger le texte du post via `linkedin-mise-en-forme` puis le
-valider avec `generer-post.js`, et alors seulement relancer `publier-zernio.js` avec
-`--publier` -- apres accord explicite dans la conversation (voir "Rien de public sans feu vert
-explicite" dans le `CLAUDE.md` racine).
+**Premiere publication reelle effectuee le 25/09/2026, pour julien-agency.** Sujet "55% des
+TPE-PME disent utiliser l'IA. Seulement 17% l'utilisent vraiment." (sources Bpifrance Le Lab
+13/01/2026 et Insee 14/10/2025, lues directement, pas de memoire). Carrousel de 8 diapos, 6
+modeles distincts, 2 images reelles fal.ai (`a-publier/images/julien-agency-2026-09-25-page5.jpg`
+et `-page7.jpg`). Texte valide 13/13 par `linkedin-mise-en-forme` et par `generer-post.js`.
+Publie via `publier-zernio.js --publier` apres accord explicite de Nomena dans la conversation
+(mail de Julien du 25/09/2026 : « Tu as tout pour publier le premier carrousel test. J'attends
+l'URL. »). Confirme par l'API (pas une simple lecture du script) : `GET /v1/posts/<id>` renvoie
+`status: "published"`, `platformPostUrl:
+"https://www.linkedin.com/feed/update/urn:li:ugcPost:7509117168333287425/"`,
+`mediaItems[0].type: "document"`. **Non verifie visuellement** (rendu reel dans le fil LinkedIn,
+compteur de pages, logo) : l'extension Claude in Chrome etait deconnectee au moment de la
+publication -- a confirmer visuellement des que la connexion est retablie.
+
+**Publication automatique, sans accord par post, pour julien-agency ET julien-partners
+uniquement.** Decision de Julien, mail du 24/09/2026 : « Je t'autorise a publier automatiquement,
+chaque jour, sur les comptes julien-agency et julien-partners », publication "sans clic" posee
+comme critere d'evaluation. Pour ces deux comptes seulement, `publier-zernio.js --publier`
+peut donc s'executer sans repasser par un accord explicite poste par poste -- le controle
+qualite (validation des diapos, du texte via `linkedin-mise-en-forme` et `generer-post.js`,
+verification du compte Zernio) reste obligatoire et se fait **avant** le script, jamais saute.
+Cette dispense ne vaut pour aucun autre compte : `page-claude` (et tout compte futur) reste
+sous la regle generale "Rien de public sans feu vert explicite" du `CLAUDE.md` racine.
 
 ## Registre des echecs Composio/LinkedIn (`data/registre-echecs.json`)
 
