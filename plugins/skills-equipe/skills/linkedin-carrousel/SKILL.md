@@ -692,13 +692,36 @@ qui n'a pas besoin de ce mecanisme.
 **Usage CLI** :
 
 ```
-node publier-zernio.js <compte> <pdf> <documentTitle> [texte-post.txt] [--publier]
+node publier-zernio.js <compte> <pdf> <documentTitle> [texte-post.txt] [--publier] [--schedule <scheduledFor> <timezone>]
 ```
 
 Sans `--publier`, le script s'arrete apres l'upload (etapes 1-3) et n'appelle jamais
 `/v1/posts` -- c'est le mode utilise pour tester l'envoi avant tout accord de publication.
 `ZERNIO_API_KEY` est lue depuis `.env` (voir "Variables d'environnement"), jamais affichee ;
 les URL signees sont masquees dans les logs (parametres de requete retires).
+
+**Programmation (ajoutee le 26/09/2026, demande de Julien).** Confirmee reelle en lisant
+directement `docs.zernio.com/quickstart` (etape 5) le meme jour -- pas supposee : l'exemple
+officiel de la documentation programme un post avec exactement `content`, `scheduledFor`,
+`timezone` et `platforms`, sans jamais envoyer `publishNow` en meme temps :
+
+```json
+{
+  "content": "...",
+  "scheduledFor": "2027-01-01T12:00:00",
+  "timezone": "America/New_York",
+  "platforms": [{ "platform": "linkedin", "accountId": "..." }]
+}
+```
+
+`scheduledFor` : heure LOCALE au format ISO 8601 SANS decalage (ex. `"2026-09-26T08:30:00"`) --
+Zernio la lit dans le `timezone` fourni (nom IANA, ex. `"Europe/Paris"`) et convertit lui-meme
+vers UTC. `--schedule <scheduledFor> <timezone>` sur le CLI (ou `scheduledFor`/`timezone` sur
+`publierDocumentZernio()`) force automatiquement `publishNow: false` -- jamais les deux en meme
+temps, pour ne jamais risquer une publication immediate malgre une demande de programmation.
+`scheduledFor`/`timezone` doivent etre fournis ensemble, ou aucun des deux (refus explicite
+sinon). Voir `test/publier-zernio.test.js` pour la couverture (corps de requete exact, refus si
+un seul des deux champs est fourni).
 
 **Test reel effectue le 24/09/2026** (presign + upload seulement, sans `--publier`) : PDF de
 test `sortants/julien-agency/_test-6-modeles.pdf` (696 970 octets) televerse avec succes pour

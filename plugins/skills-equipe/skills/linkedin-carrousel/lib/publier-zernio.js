@@ -119,7 +119,7 @@ async function preparerEnvoiZernio({ compte, cheminPdf, apiKey, reglages }) {
  * (un nouvel appel a verifierCompteZernio) pour ne jamais publier sur la foi
  * d'une verification faite plusieurs minutes plus tot dans un autre appel.
  */
-async function publierDocumentZernio({ compte, content, publicUrl, documentTitle, apiKey, publishNow = true, reglages }) {
+async function publierDocumentZernio({ compte, content, publicUrl, documentTitle, apiKey, publishNow = true, scheduledFor, timezone, reglages }) {
   if (!content) throw new Error('content requis (texte du post, deja valide par generer-post.js).');
   if (!publicUrl) throw new Error('publicUrl requis (voir preparerEnvoiZernio).');
   if (!documentTitle) throw new Error('documentTitle requis.');
@@ -143,9 +143,33 @@ async function publierDocumentZernio({ compte, content, publicUrl, documentTitle
   // controle d'accents ci-dessus -- diapos, documentTitle, texte du post.
   validerAnglicismes(documentTitleNettoye, 'documentTitle');
 
+  // Programmation (ajoute le 26/09/2026, demande de Julien -- confirme via
+  // docs.zernio.com/quickstart, etape 5, lu directement le meme jour) :
+  // `scheduledFor` (heure LOCALE ISO 8601 sans decalage, ex.
+  // "2026-09-26T08:30:00") + `timezone` (nom IANA, ex. "Europe/Paris").
+  // Zernio convertit lui-meme vers UTC a partir de ces deux valeurs. Refuse
+  // explicitement l'un sans l'autre -- une programmation a moitie renseignee
+  // n'a pas de sens. `publishNow` passe automatiquement a `false` des que
+  // `scheduledFor` est fourni : envoyer les deux en meme temps contredirait
+  // l'exemple officiel (qui n'envoie jamais `publishNow` avec un post
+  // programme) et risquerait une publication immediate malgre la demande de
+  // programmation.
+  if ((scheduledFor && !timezone) || (!scheduledFor && timezone)) {
+    throw new Error('scheduledFor et timezone doivent etre fournis ensemble, ou aucun des deux.');
+  }
+  const publishNowFinal = scheduledFor ? false : publishNow;
+
   const { accountId } = await verifierCompteZernio({ compte, apiKey, reglages });
 
-  return creerPost({ apiKey, content, accountId, documentTitle: documentTitleNettoye, publicUrl, publishNow });
+  return creerPost({
+    apiKey,
+    content,
+    accountId,
+    documentTitle: documentTitleNettoye,
+    publicUrl,
+    publishNow: publishNowFinal,
+    ...(scheduledFor ? { scheduledFor, timezone } : {}),
+  });
 }
 
 module.exports = { verifierCompteZernio, preparerEnvoiZernio, publierDocumentZernio, COMPTES_CONNUS };

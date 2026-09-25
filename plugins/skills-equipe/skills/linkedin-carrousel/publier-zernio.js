@@ -8,7 +8,7 @@
  * natif, pas une grille d'images separees).
  *
  * Usage CLI :
- *   node publier-zernio.js <compte> <pdf> <documentTitle> [texte-post.txt] [--publier]
+ *   node publier-zernio.js <compte> <pdf> <documentTitle> [texte-post.txt] [--publier] [--schedule <scheduledFor> <timezone>]
  *
  * <compte>          julien-agency | julien-partners
  * <pdf>             chemin du PDF du carrousel (voir generer-pdf.js)
@@ -21,6 +21,18 @@
  *                    sans ce drapeau, le script s'arrete apres la
  *                    verification du compte et l'envoi du PDF (presign +
  *                    upload), et n'appelle jamais /v1/posts.
+ * --schedule <scheduledFor> <timezone>
+ *                    Programme le post au lieu de le publier immediatement --
+ *                    exige --publier (l'appel reseau reel a /v1/posts a lieu
+ *                    dans les deux cas, seul le moment de diffusion change).
+ *                    `scheduledFor` : heure LOCALE au format ISO 8601 SANS
+ *                    decalage (ex. "2026-09-26T08:30:00"), `timezone` : nom
+ *                    IANA (ex. "Europe/Paris") -- Zernio convertit lui-meme
+ *                    vers UTC a partir de ces deux valeurs (confirme par
+ *                    l'exemple officiel de docs.zernio.com/quickstart, etape
+ *                    5, lu directement le 26/09/2026). `publishNow` passe
+ *                    automatiquement a `false` des que `--schedule` est
+ *                    fourni -- jamais les deux a la fois.
  *
  * Cle API : ZERNIO_API_KEY, lue depuis l'environnement (voir .env.example).
  * Jamais affichee, jamais ecrite dans un fichier suivi par git.
@@ -60,7 +72,23 @@ async function main() {
 
   const args = process.argv.slice(2);
   const publier = args.includes('--publier');
-  const positionnels = args.filter((a) => a !== '--publier');
+
+  const idxSchedule = args.indexOf('--schedule');
+  let scheduledFor;
+  let timezone;
+  const indicesAIgnorer = new Set();
+  if (idxSchedule !== -1) {
+    scheduledFor = args[idxSchedule + 1];
+    timezone = args[idxSchedule + 2];
+    indicesAIgnorer.add(idxSchedule).add(idxSchedule + 1).add(idxSchedule + 2);
+    if (!scheduledFor || !timezone) {
+      console.error('--schedule exige deux valeurs : <scheduledFor ISO local, ex. "2026-09-26T08:30:00"> <timezone IANA, ex. "Europe/Paris">');
+      process.exitCode = 1;
+      return;
+    }
+  }
+
+  const positionnels = args.filter((a, i) => a !== '--publier' && !indicesAIgnorer.has(i));
   const [compte, cheminPdf, documentTitle, cheminTextePost] = positionnels;
 
   if (!compte || !cheminPdf || !documentTitle) {
@@ -99,15 +127,23 @@ async function main() {
   const content = fs.readFileSync(cheminTextePost, 'utf-8').trim();
 
   console.log('');
-  console.log('Publication reelle (POST /v1/posts)...');
+  console.log(
+    scheduledFor
+      ? `Programmation reelle (POST /v1/posts) pour ${scheduledFor} (${timezone})...`
+      : 'Publication reelle (POST /v1/posts)...'
+  );
   const resultat = await publierDocumentZernio({
     compte,
     content,
     publicUrl: envoi.publicUrl,
     documentTitle,
     apiKey,
+    ...(scheduledFor ? { scheduledFor, timezone } : {}),
   });
-  console.log(`Publie : id="${resultat.post && resultat.post._id}", statut="${resultat.post && resultat.post.status}".`);
+  console.log(`Resultat : id="${resultat.post && resultat.post._id}", statut="${resultat.post && resultat.post.status}".`);
+  if (resultat.post && resultat.post.scheduledFor) {
+    console.log(`Programme pour (confirme par Zernio) : ${resultat.post.scheduledFor}`);
+  }
 }
 
 if (require.main === module) {
