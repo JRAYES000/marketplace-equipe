@@ -82,7 +82,7 @@ const INTRO =
 const SOURCE_LIGNE =
   'Source du délai de deux semaines (point 2) : Yaggo/Ifop, baromètre expérience candidat, janvier 2026.';
 const IA_LIGNE =
-  'Accusés de réception, relances à 48 h : l’IA peut les envoyer pour vous. C’est le métier de Claude Agency.';
+  'Accusés de réception, relances à 48 h : l’IA peut les envoyer pour vous. C’est le métier de Claude Agency.';
 const CTA_LIGNE =
   'Vous recevez cette checklist parce que vous avez écrit « recrutement » en message privé. ' +
   'Pour en discuter, répondez directement à ce message.';
