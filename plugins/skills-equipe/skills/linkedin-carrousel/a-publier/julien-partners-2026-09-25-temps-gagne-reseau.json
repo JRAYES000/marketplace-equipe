@@ -1,0 +1,65 @@
+[
+  {
+    "role": "hook",
+    "modele": "accroche",
+    "titre": "Vous avez gagné 5 heures cette semaine grâce à l'IA. À qui les donnez-vous ?",
+    "accent": "À qui les donnez-vous ?"
+  },
+  {
+    "role": "contenu",
+    "modele": "gros-chiffre",
+    "titre": "Le temps qu'on récupère",
+    "chiffre": "5,3 h",
+    "texte": "gagnées chaque semaine, en moyenne, par les dirigeants qui utilisent l'IA (source : étude Opinium pour OpenAI, 28/02-10/03/2026, 1 000 dirigeants de PME françaises)."
+  },
+  {
+    "role": "contenu",
+    "modele": "gros-chiffre",
+    "titre": "Le vrai manque, à côté",
+    "chiffre": "22%",
+    "texte": "des indépendants ne savent pas vers qui se tourner pour être accompagnés (même étude Opinium pour OpenAI, 28/02-10/03/2026)."
+  },
+  {
+    "role": "contenu",
+    "modele": "comparaison",
+    "titre": "Ce que ce temps devient, selon où il va",
+    "colonneGauche": {
+      "titre": "Seul avec l'outil",
+      "items": ["Une décision de plus à trancher seul", "Un devis relu par personne", "Le temps gagné se dilue"]
+    },
+    "colonneDroite": {
+      "titre": "Entouré, avec l'outil",
+      "items": ["Un avis pris avant de signer", "Une mise en relation qui débloque", "Le temps gagné sert vraiment"]
+    }
+  },
+  {
+    "role": "contenu",
+    "modele": "checklist",
+    "titre": "Ce que change une heure retrouvée, bien utilisée",
+    "items": [
+      "Un appel à un pair avant une décision",
+      "Une relation client entretenue, pas juste traitée",
+      "Une mise en relation qui ouvre une porte"
+    ],
+    "image": "a-publier/images/julien-partners-2026-09-25-reseau-noeud.jpg"
+  },
+  {
+    "role": "contenu",
+    "modele": "citation",
+    "citation": "Le bon outil ne remplace jamais le bon réseau. Il redonne seulement le temps d'aller le construire."
+  },
+  {
+    "role": "contenu",
+    "modele": "gros-chiffre",
+    "titre": "Ce que les indépendants font déjà",
+    "chiffre": "9/10",
+    "texte": "freelances qui travaillent déjà en équipe ou en collectif, et 86% jugent ce modèle plus humain (source : étude Collective.work et Shine, 2023, 271 freelances et 103 collectifs)."
+  },
+  {
+    "role": "contenu",
+    "modele": "cta",
+    "titre": "Le temps que l'IA vous rend mérite un vrai réseau",
+    "texte": "Claude Partners facilite les mises en relation entre indépendants et dirigeants.",
+    "bouton": "Rejoindre le réseau"
+  }
+]
