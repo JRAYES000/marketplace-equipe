@@ -222,6 +222,66 @@ test('publierDocumentZernio revalide le compte puis envoie mediaItems document +
   }
 });
 
+test('publierDocumentZernio(scheduledFor+timezone) envoie publishNow=false et les deux champs, jamais publishNow=true en meme temps', async () => {
+  const restaurer = mockerFetch(async (url, opts) => {
+    if (String(url) === 'https://zernio.com/api/v1/accounts') {
+      return reponseJson({ accounts: [COMPTE_ZERNIO_JULIEN_AGENCY] });
+    }
+    if (String(url) === 'https://zernio.com/api/v1/posts') {
+      const corps = JSON.parse(opts.body);
+      assert.equal(corps.publishNow, false, 'publishNow doit etre false des qu\'un post est programme');
+      assert.equal(corps.scheduledFor, '2026-09-26T08:30:00');
+      assert.equal(corps.timezone, 'Europe/Paris');
+      return reponseJson({ message: 'ok', post: { _id: 'post-programme', status: 'scheduled', scheduledFor: '2026-09-26T08:30:00' } }, 201);
+    }
+    throw new Error(`Mock fetch : requete inattendue -- ${url}`);
+  });
+  try {
+    const resultat = await publierDocumentZernio({
+      compte: 'julien-agency',
+      content: 'Texte du post deja valide.',
+      publicUrl: 'https://media.zernio.com/temp/carrousel-test.pdf',
+      documentTitle: 'Six modeles de carrousel, un test',
+      apiKey: 'sk_test',
+      reglages: REGLAGES_TEST,
+      scheduledFor: '2026-09-26T08:30:00',
+      timezone: 'Europe/Paris',
+    });
+    assert.equal(resultat.post.status, 'scheduled');
+  } finally {
+    restaurer();
+  }
+});
+
+test('publierDocumentZernio refuse scheduledFor sans timezone (et inversement)', async () => {
+  await assert.rejects(
+    () => publierDocumentZernio({
+      compte: 'julien-agency',
+      content: 'Texte',
+      publicUrl: 'https://media.zernio.com/temp/x.pdf',
+      documentTitle: 'Titre',
+      apiKey: 'sk_test',
+      reglages: REGLAGES_TEST,
+      scheduledFor: '2026-09-26T08:30:00',
+      // timezone absent
+    }),
+    /doivent etre fournis ensemble/
+  );
+  await assert.rejects(
+    () => publierDocumentZernio({
+      compte: 'julien-agency',
+      content: 'Texte',
+      publicUrl: 'https://media.zernio.com/temp/x.pdf',
+      documentTitle: 'Titre',
+      apiKey: 'sk_test',
+      reglages: REGLAGES_TEST,
+      timezone: 'Europe/Paris',
+      // scheduledFor absent
+    }),
+    /doivent etre fournis ensemble/
+  );
+});
+
 test('publierDocumentZernio refuse de publier si la revalidation du compte echoue (profil different)', async () => {
   const restaurer = mockerFetch(async (url) => {
     if (String(url) === 'https://zernio.com/api/v1/accounts') {
