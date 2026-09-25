@@ -36,10 +36,20 @@
  *                      colonneDroite: { titre, items: [] } } -- deux
  *                      colonnes cote a cote.
  *   - "checklist"    : { titre, items: [] } -- une liste a puces cochees.
- *   - "citation"     : { citation, auteur } -- une citation en grand avec
- *                      son attribution.
+ *   - "citation"     : { citation, auteur, citationSource } -- une citation
+ *                      en grand. "auteur" ne s'affiche QUE si "citationSource"
+ *                      est aussi fourni (URL du post ou document reel ou la
+ *                      citation apparait mot pour mot) -- sans lui, aucune
+ *                      attribution n'est rendue, jamais de propos prete a
+ *                      quelqu'un sans preuve (retour de Julien, 25/09/2026).
  *   - "cta"          : { titre, texte, bouton } -- appel a l'action unique,
  *                      fond contraste comme le hook (page de fermeture).
+ *
+ * Sur n'importe quel modele, un champ "source" optionnel : affiche en petit
+ * en bas de page ("Source : ..."). OBLIGATOIRE des qu'un chiffre-preuve
+ * (pourcentage ou multiplicateur, ex. "4,9%", "3x") apparait dans un champ
+ * visible de la diapo -- refuse sinon par lib/valider-diapos.js
+ * (validerSourceChiffre, retour de Julien du 25/09/2026).
  *
  * Sur n'importe quel modele, un emplacement image optionnel :
  *   - "image": "chemin/vers/fichier.png|jpg" -- image reelle (generee par
@@ -173,6 +183,20 @@ function listeHtml(items, classeLi) {
  *     explicitement comme en attente (jamais un vide silencieux).
  *   - ni l'un ni l'autre -> chaine vide, aucun emplacement reserve.
  */
+/**
+ * Ligne de source discrete en bas de page (retour de Julien par mail,
+ * 25/09/2026, verification du carrousel de test) : toute page qui affiche un
+ * chiffre-preuve montre sa source en petit en bas de page (organisme,
+ * annee) -- exige par `lib/valider-diapos.js` (`validerSourceChiffre`) avant
+ * meme d'arriver ici. Chaine vide si `diapo.source` est absent (page sans
+ * chiffre-preuve) -- CSS `.source-ligne:empty` la masque completement,
+ * jamais un espace reserve pour rien.
+ */
+function blocSourceLigne(diapo) {
+  if (!diapo.source) return '';
+  return `Source : ${echapperHtml(diapo.source)}`;
+}
+
 function blocImage(diapo) {
   if (diapo.image) {
     const uri = dataUriDepuisChemin(diapo.image);
@@ -281,9 +305,19 @@ function injecterDiapo(blocDiapo, diapo, index, { contexte = 'carrousel', total 
     // Le tiret cadratin ne fait plus partie du gabarit statique (voir
     // templates/*.html, .citation-auteur) : sans auteur, la ligne doit
     // disparaitre entierement (:empty), pas laisser un "— " orphelin.
-    .replaceAll('{{CITATION_AUTEUR}}', diapo.auteur ? `— ${echapperHtml(diapo.auteur)}` : '')
+    // Retour de Julien par mail (25/09/2026, verification du carrousel de
+    // test) : la page 5 attribuait a "Julien Rayes" une phrase qu'il n'a
+    // jamais publiee -- incident reel. Une citation attribuee exige
+    // desormais un champ "citationSource" (URL du post ou document reel ou
+    // elle apparait mot pour mot) ; sans lui, l'attribution ne s'affiche
+    // JAMAIS, quel que soit le contenu de "auteur" -- la citation retombe
+    // silencieusement sur un propos editorial general (deja un usage
+    // autorise du modele "citation", voir SKILL.md). Jamais de propos prete
+    // a quelqu'un sans son texte reel.
+    .replaceAll('{{CITATION_AUTEUR}}', (diapo.auteur && diapo.citationSource) ? `— ${echapperHtml(diapo.auteur)}` : '')
     .replaceAll('{{CTA_BOUTON}}', echapperHtml(diapo.bouton || ''))
-    .replaceAll('{{IMAGE_BLOC}}', blocImage(diapo));
+    .replaceAll('{{IMAGE_BLOC}}', blocImage(diapo))
+    .replaceAll('{{SOURCE_LIGNE}}', blocSourceLigne(diapo));
 }
 
 function construireDocument(compte, diapos) {

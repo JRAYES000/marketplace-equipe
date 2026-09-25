@@ -7,55 +7,45 @@
   {
     "role": "contenu",
     "modele": "gros-chiffre",
-    "titre": "Un écart mesuré",
-    "chiffre": "55%",
-    "texte": "Des TPE-PME disent utiliser l'IA dans leur recrutement, mais seulement 17% l'utilisent vraiment au quotidien."
-  },
-  {
-    "role": "contenu",
-    "modele": "checklist",
-    "titre": "Comment choisir votre premier processus à automatiser",
-    "items": [
-      "Identifiez le processus le plus répétitif de votre semaine",
-      "Exemple : la relance des devis en retard, souvent oubliée",
-      "Mesurez le temps réellement perdu chaque semaine",
-      "Choisissez un outil simple avant un outil complet"
-    ]
+    "titre": "Un chiffre qui ne bouge pas",
+    "chiffre": "4,9%",
+    "texte": "Des offres d'emploi ont été abandonnées faute de candidats en 2025, un niveau stable par rapport à 2024.",
+    "source": "France Travail, 21/04/2026"
   },
   {
     "role": "contenu",
     "modele": "comparaison",
     "titre": "Avant / après",
-    "colonneGauche": { "titre": "Avant", "items": ["Relances manuelles", "Suivi éparpillé", "Réponse tardive"] },
-    "colonneDroite": { "titre": "Après", "items": ["Relances programmées", "Suivi centralisé", "Réponse rapide"] }
+    "colonneGauche": { "titre": "Avant", "items": ["Relance manuelle, une fois par semaine", "Réponse au candidat en dix jours", "Aucune vue sur le vivier"] },
+    "colonneDroite": { "titre": "Après", "items": ["Relance automatique sous 48 heures", "Réponse au candidat en deux jours", "Vivier de candidats visible en continu"] }
   },
   {
     "role": "contenu",
     "modele": "citation",
-    "citation": "Un recrutement qui traîne ne se rattrape jamais sur le salaire proposé.",
-    "auteur": "Julien Rayes, Claude Agency"
+    "citation": "Un recrutement qui traîne ne se rattrape jamais sur le salaire proposé."
   },
   {
     "role": "contenu",
     "modele": "checklist",
-    "titre": "Trois signaux à surveiller",
+    "titre": "Comment repérer un processus qui s'essouffle",
     "items": [
       "Un délai de réponse qui s'allonge chaque semaine",
-      "Des candidats qui relancent avant vous",
-      "Un second entretien qui redemande ce que le premier savait déjà"
+      "Exemple : un candidat qui relance avant vous, signe d'un vivier trop mince",
+      "Activez votre réseau de recommandations avant d'ouvrir un nouveau poste"
     ],
-    "imageEmplacement": true
+    "image": "a-publier/images/julien-partners-2026-09-25-reseau-noeud.jpg",
+    "imagePrompt": "Illustration minimaliste d'un réseau en étoile (un nœud central relié à une douzaine de nœuds secondaires), palette terracotta sur fond crème, pour représenter un réseau de recommandations professionnelles."
   },
   {
     "role": "contenu",
-    "titre": "Ce que ça change vraiment",
-    "texte": "Un recrutement plus rapide protège votre réputation autant que votre planning."
+    "titre": "Ce qui change concrètement",
+    "texte": "Un délai de réponse plus court protège votre réputation employeur autant que votre vivier de candidats. Le réseau de recommandations devient alors votre meilleur canal, avant même les jobboards."
   },
   {
     "role": "contenu",
     "modele": "cta",
     "titre": "Passez à l'action cette semaine",
-    "texte": "Repérez votre processus le plus répétitif, et commencez petit.",
+    "texte": "Repérez le poste où vos candidats mettent le plus de temps à répondre, et activez votre réseau avant de le rouvrir.",
     "bouton": "En savoir plus"
   }
 ]

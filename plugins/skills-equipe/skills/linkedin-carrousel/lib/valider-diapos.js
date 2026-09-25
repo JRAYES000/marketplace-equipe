@@ -112,6 +112,32 @@ const SUJETS_IMAGE_INTERDITS = [
   { regex: /souris\s+d['’]ordinateur/i, motif: 'souris d\'ordinateur' },
 ];
 
+/**
+ * Retour de Julien par mail (25/09/2026, verification du carrousel de test) :
+ * toute page qui affiche un chiffre montre sa source en petit en bas de page
+ * (organisme, annee). Refuse une diapo qui affiche un chiffre-PREUVE
+ * (pourcentage ou multiplicateur) sans champ "source" non vide.
+ *
+ * LIMITE ASSUMEE, meme famille que `estDetailAnecdote` dans
+ * lib/valider-post.js : ne declenche que sur un pourcentage ("4,9%") ou un
+ * multiplicateur ("3x") -- pas sur un simple compte ("trois signaux"), qui
+ * n'est pas presente comme une preuve statistique. Un chiffre-preuve ecrit
+ * sous une autre forme (en toutes lettres, ratio "1 sur 2"...) n'est jamais
+ * detecte, meme limite deja documentee pour `validerChiffreSource`.
+ */
+const REGEX_CHIFFRE_PREUVE_DIAPO = /\d+(?:[.,]\d+)?\s?%|\b\d+\s?x\b/i;
+
+function validerSourceChiffre(diapo, texteAffiche, index) {
+  if (!REGEX_CHIFFRE_PREUVE_DIAPO.test(String(texteAffiche || ''))) return;
+  if (!String(diapo.source || '').trim()) {
+    throw new Error(
+      `Carrousel refuse : diapo n°${index + 1} ("${diapo.titre || diapo.citation || ''}") affiche ` +
+      'un chiffre mais ne porte aucun champ "source" -- toute page qui affiche un chiffre montre ' +
+      'sa source en petit en bas de page (organisme, annee).'
+    );
+  }
+}
+
 function validerImagePrompt(diapo, index) {
   if (!diapo.image) return;
   const prompt = String(diapo.imagePrompt || '').trim();
@@ -251,6 +277,7 @@ function validerDiapos(diapos) {
     }
 
     validerExempleSurPageMethode(diapo, modele, texteAffiche, index);
+    validerSourceChiffre(diapo, texteAffiche, index);
     validerImagePrompt(diapo, index);
   });
 }
@@ -259,6 +286,7 @@ module.exports = {
   validerDiapos,
   compterMots,
   validerExempleSurPageMethode,
+  validerSourceChiffre,
   validerImagePrompt,
   DIAPOS_MIN,
   DIAPOS_MAX,
