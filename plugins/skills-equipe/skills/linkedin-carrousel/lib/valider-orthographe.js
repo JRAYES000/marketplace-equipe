@@ -109,6 +109,22 @@ const MOTS_SANS_ACCENT_VERS_CORRECT = {
   couts: 'coûts',
   coute: 'coûte',
   coutent: 'coûtent',
+  // Ajoutes le 25/09/2026 (retour de Julien sur le carrousel du meme jour,
+  // urn:li:ugcPost:7509117168333287425) : "declaratif au reel" dans le texte
+  // du post ET "L'IA declarative" dans le documentTitle sont passes tous les
+  // deux -- ni l'un ni l'autre n'etait dans cette liste. Voir aussi
+  // lib/valider-post.js (convertirGras verifie desormais ces mots DANS un
+  // passage en gras, pas seulement dans le texte courant) et
+  // lib/publier-zernio.js (documentTitle passe par validerAccents avant tout
+  // envoi -- rien ne le verifiait jusqu'ici).
+  declaratif: 'déclaratif',
+  declaratifs: 'déclaratifs',
+  declarative: 'déclarative',
+  declaratives: 'déclaratives',
+  reel: 'réel',
+  reels: 'réels',
+  reelle: 'réelle',
+  reelles: 'réelles',
 };
 
 /**

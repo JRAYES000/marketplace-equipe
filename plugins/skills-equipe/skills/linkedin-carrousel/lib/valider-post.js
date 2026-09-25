@@ -15,12 +15,22 @@
  * en caracteres Unicode gras se fait ICI, au dernier moment, jamais avant.
  */
 
-const { validerAccents } = require('./valider-orthographe');
+const { validerAccents, MOTS_SANS_ACCENT_VERS_CORRECT } = require('./valider-orthographe');
 
 const CARACTERES_ACCENTUES = /[àâäéèêëîïôöùûüÿçñÀÂÄÉÈÊËÎÏÔÖÙÛÜŸÇÑ]/;
 
-const LONGUEUR_MIN = 1300;
-const LONGUEUR_MAX = 1900;
+// Retour de Julien (25/09/2026, carrousel urn:li:ugcPost:7509117168333287425) :
+// le texte du post d'un CARROUSEL repetait le carrousel lui-meme -- consigne
+// desormais : 5 lignes maximum (accroche, promesse, appel a l'action), sans
+// reprendre le detail des diapos. Voir SKILL.md, section "Texte du post".
+// Cette regle est SPECIFIQUE au carrousel et prime sur la fourchette
+// 1300-1900 caracteres de linkedin-mise-en-forme (qui vaut pour un POST DE
+// TEXTE, pas pour la legende courte d'un document) -- LONGUEUR_MIN/MAX sont
+// donc des bornes de bon sens (pas de legende vide, pas de derapage vers un
+// post-texte complet), pas une reprise de cette fourchette.
+const LONGUEUR_MIN = 60;
+const LONGUEUR_MAX = 700;
+const LIGNES_MAX = 5;
 const FENETRE_ACCROCHE = 140;
 const EMOJIS_MIN = 3;
 const EMOJIS_MAX = 6;
@@ -54,10 +64,46 @@ function convertirEnGrasUnicode(segment) {
 }
 
 /**
+ * Faille reelle trouvee et corrigee le 25/09/2026 (retour de Julien,
+ * carrousel du meme jour, urn:li:ugcPost:7509117168333287425) :
+ * "**Passez du declaratif au reel**" passait le controle existant, car
+ * CARACTERES_ACCENTUES ne refuse un segment en gras QUE s'il contient deja
+ * un accent -- un mot ecrit SANS l'accent qu'il devrait porter (par
+ * contournement volontaire ou involontaire de cette meme regle) n'a aucun
+ * caractere accentue a detecter, donc passe. Une fois converti en gras
+ * Unicode ("Mathematical Bold"), le mot devient de toute facon invisible a
+ * validerAccents (plage de caracteres hors A-Za-zÀ-ÖØ-öø-ÿ) -- aucun filet
+ * ne le rattrapait plus loin. Verifie donc ICI, sur le segment brut
+ * (pre-conversion), que ses mots ne figurent pas dans la liste fermee des
+ * mots toujours accentues -- meme liste que validerAccents
+ * (lib/valider-orthographe.js), donc "declaratif"/"reel" y sont desormais
+ * couverts sans dupliquer la liste. Voir test/adversarial-25-09.test.js.
+ */
+function verifierMotsAccentuesEnGras(segment) {
+  const regexMot = /[A-Za-zÀ-ÖØ-öø-ÿ']+/gu;
+  let correspondance;
+  while ((correspondance = regexMot.exec(segment)) !== null) {
+    const mot = correspondance[0];
+    const clef = mot.toLowerCase();
+    if (Object.prototype.hasOwnProperty.call(MOTS_SANS_ACCENT_VERS_CORRECT, clef)) {
+      throw new Error(
+        `Post refuse : le passage en gras "${segment}" contient "${mot}", qui doit s'ecrire ` +
+        `"${MOTS_SANS_ACCENT_VERS_CORRECT[clef]}" -- mais les lettres grasses Unicode n'existent ` +
+        `pas accentuees, donc ce mot ne peut pas etre ecrit correctement a l'interieur d'un gras. ` +
+        `Sortez-le du passage en gras (ecrivez-le en clair, correctement accentue) ou reformulez.`
+      );
+    }
+  }
+}
+
+/**
  * Convertit chaque `**segment**` du brouillon en gras Unicode. Refuse si un
  * segment en gras contient un accent (aucune forme grasse Unicode accentuee
- * n'existe -- la conversion serait silencieusement incorrecte), ou si aucun
- * segment en gras n'est present du tout (post sans gras = refuse).
+ * n'existe -- la conversion serait silencieusement incorrecte), si un
+ * segment en gras contient un mot de la liste fermee des mots toujours
+ * accentues mais ecrit sans son accent (meme motif, contourne autrement --
+ * voir verifierMotsAccentuesEnGras ci-dessus), ou si aucun segment en gras
+ * n'est present du tout (post sans gras = refuse).
  */
 function convertirGras(brouillon) {
   const REGEX_GRAS = /\*\*(.+?)\*\*/g;
@@ -72,6 +118,7 @@ function convertirGras(brouillon) {
         `Reformulez ce passage sans accent (ex. un chiffre, un mot court, un constat sec).`
       );
     }
+    verifierMotsAccentuesEnGras(segment);
     return convertirEnGrasUnicode(segment);
   });
 
@@ -160,6 +207,22 @@ function validerLongueur(texte) {
   if (longueur < LONGUEUR_MIN || longueur > LONGUEUR_MAX) {
     throw new Error(
       `Post refuse : ${longueur} caracteres, attendu entre ${LONGUEUR_MIN} et ${LONGUEUR_MAX}.`
+    );
+  }
+}
+
+/**
+ * Retour de Julien (25/09/2026) : le texte d'un post de carrousel fait 5
+ * lignes maximum -- accroche, promesse, appel a l'action -- il ne repete
+ * jamais le detail des diapos. Compte les lignes non vides (une ligne
+ * blanche separant deux paragraphes ne compte pas comme une ligne).
+ */
+function validerNombreLignes(texte) {
+  const lignes = texte.split('\n').map((l) => l.trim()).filter((l) => l.length > 0);
+  if (lignes.length > LIGNES_MAX) {
+    throw new Error(
+      `Post refuse : ${lignes.length} lignes de texte, maximum ${LIGNES_MAX} pour un post de ` +
+      `carrousel (accroche, promesse, appel a l'action) -- ne repetez pas le detail des diapos.`
     );
   }
 }
@@ -398,6 +461,7 @@ function verifierSourceNonVague(fenetre, chiffre) {
 function validerEtConvertirPost(brouillon) {
   const texteFinal = convertirGras(brouillon);
   validerLongueur(texteFinal);
+  validerNombreLignes(texteFinal);
   validerAccroche(texteFinal);
   validerEmojis(texteFinal);
   validerHashtags(texteFinal);
@@ -411,6 +475,7 @@ module.exports = {
   validerEtConvertirPost,
   convertirGras,
   validerLongueur,
+  validerNombreLignes,
   validerAccroche,
   validerEmojis,
   validerHashtags,
@@ -419,6 +484,7 @@ module.exports = {
   validerAccents,
   LONGUEUR_MIN,
   LONGUEUR_MAX,
+  LIGNES_MAX,
   FENETRE_ACCROCHE,
   EMOJIS_MIN,
   EMOJIS_MAX,

@@ -78,6 +78,55 @@ Quatre corrections demandees apres inspection du premier carrousel de test des 6
    `templates/*.html`, `.layout-citation`), l'exiger forcait a fournir un champ invisible rien que
    pour passer la validation (c'est ce qui s'est produit sur le carrousel de test initial).
 
+### Correction du 25/09/2026 (retour de Julien sur le premier carrousel publie)
+
+Six corrections demandees par mail apres relecture du premier carrousel reel
+(`urn:li:ugcPost:7509117168333287425`, sujet "l'IA declarative") -- les deux premieres corrigees
+dans les gabarits (profitent a tous les futurs carrousels), pas seulement sur ce carrousel :
+
+1. **Photo d'ordinateur a l'ecran vide retiree** (page 5, modele checklist) -- diapo sans valeur
+   ajoutee, simple decor. Le champ `image` de cette diapo est desormais absent dans le JSON source
+   -- `blocImage()` (`generer-pdf.js`) ne reserve un emplacement que si `image`/`imageEmplacement`
+   est fourni, donc retirer le champ suffit, aucun changement de gabarit necessaire pour CE point.
+2. **Titre qui touchait le trait decoratif du haut, corrige dans les DEUX gabarits** -- cause reelle :
+   sur les modeles "checklist"/"comparaison" avec une image, le total titre+items+image (a 480px de
+   haut) depassait l'espace vertical disponible de `.content`, et le centrage vertical
+   (`justify-content: center`) faisait deborder le contenu par le haut ET par le bas -- confirme par
+   rendu reel (page 5 ET page 7, cette derniere deja tres serree en bas avant tout changement).
+   Un premier correctif (ancrer `.content` en haut, `justify-content: flex-start`) a semble
+   corriger le haut mais a en realite deplace tout le debordement vers le bas -- confirme par rendu
+   reel sur la page 7 (image rognee, chevauchant le pied de page). Corrige en reduisant plutot
+   `.image-slot` de 480px a 380px dans `templates/julien-agency.html` ET
+   `templates/julien-partners.html` : le total tient desormais dans l'espace disponible, centrage
+   vertical inchange (reste correct pour les diapos sans image).
+3. **Texte de soutien des pages "gros-chiffre" trop petit et trop clair, corrige dans les DEUX
+   gabarits** -- `.chiffre-legende` : 40px/`var(--muted)` -> 46px/`var(--ink)`, meme gabarits que le
+   point 2.
+4. **Accents manquants ("declaratif au reel" dans le post, "L'IA declarative" dans le
+   documentTitle) -- garde-fous elargis, pas seulement corriges sur ce carrousel.** Faille reelle :
+   un mot de la liste fermee des mots toujours accentues (`lib/valider-orthographe.js`), ecrit SANS
+   son accent a l'interieur d'un passage `**en gras**`, n'etait detecte ni par `convertirGras`
+   (qui ne refusait qu'un accent DEJA present, pas son absence) ni par `validerAccents` (execute
+   APRES conversion en gras Unicode, ou le mot devient invisible a sa regex). Corrige en trois
+   endroits : (a) `declaratif`/`declaratifs`/`declarative`/`declaratives` et
+   `reel`/`reels`/`reelle`/`reelles` ajoutes a la liste fermee de `lib/valider-orthographe.js` ;
+   (b) `convertirGras` (`lib/valider-post.js`) verifie desormais aussi CHAQUE mot d'un passage en
+   gras contre cette liste, pas seulement la presence d'un accent ; (c) `documentTitle`, jamais
+   verifie par aucun garde-fou jusqu'ici (transmis tel quel en argument CLI), passe desormais par
+   `validerAccents()` dans `publierDocumentZernio()` (`lib/publier-zernio.js`) avant tout envoi.
+   Voir `test/adversarial-25-09.test.js`, qui rejoue exactement les deux erreurs.
+5. **Texte du post : 5 lignes maximum, accroche/promesse/appel a l'action -- voir
+   "Texte du post" ci-dessous.**
+6. **Une page utile ajoutee** ("Comment choisir votre premier process", modele checklist) --
+   carrousel passe de 8 a 9 diapos, toujours dans la fourchette [6, 10].
+
+**Bug d'environnement trouve en publiant reellement ce jour-la (sans rapport avec les 6 points
+ci-dessus)** : `chargerEnvLocal()` (`publier-zernio.js`) coupait le `.env` sur `\n` seul -- un
+`.env` a fins de ligne Windows (CRLF) laisse un `\r` colle a la fin de chaque valeur, que
+`(.*)$ ` (sans le flag `s`) ne consomme jamais en JavaScript, donc la ligne entiere ne matchait
+plus du tout, silencieusement (`ZERNIO_API_KEY absente de l'environnement` alors que la cle etait
+bien presente). Corrige en coupant sur `/\r?\n/`.
+
 ### Regle de contenu -- aucune citation ni temoignage invente
 
 **Jamais de citation, de temoignage ou de propos attribue a une personne (nommee ou non, reelle ou
@@ -302,13 +351,31 @@ Appele automatiquement par `genererPdf()`, avant tout rendu :
 
 ### Texte du post -- `lib/valider-post.js` + `generer-post.js`
 
+**Le texte d'un post de carrousel fait 5 lignes maximum : l'accroche, la promesse, l'appel a
+l'action -- jamais plus (retour de Julien, 25/09/2026, apres un post qui repetait le detail du
+carrousel).** Une ligne blanche entre deux paragraphes ne compte pas comme une ligne (elle separe
+deux "blocs", voir plus bas). Cette consigne est **specifique au carrousel et prime sur** la
+fourchette 1300-1900 caracteres de `linkedin-mise-en-forme` -- cette derniere vaut pour un POST DE
+TEXTE (le contenu principal du post), pas pour la legende courte qui accompagne un document deja
+porteur du contenu reel. `LONGUEUR_MIN`/`LONGUEUR_MAX` de ce fichier (60-700 caracteres, ramene le
+25/09/2026 depuis 1300-1900) et la nouvelle `LIGNES_MAX` (5) sont des bornes de bon sens pour cette
+legende courte, pas une reprise de la fourchette de `linkedin-mise-en-forme`. Le gras et les
+emojis restent obligatoires (memes regles que ci-dessous).
+
 Brouillon redige avec le gras en `**etoiles**` ; `node generer-post.js <brouillon> [sortie]`
 convertit et refuse (code de sortie 1) :
-- Gras accentue -> refus (aucune forme Unicode grasse accentuee n'existe).
+- Gras accentue -> refus (aucune forme Unicode grasse accentuee n'existe). **Elargi le 25/09/2026**
+  (retour de Julien : "declaratif au reel" passait en gras sans son accent, faille reelle) : un
+  passage en gras qui contient un mot de la liste fermee des mots toujours accentues
+  (`lib/valider-orthographe.js`), meme ECRIT SANS son accent, est desormais refuse aussi -- pas
+  seulement un accent deja present. Voir "Accents manquants" ci-dessous et
+  `test/adversarial-25-09.test.js`.
 - Aucun gras du tout -> refus.
 - Emojis hors de [3, 6] (elargi depuis [3, 5] le 18/09/2026, retour de Julien), au milieu d'une
   phrase, ou deux consecutifs -> refus.
-- Hors de 1300-1900 caracteres -> refus.
+- Hors de 60-700 caracteres -> refus (ramene le 25/09/2026 depuis 1300-1900 -- voir "5 lignes
+  maximum" ci-dessus).
+- Plus de 5 lignes de texte non vides -> refus (`LIGNES_MAX`, ajoute le 25/09/2026).
 - Accroche sans "?" dans les 140 premiers caracteres -> refus.
 - Plus de 2 mots-dieses, ou places ailleurs qu'en toute fin -> refus.
 - Formulations interdites (demande d'engagement, tiret long, "ce n'est pas X c'est Y", "ravi de
@@ -326,9 +393,13 @@ convertit et refuse (code de sortie 1) :
 ### Accents manquants -- `lib/valider-orthographe.js`
 
 Refuse tout texte contenant un mot d'une liste fermee de mots toujours accentues en francais
-standard (ete/été, deja/déjà, meme/même, etc.). Heuristique volontairement imparfaite : les mots
+standard (ete/été, deja/déjà, meme/même, etc. -- `declaratif`/`declarative` et `reel`/`reelle`
+ajoutes le 25/09/2026, voir plus haut). Heuristique volontairement imparfaite : les mots
 ambigus selon le contexte ("a"/"à", "ou"/"où") sont exclus pour eviter les faux positifs. Appele
-depuis `validerDiapos` et `validerEtConvertirPost`.
+depuis `validerDiapos`, `validerEtConvertirPost` et, depuis le 25/09/2026, `convertirGras` (sur
+chaque passage en gras, meme sans accent present -- voir "Texte du post" ci-dessus) et
+`publierDocumentZernio` (sur `documentTitle`, jamais verifie avant cette date -- retour de Julien :
+"L'IA declarative" etait passe tel quel).
 
 ## Audit adversarial et de robustesse (15/09/2026)
 
@@ -456,6 +527,20 @@ l'URL. »). Confirme par l'API (pas une simple lecture du script) : `GET /v1/pos
 `mediaItems[0].type: "document"`. **Non verifie visuellement** (rendu reel dans le fil LinkedIn,
 compteur de pages, logo) : l'extension Claude in Chrome etait deconnectee au moment de la
 publication -- a confirmer visuellement des que la connexion est retablie.
+
+**Corrige et republie le 25/09/2026, pour julien-agency, suite aux 6 retours de Julien sur le
+carrousel ci-dessus** (voir "Correction du 25/09/2026" plus haut pour le detail des 6 points).
+Meme sujet, 9 diapos (une page ajoutee, point 6), texte du post reecrit en 4 lignes (point 5),
+documentTitle "Passez du déclaratif au réel" (point 4). Chaque page verifiee par rendu reel
+(`node generer-images.js par-diapo ...`), y compris un aller-retour sur la hauteur de
+`.image-slot` (voir "Correction du 25/09/2026", point 2 -- un premier correctif corrigeait le haut
+de la page 5 mais faisait deborder le bas de la page 7, corrige avant publication). Publie via
+`publier-zernio.js --publier` (dispense d'accord par post pour julien-agency, voir plus bas).
+Confirme par l'API : `GET /v1/posts/6ab63d5de130f6fc4af4c1a4` renvoie `status: "published"`,
+`platformPostUrl: "https://www.linkedin.com/feed/update/urn:li:ugcPost:7509180583709691904/"`,
+`mediaItems[0].type: "document"`, `platformSpecificData.documentTitle: "Passez du déclaratif au
+réel"`. **L'ancien post (`urn:li:ugcPost:7509117168333287425`) n'a pas ete supprime** -- Julien a
+dit qu'il ferait le menage lui-meme.
 
 **Publication automatique, sans accord par post, pour julien-agency ET julien-partners
 uniquement.** Decision de Julien, mail du 24/09/2026 : « Je t'autorise a publier automatiquement,

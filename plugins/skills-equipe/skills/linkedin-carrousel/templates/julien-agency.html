@@ -179,13 +179,18 @@
     color: var(--ink);
   }
 
+  /* Retour de Julien (25/09/2026) : "petit texte gris dur a lire" sur les
+     pages "gros-chiffre" (pages 2 et 3 du carrousel du 25/09) -- passe de
+     40px/var(--muted) a 46px/var(--ink), meme contraste que le reste du
+     texte de contenu (pas de gris dilue sur un texte de lecture, pas
+     seulement decoratif). */
   .chiffre-legende {
     margin: 24px 0 0 0;
     font-family: 'Schibsted Grotesk', sans-serif;
     font-weight: 400;
-    font-size: 40px;
+    font-size: 46px;
     line-height: 1.4;
-    color: var(--muted);
+    color: var(--ink);
     max-width: 760px;
   }
 
@@ -302,12 +307,21 @@
      alors deborder le haut du contenu par-dessus le bandeau logo. Hauteur
      fixe + object-fit: cover pour que le total (titre + items + image)
      tienne toujours dans les ~1064px disponibles. */
+  /* Hauteur reduite le 25/09/2026 (retour de Julien : "le titre touche le
+     trait du haut" sur une diapo checklist avec image, page 5 du carrousel
+     du meme jour) : a 480px, le total titre+items+image depassait deja
+     l'espace vertical disponible de .content (~900-950px sur ce gabarit),
+     et le centrage vertical de .content faisait alors deborder le contenu
+     par le haut ET par le bas -- reduire l'image degage assez de marge pour
+     que le total tienne, sans abandonner le centrage (qui reste correct
+     pour les diapos qui n'ont pas d'image). Verifie par rendu reel, page 5
+     ET page 7 (celle-ci deja tres serree en bas AVANT ce changement). */
   .image-slot {
     flex: none;
     margin-top: 32px;
     border-radius: 24px;
     overflow: hidden;
-    height: 480px;
+    height: 380px;
   }
 
   .image-slot img {

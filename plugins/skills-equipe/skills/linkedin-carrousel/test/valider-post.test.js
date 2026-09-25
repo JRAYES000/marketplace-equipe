@@ -8,42 +8,31 @@ const {
 } = require('../lib/valider-post');
 
 /**
- * Brouillon conforme de reference -- 1413 caracteres, accroche interrogative
- * a 87 caracteres, 4 emojis en tete de bloc, 2 passages en gras sans accent,
- * 2 hashtags en fin, aucune formulation interdite. Sert de base saine a
+ * Brouillon conforme de reference -- reecrit le 25/09/2026 (retour de Julien :
+ * un post de carrousel fait 5 lignes maximum, accroche/promesse/appel a
+ * l'action, sans repeter le detail des diapos -- voir SKILL.md et
+ * lib/valider-post.js). 4 lignes non vides, ~330 caracteres, accroche
+ * interrogative a moins de 140 caracteres, 3 emojis en tete/fin de bloc,
+ * 2 passages en gras sans accent, 2 hashtags en fin. Sert de base saine a
  * partir de laquelle chaque test d'echec introduit UNE seule violation.
  */
-const BROUILLON_CONFORME = `Pourquoi vos meilleurs candidats disparaissent-ils avant même de recevoir votre offre ?
+const BROUILLON_CONFORME = `Pourquoi vos meilleurs candidats disparaissent-ils avant l'offre ? 🧭
 
-Rarement pour le salaire. Le plus souvent, ils partent pendant que votre process hésite encore, et personne ne s'en rend compte avant le refus.
+Rarement pour le salaire. Dans ce carrousel, **trois signes** qui trahissent un process qui hésite. 📅
 
-🧭 **Trois signes** reviennent, encore et encore, chez les entreprises qui perdent leurs meilleurs profils avant l'offre.
+**Passez a l'action** : réservez votre audit gratuit de trente minutes. 👉
 
-📅 Aucun délai n'est jamais communiqué. Un candidat sans date de réponse suppose le pire et signe ailleurs.
-
-🔁 Le même entretien se rejoue deux fois. Si le second redemande ce que le premier savait déjà, le message envoyé est clair : personne ne pilote ce process.
-
-🤐 Les candidats écartés n'ont jamais de réponse. Un silence ne coûte rien aujourd'hui. Il coûte le prochain candidat, qui ne répondra même plus à votre message la prochaine fois.
-
-Le vrai coût n'est pas le poste vacant un mois de plus. C'est la réputation qui se construit, entretien après entretien, chez des gens qui finissent toujours par se parler entre eux.
-
-Une seule chose à changer suffit souvent : fixer une date de réponse à chaque étape, et la tenir vraiment, même quand la décision n'est pas encore prise.
-
-Le candidat qui reste a rarement reçu la meilleure offre du marché. Il a reçu, le **plus vite** possible, une réponse claire sur où il en était.
-
-Et vous, sur votre dernier recrutement : combien de jours se sont écoulés entre deux nouvelles envoyées au candidat ?
-
-#recrutement #rh`;
+claudeagency.fr #recrutement #rh`;
 
 test('accepte le brouillon conforme et renvoie un texte converti en gras unicode', () => {
   const resultat = validerEtConvertirPost(BROUILLON_CONFORME);
-  assert.ok(resultat.includes('𝐓𝐫𝐨𝐢𝐬 𝐬𝐢𝐠𝐧𝐞𝐬'), 'le gras doit etre converti en unicode');
+  assert.ok(resultat.includes('𝐭𝐫𝐨𝐢𝐬 𝐬𝐢𝐠𝐧𝐞𝐬'), 'le gras doit etre converti en unicode');
   assert.ok(!resultat.includes('**'), 'aucune etoile ne doit subsister apres conversion');
 });
 
 test('refuse un gras accentue -- cas demande', () => {
-  const brouillon = BROUILLON_CONFORME.replace('**Trois signes**', '**Trois signes déjà connus**');
-  assert.throws(() => convertirGras(brouillon), /gras "Trois signes déjà connus" contient un accent/);
+  const brouillon = BROUILLON_CONFORME.replace('**trois signes**', '**trois signes déjà là**');
+  assert.throws(() => convertirGras(brouillon), /gras "trois signes déjà là" contient un accent/);
 });
 
 test('refuse un post sans aucun gras', () => {
@@ -52,7 +41,7 @@ test('refuse un post sans aucun gras', () => {
 });
 
 test('refuse deux emojis colles -- cas demande', () => {
-  const brouillon = BROUILLON_CONFORME.replace('🧭 **Trois signes**', '🧭📅 **Trois signes**');
+  const brouillon = BROUILLON_CONFORME.replace("avant l'offre ? 🧭", "avant l'offre ? 🧭📅");
   assert.throws(() => validerEtConvertirPost(brouillon), /deux emojis se suivent/);
 });
 
@@ -65,28 +54,43 @@ test('refuse un emoji au milieu d\'une phrase', () => {
 });
 
 test('refuse hors de la fourchette 3-6 emojis (0 emoji)', () => {
-  const brouillon = BROUILLON_CONFORME
-    .replace('🧭 ', '').replace('📅 ', '').replace('🔁 ', '').replace('🤐 ', '');
+  const brouillon = BROUILLON_CONFORME.replace('🧭', '').replace('📅', '').replace('👉', '');
   assert.throws(() => validerEtConvertirPost(brouillon), /0 emoji\(s\) trouve\(s\)/);
 });
 
-test('refuse un post de 1200 caracteres (sous 1300) -- cas demande', () => {
-  // Tronque le brouillon conforme a ~1200 caracteres de texte utile tout en
-  // gardant sa structure (gras, emojis, accroche, hashtags finaux) intacte.
-  const lignes = BROUILLON_CONFORME.split('\n');
-  const derniereLigne = lignes.pop(); // hashtags
-  let corps = lignes.join('\n');
-  while ([...`${corps}\n${derniereLigne}`].length > 1200) {
-    corps = corps.slice(0, -1);
-  }
-  const brouillonCourt = `${corps}\n${derniereLigne}`;
-  assert.throws(() => validerEtConvertirPost(brouillonCourt), /attendu entre 1300 et 1900/);
+test('refuse un post de moins de 60 caracteres -- cas demande', () => {
+  assert.throws(
+    () => validerEtConvertirPost("Salut ? **go** 🧭📅👉"),
+    /caracteres, attendu entre 60 et 700/
+  );
+});
+
+test('refuse un post de plus de 700 caracteres -- cas demande', () => {
+  const rembourrage = 'Un mot de plus. '.repeat(40);
+  const brouillon = BROUILLON_CONFORME.replace(
+    'Dans ce carrousel, **trois signes** qui trahissent un process qui hésite. 📅',
+    `Dans ce carrousel, **trois signes** qui trahissent un process qui hésite. ${rembourrage}📅`
+  );
+  assert.throws(() => validerEtConvertirPost(brouillon), /attendu entre 60 et 700/);
+});
+
+test('refuse plus de 5 lignes de texte -- cas demande (retour de Julien du 25/09/2026)', () => {
+  // BROUILLON_CONFORME a deja 4 lignes non vides -- en ajouter deux fait 6,
+  // au-dela du maximum de 5 (une seule de plus, 5, resterait conforme).
+  const brouillon = `${BROUILLON_CONFORME}\n\nUne cinquieme ligne.\n\nUne sixieme ligne de trop, qui repete le carrousel.`;
+  assert.throws(() => validerEtConvertirPost(brouillon), /6 lignes de texte, maximum 5/);
+});
+
+test('une ligne blanche entre deux paragraphes ne compte pas comme une ligne', () => {
+  // Le brouillon conforme a deja des lignes blanches entre ses 4 paragraphes --
+  // s'il passait, une ligne blanche compterait a tort comme une ligne de texte.
+  assert.doesNotThrow(() => validerEtConvertirPost(BROUILLON_CONFORME));
 });
 
 test('refuse une accroche sans point d\'interrogation dans les 140 premiers caracteres', () => {
   const brouillon = BROUILLON_CONFORME.replace(
-    'Pourquoi vos meilleurs candidats disparaissent-ils avant même de recevoir votre offre ?',
-    'Vos meilleurs candidats disparaissent avant même de recevoir votre offre, presque toujours en silence.'
+    "Pourquoi vos meilleurs candidats disparaissent-ils avant l'offre ? 🧭",
+    "Vos meilleurs candidats disparaissent avant l'offre, presque toujours en silence. 🧭"
   );
   assert.throws(() => validerEtConvertirPost(brouillon), /aucun point d'interrogation/);
 });
@@ -131,7 +135,7 @@ test('refuse "ce n\'est pas X, c\'est Y"', () => {
 test('refuse un chiffre sans source attachee -- cas demande', () => {
   const brouillon = BROUILLON_CONFORME.replace(
     'Rarement pour le salaire.',
-    '42% des candidats partent avant l\'offre.'
+    "42% des candidats partent avant l'offre."
   );
   assert.throws(() => validerEtConvertirPost(brouillon), /n'a pas de source attachee/);
 });
@@ -139,7 +143,7 @@ test('refuse un chiffre sans source attachee -- cas demande', () => {
 test('accepte un chiffre avec sa source attachee', () => {
   const brouillon = BROUILLON_CONFORME.replace(
     'Rarement pour le salaire.',
-    '42% des candidats partent avant l\'offre (source : étude interne vérifiable).'
+    "42% des candidats partent avant l'offre (source : étude interne vérifiable)."
   );
   assert.doesNotThrow(() => validerEtConvertirPost(brouillon));
 });
@@ -160,7 +164,10 @@ test('n\'accuse pas a tort l\'annee ecrite a l\'interieur de sa propre citation'
  * personnes) passe avec une ligne "Source : ..." unique en fin de post.
  */
 const AJOUT_ANECDOTE = "Une aidante familiale de 79 ans a suivi l'atelier pendant 4 semaines avec 12 personnes en salle, le 17/09/2026.";
-const AVEC_LIGNE_SOURCE = (b) => b.replace('\n\n#recrutement #rh', '\n\nSource : post LinkedIn d\'Allie K. Miller, 17/09/2026.\n\n#recrutement #rh');
+const AVEC_LIGNE_SOURCE = (b) => b.replace(
+  '\n\nclaudeagency.fr #recrutement #rh',
+  "\n\nSource : post LinkedIn d'Allie K. Miller, 17/09/2026.\n\nclaudeagency.fr #recrutement #rh"
+);
 
 test('chiffre-anecdote (age, duree, nombre de personnes, date) sans source collee mais avec ligne Source finale : passe', () => {
   const brouillon = AVEC_LIGNE_SOURCE(BROUILLON_CONFORME.replace('Rarement pour le salaire.', AJOUT_ANECDOTE));
@@ -197,6 +204,6 @@ test('"N personnes" dans une phrase de sondage reste une donnee d\'etude : refus
 test('une ligne Source finale vague ("Source : une etude") ne dispense de rien', () => {
   const brouillon = BROUILLON_CONFORME
     .replace('Rarement pour le salaire.', AJOUT_ANECDOTE)
-    .replace('\n\n#recrutement #rh', '\n\nSource : une etude\n\n#recrutement #rh');
+    .replace('\n\nclaudeagency.fr #recrutement #rh', '\n\nSource : une etude\n\nclaudeagency.fr #recrutement #rh');
   assert.throws(() => validerEtConvertirPost(brouillon), /n'a pas de source attachee/);
 });
