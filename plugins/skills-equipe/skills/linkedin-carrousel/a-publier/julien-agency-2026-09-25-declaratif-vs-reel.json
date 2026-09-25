@@ -1,0 +1,69 @@
+[
+  {
+    "role": "hook",
+    "modele": "accroche",
+    "titre": "55% des TPE-PME disent utiliser l'IA. Seulement 17% l'utilisent vraiment",
+    "accent": "17% l'utilisent vraiment"
+  },
+  {
+    "role": "contenu",
+    "modele": "gros-chiffre",
+    "titre": "Ce que déclarent les dirigeants fin 2025",
+    "chiffre": "55%",
+    "texte": "Des TPE-PME disent utiliser l'IA générative. Source : Bpifrance Le Lab, 13 janvier 2026."
+  },
+  {
+    "role": "contenu",
+    "modele": "gros-chiffre",
+    "titre": "Ce qui reste quand on regarde l'usage réel",
+    "chiffre": "17%",
+    "texte": "Seulement, en usage régulier. Le reste : occasionnel, ou jamais commencé."
+  },
+  {
+    "role": "contenu",
+    "modele": "comparaison",
+    "titre": "\"Utiliser l'IA\" ne veut pas dire la même chose pour tout le monde",
+    "colonneGauche": {
+      "titre": "Ce que ça veut dire pour beaucoup",
+      "items": ["Un compte ouvert une fois", "Un post copié-collé", "Une démo vue en formation"]
+    },
+    "colonneDroite": {
+      "titre": "Ce que ça change en vrai",
+      "items": ["Un process qui tourne chaque semaine", "Une tâche qui ne revient plus", "Un chiffre qui bouge, pas une impression"]
+    }
+  },
+  {
+    "role": "contenu",
+    "modele": "checklist",
+    "titre": "3 signes que votre IA ne sert à rien",
+    "items": [
+      "Personne ne s'en sert sans que vous le rappeliez",
+      "Elle ne touche aucun processus récurrent",
+      "Vous ne sauriez pas dire ce qu'elle vous fait gagner"
+    ],
+    "image": "a-publier/images/julien-agency-2026-09-25-page5.jpg"
+  },
+  {
+    "role": "contenu",
+    "modele": "citation",
+    "citation": "Utiliser l'IA une fois n'est pas l'utiliser"
+  },
+  {
+    "role": "contenu",
+    "modele": "checklist",
+    "titre": "Ce qui fait la différence chez ceux qui l'utilisent vraiment",
+    "items": [
+      "Un seul processus choisi, pas dix",
+      "Un résultat mesuré chaque semaine",
+      "Quelqu'un qui suit, pas seulement qui lance"
+    ],
+    "image": "a-publier/images/julien-agency-2026-09-25-page7.jpg"
+  },
+  {
+    "role": "contenu",
+    "modele": "cta",
+    "titre": "Passez du déclaratif au réel",
+    "texte": "Un audit gratuit de 30 minutes pour trouver le process qui vaut le coup.",
+    "bouton": "Réserver l'audit"
+  }
+]

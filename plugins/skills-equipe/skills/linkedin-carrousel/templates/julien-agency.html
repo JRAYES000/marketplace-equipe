@@ -294,6 +294,45 @@
     justify-content: center;
   }
 
+  /* ---------- Emplacement image (checklist/comparaison) ----------
+     Jamais stylee jusqu'ici (bloc introduit le 24/09/2026, jamais utilise
+     avec une vraie image avant le 25/09/2026) : une image reelle sans
+     hauteur contrainte grossit le bloc au-dela de l'espace disponible,
+     et le centrage vertical de .content (justify-content: center) fait
+     alors deborder le haut du contenu par-dessus le bandeau logo. Hauteur
+     fixe + object-fit: cover pour que le total (titre + items + image)
+     tienne toujours dans les ~1064px disponibles. */
+  .image-slot {
+    flex: none;
+    margin-top: 32px;
+    border-radius: 24px;
+    overflow: hidden;
+    height: 480px;
+  }
+
+  .image-slot img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .image-slot--vide {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 2px dashed var(--muted);
+    background: rgba(0, 0, 0, 0.03);
+  }
+
+  .image-slot--vide span {
+    font-family: 'Schibsted Grotesk', sans-serif;
+    font-size: 28px;
+    color: var(--muted);
+    text-align: center;
+    padding: 0 40px;
+  }
+
   /* ---------- Modele "citation" ---------- */
   .slide[data-modele="citation"] .layout-citation { display: flex; flex-direction: column; }
 
