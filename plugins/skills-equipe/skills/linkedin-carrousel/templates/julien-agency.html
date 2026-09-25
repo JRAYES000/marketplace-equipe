@@ -348,32 +348,37 @@
   }
 
   /* ---------- Modele "citation" ---------- */
+  /* Retour de Julien par mail (25/09/2026) : une citation ne doit jamais
+     rester seule sur une page qui se lit vide -- fond contraste plein comme
+     hook/cta (voir plus bas, meme groupe de selecteurs) et guillemet/texte
+     agrandis, pour que la page se lise comme une diapo pensee, quelle que
+     soit la longueur reelle de la citation. */
   .slide[data-modele="citation"] .layout-citation { display: flex; flex-direction: column; }
 
   .citation-marque {
     font-family: 'Bricolage Grotesque', sans-serif;
     font-weight: 800;
-    font-size: 160px;
+    font-size: 220px;
     line-height: 1;
     color: var(--accent-deco);
-    margin: 0 0 -40px 0;
+    margin: 0 0 -56px 0;
   }
 
   .citation-texte {
     margin: 0;
     font-family: 'Bricolage Grotesque', sans-serif;
     font-weight: 700;
-    font-size: 58px;
-    line-height: 1.25;
+    font-size: 66px;
+    line-height: 1.28;
     color: var(--ink);
     max-width: 860px;
   }
 
   .citation-auteur {
-    margin: 32px 0 0 0;
+    margin: 40px 0 0 0;
     font-family: 'Schibsted Grotesk', sans-serif;
     font-weight: 600;
-    font-size: 34px;
+    font-size: 36px;
     color: var(--muted);
   }
 
@@ -497,30 +502,40 @@
   .slide[data-role="hook"] .title { font-size: 88px; line-height: 1.05; }
 
   .slide[data-role="hook"],
-  .slide[data-modele="cta"] {
+  .slide[data-modele="cta"],
+  .slide[data-modele="citation"] {
     background: var(--bg-sombre);
   }
   .slide[data-role="hook"] .title,
   .slide[data-role="hook"] .body-text,
   .slide[data-modele="cta"] .cta-titre,
-  .slide[data-modele="cta"] .cta-texte {
+  .slide[data-modele="cta"] .cta-texte,
+  .slide[data-modele="citation"] .citation-texte {
     color: var(--cream);
   }
   .slide[data-role="hook"] .body-text,
   .slide[data-modele="cta"] .cta-texte {
     opacity: 0.86;
   }
+  .slide[data-modele="citation"] .citation-auteur {
+    color: var(--cream);
+    opacity: 0.7;
+  }
   .slide[data-role="hook"] .hairline,
-  .slide[data-modele="cta"] .hairline {
+  .slide[data-modele="cta"] .hairline,
+  .slide[data-modele="citation"] .hairline {
     background: var(--cream);
     opacity: 0.22;
   }
   .slide[data-role="hook"] .auteur-nom,
   .slide[data-modele="cta"] .auteur-nom,
+  .slide[data-modele="citation"] .auteur-nom,
   .slide[data-role="hook"] .pagenum,
   .slide[data-modele="cta"] .pagenum,
+  .slide[data-modele="citation"] .pagenum,
   .slide[data-role="hook"] .swipe-hint,
-  .slide[data-modele="cta"] .swipe-hint {
+  .slide[data-modele="cta"] .swipe-hint,
+  .slide[data-modele="citation"] .swipe-hint {
     color: var(--cream);
   }
   .slide[data-modele="cta"] .cta-bouton {

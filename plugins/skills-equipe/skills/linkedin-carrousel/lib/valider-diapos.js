@@ -18,6 +18,7 @@
  */
 
 const { validerAccents } = require('./valider-orthographe');
+const { validerAnglicismes } = require('./valider-anglicismes');
 const { resoudreModele, champsVisibles } = require('./modeles');
 
 // Bornes et limite de mots mises a jour le 24/09/2026 (retour de Julien
@@ -64,6 +65,71 @@ function compterMots(texte) {
 function validerTexteDiapo(texte, contexte) {
   if (REGEX_CARACTERE_CONTROLE.test(String(texte || ''))) {
     throw new Error(`Carrousel refuse : ${contexte} contient un caractere de controle non imprimable.`);
+  }
+}
+
+/**
+ * Retour de Julien par mail (25/09/2026) : une page "Comment..." ou "methode"
+ * contient TOUJOURS un exemple concret (son exemple : la relance des devis).
+ * Detection du declencheur sur le "titre" de la diapo (le seul champ ou ce
+ * genre de formulation apparait -- "Comment choisir votre premier processus",
+ * "La methode en 3 etapes"...) ; recherche de l'exemple sur TOUS les champs
+ * visibles du modele (texte, items...), pas seulement le titre.
+ *
+ * LIMITE ASSUMEE, meme famille que le hook (SKILL.md, "Un hook irresistible") :
+ * ce garde-fou verifie la presence d'un MARQUEUR d'exemple ("exemple", "ex :"),
+ * pas que l'exemple est reellement concret et pertinent -- un exemple vague
+ * derriere le bon marqueur passerait quand meme. Seule une relecture le juge.
+ */
+const REGEX_PAGE_METHODE = /\b(comment\b|m[ée]thode)/i;
+const REGEX_MARQUEUR_EXEMPLE = /\bexemple\b|\bex\s*[:.]/i;
+
+function validerExempleSurPageMethode(diapo, modele, texteAffiche, index) {
+  if (!REGEX_PAGE_METHODE.test(String(diapo.titre || ''))) return;
+  if (!REGEX_MARQUEUR_EXEMPLE.test(String(texteAffiche || ''))) {
+    throw new Error(
+      `Carrousel refuse : diapo n°${index + 1} ("${diapo.titre}") est une page "Comment..."/` +
+      `"methode" (modele "${modele}") mais ne contient aucun exemple concret -- ajoutez un ` +
+      '"exemple" ou "ex :" explicite (ex. la relance des devis), pas seulement l\'explication ' +
+      'generale.'
+    );
+  }
+}
+
+// Retour de Julien par mail (25/09/2026) : jamais de photo decorative sans
+// message -- clavier, ordinateur/ecran vide sont les exemples explicitement
+// cites. Liste FERMEE de sujets generiques interdits pour le prompt de
+// generation fal.ai (meme s'il n'existe pas encore de script d'appel a
+// fal.ai dans ce depot, voir SKILL.md -- la generation reste manuelle via le
+// navigateur). `imagePrompt` est desormais OBLIGATOIRE des qu'une diapo porte
+// un champ "image" reel : sans lui, rien ne trace ce qui a ete demande a
+// fal.ai, et aucun controle sur les sujets interdits n'est possible.
+const SUJETS_IMAGE_INTERDITS = [
+  { regex: /clavier/i, motif: 'clavier' },
+  { regex: /(?:e|é)cran\s+(?:vide|noir|éteint|eteint)/i, motif: 'écran vide/éteint' },
+  { regex: /ordinateur\s+(?:vide|(?:é|e)teint|allum(?:é|e))?\s*(?:seul)?$/i, motif: 'ordinateur seul, sans contexte' },
+  { regex: /bureau\s+vide/i, motif: 'bureau vide' },
+  { regex: /souris\s+d['’]ordinateur/i, motif: 'souris d\'ordinateur' },
+];
+
+function validerImagePrompt(diapo, index) {
+  if (!diapo.image) return;
+  const prompt = String(diapo.imagePrompt || '').trim();
+  if (!prompt) {
+    throw new Error(
+      `Carrousel refuse : diapo n°${index + 1} porte une image reelle ("${diapo.image}") sans ` +
+      '"imagePrompt" -- indiquez le prompt fal.ai utilise, pour tracer ce qui a ete demande et ' +
+      'permettre le controle des sujets generiques interdits.'
+    );
+  }
+  for (const { regex, motif } of SUJETS_IMAGE_INTERDITS) {
+    if (regex.test(prompt)) {
+      throw new Error(
+        `Carrousel refuse : diapo n°${index + 1}, "imagePrompt" decrit un sujet generique ` +
+        `interdit (${motif}) -- une image ne doit jamais etre une simple photo decorative sans ` +
+        'message, elle doit illustrer l\'idee reelle de la page.'
+      );
+    }
   }
 }
 
@@ -178,15 +244,26 @@ function validerDiapos(diapos) {
     } catch (erreur) {
       throw new Error(`Carrousel refuse : diapo n°${index + 1} ("${diapo.titre || diapo.citation || ''}") -- ${erreur.message}`);
     }
+    try {
+      validerAnglicismes(texteAffiche);
+    } catch (erreur) {
+      throw new Error(`Carrousel refuse : diapo n°${index + 1} ("${diapo.titre || diapo.citation || ''}") -- ${erreur.message}`);
+    }
+
+    validerExempleSurPageMethode(diapo, modele, texteAffiche, index);
+    validerImagePrompt(diapo, index);
   });
 }
 
 module.exports = {
   validerDiapos,
   compterMots,
+  validerExempleSurPageMethode,
+  validerImagePrompt,
   DIAPOS_MIN,
   DIAPOS_MAX,
   DIAPOS_DEFAUT,
   MOTS_MAX_PAR_DIAPO,
   CARACTERES_MAX_PAR_DIAPO,
+  SUJETS_IMAGE_INTERDITS,
 };

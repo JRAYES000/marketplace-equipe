@@ -18,6 +18,7 @@ const fs = require('fs');
 const path = require('path');
 const { presignerFichier, televerserFichier, listerComptes, creerPost } = require('./zernio');
 const { validerAccents } = require('./valider-orthographe');
+const { validerAnglicismes } = require('./valider-anglicismes');
 
 const COMPTES_CONNUS = ['julien-agency', 'julien-partners'];
 
@@ -129,6 +130,9 @@ async function publierDocumentZernio({ compte, content, publicUrl, documentTitle
   // accentues, lib/valider-orthographe.js), applique ici avant tout appel
   // reseau Zernio.
   validerAccents(documentTitle);
+  // Retour de Julien par mail (25/09/2026) : meme trois surfaces que le
+  // controle d'accents ci-dessus -- diapos, documentTitle, texte du post.
+  validerAnglicismes(documentTitle, 'documentTitle');
 
   const { accountId } = await verifierCompteZernio({ compte, apiKey, reglages });
 

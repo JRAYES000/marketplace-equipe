@@ -18,7 +18,7 @@ const {
  */
 const BROUILLON_CONFORME = `Pourquoi vos meilleurs candidats disparaissent-ils avant l'offre ? 🧭
 
-Rarement pour le salaire. Dans ce carrousel, **trois signes** qui trahissent un process qui hésite. 📅
+Rarement pour le salaire. Dans ce carrousel, **trois signes** qui trahissent un processus qui hésite. 📅
 
 **Passez a l'action** : réservez votre audit gratuit de trente minutes. 👉
 
@@ -68,8 +68,8 @@ test('refuse un post de moins de 60 caracteres -- cas demande', () => {
 test('refuse un post de plus de 700 caracteres -- cas demande', () => {
   const rembourrage = 'Un mot de plus. '.repeat(40);
   const brouillon = BROUILLON_CONFORME.replace(
-    'Dans ce carrousel, **trois signes** qui trahissent un process qui hésite. 📅',
-    `Dans ce carrousel, **trois signes** qui trahissent un process qui hésite. ${rembourrage}📅`
+    'Dans ce carrousel, **trois signes** qui trahissent un processus qui hésite. 📅',
+    `Dans ce carrousel, **trois signes** qui trahissent un processus qui hésite. ${rembourrage}📅`
   );
   assert.throws(() => validerEtConvertirPost(brouillon), /attendu entre 60 et 700/);
 });
