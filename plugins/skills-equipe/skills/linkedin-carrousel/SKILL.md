@@ -140,6 +140,67 @@ dans le CLAUDE.md racine du depot, precisee ici pour ce cas specifique aux carro
 (temoignages/citations attribues a des tiers, pas seulement des chiffres ou l'experience de
 Julien).
 
+## Retours du mail de Julien du 25/09/2026 (deuxieme mail du jour)
+
+Cinq retours transformes en regles, et en garde-fous automatiques partout ou c'etait possible --
+a appliquer sur TOUS les prochains carrousels, julien-agency comme julien-partners, pas seulement
+les prochains testes ce jour-la.
+
+1. **Francais, pas d'anglicismes.** "processus" et non "process" -- meme famille de defaut que
+   les accents manquants (voir "Accents manquants" plus bas). Nouveau module
+   `lib/valider-anglicismes.js` : liste FERMEE d'anglicismes de vocabulaire professionnel courants
+   (process, deadline, feedback, workflow, business, brief, benchmark, reporting, roadmap,
+   kickoff, mindset, insight, targets, networking) vers leur equivalent francais, refuse
+   explicitement des qu'un mot de la liste est trouve -- meme philosophie que
+   `lib/valider-orthographe.js` (liste fermee, pas une detection generale d'anglais ; "email",
+   "planning", "week-end" volontairement exclus, entres dans l'usage courant du francais). Appele
+   sur les MEMES 3 surfaces que le controle d'accents : les diapos (`lib/valider-diapos.js`), le
+   `documentTitle` (`lib/publier-zernio.js`) et le texte du post (`lib/valider-post.js`, verifie
+   sur le brouillon AVANT conversion du gras -- meme raison que `verifierMotsAccentuesEnGras`,
+   sinon un anglicisme a l'interieur d'un `**gras**` deviendrait invisible une fois converti en
+   Unicode). Voir `test/regles-mail-25-09.test.js`.
+2. **Une page "Comment..." ou "methode" contient toujours un exemple concret** (l'exemple de
+   Julien : la relance des devis). Nouveau garde-fou dans `lib/valider-diapos.js`
+   (`validerExempleSurPageMethode`) : declenche sur un `titre` qui commence par "Comment" ou
+   contient "methode"/"méthode", exige alors un marqueur d'exemple explicite ("exemple", "ex :")
+   quelque part dans les champs visibles de la diapo (texte, items...) -- refuse sinon. **Limite
+   assumee**, meme famille que le hook (voir plus bas) : verifie la presence d'un MARQUEUR, pas
+   que l'exemple est reellement concret et pertinent -- seule une relecture le juge.
+3. **Citation jamais seule sur une page qui se lit vide.** Le modele "citation" des deux gabarits
+   (`templates/julien-agency.html`, `templates/julien-partners.html`) passe desormais sur le meme
+   fond contraste plein que hook/cta (`var(--bg-sombre)`, ajoute au meme groupe de selecteurs),
+   avec guillemet decoratif agrandi (160px -> 220px) et texte de citation agrandi (58px -> 66px) --
+   une citation courte occupe donc une page visuellement pensee, pas un reste de blanc. **Verifie
+   par rendu Playwright reel**, pas seulement decrit : `test/regles-mail-25-09.test.js` mesure que
+   le fond rendu de la diapo "citation" differe reellement du fond de page par defaut, et que le
+   guillemet mesure au moins 200px, sur les deux comptes. Rendu visuel de reference genere le
+   25/09/2026 : `sortants/_test-regles-mail-25-09/diapo-05.png`.
+4. **Images : uniquement si elles illustrent l'idee de la page, jamais une photo decorative sans
+   message** (exemples cites par Julien : clavier, ordinateur/ecran vide). `imagePrompt` devient
+   OBLIGATOIRE des qu'une diapo porte un champ `image` reel (`lib/valider-diapos.js`,
+   `validerImagePrompt`) -- sans lui, rien ne trace ce qui a ete demande a fal.ai. Liste FERMEE de
+   sujets generiques interdits (`SUJETS_IMAGE_INTERDITS`) verifiee dans ce prompt : clavier, ecran
+   vide/eteint, ordinateur seul sans contexte, bureau vide, souris d'ordinateur -- refuse
+   explicitement si l'un d'eux y figure. **Limite assumee** : il n'existe pas encore de script
+   d'appel a fal.ai dans ce depot (generation manuelle via navigateur, voir plus bas) -- ce
+   garde-fou verifie le PROMPT declare par l'operateur, pas l'image reellement generee ; rien
+   n'empeche une image differente du prompt d'etre glissee a la place. A renforcer le jour ou un
+   appel API fal.ai existe reellement dans ce depot.
+5. **Rappel des regles deja en place, a ne jamais oublier** (le post Claude Partners du 25/09/2026
+   ne les respectait pas au depart) : texte du post 5 lignes maximum (`LIGNES_MAX`, voir "Texte du
+   post" plus bas) et accents corrects sur les diapos, le titre du document ET le texte du post
+   (`lib/valider-orthographe.js`, appele depuis les 3 memes surfaces que le nouveau controle
+   d'anglicismes ci-dessus). Non-regression verrouillee par `test/regles-mail-25-09.test.js`, en
+   plus des tests existants de chaque garde-fou.
+
+**Carrousel de test genere localement le 25/09/2026, jamais publie** (preuve que les 5 regles
+s'appliquent reellement, pas seulement documentees) : `a-publier/julien-agency-2026-09-25-test-regles-mail.json`
+(8 diapos : hook, gros-chiffre, checklist "Comment choisir votre premier processus à automatiser"
+avec un exemple explicite, comparaison, citation, checklist avec emplacement image, contenu simple,
+cta), rendu en PDF (`sortants/julien-agency/Vos meilleurs candidats disparaissent avant l'offre. Voici pourquoi..pdf`)
+et en PNG par diapo (`sortants/_test-regles-mail-25-09/diapo-01.png` a `diapo-08.png`) -- chaque
+page inspectee visuellement avant d'ecrire cette section.
+
 ## Regles de methode non negociables (retour de Julien, 18/09/2026)
 
 Julien a juge les deux carrousels publies avant cette date comme "de l'AI slop" -- brouillon,
@@ -400,6 +461,16 @@ depuis `validerDiapos`, `validerEtConvertirPost` et, depuis le 25/09/2026, `conv
 chaque passage en gras, meme sans accent present -- voir "Texte du post" ci-dessus) et
 `publierDocumentZernio` (sur `documentTitle`, jamais verifie avant cette date -- retour de Julien :
 "L'IA declarative" etait passe tel quel).
+
+### Anglicismes -- `lib/valider-anglicismes.js`
+
+Refuse tout texte contenant un mot d'une liste FERMEE d'anglicismes de vocabulaire professionnel
+courants (process, deadline, feedback, workflow, business, brief, benchmark, reporting, roadmap,
+kickoff, mindset, insight, targets, networking), avec son equivalent francais propose dans le
+message de refus. Ajoute le 25/09/2026 (retour de Julien par mail, voir "Retours du mail de Julien
+du 25/09/2026" plus haut). Appele depuis `validerDiapos`, `validerEtConvertirPost` (sur le
+brouillon, avant conversion du gras) et `publierDocumentZernio` (sur `documentTitle`) -- memes 3
+surfaces que `validerAccents`.
 
 ## Audit adversarial et de robustesse (15/09/2026)
 

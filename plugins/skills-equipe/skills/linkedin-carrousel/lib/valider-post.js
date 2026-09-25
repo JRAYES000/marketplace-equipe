@@ -16,6 +16,7 @@
  */
 
 const { validerAccents, MOTS_SANS_ACCENT_VERS_CORRECT } = require('./valider-orthographe');
+const { validerAnglicismes } = require('./valider-anglicismes');
 
 const CARACTERES_ACCENTUES = /[àâäéèêëîïôöùûüÿçñÀÂÄÉÈÊËÎÏÔÖÙÛÜŸÇÑ]/;
 
@@ -459,6 +460,12 @@ function verifierSourceNonVague(fenetre, chiffre) {
  * viole -- ne renvoie le texte que si TOUT est conforme.
  */
 function validerEtConvertirPost(brouillon) {
+  // Verifie sur le BROUILLON brut (avant conversion du gras) : un anglicisme
+  // ecrit a l'interieur d'un passage **en gras** deviendrait invisible a une
+  // regex ASCII une fois converti en gras Unicode (meme raison que
+  // verifierMotsAccentuesEnGras plus haut) -- ecrit ici pour couvrir les deux
+  // cas sans dupliquer la logique de detection.
+  validerAnglicismes(brouillon, 'texte du post');
   const texteFinal = convertirGras(brouillon);
   validerLongueur(texteFinal);
   validerNombreLignes(texteFinal);
@@ -482,6 +489,7 @@ module.exports = {
   validerInterdits,
   validerChiffreSource,
   validerAccents,
+  validerAnglicismes,
   LONGUEUR_MIN,
   LONGUEUR_MAX,
   LIGNES_MAX,

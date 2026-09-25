@@ -1,0 +1,61 @@
+[
+  {
+    "role": "hook",
+    "titre": "Vos meilleurs candidats disparaissent avant l'offre. Voici pourquoi.",
+    "accent": "disparaissent avant l'offre"
+  },
+  {
+    "role": "contenu",
+    "modele": "gros-chiffre",
+    "titre": "Un écart mesuré",
+    "chiffre": "55%",
+    "texte": "Des TPE-PME disent utiliser l'IA dans leur recrutement, mais seulement 17% l'utilisent vraiment au quotidien."
+  },
+  {
+    "role": "contenu",
+    "modele": "checklist",
+    "titre": "Comment choisir votre premier processus à automatiser",
+    "items": [
+      "Identifiez le processus le plus répétitif de votre semaine",
+      "Exemple : la relance des devis en retard, souvent oubliée",
+      "Mesurez le temps réellement perdu chaque semaine",
+      "Choisissez un outil simple avant un outil complet"
+    ]
+  },
+  {
+    "role": "contenu",
+    "modele": "comparaison",
+    "titre": "Avant / après",
+    "colonneGauche": { "titre": "Avant", "items": ["Relances manuelles", "Suivi éparpillé", "Réponse tardive"] },
+    "colonneDroite": { "titre": "Après", "items": ["Relances programmées", "Suivi centralisé", "Réponse rapide"] }
+  },
+  {
+    "role": "contenu",
+    "modele": "citation",
+    "citation": "Un recrutement qui traîne ne se rattrape jamais sur le salaire proposé.",
+    "auteur": "Julien Rayes, Claude Agency"
+  },
+  {
+    "role": "contenu",
+    "modele": "checklist",
+    "titre": "Trois signaux à surveiller",
+    "items": [
+      "Un délai de réponse qui s'allonge chaque semaine",
+      "Des candidats qui relancent avant vous",
+      "Un second entretien qui redemande ce que le premier savait déjà"
+    ],
+    "imageEmplacement": true
+  },
+  {
+    "role": "contenu",
+    "titre": "Ce que ça change vraiment",
+    "texte": "Un recrutement plus rapide protège votre réputation autant que votre planning."
+  },
+  {
+    "role": "contenu",
+    "modele": "cta",
+    "titre": "Passez à l'action cette semaine",
+    "texte": "Repérez votre processus le plus répétitif, et commencez petit.",
+    "bouton": "En savoir plus"
+  }
+]
