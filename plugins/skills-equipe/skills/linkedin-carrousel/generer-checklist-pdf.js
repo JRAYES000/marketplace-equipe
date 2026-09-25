@@ -80,10 +80,9 @@ const INTRO =
   'Un recrutement ne s’essouffle presque jamais à cause du salaire proposé. Il s’essouffle sur le rythme. ' +
   'Voici les 10 points à vérifier cette semaine avant de perdre votre prochain candidat sérieux.';
 const SOURCE_LIGNE =
-  'Source (point 2) : Yaggo/Ifop, baromètre expérience candidat, janvier 2026 — ' +
-  'l’étude qui justifie le délai de deux semaines du point 2.';
+  'Source du délai de deux semaines (point 2) : Yaggo/Ifop, baromètre expérience candidat, janvier 2026.';
 const IA_LIGNE =
-  'Les accusés de réception et les relances à 48 heures automatisés : c’est le métier de Claude Agency.';
+  'Accusés de réception, relances à 48 h : l’IA peut les envoyer pour vous. C’est le métier de Claude Agency.';
 const CTA_LIGNE =
   'Vous recevez cette checklist parce que vous avez écrit « recrutement » en message privé. ' +
   'Pour en discuter, répondez directement à ce message.';
