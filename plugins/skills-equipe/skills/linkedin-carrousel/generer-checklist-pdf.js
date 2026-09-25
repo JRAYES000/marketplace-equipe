@@ -38,7 +38,7 @@ const ITEMS = [
   },
   {
     titre: 'Répondez dans un délai maximum de deux semaines',
-    exemple: '<strong>4 candidats sur 5</strong> jugent deux semaines comme le délai maximum acceptable pour recevoir une réponse.',
+    exemple: 'Annoncez au candidat la date de votre réponse dès le premier échange.',
   },
   {
     titre: 'Relancez sous 48 heures après chaque étape',
@@ -46,7 +46,7 @@ const ITEMS = [
   },
   {
     titre: 'Surveillez qui relance qui',
-    exemple: 'Si c’est le candidat qui écrit « des nouvelles ? », le recrutement a déjà pris du retard sur lui.',
+    exemple: 'Notez la date de chaque échange. Sans nouvelle de vous depuis 48 h, relancez.',
   },
   {
     titre: 'Tenez un vivier de candidats visible en continu',
@@ -79,10 +79,15 @@ const TITRE_ACCENT = 'disparaissent avant l’offre';
 const INTRO =
   'Un recrutement ne s’essouffle presque jamais à cause du salaire proposé. Il s’essouffle sur le rythme. ' +
   'Voici les 10 points à vérifier cette semaine avant de perdre votre prochain candidat sérieux.';
-const SOURCE_LIGNE = 'Source (point 2) : Yaggo/Ifop, baromètre expérience candidat, janvier 2026.';
+const SOURCE_LIGNE =
+  'Source (point 2) : Yaggo/Ifop, baromètre expérience candidat, janvier 2026 — ' +
+  'l’étude qui justifie le délai de deux semaines du point 2.';
+const IA_LIGNE =
+  'Les accusés de réception et les relances à 48 heures automatisés : c’est le métier de Claude Agency.';
 const CTA_LIGNE =
   'Vous recevez cette checklist parce que vous avez écrit « recrutement » en message privé. ' +
   'Pour en discuter, répondez directement à ce message.';
+const SITE_LIGNE = 'claudeagency.fr';
 
 function echapperHtml(texte) {
   return String(texte)
@@ -130,9 +135,11 @@ function construireDocument() {
     .replaceAll('{{INTRO}}', echapperHtml(INTRO))
     .replaceAll('{{ITEMS_HTML}}', itemsHtml(ITEMS))
     .replaceAll('{{SOURCE_LIGNE}}', echapperHtml(SOURCE_LIGNE))
+    .replaceAll('{{IA_LIGNE}}', echapperHtml(IA_LIGNE))
     .replaceAll('{{AUTEUR_NOM}}', 'Julien Rayes')
     .replaceAll('{{AUTEUR_ROLE}}', 'Claude Agency')
-    .replaceAll('{{CTA_LIGNE}}', echapperHtml(CTA_LIGNE));
+    .replaceAll('{{CTA_LIGNE}}', echapperHtml(CTA_LIGNE))
+    .replaceAll('{{SITE_LIGNE}}', echapperHtml(SITE_LIGNE));
   return html;
 }
 
