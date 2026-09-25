@@ -766,6 +766,20 @@ verification du compte Zernio) reste obligatoire et se fait **avant** le script,
 Cette dispense ne vaut pour aucun autre compte : `page-claude` (et tout compte futur) reste
 sous la regle generale "Rien de public sans feu vert explicite" du `CLAUDE.md` racine.
 
+**Premiere publication PROGRAMMEE effectuee le 25/09/2026, pour julien-agency** (demande
+explicite de Julien : le compte avait deja eu deux carrousels le jour meme, programmation
+demandee plutot qu'un envoi immediat). Carrousel "Vos meilleurs candidats disparaissent avant
+l'offre. Voici pourquoi." (7 diapos, commit `ef615cc`, sujet recrutement/reseau). Texte du post
+et `documentTitle` valides avant tout appel (`generer-post.js`, `validerAccents`,
+`validerAnglicismes`) et montres a Julien avant l'envoi. Publie via
+`publier-zernio.js --publier --schedule "2026-09-26T08:30:00" "Europe/Paris"`. Confirme par
+l'API (`GET /v1/posts/6ab66ea404c51b0900f1e2db`) : `status: "scheduled"`,
+`scheduledFor: "2026-09-26T06:30:00.000Z"` (08:30 heure de Paris, UTC+2 en septembre -- heure
+d'ete, conversion correcte confirmee), `timezone: "Europe/Paris"`,
+`platforms[0].status: "pending"`. **Aucune `platformPostUrl` n'existe encore** -- normal pour un
+post programme, non encore publie sur LinkedIn a l'heure de cette verification ; a recuperer le
+26/09/2026 apres 08:30 Paris via un nouvel appel `GET /v1/posts/<id>`.
+
 ## Registre des echecs Composio/LinkedIn (`data/registre-echecs.json`)
 
 **Ne couvre plus le chemin de publication reel de cette skill depuis le 24/09/2026** (bascule
