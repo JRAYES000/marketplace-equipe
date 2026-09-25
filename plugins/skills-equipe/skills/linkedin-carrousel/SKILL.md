@@ -197,9 +197,23 @@ les prochains testes ce jour-la.
 s'appliquent reellement, pas seulement documentees) : `a-publier/julien-agency-2026-09-25-test-regles-mail.json`
 (8 diapos : hook, gros-chiffre, checklist "Comment choisir votre premier processus à automatiser"
 avec un exemple explicite, comparaison, citation, checklist avec emplacement image, contenu simple,
-cta), rendu en PDF (`sortants/julien-agency/Vos meilleurs candidats disparaissent avant l'offre. Voici pourquoi..pdf`)
+cta), rendu en PDF (`sortants/julien-agency/Vos meilleurs candidats disparaissent avant l'offre. Voici pourquoi.pdf`)
 et en PNG par diapo (`sortants/_test-regles-mail-25-09/diapo-01.png` a `diapo-08.png`) -- chaque
 page inspectee visuellement avant d'ecrire cette section.
+
+### Bug trouve en verifiant ce carrousel de test : point final en double dans le nom de fichier
+
+Le titre de la diapo hook se terminait par une phrase complete ("...Voici pourquoi.") -- une fois
+`.pdf` accole par `cheminSortieParDefaut`, le fichier produit s'appelait
+"...pourquoi..pdf" (double point), jamais retire avant. Corrige par une fonction partagee,
+`retirerPointFinal` (`generer-pdf.js`) : retire un point final (et les espaces qui suivraient),
+appelee a la fin de `nomFichierDepuisTitre` -- donc sur tout nom de fichier de sortie, PDF comme
+PNG. **Meme defaut possible sur le `documentTitle` envoye a Zernio** (repris tel quel du titre de
+la diapo hook par l'operateur, pas derive automatiquement) : `publierDocumentZernio`
+(`lib/publier-zernio.js`) appelle desormais aussi `retirerPointFinal` sur `documentTitle`, avant
+`validerAccents`/`validerAnglicismes` et avant tout appel reseau -- ce qui part vers Zernio est
+toujours nettoye, meme si l'appelant ne l'a pas fait lui-meme. Voir
+`test/regles-mail-25-09.test.js`, section "Point final en double".
 
 ## Regles de methode non negociables (retour de Julien, 18/09/2026)
 

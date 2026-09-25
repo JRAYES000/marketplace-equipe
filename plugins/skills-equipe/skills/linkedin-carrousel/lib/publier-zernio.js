@@ -19,6 +19,7 @@ const path = require('path');
 const { presignerFichier, televerserFichier, listerComptes, creerPost } = require('./zernio');
 const { validerAccents } = require('./valider-orthographe');
 const { validerAnglicismes } = require('./valider-anglicismes');
+const { retirerPointFinal } = require('../generer-pdf');
 
 const COMPTES_CONNUS = ['julien-agency', 'julien-partners'];
 
@@ -129,14 +130,22 @@ async function publierDocumentZernio({ compte, content, publicUrl, documentTitle
   // Meme controle que le texte du post (liste fermee des mots toujours
   // accentues, lib/valider-orthographe.js), applique ici avant tout appel
   // reseau Zernio.
-  validerAccents(documentTitle);
+  // Bug reel trouve le 25/09/2026 (meme jour, suite) : un documentTitle
+  // recopie directement depuis le titre de la diapo hook (qui se termine
+  // souvent par une phrase complete, ex. "...Voici pourquoi.") porte le
+  // meme point final que celui qui produisait "Titre..pdf" sur le nom de
+  // fichier (voir retirerPointFinal, generer-pdf.js) -- retire ICI, avant
+  // tout controle et tout envoi, pour que ce qui part vers Zernio soit
+  // toujours nettoye, meme si l'appelant ne l'a pas fait lui-meme.
+  const documentTitleNettoye = retirerPointFinal(documentTitle);
+  validerAccents(documentTitleNettoye);
   // Retour de Julien par mail (25/09/2026) : meme trois surfaces que le
   // controle d'accents ci-dessus -- diapos, documentTitle, texte du post.
-  validerAnglicismes(documentTitle, 'documentTitle');
+  validerAnglicismes(documentTitleNettoye, 'documentTitle');
 
   const { accountId } = await verifierCompteZernio({ compte, apiKey, reglages });
 
-  return creerPost({ apiKey, content, accountId, documentTitle, publicUrl, publishNow });
+  return creerPost({ apiKey, content, accountId, documentTitle: documentTitleNettoye, publicUrl, publishNow });
 }
 
 module.exports = { verifierCompteZernio, preparerEnvoiZernio, publierDocumentZernio, COMPTES_CONNUS };
