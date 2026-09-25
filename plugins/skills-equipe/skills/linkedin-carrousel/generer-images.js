@@ -28,6 +28,7 @@ const {
   chargerGabarit,
   injecterDiapo,
   titreDepuisDiapos,
+  validerEspacementReel,
 } = require('./generer-pdf');
 
 const SKILL_DIR = __dirname;
@@ -53,6 +54,7 @@ async function rendreDiapoEnPng({ navigateur, compte, diapo, index, cheminSortie
   try {
     await page.setContent(html, { waitUntil: 'load' });
     await page.evaluate(() => document.fonts.ready);
+    await validerEspacementReel(page);
     fs.mkdirSync(path.dirname(cheminSortie), { recursive: true });
     await page.screenshot({ path: cheminSortie, type: 'png' });
     return cheminSortie;

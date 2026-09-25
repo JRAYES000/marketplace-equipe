@@ -396,6 +396,66 @@ function cheminSortieParDefaut(compte, diapos) {
   return candidat;
 }
 
+// Retour de Julien par mail (25/09/2026, verification du carrousel de test) :
+// page 5 debordait reellement -- titre qui touche le trait decoratif du haut
+// (defaut deja signale le 25/09/2026, jamais entierement corrige : la
+// reduction de .image-slot a 380px suffisait pour LE carrousel de l'epoque,
+// pas pour un contenu plus charge) ET image qui descend jusqu'au pied de
+// page. Aucun garde-fou avant genererDiapos ne peut le detecter (ca depend
+// de la police reellement rendue, de la longueur du texte ET de la presence
+// d'une image -- une combinaison que le compte de mots/caracteres ne capture
+// pas). Mesure REELLE apres rendu Playwright, sur le DOM tel qu'il sera
+// imprime : ecart entre le trait decoratif du haut (.accent-rule) et le
+// premier element visible du contenu, et entre le dernier element visible et
+// le pied de page (.footer-wrap). Refuse explicitement si l'une des deux
+// mesures est sous le minimum -- jamais un PDF genere silencieusement en
+// deborde.
+const ESPACE_HAUT_MIN_PX = 32;
+const ESPACE_BAS_MIN_PX = 24;
+
+async function validerEspacementReel(page) {
+  const mesures = await page.evaluate(() => {
+    return Array.from(document.querySelectorAll('.slide')).map((slide) => {
+      const accentRule = slide.querySelector('.accent-rule');
+      const content = slide.querySelector('.content');
+      const footerWrap = slide.querySelector('.footer-wrap');
+      if (!accentRule || !content || !footerWrap) return null;
+      const visible = Array.from(content.children).find(
+        (el) => getComputedStyle(el).display !== 'none'
+      );
+      if (!visible) return null;
+      const rAccent = accentRule.getBoundingClientRect();
+      const rVisible = visible.getBoundingClientRect();
+      const rFooter = footerWrap.getBoundingClientRect();
+      return {
+        modele: slide.getAttribute('data-modele') || '',
+        numero: slide.querySelector('.pagenum') ? slide.querySelector('.pagenum').textContent : '',
+        ecartHaut: rVisible.top - rAccent.bottom,
+        ecartBas: rFooter.top - rVisible.bottom,
+      };
+    });
+  });
+
+  mesures.forEach((mesure, index) => {
+    if (!mesure) return;
+    const repere = mesure.numero ? `diapo ${mesure.numero}` : `diapo n°${index + 1}`;
+    if (mesure.ecartHaut < ESPACE_HAUT_MIN_PX) {
+      throw new Error(
+        `Carrousel refuse : ${repere} (modele "${mesure.modele}") -- ${mesure.ecartHaut.toFixed(1)}px ` +
+        `entre le trait du haut et le premier element, minimum ${ESPACE_HAUT_MIN_PX}px. Le contenu ` +
+        'touche le trait decoratif -- reduisez le texte ou deplacez l\'image sur une page moins chargee.'
+      );
+    }
+    if (mesure.ecartBas < ESPACE_BAS_MIN_PX) {
+      throw new Error(
+        `Carrousel refuse : ${repere} (modele "${mesure.modele}") -- ${mesure.ecartBas.toFixed(1)}px ` +
+        `entre le dernier element et le pied de page, minimum ${ESPACE_BAS_MIN_PX}px. Le contenu ` +
+        'deborde vers le bas -- reduisez le texte ou deplacez l\'image sur une page moins chargee.'
+      );
+    }
+  });
+}
+
 async function genererPdf({ compte, diapos, sortie }) {
   validerDiapos(diapos);
   const html = construireDocument(compte, diapos);
@@ -407,6 +467,7 @@ async function genererPdf({ compte, diapos, sortie }) {
     // Attendre que les polices embarquees (base64) soient reellement chargees :
     // sans ca, le PDF peut figer un instant de police de repli (FOUT).
     await page.evaluate(() => document.fonts.ready);
+    await validerEspacementReel(page);
 
     const cheminSortie = sortie || cheminSortieParDefaut(compte, diapos);
     fs.mkdirSync(path.dirname(cheminSortie), { recursive: true });
@@ -467,4 +528,7 @@ module.exports = {
   titreDepuisDiapos,
   titreAvecAccent,
   retirerPointFinal,
+  validerEspacementReel,
+  ESPACE_HAUT_MIN_PX,
+  ESPACE_BAS_MIN_PX,
 };

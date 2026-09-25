@@ -277,6 +277,50 @@ le depot (`a-publier/images/julien-partners-2026-09-25-reseau-noeud.jpg`, illust
 en etoile -- sert le sous-theme "activer son reseau de recommandations" du meme fil). Rendu en PDF
 et en PNG par diapo, chaque page inspectee visuellement.
 
+## Troisieme relecture du carrousel de test (25/09/2026)
+
+Nouvelle relecture page par page du carrousel corrige (voir section precedente), 3 corrections
+avant de considerer ces regles reellement en place :
+
+1. **Page 5 debordait reellement** : le titre touchait le trait decoratif du haut et l'image
+   descendait jusqu'au pied de page (meme famille de defaut que le point 2 de la correction du
+   25/09/2026 plus haut -- deja "corrige" une fois, mais la reduction de `.image-slot` a 380px ne
+   suffisait plus pour ce contenu-la, plus charge). Corrige sur ce carrousel en deplacant l'image
+   vers une page moins chargee (la page "Activez votre reseau", titre + un seul paragraphe, pas de
+   liste) et en raccourcissant les items de la page checklist. **Nouveau garde-fou par rendu reel**,
+   pour que ce defaut precis ne puisse plus jamais passer inapercu : `validerEspacementReel`
+   (`generer-pdf.js`), appele apres le rendu Playwright (polices chargees), avant tout PDF/PNG --
+   mesure sur le DOM reellement rendu l'ecart entre `.accent-rule` (trait du haut) et le premier
+   element visible du contenu (minimum 32px), et entre ce contenu et `.footer-wrap` (minimum 24px).
+   Refuse explicitement si l'une des deux mesures echoue, sur CHAQUE diapo du carrousel -- appele
+   depuis `genererPdf()` ET depuis `generer-images.js` (`rendreDiapoEnPng`), les deux chemins de
+   rendu reel. **Ne peut evidemment s'executer qu'APRES le rendu** (contrairement a
+   `validerDiapos`, qui refuse avant tout rendu) -- c'est la seule facon de mesurer un debordement
+   qui depend de la police reellement chargee, de la longueur du texte ET de la presence d'une
+   image, une combinaison que le compte de mots/caracteres ne capture pas. Voir
+   `test/espacement-et-cta-25-09.test.js`, qui rejoue exactement la page 5 fautive.
+2. **Appel a l'action qui ne mene nulle part.** "En savoir plus" n'a aucun sens sur un document PDF
+   ou une image -- aucun lien cliquable n'existe. **Regle** : l'appel a l'action du modele "cta" dit
+   une action concrete et faisable directement depuis LinkedIn (ex. « Ecrivez-moi "recrutement" en
+   message prive »), jamais une simple invite vague, et jamais une demande d'engagement deja
+   interdite par le brief (« commentez OUI », voir plus bas). **Garde-fou** : `lib/valider-diapos.js`
+   (`validerCtaSansEngagement`) applique la meme banque de formulations interdites que le texte du
+   post (`lib/valider-post.js`, `validerInterdits`) au texte visible d'une diapo "cta" -- pas
+   dupliquee, la meme fonction. Une action "concrete et faisable" au sens large (pas seulement
+   l'absence d'une formulation interdite) reste un jugement editorial, comme le hook.
+3. **Le chiffre doit prouver l'accroche.** Le chiffre choc d'un carrousel doit mesurer exactement ce
+   que l'accroche annonce -- pas une donnee adjacente mais differente (voir "Un seul fil" plus
+   haut, meme famille de defaut). Sur ce carrousel : hook sur la disparition des candidats avant
+   l'offre, chiffre remplace par une donnee reelle et sourcee sur le delai de patience des candidats
+   (**"4 candidats sur 5 jugent deux semaines comme le delai maximum acceptable pour recevoir une
+   reponse", Yaggo/Ifop, barometre experience candidat, janvier 2026** -- verifie par lecture
+   directe de l'article qui cite l'etude, pas de memoire). Recherche prealable sur un chiffre
+   candidat-cote-abandon precis (delai/absence de reponse) : plusieurs blogs citent "52-60% des
+   candidats abandonnent un processus trop long" en attribuant la source a une "etude Cronofy" sans
+   date verifiable a la source primaire -- **ecarte, pas assez fiable pour etre cite tel quel** (voir
+   "Ne jamais inventer" dans le CLAUDE.md racine). Le barometre Yaggo/Ifop, lui, est nomme, date
+   precisement (7-16 janvier 2026, 2004 repondants) et lu directement -- retenu a sa place.
+
 ## Regles de methode non negociables (retour de Julien, 18/09/2026)
 
 Julien a juge les deux carrousels publies avant cette date comme "de l'AI slop" -- brouillon,

@@ -19,6 +19,7 @@
 
 const { validerAccents } = require('./valider-orthographe');
 const { validerAnglicismes } = require('./valider-anglicismes');
+const { validerInterdits } = require('./valider-post');
 const { resoudreModele, champsVisibles } = require('./modeles');
 
 // Bornes et limite de mots mises a jour le 24/09/2026 (retour de Julien
@@ -135,6 +136,25 @@ function validerSourceChiffre(diapo, texteAffiche, index) {
       'un chiffre mais ne porte aucun champ "source" -- toute page qui affiche un chiffre montre ' +
       'sa source en petit en bas de page (organisme, annee).'
     );
+  }
+}
+
+/**
+ * Retour de Julien par mail (25/09/2026, verification du carrousel de test) :
+ * l'appel a l'action de la page "cta" dit une action concrete et faisable
+ * (ex. "Ecrivez-moi 'recrutement' en message prive"), jamais une demande
+ * d'engagement interdite (ex. "commentez OUI") -- un PDF/une image n'a de
+ * toute facon aucun lien cliquable, "En savoir plus" ne mene nulle part.
+ * Reutilise la meme banque de formulations interdites que le texte du post
+ * (lib/valider-post.js, validerInterdits) sur le modele "cta" uniquement --
+ * pas de raison d'avoir deux bannieres differentes pour la meme regle.
+ */
+function validerCtaSansEngagement(modele, texteAffiche, index) {
+  if (modele !== 'cta') return;
+  try {
+    validerInterdits(texteAffiche);
+  } catch (erreur) {
+    throw new Error(`Carrousel refuse : diapo n°${index + 1} (cta) -- ${erreur.message}`);
   }
 }
 
@@ -278,6 +298,7 @@ function validerDiapos(diapos) {
 
     validerExempleSurPageMethode(diapo, modele, texteAffiche, index);
     validerSourceChiffre(diapo, texteAffiche, index);
+    validerCtaSansEngagement(modele, texteAffiche, index);
     validerImagePrompt(diapo, index);
   });
 }
@@ -287,6 +308,7 @@ module.exports = {
   compterMots,
   validerExempleSurPageMethode,
   validerSourceChiffre,
+  validerCtaSansEngagement,
   validerImagePrompt,
   DIAPOS_MIN,
   DIAPOS_MAX,
