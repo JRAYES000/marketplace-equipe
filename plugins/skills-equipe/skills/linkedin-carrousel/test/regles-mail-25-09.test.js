@@ -19,7 +19,7 @@ const { chromium } = require('playwright');
 const { validerDiapos } = require('../lib/valider-diapos');
 const { validerAnglicismes } = require('../lib/valider-anglicismes');
 const { validerEtConvertirPost, LIGNES_MAX } = require('../lib/valider-post');
-const { chargerGabarit, injecterDiapo } = require('../generer-pdf');
+const { chargerGabarit, injecterDiapo, nomFichierDepuisTitre, retirerPointFinal, titreDepuisDiapos } = require('../generer-pdf');
 
 function diapoHookValide(champs = {}) {
   return {
@@ -226,3 +226,69 @@ test('rappel : les 3 surfaces (diapos, documentTitle, post) sont bien toutes cou
   const { validerAccents } = require('../lib/valider-orthographe');
   assert.throws(() => validerAccents('Ceci est deja fini.'), /accent/);
 });
+
+// ---------- 6. Point final en double dans le nom de fichier ----------
+// Bug reel trouve le 25/09/2026 en verifiant le carrousel de test : un titre
+// de diapo hook qui se termine par une phrase complete (point final) produit
+// "...pdf" -- "Titre..pdf", jamais retire avant. Corrige dans
+// generer-pdf.js (retirerPointFinal, nomFichierDepuisTitre) et propage a
+// lib/publier-zernio.js (documentTitle, meme defaut possible).
+
+test('retirerPointFinal retire un point final unique et les espaces qui suivraient', () => {
+  assert.equal(retirerPointFinal('Voici pourquoi.'), 'Voici pourquoi');
+  assert.equal(retirerPointFinal('Voici pourquoi. '), 'Voici pourquoi');
+  assert.equal(retirerPointFinal('Voici pourquoi'), 'Voici pourquoi');
+});
+
+test('retirerPointFinal ne touche pas un point qui n\'est pas final (ex. "M. Dupont")', () => {
+  assert.equal(retirerPointFinal('M. Dupont'), 'M. Dupont');
+});
+
+test('nomFichierDepuisTitre retire le point final -- ne produit jamais "Titre..pdf" une fois l\'extension ajoutee', () => {
+  const nom = nomFichierDepuisTitre('Vos meilleurs candidats disparaissent avant l\'offre. Voici pourquoi.');
+  assert.ok(!nom.endsWith('.'), `nom de fichier "${nom}" se termine encore par un point`);
+  assert.equal(`${nom}.pdf`.includes('..'), false, `"${nom}.pdf" contient un double point`);
+});
+
+test('titreDepuisDiapos (utilise pour le nom de fichier reel) ne renvoie jamais un titre termine par un point', () => {
+  const diapos = [{ role: 'hook', titre: 'Vos meilleurs candidats disparaissent avant l\'offre. Voici pourquoi.', accent: 'disparaissent avant l\'offre' }];
+  const nom = titreDepuisDiapos(diapos);
+  assert.ok(!nom.endsWith('.'), `titre derive "${nom}" se termine encore par un point`);
+});
+
+test('publierDocumentZernio nettoie le point final du documentTitle avant tout envoi a Zernio', async () => {
+  const { publierDocumentZernio } = require('../lib/publier-zernio');
+  const restaurer = mockerFetch(async (url, opts) => {
+    if (String(url) === 'https://zernio.com/api/v1/accounts') {
+      return reponseJson({ accounts: [{ _id: '6ab50c438d284ffb213b7c55', platform: 'linkedin', isActive: true }] });
+    }
+    if (String(url) === 'https://zernio.com/api/v1/posts') {
+      const corps = JSON.parse(opts.body);
+      assert.equal(corps.platforms[0].platformSpecificData.documentTitle, 'Voici pourquoi');
+      return reponseJson({ message: 'ok', post: { _id: 'post-test', status: 'published' } }, 201);
+    }
+    throw new Error(`Mock fetch : requete inattendue -- ${url}`);
+  });
+  try {
+    await publierDocumentZernio({
+      compte: 'julien-agency',
+      content: 'Texte du post deja valide.',
+      publicUrl: 'https://media.zernio.com/temp/carrousel-test.pdf',
+      documentTitle: 'Voici pourquoi.',
+      apiKey: 'sk_test',
+      reglages: { 'julien-agency': { zernio_account_id: '6ab50c438d284ffb213b7c55' } },
+    });
+  } finally {
+    restaurer();
+  }
+});
+
+function mockerFetch(gestionnaire) {
+  const original = global.fetch;
+  global.fetch = gestionnaire;
+  return () => { global.fetch = original; };
+}
+
+function reponseJson(corps, status = 200) {
+  return { ok: status >= 200 && status < 300, status, json: async () => corps, text: async () => JSON.stringify(corps) };
+}

@@ -298,10 +298,25 @@ const TITRE_LONGUEUR_MAX = 80;
 const CARACTERES_INTERDITS = /[\\/:*?"<>|\r\n]+/g;
 
 /**
+ * Retire le(s) point(s) final(aux) d'un titre, avec les espaces qui les
+ * suivraient. Bug reel trouve le 25/09/2026 : un titre de diapo hook qui se
+ * termine deja par une phrase complete ("...Voici pourquoi.") produisait un
+ * nom de fichier "...pourquoi..pdf" (double point) une fois l'extension
+ * ajoutee -- jamais retire avant. Partagee avec `publierDocumentZernio`
+ * (lib/publier-zernio.js) : meme defaut possible sur le `documentTitle`
+ * envoye a Zernio, meme si aucune extension ne lui est accolee ensuite --
+ * mieux vaut une seule fonction, jamais deux endroits a corriger separement.
+ */
+function retirerPointFinal(texte) {
+  return String(texte || '').replace(/\.+\s*$/, '').trimEnd();
+}
+
+/**
  * Derive un nom de fichier lisible en francais a partir d'un titre de diapo :
  * casse et accents conserves (ce n'est PAS un slug d'URL), seuls les
  * caracteres interdits dans un nom de fichier sont retires, espaces
- * multiples fusionnes, tronque a 80 caracteres sans couper un mot en deux.
+ * multiples fusionnes, tronque a 80 caracteres sans couper un mot en deux,
+ * point final retire (voir retirerPointFinal -- sinon "Titre..pdf").
  */
 function nomFichierDepuisTitre(texte, longueurMax = TITRE_LONGUEUR_MAX) {
   let titre = String(texte || '')
@@ -316,6 +331,8 @@ function nomFichierDepuisTitre(texte, longueurMax = TITRE_LONGUEUR_MAX) {
     // sauf s'il est trop tot (perte de plus de la moitie du texte utile)
     titre = dernierEspace > longueurMax * 0.5 ? tronque.slice(0, dernierEspace) : tronque;
   }
+
+  titre = retirerPointFinal(titre);
 
   return titre || 'Sans titre';
 }
@@ -415,4 +432,5 @@ module.exports = {
   injecterDiapo,
   titreDepuisDiapos,
   titreAvecAccent,
+  retirerPointFinal,
 };
