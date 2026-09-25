@@ -780,6 +780,30 @@ d'ete, conversion correcte confirmee), `timezone: "Europe/Paris"`,
 post programme, non encore publie sur LinkedIn a l'heure de cette verification ; a recuperer le
 26/09/2026 apres 08:30 Paris via un nouvel appel `GET /v1/posts/<id>`.
 
+## Checklist PDF (lead magnet a une page) -- ajoute le 25/09/2026
+
+Le post ci-dessus promet : « Ecrivez-moi "recrutement" en message prive, je vous partage la
+checklist complete. » `generer-checklist-pdf.js` genere ce document (PDF A4, une seule page) a
+partir d'un nouveau gabarit `templates/checklist-a4.html` -- memes polices (Bricolage Grotesque +
+Schibsted Grotesk) et memes couleurs de marque que les diapos carrousel, mais canevas fixe
+794x1123px (A4 a 96dpi) au lieu de 1080x1350. Avant d'ecrire le PDF, le script mesure la position
+reelle du bas du pied de page (Playwright, meme logique que `validerEspacementReel` de
+`generer-pdf.js`) et refuse si elle depasse 1123px -- jamais un document qui deborde sur une
+deuxieme page silencieusement.
+
+Contenu : 10 points actionnables, chacun avec un exemple concret, en continuite directe du
+carrousel source (`a-publier/julien-agency-2026-09-25-test-regles-mail.json`) -- meme chiffre
+source (Yaggo/Ifop, barometre experience candidat, janvier 2026, point 2 de la checklist), meme
+delai de relance (48 heures), meme reseau de recommandations, memes signaux d'un processus qui
+s'essouffle. Aucun chiffre ni temoignage nouveau invente : le seul chiffre cite reprend
+exactement la source deja verifiee du carrousel.
+
+Usage : `node generer-checklist-pdf.js` (pas de parametre -- contenu et sortie codes en dur pour
+ce lead magnet precis). Sortie :
+`a-publier/julien-agency-2026-09-26-checklist-recrutement.pdf`. Le script ecrit aussi un
+`.verif.png` (capture d'ecran du rendu reel) a cote du PDF pour verification visuelle avant tout
+envoi -- fichier de controle, a supprimer avant un commit (pas un livrable).
+
 ## Registre des echecs Composio/LinkedIn (`data/registre-echecs.json`)
 
 **Ne couvre plus le chemin de publication reel de cette skill depuis le 24/09/2026** (bascule
