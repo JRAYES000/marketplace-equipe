@@ -17,6 +17,7 @@
 const fs = require('fs');
 const path = require('path');
 const { presignerFichier, televerserFichier, listerComptes, creerPost } = require('./zernio');
+const { validerAccents } = require('./valider-orthographe');
 
 const COMPTES_CONNUS = ['julien-agency', 'julien-partners'];
 
@@ -120,6 +121,14 @@ async function publierDocumentZernio({ compte, content, publicUrl, documentTitle
   if (!content) throw new Error('content requis (texte du post, deja valide par generer-post.js).');
   if (!publicUrl) throw new Error('publicUrl requis (voir preparerEnvoiZernio).');
   if (!documentTitle) throw new Error('documentTitle requis.');
+  // Ajoute le 25/09/2026 (retour de Julien) : "L'IA declarative" dans le
+  // documentTitle du carrousel publie ce jour n'etait verifie par aucun
+  // garde-fou -- generer-post.js/valider-post.js ne portent que sur le
+  // TEXTE du post, jamais sur ce titre, passe tel quel en argument CLI.
+  // Meme controle que le texte du post (liste fermee des mots toujours
+  // accentues, lib/valider-orthographe.js), applique ici avant tout appel
+  // reseau Zernio.
+  validerAccents(documentTitle);
 
   const { accountId } = await verifierCompteZernio({ compte, apiKey, reglages });
 

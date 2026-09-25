@@ -182,13 +182,18 @@
     color: var(--ink);
   }
 
+  /* Retour de Julien (25/09/2026) : "petit texte gris dur a lire" sur les
+     pages "gros-chiffre" (pages 2 et 3 du carrousel julien-agency du
+     25/09) -- passe de 40px/var(--muted) a 46px/var(--ink), meme
+     traitement que julien-agency.html pour que les deux gabarits restent
+     coherents. */
   .chiffre-legende {
     margin: 24px 0 0 0;
     font-family: 'Schibsted Grotesk', sans-serif;
     font-weight: 400;
-    font-size: 40px;
+    font-size: 46px;
     line-height: 1.4;
-    color: var(--muted);
+    color: var(--ink);
     max-width: 760px;
   }
 
@@ -302,12 +307,17 @@
      contrainte, une vraie image fait deborder le bloc au-dela de l'espace
      disponible et le centrage vertical de .content la fait chevaucher le
      bandeau logo. */
+  /* Hauteur reduite le 25/09/2026 (meme correctif que julien-agency.html --
+     retour de Julien : "le titre touche le trait du haut" sur une diapo
+     checklist avec image). A 480px, le total titre+items+image depassait
+     l'espace vertical disponible de .content -- reduire l'image degage
+     assez de marge pour que le total tienne, centrage vertical inchange. */
   .image-slot {
     flex: none;
     margin-top: 32px;
     border-radius: 24px;
     overflow: hidden;
-    height: 480px;
+    height: 380px;
   }
 
   .image-slot img {

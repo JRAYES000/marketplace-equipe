@@ -35,7 +35,12 @@ function chargerEnvLocal() {
   // minimale du .env local, jamais commite (voir .gitignore racine).
   const cheminEnv = path.join(__dirname, '.env');
   if (!fs.existsSync(cheminEnv)) return;
-  for (const ligne of fs.readFileSync(cheminEnv, 'utf-8').split('\n')) {
+  // Coupe sur \r?\n (pas seulement \n) : un .env avec fins de ligne Windows
+  // (CRLF) laissait un \r final colle a la valeur, que ".*$" ne consomme
+  // jamais (le \r n'est pas capture par "." en JS) -- la ligne entiere ne
+  // matchait alors plus du tout, silencieusement. Trouve le 25/09/2026 en
+  // publiant reellement depuis une session Windows.
+  for (const ligne of fs.readFileSync(cheminEnv, 'utf-8').split(/\r?\n/)) {
     const m = ligne.match(/^([A-Z0-9_]+)=(.*)$/);
     if (m && !process.env[m[1]]) process.env[m[1]] = m[2].trim();
   }

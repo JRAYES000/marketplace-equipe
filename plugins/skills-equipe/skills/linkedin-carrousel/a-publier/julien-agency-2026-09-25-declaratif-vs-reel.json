@@ -40,8 +40,7 @@
       "Personne ne s'en sert sans que vous le rappeliez",
       "Elle ne touche aucun processus récurrent",
       "Vous ne sauriez pas dire ce qu'elle vous fait gagner"
-    ],
-    "image": "a-publier/images/julien-agency-2026-09-25-page5.jpg"
+    ]
   },
   {
     "role": "contenu",
@@ -58,6 +57,16 @@
       "Quelqu'un qui suit, pas seulement qui lance"
     ],
     "image": "a-publier/images/julien-agency-2026-09-25-page7.jpg"
+  },
+  {
+    "role": "contenu",
+    "modele": "checklist",
+    "titre": "Comment choisir votre premier process",
+    "items": [
+      "Il revient chaque semaine, pas une fois par trimestre",
+      "Il est facile à mesurer, pas juste \"ça va plus vite\"",
+      "Quelqu'un peut le suivre sans vous"
+    ]
   },
   {
     "role": "contenu",
