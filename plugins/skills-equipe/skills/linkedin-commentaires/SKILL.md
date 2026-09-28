@@ -20,8 +20,8 @@ aujourd'hui ».
    `reglages-comptes.json`. **Champ obligatoire : `targetUrls`, pas `profiles`** -- avec
    `profiles` l'acteur renvoie zero post sans aucune erreur.
 2. `trierPosts` ecarte les carrousels (`document.totalPageCount` present -- commenter dessus
-   reviendrait a commenter un post non lu) et les posts au-dela de `seuil_max_commentaires`,
-   trie par date decroissante.
+   reviendrait a commenter un post non lu), les posts de groupe LinkedIn (voir "Posts de groupe
+   exclus" plus bas) et les posts au-dela de `seuil_max_commentaires`, trie par date decroissante.
 3. `lib/planifier-commentaires.js` (`filtrerPostsFrais`) ne garde que les posts publies il y a
    moins de 4 heures. `validerQuotaJournalier` refuse un nouveau commentaire si le quota du jour
    (5) est atteint, ou si la meme personne a deja ete commentee aujourd'hui.
@@ -143,6 +143,25 @@ Fichier local, jamais commite (voir `.gitignore` racine, meme regle que
 `data/registre-commentaires.json`) -- a consulter en cas d'investigation future sur un incident
 de publication ou de quota, en complement du registre de succes. Implementation partagee avec
 `linkedin-carrousel` : `plugins/skills-equipe/lib/composio-canal.js`, fonction `journaliserEchec`.
+
+## Posts de groupe exclus (ajoute le 25/09/2026)
+
+**Incident reel** : au second passage du jour, le post le plus frais pour julien-partners
+(0,8h) venait du groupe LinkedIn "NBC Réseaux d'Affaires" (id 9079228). Retenu comme candidat
+prioritaire par la fenetre de fraicheur puis envoye a la publication, il a ete refuse par
+LinkedIn avec un 403 explicite : `Viewer is not authorized by domain with permission
+CommentCreatePermission on urn:li:group:9079228 for resource
+groupsSocialActionAuthorizations`. Ni julien-agency ni julien-partners n'ont la permission de
+commenter dans un groupe LinkedIn, seulement sous un post de profil -- l'echec a ete journalise
+automatiquement dans `data/registre-echecs.json` (voir plus haut), mais le passage a du se
+rabattre sur le candidat suivant, hors de la fenetre de 4h, uniquement parce qu'un post non
+commentable avait pris la place d'un candidat reellement exploitable.
+
+`estPostDeGroupe` (`lib/trouver-posts.js`) ecarte desormais ces posts dans `trierPosts`, **avant
+le tri par fraicheur** -- un post de groupe ne peut donc plus jamais prendre la place d'un
+candidat commentable. Repere mecanique : `shareUrn` au format `urn:li:groupPost:...` (jamais
+`urn:li:share:`/`urn:li:ugcPost:` comme pour un post de profil), ou a defaut `authorUrl`
+pointant vers `linkedin.com/groups/`. Teste par 2 cas dans `test/trierPosts.test.js`.
 
 ## Garde-fous automatiques (refus explicite, jamais un avertissement)
 
