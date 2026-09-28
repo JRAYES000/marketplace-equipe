@@ -17,8 +17,55 @@
 
 const { validerAccents, MOTS_SANS_ACCENT_VERS_CORRECT } = require('./valider-orthographe');
 const { validerAnglicismes } = require('./valider-anglicismes');
+const path = require('node:path');
+const fs = require('node:fs');
 
 const CARACTERES_ACCENTUES = /[àâäéèêëîïôöùûüÿçñÀÂÄÉÈÊËÎÏÔÖÙÛÜŸÇÑ]/;
+
+// Garde-fou ajoute le 28/09/2026 (demande de Julien) : `verifierMotsAccentuesEnGras`
+// ci-dessous ne rattrapait qu'une liste FERMEE de mots (MOTS_SANS_ACCENT_VERS_CORRECT,
+// valider-orthographe.js) -- 3 posts reels sont passes malgre elle ("dependance",
+// "defaillance", "declarent" n'y figuraient pas ; seul "coute" y etait deja). Julien : "il
+// faut un garde-fou, pas une consigne" -- ceci REMPLACE la logique de liste fermee par un
+// vrai dictionnaire francais (~336k mots, package "an-array-of-french-words", MIT,
+// installe en dependance de cette skill). La liste fermee reste utilisee ailleurs
+// (validerAccents, sur le texte HORS gras) : elle n'est pas retiree, seulement doublee ici
+// par un filet plus large la ou l'incident a eu lieu.
+const DICTIONNAIRE = JSON.parse(
+  fs.readFileSync(path.join(__dirname, '..', 'node_modules', 'an-array-of-french-words', 'index.json'), 'utf8')
+);
+const DICT_SET = new Set(DICTIONNAIRE.map((m) => m.toLowerCase()));
+const sansAccentMot = (s) => s.normalize('NFD').replace(/[̀-ͯ]/g, '');
+const INDEX_SANS_ACCENT = new Map();
+for (const mot of DICTIONNAIRE) {
+  const motMin = mot.toLowerCase();
+  const norm = sansAccentMot(motMin);
+  if (norm === motMin) continue;
+  if (!INDEX_SANS_ACCENT.has(norm)) INDEX_SANS_ACCENT.set(norm, new Set());
+  INDEX_SANS_ACCENT.get(norm).add(motMin);
+}
+
+/**
+ * Signale, dans un segment de gras encore en ASCII (pas converti), tout mot dont la
+ * forme SANS accent n'est pas un mot francais valide mais dont la forme AVEC accent
+ * existe reellement dans le dictionnaire (ex. "coute" absent, "coûte" present ->
+ * signale). Un mot absent du dictionnaire et SANS forme accentuee connue (anglicisme,
+ * nom propre, "process", "Claude Partners"...) n'est jamais signale a tort.
+ */
+function motsAccentManquantDictionnaire(segment) {
+  const mots = segment.match(/[a-zA-Z]+(?:['’-][a-zA-Z]+)*/g) || [];
+  const fautifs = [];
+  for (const motBrut of mots) {
+    const mot = motBrut.toLowerCase();
+    if (mot.length < 2) continue;
+    if (DICT_SET.has(mot)) continue;
+    const candidats = INDEX_SANS_ACCENT.get(mot);
+    if (candidats && candidats.size > 0) {
+      fautifs.push(`"${motBrut}" (accente attendu : "${[...candidats].join('" ou "')}")`);
+    }
+  }
+  return fautifs;
+}
 
 // Retour de Julien (25/09/2026, carrousel urn:li:ugcPost:7509117168333287425) :
 // le texte du post d'un CARROUSEL repetait le carrousel lui-meme -- consigne
@@ -94,6 +141,17 @@ function verifierMotsAccentuesEnGras(segment) {
         `Sortez-le du passage en gras (ecrivez-le en clair, correctement accentue) ou reformulez.`
       );
     }
+  }
+  // Filet dictionnaire (28/09/2026) : voir la note plus haut -- rattrape tout mot que la
+  // liste fermee ci-dessus ne couvre pas encore ("dependance", "defaillance", "declarent"
+  // au moment de l'incident).
+  const motsFautifs = motsAccentManquantDictionnaire(segment);
+  if (motsFautifs.length > 0) {
+    throw new Error(
+      `Post refuse : le passage en gras "${segment}" contient un accent retire a tort -- ` +
+      `${motsFautifs.join(' ; ')}. Reformulez avec un mot qui n'a naturellement pas d'accent, ` +
+      `ne le retirez jamais d'un mot qui en a besoin.`
+    );
   }
 }
 

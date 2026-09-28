@@ -1,16 +1,16 @@
 {
   "name": "linkedin-carrousel",
   "private": true,
-  "version": "1.5.2",
+  "version": "1.3.5",
   "description": "Generation de carrousels LinkedIn (PDF multi-page) a partir des templates HTML de la skill",
   "type": "commonjs",
   "scripts": {
     "generer-pdf": "node generer-pdf.js",
     "generer-images": "node generer-images.js",
-    "publier-zernio": "node publier-zernio.js",
     "test": "node --test"
   },
   "dependencies": {
+    "an-array-of-french-words": "^2.0.0",
     "playwright": "^1.48.0"
   }
 }

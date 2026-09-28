@@ -35,6 +35,36 @@ test('refuse un gras accentue -- cas demande', () => {
   assert.throws(() => convertirGras(brouillon), /gras "trois signes déjà là" contient un accent/);
 });
 
+// Garde-fou ajoute le 28/09/2026 (demande de Julien) : dictionnaire francais reel en
+// plus de la liste fermee MOTS_SANS_ACCENT_VERS_CORRECT, qui ne couvrait pas ces 4 cas
+// reels ("dependance", "defaillance", "declarent" absents de la liste ; "coute" y etait
+// deja mais le filet dictionnaire le rattrape aussi, de la meme facon). Rejoues mot pour
+// mot, jamais paraphrases.
+test('refuse un gras avec "dependance" (accent retire a tort) -- cas reel', () => {
+  const brouillon = BROUILLON_CONFORME.replace('**trois signes**', '**la dependance a cet outil**');
+  assert.throws(() => convertirGras(brouillon), /dependance.*d[ée]pendance|d[ée]pendance.*dependance/);
+});
+
+test('refuse un gras avec "coute" (accent retire a tort) -- cas reel', () => {
+  const brouillon = BROUILLON_CONFORME.replace('**trois signes**', '**ca coute cher**');
+  assert.throws(() => convertirGras(brouillon), /coute/);
+});
+
+test('refuse un gras avec "defaillance" (accent retire a tort) -- cas reel', () => {
+  const brouillon = BROUILLON_CONFORME.replace('**trois signes**', '**un point de defaillance**');
+  assert.throws(() => convertirGras(brouillon), /defaillance.*d[ée]faillance|d[ée]faillance.*defaillance/);
+});
+
+test('refuse un gras avec "declarent" (accent retire a tort) -- cas reel', () => {
+  const brouillon = BROUILLON_CONFORME.replace('**trois signes**', '**ils declarent tout**');
+  assert.throws(() => convertirGras(brouillon), /declarent.*d[ée]clarent|d[ée]clarent.*declarent/);
+});
+
+test('n\'accuse pas a tort un mot sans equivalent accentue en francais (anglicisme, nom propre)', () => {
+  const brouillon = BROUILLON_CONFORME.replace('**trois signes**', '**Claude Partners et le logiciel**');
+  assert.doesNotThrow(() => convertirGras(brouillon));
+});
+
 test('refuse un post sans aucun gras', () => {
   const sansGras = BROUILLON_CONFORME.replace(/\*\*/g, '');
   assert.throws(() => validerEtConvertirPost(sansGras), /aucun passage en gras/);

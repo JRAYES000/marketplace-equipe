@@ -3,10 +3,22 @@
 // que par un sous-processus CLI -- aucun test n'existait avant cette date pour cette
 // skill (contrairement a linkedin-carrousel et linkedin-veille-virale).
 //
+// Critere "aucun accent manquant dans le gras" ajoute le 28/09/2026 : garde-fou demande
+// par Julien apres 3 incidents reels (posts publies avec "dependance", "coute",
+// "defaillance" en gras -- des mots qui existent en francais mais UNIQUEMENT sous leur
+// forme accentuee, jamais "corriges" en amont car la regle 2 ne verifiait que l'ABSENCE
+// d'accent dans le gras, jamais la VALIDITE du mot une fois l'accent retire). Julien : "il
+// faut un garde-fou, pas une consigne". Voir plus bas (DICTIONNAIRE, INDEX_SANS_ACCENT,
+// motsAccentManquant) pour le mecanisme, et lib.mjs (an-array-of-french-words, ~336k
+// mots) pour la source du dictionnaire -- jamais une liste maison, qui aurait fini par
+// rater le mot suivant.
+//
 // Le brouillon se donne en markdown (**ainsi**) ou deja converti en gras Unicode : les
 // deux formes comptent, sur les DEUX polices "gras" Unicode reellement vues en usage --
 // voir POLICES ci-dessous, trouve le 22/09/2026 en verifiant les 3 posts de veille deja
 // publies (Bernard Marr 18/09, Andrew Ng 21/09) contre les 9 criteres d'origine.
+
+import { readFileSync } from "node:fs";
 
 // Mathematical Sans-Serif Bold -- celle que fabrique enGras() ci-dessous, choisie par
 // Julien le 18/09/2026 (SKILL.md, regle 2). Aucune lettre accentuee n'existe dans ce
@@ -24,6 +36,50 @@ const SANS_SERIF = { maj: 0x1d5d4, min: 0x1d5ee, chiffres: 0x1d7ec };
 // n'a pas non plus de forme accentuee (le bloc Mathematical Alphanumeric Symbols
 // entier n'en a pour aucune police, quelle qu'elle soit).
 const SERIF = { maj: 0x1d400, min: 0x1d41a, chiffres: 0x1d7ce };
+
+// Dictionnaire francais (~336k mots, avec accents) -- charge une seule fois au chargement
+// du module. Source : package "an-array-of-french-words" (MIT), installe en dependance
+// de cette skill le 28/09/2026 pour ce garde-fou precisement. Jamais de liste maison :
+// une liste ecrite a la main aurait couvert les 4 cas connus et rate le 5e.
+const CHEMIN_DICTIONNAIRE = new URL("../node_modules/an-array-of-french-words/index.json", import.meta.url);
+const DICTIONNAIRE = JSON.parse(readFileSync(CHEMIN_DICTIONNAIRE, "utf8"));
+const DICT_SET = new Set(DICTIONNAIRE.map((m) => m.toLowerCase()));
+
+const sansAccent = (s) => s.normalize("NFD").replace(/[̀-ͯ]/g, "");
+
+// Pour chaque mot du dictionnaire qui contient un accent, indexe sa forme sans accent ->
+// l'ensemble de ses formes accentuees reelles. Un mot deja sans accent dans le
+// dictionnaire (ex. "process") n'est jamais indexe ici : rien ne le signalera donc a
+// tort, meme s'il est absent du dictionnaire (anglicismes, noms propres, "Claude
+// Partners"...) -- seul un mot dont la forme accentuee EXISTE reellement declenche une
+// alerte.
+const INDEX_SANS_ACCENT = new Map();
+for (const mot of DICTIONNAIRE) {
+  const motMin = mot.toLowerCase();
+  const norm = sansAccent(motMin);
+  if (norm === motMin) continue;
+  if (!INDEX_SANS_ACCENT.has(norm)) INDEX_SANS_ACCENT.set(norm, new Set());
+  INDEX_SANS_ACCENT.get(norm).add(motMin);
+}
+
+// Extrait les mots d'un segment de gras deja ramene en ASCII (versAscii applique en amont
+// si besoin) et signale ceux dont la forme SANS accent n'est pas un mot francais valide,
+// mais dont une forme AVEC accent existe dans le dictionnaire. Ignore les mots de moins de
+// 2 lettres (evite "a"/"c" etc., ambigus et sans risque de sens).
+function motsAccentManquant(segmentAscii) {
+  const mots = segmentAscii.match(/[a-zA-Z]+(?:['’-][a-zA-Z]+)*/g) || [];
+  const fautifs = [];
+  for (const motBrut of mots) {
+    const mot = motBrut.toLowerCase();
+    if (mot.length < 2) continue;
+    if (DICT_SET.has(mot)) continue;
+    const candidats = INDEX_SANS_ACCENT.get(mot);
+    if (candidats && candidats.size > 0) {
+      fautifs.push(`"${motBrut}" (accente attendu : "${[...candidats].join('" ou "')}")`);
+    }
+  }
+  return fautifs;
+}
 
 const BASES_ECRITURE = [
   [0x41, 0x5a, SANS_SERIF.maj],
@@ -229,6 +285,16 @@ export function verifierTexte(corps) {
   resultats.push(dire(gras.length >= 8, "au moins 8 passages en gras", `${gras.length} trouve(s)`));
   const fautifs = gras.filter((g) => ACCENTUE.test(g.replace(EMOJI_G, "").replace(UNICODE_GRAS, "")));
   resultats.push(dire(fautifs.length === 0, "aucun gras accentue", fautifs.length ? fautifs.join(" | ") : "tous sans accent"));
+
+  // Nouveau critere (28/09/2026) : voir l'en-tete de fichier. Chaque segment gras est
+  // ramene en ASCII (deja le cas pour le markdown, versAscii() pour l'Unicode deja
+  // converti), puis chaque mot est compare au dictionnaire -- voir motsAccentManquant().
+  const motsFautifs = gras.flatMap((g) => motsAccentManquant(versAscii(g)));
+  resultats.push(dire(
+    motsFautifs.length === 0,
+    "aucun accent manquant dans le gras",
+    motsFautifs.length ? motsFautifs.join(" ; ") : "tous les mots verifies au dictionnaire"
+  ));
 
   // Nouveau critere (22/09/2026) : le gras deja converti doit etre dans la police que
   // Julien a choisie (Sans-Serif Bold), pas l'autre (voir SERIF plus haut). Un
