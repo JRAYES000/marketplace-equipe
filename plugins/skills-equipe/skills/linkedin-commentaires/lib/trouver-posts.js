@@ -75,13 +75,41 @@ async function trouverPosts({
 }
 
 /**
+ * Detecte un post publie dans un groupe LinkedIn plutot que sur le profil
+ * d'une personne -- repere mecanique : `shareUrn` au format
+ * `urn:li:groupPost:...` (jamais `urn:li:share:` ou `urn:li:ugcPost:` comme
+ * pour un post de profil), ou a defaut `authorUrl` pointant vers
+ * `linkedin.com/groups/`.
+ *
+ * Incident reel (25/09/2026) : le post le plus frais du jour pour
+ * julien-partners venait du groupe "NBC Réseaux d'Affaires" (id 9079228).
+ * Une fois retenu comme candidat prioritaire (fraicheur 0,8h) et envoye a la
+ * publication, LinkedIn a refuse avec un 403 explicite : "Viewer is not
+ * authorized by domain with permission CommentCreatePermission on
+ * urn:li:group:9079228 for resource groupsSocialActionAuthorizations" --
+ * aucun des deux comptes (julien-agency, julien-partners) n'a la permission
+ * de commenter dans un groupe LinkedIn, seulement sous un post de profil.
+ * Le passage a du se rabattre sur le candidat suivant, hors de la fenetre de
+ * fraicheur de 4h, uniquement parce qu'un post non commentable avait pris la
+ * place du premier candidat reellement exploitable. `estPostDeGroupe` ecarte
+ * desormais ces posts avant meme le tri par fraicheur, pour qu'ils ne
+ * concurrencent plus jamais un candidat commentable.
+ */
+function estPostDeGroupe(post) {
+  if (post.shareUrn && post.shareUrn.startsWith('urn:li:groupPost:')) return true;
+  if (post.authorUrl && post.authorUrl.includes('linkedin.com/groups/')) return true;
+  return false;
+}
+
+/**
  * Tri : ecarte les carrousels (repere mecanique : document.totalPageCount
  * present -- leur contenu vit dans les pages, pas dans le texte du post, donc
- * commenter dessus reviendrait a commenter un post non lu), et les posts
- * au-dela du seuil de commentaires configure. Garde `shareUrn`, qui est ce
- * qu'il faut passer tel quel en `object` et `target_urn` de
- * LINKEDIN_CREATE_COMMENT_ON_POST -- une URN `urn:li:activity:` est refusee
- * par l'API.
+ * commenter dessus reviendrait a commenter un post non lu), les posts de
+ * groupe LinkedIn (voir `estPostDeGroupe`, aucun compte n'a la permission d'y
+ * commenter), et les posts au-dela du seuil de commentaires configure. Garde
+ * `shareUrn`, qui est ce qu'il faut passer tel quel en `object` et
+ * `target_urn` de LINKEDIN_CREATE_COMMENT_ON_POST -- une URN
+ * `urn:li:activity:` est refusee par l'API.
  *
  * Audit adversarial du 15/09/2026 : un element `null`/non-objet au milieu du
  * tableau (reponse Apify malformee) plantait avec un TypeError brut
@@ -93,8 +121,9 @@ function trierPosts(posts, { maxCommentaires = 30 } = {}) {
   return posts
     .filter((post) => post !== null && typeof post === 'object')
     .filter((post) => !(post.document && typeof post.document.totalPageCount === 'number'))
+    .filter((post) => !estPostDeGroupe(post))
     .filter((post) => (post.commentsCount ?? 0) <= maxCommentaires)
     .sort((a, b) => new Date(b.postedAt || 0) - new Date(a.postedAt || 0));
 }
 
-module.exports = { trouverPosts, trierPosts, normaliserPost };
+module.exports = { trouverPosts, trierPosts, normaliserPost, estPostDeGroupe };
