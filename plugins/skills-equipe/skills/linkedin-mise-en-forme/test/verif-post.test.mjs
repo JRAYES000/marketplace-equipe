@@ -28,20 +28,20 @@ const CONFORME = [
   "",
   "\u{26A1} **Trois gestes**",
   "",
-  "On evite les **memes questions posees deux fois**. On repond sous deux jours. On explique chaque etape.",
+  "On evite les **questions qui reviennent sans cesse**. On repond sous deux jours. On explique chaque etape.",
   "",
   "\u{2705} **Ce qui reste**",
   "",
-  "Le **silence total apres l'entretien** cree plus de degats que n'importe quel refus explique. Voici " +
+  "Le **silence total suivant l'entretien** cree plus de degats que n'importe quel refus explique. Voici " +
     "Ce post sert uniquement de gabarit de test pour verifier automatiquement les regles de forme. ".repeat(9).trim(),
   "",
-  "Les **trois signes a reperer** tiennent en une phrase, et **dix minutes suffisent** pour les corriger.",
+  "Les **trois signes a noter** tiennent en une phrase, et **dix minutes suffisent** pour les corriger.",
 ].join("\n");
 
-test("fixture conforme : 13/13 criteres passes", () => {
+test("fixture conforme : 14/14 criteres passes", () => {
   const { resultats, passes, total } = verifierTexte(CONFORME);
-  assert.equal(total, 13);
-  assert.equal(passes, 13, resultats.filter((r) => !r.bon).map((r) => `${r.nom}: ${r.detail}`).join("; "));
+  assert.equal(total, 14);
+  assert.equal(passes, 14, resultats.filter((r) => !r.bon).map((r) => `${r.nom}: ${r.detail}`).join("; "));
 });
 
 test("enGras fabrique du Sans-Serif Bold, jamais l'autre police -- verifie par point de code", () => {
@@ -93,7 +93,7 @@ test("longueur hors fourchette 1300-1900 refusee", () => {
 
 test("moins de 8 passages en gras refuse", () => {
   const corps = CONFORME.replace(/\*\*(process trop lent)\*\*/, "$1")
-    .replace(/\*\*(memes questions posees deux fois)\*\*/, "$1");
+    .replace(/\*\*(questions qui reviennent sans cesse)\*\*/, "$1");
   const { resultats } = verifierTexte(corps);
   const r = resultats.find((x) => x.nom === "au moins 8 passages en gras");
   assert.equal(r.bon, false);
@@ -317,6 +317,60 @@ test("un texte qui contient reellement \"commentez\" et \"oui\" sans lien entre 
   );
   const { resultats } = verifierTexte(corps);
   const r = resultats.find((x) => x.nom === "aucune formulation interdite");
+  assert.equal(r.bon, true, r.detail);
+});
+
+// Nouveau critere (28/09/2026) : garde-fou demande par Julien apres 3 incidents reels sur
+// des posts publies avec un accent retire dans le gras pour un mot qui n'existe QUE sous
+// sa forme accentuee ("dependance", "coute", "defaillance"), plus "declarent" trouve dans
+// la meme relecture. Les 4 cas sont rejoues ici mot pour mot, jamais paraphrases.
+test("un gras contenant \"dependance\" (mot valide seulement accentue : dependance) est refuse", () => {
+  const corps = CONFORME.replace("**process trop lent**", "**la dependance au meme outil**");
+  const { resultats } = verifierTexte(corps);
+  const r = resultats.find((x) => x.nom === "aucun accent manquant dans le gras");
+  assert.equal(r.bon, false);
+  assert.match(r.detail, /dependance/);
+  assert.match(r.detail, /d[ée]pendance/);
+});
+
+test("un gras contenant \"coute\" (mot valide seulement accentue : coute) est refuse", () => {
+  const corps = CONFORME.replace("**process trop lent**", "**ca coute cher**");
+  const { resultats } = verifierTexte(corps);
+  const r = resultats.find((x) => x.nom === "aucun accent manquant dans le gras");
+  assert.equal(r.bon, false);
+  assert.match(r.detail, /"coute"/);
+  assert.match(r.detail, /co[uû]te/);
+});
+
+test("un gras contenant \"defaillance\" (mot valide seulement accentue : defaillance) est refuse", () => {
+  const corps = CONFORME.replace("**process trop lent**", "**un point de defaillance**");
+  const { resultats } = verifierTexte(corps);
+  const r = resultats.find((x) => x.nom === "aucun accent manquant dans le gras");
+  assert.equal(r.bon, false);
+  assert.match(r.detail, /defaillance/);
+  assert.match(r.detail, /d[ée]faillance/);
+});
+
+test("un gras contenant \"declarent\" (mot valide seulement accentue : declarent) est refuse", () => {
+  const corps = CONFORME.replace("**process trop lent**", "**ils declarent tout**");
+  const { resultats } = verifierTexte(corps);
+  const r = resultats.find((x) => x.nom === "aucun accent manquant dans le gras");
+  assert.equal(r.bon, false);
+  assert.match(r.detail, /declarent/);
+  assert.match(r.detail, /d[ée]clarent/);
+});
+
+test("un mot sans accent qui n'existe pas en francais accentue (anglicisme, nom propre) n'est pas signale a tort", () => {
+  const corps = CONFORME.replace("**process trop lent**", "**Claude Partners et le process**");
+  const { resultats } = verifierTexte(corps);
+  const r = resultats.find((x) => x.nom === "aucun accent manquant dans le gras");
+  assert.equal(r.bon, true, r.detail);
+});
+
+test("un mot deja accentue correctement dans le gras (donc deja refuse par \"aucun gras accentue\") n'est pas en plus signale ici", () => {
+  const corps = CONFORME.replace("**process trop lent**", "**la dépendance au même outil**");
+  const { resultats } = verifierTexte(corps);
+  const r = resultats.find((x) => x.nom === "aucun accent manquant dans le gras");
   assert.equal(r.bon, true, r.detail);
 });
 
