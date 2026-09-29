@@ -20,6 +20,7 @@
  */
 const fs = require('fs');
 const path = require('path');
+const { chargerEnvLocal } = require('./lib/charger-env');
 const { trierPosts, recupererPosts } = require('./lib/veille');
 const { validerAccents } = require('./lib/valider-orthographe');
 const { convertirGras, validerMiseEnForme } = require('./lib/valider-mise-en-forme');
@@ -160,6 +161,8 @@ async function executerPourCompte(compte, config, { cheminRegistre } = {}) {
 }
 
 async function main() {
+  chargerEnvLocal();
+
   const resultats = {};
   for (const [compte, config] of Object.entries(reglages)) {
     resultats[compte] = await executerPourCompte(compte, config);

@@ -1,6 +1,6 @@
 'use strict';
 
-const test = require('node:test');
+const { test, before, after } = require('node:test');
 const assert = require('node:assert/strict');
 const { executerPourCompte } = require('../dry-run');
 const reglages = require('../reglages-comptes.json');
@@ -10,9 +10,20 @@ const reglages = require('../reglages-comptes.json');
 // retienne, plutot que de dependre de la date reelle du jour d'execution.
 const MAINTENANT_FIXTURE = new Date('2026-09-10T09:30:00.000Z');
 
-test('dry run produit un candidat valide pour chaque compte sans appeler de publication', async () => {
-  assert.equal(process.env.APIFY_TOKEN, undefined, 'ce test suppose un environnement sans APIFY_TOKEN (chemin fixture)');
+// Isole APIFY_TOKEN pour forcer le chemin fixture, plutot que de supposer un
+// environnement sans jeton (une vraie cle peut deja vivre dans
+// l'environnement de la session).
+let apifyTokenSauvegarde;
+before(() => {
+  apifyTokenSauvegarde = process.env.APIFY_TOKEN;
+  delete process.env.APIFY_TOKEN;
+});
+after(() => {
+  if (apifyTokenSauvegarde === undefined) delete process.env.APIFY_TOKEN;
+  else process.env.APIFY_TOKEN = apifyTokenSauvegarde;
+});
 
+test('dry run produit un candidat valide pour chaque compte sans appeler de publication', async () => {
   for (const [compte, config] of Object.entries(reglages)) {
     const resultat = await executerPourCompte(compte, config, { maintenant: MAINTENANT_FIXTURE });
 

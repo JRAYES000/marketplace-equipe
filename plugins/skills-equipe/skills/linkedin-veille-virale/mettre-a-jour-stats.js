@@ -13,6 +13,7 @@
  *
  * Necessite NOTION_TOKEN et le dataSourceId de la base "Veille & posts".
  */
+const { chargerEnvLocal } = require('./lib/charger-env');
 const { mettreAJourStatistiques7j } = require('./lib/notion');
 
 function parseArgs(argv) {
@@ -29,6 +30,8 @@ function parseArgs(argv) {
 }
 
 async function main() {
+  chargerEnvLocal();
+
   const args = parseArgs(process.argv.slice(2));
   const dataSourceId = args.dataSourceId || process.env.NOTION_VEILLE_DATA_SOURCE_ID;
   if (!dataSourceId) {

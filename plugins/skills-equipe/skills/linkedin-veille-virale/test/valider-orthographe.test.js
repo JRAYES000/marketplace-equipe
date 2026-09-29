@@ -1,9 +1,23 @@
 'use strict';
 
-const test = require('node:test');
+const { test, before, after } = require('node:test');
 const assert = require('node:assert/strict');
 const { validerAccents } = require('../lib/valider-orthographe');
 const { executerPourCompte } = require('../dry-run');
+
+// Isole APIFY_TOKEN pour forcer le chemin fixture dans executerPourCompte
+// plus bas (voir test/dry-run.test.js) : sans ca, une vraie cle presente
+// dans l'environnement de la session declenche un vrai appel Apify au lieu
+// du jeu fixture attendu par ce test.
+let apifyTokenSauvegarde;
+before(() => {
+  apifyTokenSauvegarde = process.env.APIFY_TOKEN;
+  delete process.env.APIFY_TOKEN;
+});
+after(() => {
+  if (apifyTokenSauvegarde === undefined) delete process.env.APIFY_TOKEN;
+  else process.env.APIFY_TOKEN = apifyTokenSauvegarde;
+});
 
 test('accepte un texte correctement accentue', () => {
   assert.doesNotThrow(() => validerAccents('Le délai a été respecté, comme prévu.'));

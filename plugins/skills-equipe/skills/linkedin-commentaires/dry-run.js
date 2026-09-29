@@ -28,6 +28,7 @@
  */
 const fs = require('fs');
 const path = require('path');
+const { chargerEnvLocal } = require('./lib/charger-env');
 const { trierPosts, trouverPosts } = require('./lib/trouver-posts');
 const { filtrerPostsFrais, validerQuotaJournalier, dateJourISO, QUOTA_MAX_PAR_JOUR } = require('./lib/planifier-commentaires');
 const { validerCommentaire } = require('./lib/valider-commentaire');
@@ -125,6 +126,8 @@ async function executerPourCompte(compte, config, { maintenant = new Date(), che
 }
 
 async function main() {
+  chargerEnvLocal();
+
   const resultats = {};
   for (const [compte, config] of Object.entries(reglages)) {
     resultats[compte] = await executerPourCompte(compte, config);
