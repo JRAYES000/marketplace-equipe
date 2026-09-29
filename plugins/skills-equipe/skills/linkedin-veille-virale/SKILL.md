@@ -85,6 +85,7 @@ duree) tant qu'une ligne `Source : ...` finale couvre le post -- le code modifie
    (`lib/registre.js`), pas une simple limite documentee. Voir "Garde-fou -- quota hebdomadaire"
    plus bas.
 6. `dry-run.js` execute les etapes 1-3 et le controle de quota sans jamais appeler `publierPost`.
+   Sortie ecrite dans `dry-run-sortie/dernier-dry-run.json` (non suivi, `.gitignore`) : la fixture versionnee n'est jamais reecrite (29/09/2026).
    Bascule sur le jeu fixture des que `APIFY_TOKEN` est absent (a lui seul, meme si
    `comptes_a_surveiller` est rempli) et/ou que `comptes_a_surveiller` est vide.
 

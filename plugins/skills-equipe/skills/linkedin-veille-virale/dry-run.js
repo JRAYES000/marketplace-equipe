@@ -168,10 +168,11 @@ async function main() {
     resultats[compte] = await executerPourCompte(compte, config);
   }
 
-  // Nom de fichier explicite : ce resultat vient du jeu FIXTURE
-  // (fixtures/posts-exemple.json), pas d'un vrai appel Apify -- voir
-  // chargerPosts() ci-dessus et le champ "source" de chaque entree.
-  const sortiePath = path.join(__dirname, 'dry-run-sortie', 'veille-exemple-fixture.json');
+  // Sortie dans un fichier NON SUIVI (.gitignore : dry-run-sortie/dernier-dry-run.json).
+  // Avant le 29/09/2026 ce script reecrivait veille-exemple-fixture.json, versionne :
+  // un dry-run avec une cle Apify reelle y deposait des identifiants de posts LinkedIn
+  // reels dans un depot public. La fixture n'est plus jamais ecrite ici.
+  const sortiePath = path.join(__dirname, 'dry-run-sortie', 'dernier-dry-run.json');
   fs.mkdirSync(path.dirname(sortiePath), { recursive: true });
   fs.writeFileSync(sortiePath, JSON.stringify(resultats, null, 2), 'utf8');
 

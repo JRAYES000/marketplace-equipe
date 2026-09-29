@@ -15,6 +15,7 @@ sortants/
 # Sortie du dry-run de linkedin-commentaires (peut contenir des identifiants de posts
 # reels si une cle Apify est chargee) -- 29/09/2026, la fixture versionnee n'est plus reecrite.
 **/linkedin-commentaires/dry-run-sortie/dernier-dry-run.json
+**/linkedin-veille-virale/dry-run-sortie/dernier-dry-run.json
 
 # Registre des echecs Composio/LinkedIn (17/09/2026, suite) -- meme raison que
 # ci-dessus : donnee d'execution locale, jamais du code.
