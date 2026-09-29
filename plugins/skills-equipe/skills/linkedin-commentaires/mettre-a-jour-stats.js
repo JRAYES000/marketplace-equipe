@@ -22,6 +22,7 @@
  * commentaire. Utiliser `node enregistrer-releve-profil.js` a la place, UNE
  * fois par jour, jamais une fois par commentaire.
  */
+const { chargerEnvLocal } = require('./lib/charger-env');
 const { mettreAJourStatistiques } = require('./lib/notion');
 
 function parseArgs(argv) {
@@ -38,6 +39,8 @@ function parseArgs(argv) {
 }
 
 async function main() {
+  chargerEnvLocal();
+
   const args = parseArgs(process.argv.slice(2));
   // Verifie d'abord l'usage de flags retires : une erreur de commande pure,
   // independante de la configuration Notion -- inutile de faire chercher

@@ -1,8 +1,20 @@
 'use strict';
 
-const test = require('node:test');
+const { test, before, after } = require('node:test');
 const assert = require('node:assert/strict');
 const { calculerComparaisonHebdomadaire, ecrireBlocComparaisonHebdomadaire } = require('../lib/notion');
+
+// Isole NOTION_TOKEN pour le test "refuse sans NOTION_TOKEN" plus bas (voir
+// notion-erreurs.test.js) : ne suppose jamais un environnement sans jeton.
+let notionTokenSauvegarde;
+before(() => {
+  notionTokenSauvegarde = process.env.NOTION_TOKEN;
+  delete process.env.NOTION_TOKEN;
+});
+after(() => {
+  if (notionTokenSauvegarde === undefined) delete process.env.NOTION_TOKEN;
+  else process.env.NOTION_TOKEN = notionTokenSauvegarde;
+});
 
 // Vue de comparaison demandee par le brief (section 6, "le coeur de la
 // skill") : commentaires de la semaine cote a cote avec vues de profil et

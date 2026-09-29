@@ -9,9 +9,12 @@
  *
  * Usage : node creer-page-notion.js
  */
+const { chargerEnvLocal } = require('./lib/charger-env');
 const { creerBaseVeilleEtPosts, creerVuesParCompte } = require('./lib/notion');
 
 async function main() {
+  chargerEnvLocal();
+
   const parentPageId = process.env.NOTION_PARENT_PAGE_ID;
   if (!parentPageId) {
     console.error(

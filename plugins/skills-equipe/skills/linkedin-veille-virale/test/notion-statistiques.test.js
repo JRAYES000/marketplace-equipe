@@ -1,6 +1,6 @@
 'use strict';
 
-const test = require('node:test');
+const { test, before, after } = require('node:test');
 const assert = require('node:assert/strict');
 const { retrouverEntreeParTitre, mettreAJourStatistiques7j } = require('../lib/notion');
 
@@ -8,6 +8,18 @@ const { retrouverEntreeParTitre, mettreAJourStatistiques7j } = require('../lib/n
 // principe que linkedin-commentaires -- aucun OCR ici, la session Claude
 // lit l'image, ces fonctions ecrivent juste ce qui a ete lu. Testable sans
 // reseau : NOTION_TOKEN absent leve avant tout appel HTTP.
+//
+// Isole NOTION_TOKEN explicitement (voir linkedin-commentaires/test/
+// notion-erreurs.test.js) : ne suppose jamais un environnement sans jeton.
+let notionTokenSauvegarde;
+before(() => {
+  notionTokenSauvegarde = process.env.NOTION_TOKEN;
+  delete process.env.NOTION_TOKEN;
+});
+after(() => {
+  if (notionTokenSauvegarde === undefined) delete process.env.NOTION_TOKEN;
+  else process.env.NOTION_TOKEN = notionTokenSauvegarde;
+});
 
 test('retrouverEntreeParTitre refuse sans NOTION_TOKEN, message explicite', async () => {
   await assert.rejects(

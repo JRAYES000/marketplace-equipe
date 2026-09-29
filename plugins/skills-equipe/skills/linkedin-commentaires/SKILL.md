@@ -102,6 +102,18 @@ recente correcte mais precedee d'un trou de plusieurs mois) -- a reevaluer a par
 
 ## Variables d'environnement (`.env.example`)
 
+**Chargement autonome (ajoute le 29/09/2026)** : chaque script CLI de cette skill
+(`dry-run.js`, `creer-page-notion.js`, `mettre-a-jour-stats.js`) appelle `chargerEnvLocal()`
+(`lib/charger-env.js`) en tout debut d'execution -- meme mecanisme exact que
+`linkedin-carrousel/publier-zernio.js` (coupe sur `/\r?\n/`, jamais d'ecrasement d'une
+variable deja definie dans l'environnement, aucune valeur jamais affichee ni ecrite ailleurs).
+Lit `.env` a la racine de la skill s'il existe -- rien ne change si le fichier est absent. Si
+une cle manque encore apres ce chargement, le script concerne s'arrete avec un message
+explicite (quelle cle, dans quel fichier la definir) : aucun de ces trois scripts ne bascule
+en silence sur des donnees fixture faute de cle (seul `dry-run.js` a un repli fixture
+delibere pour `APIFY_TOKEN`, documente et etiquete dans son champ `source`, jamais pour les
+cles Notion/Composio).
+
 - **`APIFY_TOKEN`** -- requis pour `trouverPosts` ; sans lui, repli fixture (voir plus haut).
 - **`NOTION_TOKEN`** + **`NOTION_PARENT_PAGE_ID`** -- pour la base "Commentaires" (suivi a 3
   jours). `NOTION_PARENT_PAGE_ID` est l'ID de la page Notion **deja partagee avec

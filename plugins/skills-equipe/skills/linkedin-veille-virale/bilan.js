@@ -14,6 +14,7 @@
  * Necessite NOTION_TOKEN et le dataSourceId de la base "Veille & posts"
  * (ou NOTION_VEILLE_DATA_SOURCE_ID dans l'environnement).
  */
+const { chargerEnvLocal } = require('./lib/charger-env');
 const { recupererEntreesRecentes, calculerBilan } = require('./lib/notion');
 
 const COMPTES = ['page-claude', 'julien-agency', 'julien-partners'];
@@ -36,6 +37,8 @@ function formatterLigne({ nom, nombre, scoreMoyen }) {
 }
 
 async function main() {
+  chargerEnvLocal();
+
   const args = parseArgs(process.argv.slice(2));
   const compte = args._[0];
   if (!compte || !COMPTES.includes(compte)) {
