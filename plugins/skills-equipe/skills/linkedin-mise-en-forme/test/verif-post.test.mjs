@@ -20,11 +20,11 @@ const enGrasSerif = (s) => [...s].map((c) => {
 // mecaniquement les douze criteres. Sert de reference : toute regression sur un
 // critere existant doit d'abord casser ce test-la.
 const CONFORME = [
-  "**Et si votre process de recrutement faisait fuir vos meilleurs candidats sans que vous le voyiez ?**",
+  "**Et si votre processus de recrutement faisait fuir vos meilleurs candidats sans que vous le voyiez ?**",
   "",
   "\u{1F449} **Le constat**",
   "",
-  "Un **process trop lent** coute des candidats avant meme l'offre. Personne ne s'en rend compte a temps.",
+  "Un **processus trop lent** coute des candidats avant meme l'offre. Personne ne s'en rend compte a temps.",
   "",
   "\u{26A1} **Trois gestes**",
   "",
@@ -38,10 +38,10 @@ const CONFORME = [
   "Les **trois signes a noter** tiennent en une phrase, et **dix minutes suffisent** pour les corriger.",
 ].join("\n");
 
-test("fixture conforme : 14/14 criteres passes", () => {
+test("fixture conforme : 15/15 criteres passes", () => {
   const { resultats, passes, total } = verifierTexte(CONFORME);
-  assert.equal(total, 14);
-  assert.equal(passes, 14, resultats.filter((r) => !r.bon).map((r) => `${r.nom}: ${r.detail}`).join("; "));
+  assert.equal(total, 15);
+  assert.equal(passes, 15, resultats.filter((r) => !r.bon).map((r) => `${r.nom}: ${r.detail}`).join("; "));
 });
 
 test("enGras fabrique du Sans-Serif Bold, jamais l'autre police -- verifie par point de code", () => {
@@ -53,7 +53,7 @@ test("enGras fabrique du Sans-Serif Bold, jamais l'autre police -- verifie par p
   assert.equal(enGras(" ").codePointAt(0), 0x20);
   // Round-trip : un texte passe en gras puis compte par verifierTexte doit etre reconnu
   // comme un gras existant, dans la BONNE police.
-  const corps = CONFORME.replace("**process trop lent**", enGras("process trop lent"));
+  const corps = CONFORME.replace("**processus trop lent**", enGras("processus trop lent"));
   const { resultats } = verifierTexte(corps);
   assert.equal(resultats.find((x) => x.nom === "au moins 8 passages en gras").bon, true);
   assert.equal(resultats.find((x) => x.nom === "gras dans la bonne police (Sans-Serif Bold)").bon, true);
@@ -62,7 +62,7 @@ test("enGras fabrique du Sans-Serif Bold, jamais l'autre police -- verifie par p
 test("accroche > 140 caracteres refusee", () => {
   const corps = CONFORME.replace(
     /^\*\*.+?\*\*/,
-    `**${"Et si votre process de recrutement au sens le plus large et le plus complet qui soit faisait vraiment fuir absolument tous vos meilleurs candidats sans que vous le voyiez jamais ?"}**`
+    `**${"Et si votre processus de recrutement au sens le plus large et le plus complet qui soit faisait vraiment fuir absolument tous vos meilleurs candidats sans que vous le voyiez jamais ?"}**`
   );
   const { resultats } = verifierTexte(corps);
   const r = resultats.find((x) => x.nom === "accroche <= 140 caracteres");
@@ -92,7 +92,7 @@ test("longueur hors fourchette 1300-1900 refusee", () => {
 });
 
 test("moins de 8 passages en gras refuse", () => {
-  const corps = CONFORME.replace(/\*\*(process trop lent)\*\*/, "$1")
+  const corps = CONFORME.replace(/\*\*(processus trop lent)\*\*/, "$1")
     .replace(/\*\*(questions qui reviennent sans cesse)\*\*/, "$1");
   const { resultats } = verifierTexte(corps);
   const r = resultats.find((x) => x.nom === "au moins 8 passages en gras");
@@ -100,7 +100,7 @@ test("moins de 8 passages en gras refuse", () => {
 });
 
 test("un gras accentue est refuse", () => {
-  const corps = CONFORME.replace("**process trop lent**", "**procédé trop lent**");
+  const corps = CONFORME.replace("**processus trop lent**", "**procédé trop lent**");
   const { resultats } = verifierTexte(corps);
   const r = resultats.find((x) => x.nom === "aucun gras accentue");
   assert.equal(r.bon, false);
@@ -116,7 +116,7 @@ test("un gras dans l'autre police (Mathematical Bold avec empattement) est reper
   // "deux briques", exactement le segment reel du post Andrew Ng (21/09/2026),
   // Mathematical Bold avec empattement (U+1D400), pas Sans-Serif Bold.
   const segmentSerif = enGrasSerif("deux briques");
-  const corps = CONFORME.replace("**process trop lent**", segmentSerif);
+  const corps = CONFORME.replace("**processus trop lent**", segmentSerif);
   const { resultats } = verifierTexte(corps);
   const gras = resultats.find((x) => x.nom === "au moins 8 passages en gras");
   const accent = resultats.find((x) => x.nom === "aucun gras accentue");
@@ -164,8 +164,8 @@ test("moins de 3 emojis refuse", () => {
 
 test("un emoji hors tete de ligne refuse", () => {
   const corps = CONFORME.replace(
-    "Un **process trop lent** coute",
-    "Un **process trop lent** \u{1F449} coute"
+    "Un **processus trop lent** coute",
+    "Un **processus trop lent** \u{1F449} coute"
   );
   const { resultats } = verifierTexte(corps);
   const r = resultats.find((x) => x.nom === "emojis en tete de ligne");
@@ -257,7 +257,7 @@ test("un chiffre-preuve avec une source collee (source : ...) est accepte", () =
 // une plage chiffres-seuls dediee (PLAGE_CHIFFRES).
 test("un mot en gras n'est jamais confondu avec un chiffre", () => {
   const corps = CONFORME.replace(
-    "**process trop lent**",
+    "**processus trop lent**",
     "**seize mille cinq cents offres**"
   );
   const { resultats } = verifierTexte(corps);
@@ -325,7 +325,7 @@ test("un texte qui contient reellement \"commentez\" et \"oui\" sans lien entre 
 // sa forme accentuee ("dependance", "coute", "defaillance"), plus "declarent" trouve dans
 // la meme relecture. Les 4 cas sont rejoues ici mot pour mot, jamais paraphrases.
 test("un gras contenant \"dependance\" (mot valide seulement accentue : dependance) est refuse", () => {
-  const corps = CONFORME.replace("**process trop lent**", "**la dependance au meme outil**");
+  const corps = CONFORME.replace("**processus trop lent**", "**la dependance au meme outil**");
   const { resultats } = verifierTexte(corps);
   const r = resultats.find((x) => x.nom === "aucun accent manquant dans le gras");
   assert.equal(r.bon, false);
@@ -334,7 +334,7 @@ test("un gras contenant \"dependance\" (mot valide seulement accentue : dependan
 });
 
 test("un gras contenant \"coute\" (mot valide seulement accentue : coute) est refuse", () => {
-  const corps = CONFORME.replace("**process trop lent**", "**ca coute cher**");
+  const corps = CONFORME.replace("**processus trop lent**", "**ca coute cher**");
   const { resultats } = verifierTexte(corps);
   const r = resultats.find((x) => x.nom === "aucun accent manquant dans le gras");
   assert.equal(r.bon, false);
@@ -343,7 +343,7 @@ test("un gras contenant \"coute\" (mot valide seulement accentue : coute) est re
 });
 
 test("un gras contenant \"defaillance\" (mot valide seulement accentue : defaillance) est refuse", () => {
-  const corps = CONFORME.replace("**process trop lent**", "**un point de defaillance**");
+  const corps = CONFORME.replace("**processus trop lent**", "**un point de defaillance**");
   const { resultats } = verifierTexte(corps);
   const r = resultats.find((x) => x.nom === "aucun accent manquant dans le gras");
   assert.equal(r.bon, false);
@@ -352,7 +352,7 @@ test("un gras contenant \"defaillance\" (mot valide seulement accentue : defaill
 });
 
 test("un gras contenant \"declarent\" (mot valide seulement accentue : declarent) est refuse", () => {
-  const corps = CONFORME.replace("**process trop lent**", "**ils declarent tout**");
+  const corps = CONFORME.replace("**processus trop lent**", "**ils declarent tout**");
   const { resultats } = verifierTexte(corps);
   const r = resultats.find((x) => x.nom === "aucun accent manquant dans le gras");
   assert.equal(r.bon, false);
@@ -361,14 +361,14 @@ test("un gras contenant \"declarent\" (mot valide seulement accentue : declarent
 });
 
 test("un mot sans accent qui n'existe pas en francais accentue (anglicisme, nom propre) n'est pas signale a tort", () => {
-  const corps = CONFORME.replace("**process trop lent**", "**Claude Partners et le process**");
+  const corps = CONFORME.replace("**processus trop lent**", "**Claude Partners et le processus**");
   const { resultats } = verifierTexte(corps);
   const r = resultats.find((x) => x.nom === "aucun accent manquant dans le gras");
   assert.equal(r.bon, true, r.detail);
 });
 
 test("un mot deja accentue correctement dans le gras (donc deja refuse par \"aucun gras accentue\") n'est pas en plus signale ici", () => {
-  const corps = CONFORME.replace("**process trop lent**", "**la dépendance au même outil**");
+  const corps = CONFORME.replace("**processus trop lent**", "**la dépendance au même outil**");
   const { resultats } = verifierTexte(corps);
   const r = resultats.find((x) => x.nom === "aucun accent manquant dans le gras");
   assert.equal(r.bon, true, r.detail);
@@ -382,4 +382,41 @@ test("une accroche redigee dans une autre langue que le francais passe (comporte
   const { resultats } = verifierTexte(corps);
   const r = resultats.find((x) => x.nom === "accroche formulee en question");
   assert.equal(r.bon, true);
+});
+
+// Critere 15 (29/09/2026) : anglicismes, liste PARTAGEE avec linkedin-carrousel.
+const anglicisme = (corps) => verifierTexte(corps).resultats.find((x) => x.nom === "aucun anglicisme");
+
+test("anglicismes : « process » refuse, avec le mot fautif et son equivalent francais", () => {
+  const r = anglicisme(CONFORME.replace("**processus trop lent**", "**process trop lent**"));
+  assert.equal(r.bon, false);
+  assert.match(r.detail, /"process" \(dites plutot "processus"\)/);
+});
+
+test("anglicismes : « deadline » et « feedback » refuses, equivalents nommes", () => {
+  const d = anglicisme(CONFORME.replace("Personne ne s'en rend compte", "La deadline tombe. Personne ne s'en rend compte"));
+  assert.equal(d.bon, false);
+  assert.match(d.detail, /"deadline" \(dites plutot "date limite"\)/);
+  const f = anglicisme(CONFORME.replace("On repond sous deux jours", "On repond au feedback sous deux jours"));
+  assert.equal(f.bon, false);
+  assert.match(f.detail, /"feedback" \(dites plutot "retour"\)/);
+});
+
+test("anglicismes : « process » deja converti en gras Unicode n'echappe pas au controle", () => {
+  const r = anglicisme(CONFORME.replace("**processus trop lent**", enGras("process trop lent")));
+  assert.equal(r.bon, false);
+});
+
+test("anglicismes : « processus » (bon mot) et post propre passent", () => {
+  assert.equal(anglicisme(CONFORME).bon, true);
+});
+
+test("anglicismes : la liste utilisee est celle du carrousel, pas une copie", async () => {
+  const { ANGLICISMES_VERS_FRANCAIS } = (await import("node:module")).createRequire(import.meta.url)("../../linkedin-carrousel/lib/valider-anglicismes.js");
+  for (const [mot, attendu] of Object.entries(ANGLICISMES_VERS_FRANCAIS)) {
+    const r = anglicisme(`${CONFORME}
+Le ${mot} ici.`);
+    assert.equal(r.bon, false, mot);
+    assert.ok(r.detail.includes(`"${attendu}"`), `${mot} -> ${attendu}`);
+  }
 });

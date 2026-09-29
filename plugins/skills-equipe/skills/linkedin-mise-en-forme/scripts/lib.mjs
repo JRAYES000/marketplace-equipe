@@ -19,6 +19,13 @@
 // publies (Bernard Marr 18/09, Andrew Ng 21/09) contre les 9 criteres d'origine.
 
 import { readFileSync } from "node:fs";
+import { createRequire } from "node:module";
+
+// Liste d'anglicismes PARTAGEE avec linkedin-carrousel (ajoutee le 29/09/2026, apres un
+// "process" passe dans le post A1 du 28/09) : on importe la fonction et la liste du
+// carrousel au lieu de les recopier, pour qu'il n'existe jamais deux listes qui divergent.
+// Les deux skills vivent dans le meme paquet : le chemin relatif est stable.
+const { detecterAnglicismes } = createRequire(import.meta.url)("../../linkedin-carrousel/lib/valider-anglicismes.js");
 
 // Mathematical Sans-Serif Bold -- celle que fabrique enGras() ci-dessous, choisie par
 // Julien le 18/09/2026 (SKILL.md, regle 2). Aucune lettre accentuee n'existe dans ce
@@ -346,6 +353,18 @@ export function verifierTexte(corps) {
     chiffresFautifs.length === 0,
     "aucun chiffre sans source",
     chiffresFautifs.length ? chiffresFautifs.join(" ; ") : "aucun chiffre, ou tous sources"
+  ));
+
+  // Nouveau critere (29/09/2026) : aucun anglicisme de la liste fermee de
+  // linkedin-carrousel/lib/valider-anglicismes.js (process -> processus, etc.). Lu sur le
+  // texte ramene en ASCII : un mot deja converti en gras Unicode ne doit pas y echapper.
+  const anglicismes = detecterAnglicismes(versAscii(corps));
+  resultats.push(dire(
+    anglicismes.length === 0,
+    "aucun anglicisme",
+    anglicismes.length
+      ? anglicismes.map((a) => `"${a.trouve}" (dites plutot "${a.attendu}")`).join(", ")
+      : "aucun de la liste"
   ));
 
   const passes = resultats.filter((r) => r.bon).length;
