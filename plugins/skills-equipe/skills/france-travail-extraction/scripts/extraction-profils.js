@@ -1,5 +1,12 @@
-// Script d'extraction v5.0 — un lot de profils France Travail Pro.
-// v5.0 (2026-09-29) : commentaires seulement, aucune logique modifiee depuis v4.7.
+// Script d'extraction v5.2 — un lot de profils France Travail Pro.
+// v5.2 (2026-09-29) : dedoublonnage PENDANT le parcours. `window.__connus`
+//   (Set de cles « prenom nom » normalisees, construit depuis `window.__connusBruts`
+//   injecte avant le script)
+//   fait sauter un profil deja en base AVANT tout clic : ni « Afficher le
+//   numero », ni telechargement, ni OCR, ni appariement. `__run(n)` compte
+//   desormais n NOUVEAUX profils, et s'arrete sur un budget de temps pour tenir
+//   sous le timeout CDP. Mesure du 29/09 : 17 profils sur 20 etaient deja en
+//   base, et chacun coutait un CV, un OCR et un appariement pour rien.
 // Réécrit le 2026-09-17 après un run réel : la version de juin ne fonctionnait
 // plus, son sélecteur de panneau ne trouvait plus rien et rendait `done: 0`.
 //
@@ -47,8 +54,24 @@
 // un parametre, pas une constante — 15 passe sans probleme onglet visible, alors
 // que 10 depasse le timeout CDP de 45 s des que l'onglet est cache.
 window.__log = window.__log || [];
+window.__connus = window.__connus || new Set();
 
-window.__run = async (BATCH = 8) => {
+// Cle de dedoublonnage : minuscules, sans accents ni ponctuation, espaces
+// reduits. Doit rester identique a celle construite depuis Notion (SKILL.md,
+// Phase 1) : « Prenom NOM » cote page, `Prenom || ' ' || Nom` cote base.
+window.__cle = s => (s || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+  .toLowerCase().replace(/[^a-z0-9]+/g, ' ').trim();
+
+// Noms connus injectes BRUTS avant le script (`window.__connusBruts = [...]`,
+// « Prenom NOM » tels que Notion les rend) : la normalisation se fait ici, une
+// seule fois, avec la meme fonction que pour les noms lus dans le panneau.
+(window.__connusBruts || []).forEach(n => window.__connus.add(window.__cle(n)));
+
+// BATCH = nombre de NOUVEAUX profils voulus. BUDGET_MS = duree max d'un appel :
+// un profil deja connu coute ~0,3 s, un nouveau ~2-3 s ; 35 s laisse de la marge
+// sous le timeout CDP de 45 s. Relancer `__run` tant que `arret` vaut « budget ».
+window.__run = async (BATCH = 8, BUDGET_MS = 35000) => {
+  const debut = Date.now();
   // Toutes les attentes passent par le Worker de `arriere-plan.js`. Sans lui, repli
   // sur setTimeout : le script tourne, mais 22 fois plus lentement en arriere-plan.
   const pause = window.__pause || (ms => new Promise(r => setTimeout(r, ms)));
@@ -80,8 +103,10 @@ window.__run = async (BATCH = 8) => {
 
   const lot = [];
   let arret = 'batch atteint';
+  let sautes = 0;
 
-  for (let i = 0; i < BATCH; i++) {
+  for (let i = 0; lot.length < BATCH; i++) {
+    if (Date.now() - debut > BUDGET_MS) { arret = 'budget'; break; }
     const p = P();
     if (!p) { arret = 'panneau absent a l iteration ' + i; break; }
     const courant = pag();
@@ -91,6 +116,21 @@ window.__run = async (BATCH = 8) => {
       const nx0 = suivant();
       if (!nx0) { arret = 'deja vu, pas de suivant'; break; }
       nx0.click(); await attendre(courant); continue;
+    }
+
+    // Deja en base ? On le sait avant tout clic : le nom est dans le panneau.
+    // Un profil anonyme (nom remplace par l'intitule) n'est jamais saute : son
+    // identite ne se lit que dans le CV.
+    const t0 = p.innerText || '';
+    const nom0 = ((t0.match(/Profil mis à jour le [^\n]+\n([^\n]+)/) || [])[1] || '').trim();
+    if (nom0 && window.__connus.has(window.__cle(nom0))) {
+      window.__log.push({ pag: courant, nom: nom0, deja: true });
+      sautes++;
+      const nxd = suivant();
+      if (!nxd) { arret = 'suivant introuvable'; break; }
+      nxd.click();
+      if (await attendre(courant) === courant) { arret = 'pagination bloquee a ' + courant; break; }
+      continue;
     }
 
     // Le téléphone vient du CV par OCR, pas du panneau : mesuré le 2026-09-17,
@@ -147,7 +187,12 @@ window.__run = async (BATCH = 8) => {
     if (np === courant) { arret = 'pagination bloquee a ' + courant; break; }
   }
 
-  return JSON.stringify({ traites: lot.length, total: window.__log.length, arret, lot });
+  return JSON.stringify({
+    nouveaux: lot.length, sautes, total: window.__log.length,
+    nouveauxTotal: window.__log.filter(r => !r.deja).length,
+    telecharges: window.__log.filter(r => r.telecharge).length,
+    arret, secondes: Math.round((Date.now() - debut) / 1000), lot
+  });
 };
 
 // Premier lot des l'injection, pour ne pas perdre un aller-retour.

@@ -11,7 +11,7 @@ description: >-
   toi-même, même si France Travail, un CV ou un demandeur d'emploi est mentionné.
 compatibility: "Claude Code. Requiert Claude in Chrome (session recruteur déjà connectée), le connecteur Notion (base « Leads France Travail ») et l'outil Bash avec poppler + tesseract pour l'OCR des CV."
 metadata:
-  version: '5.1'
+  version: '5.2'
   environment: 'Claude Code, rédigé pour Claude Sonnet 5.5 (fonctionne aussi sous Opus). Claude in Chrome pour la session recruteur, outil Bash pour les scripts fournis, connecteur Notion pour la lecture et l écriture. Livrable unique = la base Notion « Leads France Travail ».'
   journal: 'references/journal.md — mesures et incidents des runs réels (v2.0 à v4.7). À lire seulement pour comprendre ou contester une règle ; en cas de désaccord, ce fichier-ci fait foi.'
 ---
@@ -117,7 +117,9 @@ Trois questions, en un seul appel :
    que toute optimisation technique : la choisir sur l'intention (reconversion, formation)
    autant que sur le métier. Mesuré : « formation naturopathie » donne presque 100 % de
    profils dans la cible, « infirmière libérale » beaucoup de hors-cible.
-2. **Nombre de candidats** pour ce lot — ex. `30`, `100`.
+2. **Nombre de NOUVEAUX candidats** pour ce lot — ex. `20`, `50`. Depuis la v5.2, les
+   profils déjà en base sont sautés sans compter : le lot s'arrête quand il a trouvé ce
+   nombre de profils absents de la base, ou quand le vivier pertinent est épuisé.
 3. **Filtres** — garder « Disponibilité immédiate » + « Profil mis à jour < 3 mois » ? Lieu ?
 
 Puis confirmer en une ligne : requête, taille du lot, filtres, destination Notion, et le fait
@@ -139,11 +141,31 @@ Annoncer à l'utilisateur ce que le vivier a déjà donné, et signaler une requ
 passée : **le recouvrement entre requêtes est réel** (un profil capté par « Naturopathie »
 ressort sous « Formation naturopathie »).
 
-La déduplication n'a **pas** lieu ici mais en Phase 5 : charger toute la base ne fait gagner
-aucun parcours, et un `group_concat` de toute la table finit tronqué en silence. Base vide au
-premier run : aucune ligne, ce n'est pas une erreur.
+### Charger les profils déjà connus (dédoublonnage avant parcours)
 
-**Barrière :** la requête a répondu (même vide).
+Mesuré le 29/09/2026 : 17 profils sur 20 étaient déjà en base. Chacun a coûté un clic, un CV
+téléchargé, un OCR et un appariement pour rien. Depuis la v5.2, le script saute un profil
+connu **avant tout clic**, sur son nom lu dans le panneau (~0,3 s au lieu de ~3 s, et ni CV
+ni OCR). Il lui faut la liste des noms connus, chargée ici :
+
+```sql
+SELECT Prenom || ' ' || Nom AS k FROM "collection://c9a8febd-29ae-468e-a320-bd2fd62a161f"
+WHERE Prenom IS NOT NULL AND Prenom<>'' ORDER BY Nom LIMIT 100 OFFSET <0, 100, 200…>
+```
+
+- **Paginer par 100 avec `OFFSET`.** Le connecteur coupe la réponse à 100 lignes et ne le
+  signale que par `has_more: true` (mesuré le 29/09 : 100 lignes rendues sur 160). Continuer
+  tant que `has_more` vaut `true`. Ne pas passer par `group_concat` : il tronque en silence.
+- **Seulement les lignes avec prénom.** Un profil anonyme (intitulé à la place du nom) n'est
+  jamais sauté : deux personnes différentes peuvent avoir le même intitulé (« Formation
+  Naturopathie » cachait Marine CRETTE).
+- Ces clés s'injectent dans la page en **Phase 3, avant le script** (voir là-bas).
+
+La Phase 5 garde sa déduplication : c'est le filet de sécurité (profil anonyme, prénom écrit
+autrement). Base vide au premier run : aucune ligne, ce n'est pas une erreur.
+
+**Barrière :** la requête a répondu (même vide), et toutes les pages de noms connus sont
+chargées (dernière réponse avec `has_more: false`).
 
 ## Phase 2 — Ouvrir la recherche (onglet visible)
 
@@ -185,11 +207,19 @@ arrière-plan, à condition que `scripts/arriere-plan.js` soit en place. Sans lu
 25 s par profil au lieu de 0,3 à 1,7 s, **sans lever d'erreur** : un parcours anormalement lent
 signifie « parades absentes », pas « site lent ».
 
+0. **Injecter d'abord les noms connus** (Phase 1), bruts, en un seul appel :
+   `window.__connusBruts = ["Prenom NOM", …]`. **Avant** le script : son injection lance
+   aussitôt un premier lot et normalise la liste à ce moment-là. Le retour de l'injection
+   suivante doit montrer des `sautes` dès que la base recoupe la recherche ; contrôler au
+   besoin `window.__connus.size` = nombre de noms chargés.
 1. **Injecter `scripts/extraction-profils.js` précédé de `await`.** Sans `await`, le retour est
    `{}`, ce qui se lit à tort comme un lot vide. L'injection enregistre `window.__run(n)` et
-   traite aussitôt un premier lot de 8.
-2. **Lots suivants : `await window.__run(15)`.** Ne jamais réinjecter le script entier. 15
-   profils tiennent sous le timeout CDP de 45 s avec les parades en place.
+   traite aussitôt un premier lot de 8 nouveaux profils.
+2. **Lots suivants : `await window.__run(n)`**, `n` = nouveaux profils encore voulus. Ne
+   jamais réinjecter le script entier. Chaque appel s'arrête seul après 35 s (`arret:
+   'budget'`) pour tenir sous le timeout CDP de 45 s : relancer tant que `arret` vaut
+   `budget` et que `nouveauxTotal` n'a pas atteint la cible. Le retour donne `nouveaux`,
+   `sautes` (déjà en base), `telecharges` et `secondes`.
 3. **En cas de timeout, ne jamais relancer.** Le script continue de tourner dans la page ; un
    second appel créerait des doublons. Sonder `window.__log.length` jusqu'à ce qu'il se
    stabilise, puis reprendre.
@@ -215,7 +245,7 @@ plus, injecter le journal dans la page puis le lire avec `get_page_text` (~10 00
 ```js
 const a = document.createElement('article');
 a.id = '__dump';
-a.textContent = window.__log.map(r => [r.pag, r.nom, r.titre, r.maj, r.commune, r.tel, r.telecharge].join('~')).join('\n');
+a.textContent = window.__log.filter(r => !r.deja).map(r => [r.pag, r.nom, r.titre, r.maj, r.commune, r.tel, r.telecharge].join('~')).join('\n');
 document.body.insertBefore(a, document.body.firstChild);
 ```
 
@@ -241,7 +271,7 @@ jusqu'au timeout.
 - **Fonction** : le titre du profil, en casse lisible, condensé à une trentaine de caractères
   (« Actuellement ASH - objectif Infirmière libérale » → « Aspirante infirmière libérale »).
 
-**Barrière :** le nombre de profils visé est parcouru (ou le vivier pertinent est épuisé, et
+**Barrière :** le nombre de nouveaux profils visé est atteint (ou le vivier pertinent est épuisé, et
 c'est dit), et `window.__log.filter(r => r.telecharge).length` est connu.
 
 ## Phase 4 — Emails depuis les CV
