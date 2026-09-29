@@ -405,3 +405,21 @@ Phase 5 bis recopie desormais seulement les Id acceptes par `ecrire`.
   aussi ft-journal*.json et les fichiers de travail passes en argument.
 • SKILL.md : 36,5 Ko -> 19,2 Ko ; replis, conformite detaillee, relecture manuelle du journal
   dans references/annexes.md.
+
+(v9.0, 2026-09-29, demande de Julien) NOTION FAIT FOI, PAR L'API PUBLIQUE ; NOCODB EN MIROIR.
+• Cause : le connecteur Notion MCP plafonne ses appels (usage_limit_reached ;
+  query_multiple_data_sources reserve a l'offre payante). L'API publique Notion avec un jeton
+  d'integration interne est gratuite et sans quota d'usage (~3 req/s).
+• Connexion interne « Leads France Travail - API » creee dans l'espace CLAUDE PARTNERS, base
+  connectee (sans cette connexion : 404 object_not_found), jeton NOTION_TOKEN_FT range dans le
+  coffre (empreintes locale et distante identiques).
+• scripts/notion.js : resume, connus, dedup, ecrire, reprendre, verifier, export,
+  miroir-nocodb, amorcer, archiver-test. Teste sur 3 fiches TEST- : ecriture 2/2, verifier
+  compte=2, dedup 2 doublons, echec force (jeton invalide) -> code 3 + file d'attente 1,
+  reprise 1 creee, reprise d'une fiche deja ecrite -> « 1 deja dans Notion » sans doublon,
+  Ecarte refuse, archivage 3/3 (base revenue a 257).
+• amorcer --sec : 0 fiche NocoDB absente de Notion. Premier miroir : 8 modifications, 0
+  creation, 0 suppression, relu = attendu = 226, relance a 0 ecart. Chemin de suppression du
+  miroir et garde-fou non exerces sur donnees reelles (aucune suppression a faire).
+• Incident : valeurs du coffre entourees de backticks ; un export bash non nettoye les a
+  executees et a affiche une partie de NOCODB_TOKEN dans une erreur. Regle ajoutee en Phase 1.
