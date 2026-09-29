@@ -299,3 +299,19 @@ methode ni de logique de script. Ce qui a change dans SKILL.md :
 • Commentaire d emails-depuis-cv.sh aligne sur la regle d appariement v4.6 (l ordre porte, les
   noms ancrent).
 • Non verifie en run reel a la date de la refonte : a confirmer au prochain lot.
+
+(v5.2) DEDOUBLONNAGE AVANT PARCOURS ET MESURE DES TEMPS (2026-09-29)
+• Lot de 20 « Formation naturopathie » : 17 profils deja en base. Chacun a coute un
+  telechargement de CV, un OCR et un appariement pour rien. Correctif : les noms connus
+  (Prenom NOM, pagines depuis Notion) sont injectes avant le script, qui saute un profil
+  connu AVANT tout clic. `__run(n)` compte desormais n NOUVEAUX profils, avec un budget de
+  35 s par appel. Teste sur une page simulee : 2 connus sautes (dont un accent different),
+  3 nouveaux, 3 CV seulement.
+• Le connecteur Notion coupe une reponse SQL a 100 lignes, signale seulement par
+  `has_more: true` : 100 cles rendues sur 160. Paginer avec LIMIT 100 OFFSET n.
+• OU PASSE LE TEMPS, mesure reelle : parcours de 20 profils ~90 s (horodatage des CV),
+  OCR des 13 CV 5,4 s (la plupart ont une couche texte). Le reste d'une session est la
+  connexion 2FA et les allers-retours de l'assistant. Reecrire en Rust ne ferait rien
+  gagner : aucun calcul n'est lent ici (pas de Python dans la chaine ; pdftotext et
+  tesseract sont deja du C/C++). La vitesse de parcours est bornee par le site, dont il
+  faut de toute facon respecter le rythme.
