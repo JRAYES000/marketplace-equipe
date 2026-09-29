@@ -369,3 +369,14 @@ reference (dedup, connus, verifier) ; Notion devient un miroir ecrit apres NocoD
   supprimee, table revenue a 224 lignes.
 • Blocage constate le 29/09/2026 : `query_data_sources` en limite, Notion absent de Composio, la
   recherche Notion ne liste pas 250 lignes. D'ou l'export CSV manuel comme voie sans quota.
+
+(v7.1, 2026-09-29, suite) PREMIERE RECONCILIATION REELLE, via Composio (Notion connecte a Composio
+par Julien apres la limite du connecteur MCP). 258 lignes Notion lues en 3 appels
+`NOTION_QUERY_DATABASE`, comparees aux 224 lignes NocoDB : 2 fiches seulement dans NocoDB
+(Reconversion bien-etre, recopiees dans Notion), 5 seulement dans Notion hors 31 `Ecarte` ignorees.
+Sur ces 5 : 2 vraies fiches (RENELLE Sophie, CORREIA Arminda, ecrites dans Notion par la v5.3
+le matin du 29/09, apres la migration) importees dans NocoDB ; 3 doublons Notion non importes
+(2 ecrits par erreur par ma propre ecriture Notion avant dedup NocoDB, 1 fiche « fonction
+publique » deja presente). Relecture : NocoDB 226, Notion 260, 0 fiche NocoDB absente de Notion.
+Lecon : une ecriture Notion faite AVANT le dedoublonnage NocoDB cree des doublons Notion ; la
+Phase 5 bis recopie desormais seulement les Id acceptes par `ecrire`.

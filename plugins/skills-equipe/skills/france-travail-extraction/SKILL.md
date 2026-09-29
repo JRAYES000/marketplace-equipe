@@ -542,10 +542,19 @@ Les deux bases dérivent : Notion garde ce que NocoDB n'a plus (les fiches `Ecar
 29/09/2026), NocoDB a ce que Notion n'a jamais reçu (lots écrits pendant une limite Notion). Se
 lance sur demande, jamais en fin de run.
 
-1. **Obtenir la base Notion en fichier.** Sans requête SQL, donc sans quota : dans Notion, base
-   « Leads France Travail » → ⋯ → Exporter → CSV, puis déposer le fichier dans Téléchargements. Si
-   le quota Notion le permet, `notion-query-data-sources` (100 lignes par appel, pagination sur
-   `has_more`) donne le même contenu ; l'écrire en JSON avec les colonnes de la table.
+1. **Obtenir la base Notion en fichier.** Trois voies, de la moins chère à la plus manuelle :
+   - **Composio** (Notion y est connecté, il passe par l'API Notion et non par le quota du
+     connecteur MCP) : dans `COMPOSIO_REMOTE_WORKBENCH`, boucler sur `NOTION_QUERY_DATABASE`
+     (`database_id` `1cfd41a205fc44f797b39e4e8e1d6978`, 100 lignes par appel, curseur
+     `next_cursor` jusqu'à `has_more=false`), écrire un CSV aux colonnes de la table (`Nom`,
+     `Prenom`, `Email`, `Telephone`, `Commune`, `Fonction`, `Requete`, `Date extraction`,
+     `Profil mis a jour`, `Statut`, `Note`), l'exposer par `upload_local_file` et le télécharger
+     avec `curl -L` dans le dossier temporaire. **Supprimer ce fichier après usage** : ce sont des
+     données de candidats. Mesuré le 29/09/2026 : 258 lignes en 3 appels.
+   - **Connecteur Notion MCP** : `notion-query-data-sources` (100 lignes par appel, pagination sur
+     `has_more`), si le quota le permet.
+   - **À la main** : dans Notion, base « Leads France Travail » → ⋯ → Exporter → CSV, fichier
+     déposé dans Téléchargements.
 2. **Simuler** : `node "<skill>/scripts/nocodb.js" reconcilier <export.csv|.json>`. Rend les
    comptes, les `Id` NocoDB absents de Notion, et la liste des fiches Notion absentes de NocoDB.
    Appariement par email, sinon par nom + prénom + commune + requête, **au multi-ensemble** : deux
