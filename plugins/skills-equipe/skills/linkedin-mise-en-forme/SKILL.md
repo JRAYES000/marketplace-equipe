@@ -157,9 +157,10 @@ le fait qu'on supprime.
 
 ## Guardrails — avant depot dans sortants/
 
-Les criteres de `contenu-linkedin`, plus les dix suivants (treize au total avec
-les criteres 2 et 4, qui comptent double). Le script les mesure tous sauf le
-niveau de lecture, qui se relit :
+Les criteres de `contenu-linkedin`, plus les onze suivants. Le script en mesure
+quinze au total (les criteres 2 et 4 comptent double, le gras accentue et l'accent
+manquant dans le gras sont deux mesures distinctes) ; seul le niveau de lecture se
+relit :
 
 ```bash
 node "<dossier de la skill>/scripts/verif-post.mjs" verif "C:/chemin/vers/brouillon.txt"
@@ -220,6 +221,15 @@ node "<dossier de la skill>/scripts/verif-post.mjs" verif "C:/chemin/vers/brouil
     les lettres) pour reperer un "chiffre", ce qui faisait matcher des mots
     entiers en gras ("offres", "en") comme des chiffres — corrige avec une
     plage chiffres-seuls dediee.
+11. **Aucun anglicisme** — « process » au lieu de « processus », « deadline »,
+    « feedback », « workflow », etc. Ajoute le 29/09/2026 apres le post A1 du
+    28/09, publie avec « process ». Le controle n'est PAS une seconde liste : il
+    importe `detecterAnglicismes` de `linkedin-carrousel/lib/valider-anglicismes.js`
+    (`createRequire`, chemin relatif, les deux skills sont dans le meme paquet).
+    Ajouter un mot se fait la-bas, une seule fois, et vaut pour les posts texte
+    et les carrousels. Le texte est ramene en ASCII avant la mesure, donc un
+    mot deja converti en gras Unicode n'y echappe pas. Le post est refuse avec le
+    mot fautif et son equivalent (`"process" (dites plutot "processus")`).
 
 Le script sort en code 1 si un critere echoue. Montrer sa sortie brute a Julien
 avec le brouillon — ne jamais ecrire « guardrails passes » sans elle.
