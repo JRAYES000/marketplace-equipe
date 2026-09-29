@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Charge les trois jetons du run depuis le coffre de Julien (depot prive
+# Charge les jetons du run depuis le coffre de Julien (depot prive
 # JRAYES000/claude-config, env/secrets.md) vers un fichier lu par notion.js et nocodb.js.
 #
 # Pourquoi (v9.2) : le 29/09/2026, un export bash fait a la main a execute les backticks
@@ -10,7 +10,8 @@
 # Usage : bash charger-secrets.sh
 #   Ecrit %LOCALAPPDATA%/france-travail-extraction/secrets.env (ou $FT_SECRETS).
 #   nettoyer-cv.sh l'envoie a la corbeille en fin de run.
-# Hors du poste de Julien : definir NOTION_TOKEN_FT, NOCODB_URL et NOCODB_TOKEN dans
+# v9.3 : SALESHANDY_API_KEY en plus (import dans la sequence, notion.js).
+# Hors du poste de Julien : definir NOTION_TOKEN_FT, NOCODB_URL, NOCODB_TOKEN et SALESHANDY_API_KEY dans
 # l'environnement ; ce script n'est alors pas necessaire.
 #
 # Format du coffre (identique a visibilite-ops/scripts/coffre-registre.sh) : 11 colonnes,
@@ -23,7 +24,7 @@ if [ -n "${LOCALAPPDATA:-}" ]; then D="$(cygpath -u "$LOCALAPPDATA" 2>/dev/null 
 else D="$HOME/.local/state/france-travail-extraction"
 fi
 F="${FT_SECRETS:-$D/secrets.env}"
-CLES="NOTION_TOKEN_FT NOCODB_URL NOCODB_TOKEN"
+CLES="NOTION_TOKEN_FT NOCODB_URL NOCODB_TOKEN SALESHANDY_API_KEY"
 
 mkdir -p "$(dirname "$F")"
 umask 177
