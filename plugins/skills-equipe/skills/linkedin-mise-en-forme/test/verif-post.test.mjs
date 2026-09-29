@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { enGras, verifierTexte } from "../scripts/lib.mjs";
+import { enGras, verifierTexte, motsAccentManquantCorps } from "../scripts/lib.mjs";
 
 // Fabrique du Mathematical Bold AVEC empattement (bases documentees dans lib.mjs,
 // SERIF) -- sert uniquement a construire des fixtures de test pour la mauvaise police,
@@ -35,7 +35,7 @@ const CONFORME = [
   "Le **silence total suivant l'entretien** cree plus de degats que n'importe quel refus explique. Voici " +
     "Ce post sert uniquement de gabarit de test pour verifier automatiquement les regles de forme. ".repeat(9).trim(),
   "",
-  "Les **trois signes a noter** tiennent en une phrase, et **dix minutes suffisent** pour les corriger.",
+  "Les **trois signes utiles** tiennent en une phrase, et **dix minutes suffisent** pour les corriger.",
 ].join("\n");
 
 test("fixture conforme : 15/15 criteres passes", () => {
@@ -419,4 +419,84 @@ Le ${mot} ici.`);
     assert.equal(r.bon, false, mot);
     assert.ok(r.detail.includes(`"${attendu}"`), `${mot} -> ${attendu}`);
   }
+});
+
+// Cas reel du 29/09/2026 : la 1re ligne de A4 (linkedin/2026-09-28-30/a4.final.txt du depot
+// livrables-Claude-Agency), tout en gras sans accent, avait obtenu 14/14. Trois trous cumules :
+// "l'equipe" restait un seul mot (elision), "salarie"/"estime"/"sous-estime" existent aussi
+// sans accent (homographes), et "a" (1 lettre) etait ignore. Texte rejoue mot pour mot.
+const LIGNE_A4 = enGras("Confier l'IA a un seul salarie de l'equipe est-il un risque sous-estime ?");
+
+test("A4 : la ligne reelle est refusee, avec \"a\", \"equipe\" et \"sous-estime\" nommes", () => {
+  const fautifs = motsAccentManquantCorps(LIGNE_A4);
+  const texte = fautifs.join(" ; ");
+  assert.match(texte, /"a" \(accente attendu : "à"\)/);
+  assert.match(texte, /"equipe" \(accente attendu : "équipe"/);
+  assert.match(texte, /"sous-estime" \(accente attendu : "sous-estimé"\)/);
+  // Et par le critere complet, sur un post par ailleurs conforme.
+  const corps = CONFORME.replace(CONFORME.split("\n")[0], LIGNE_A4);
+  const r = verifierTexte(corps).resultats.find((x) => x.nom === "aucun accent manquant dans le gras");
+  assert.equal(r.bon, false, r.detail);
+});
+
+test("A4 : la meme ligne en markdown (**...**) est refusee de la meme facon", () => {
+  const md = "**Confier l'IA a un seul salarie de l'equipe est-il un risque sous-estime ?**";
+  assert.equal(motsAccentManquantCorps(md).length >= 3, true);
+});
+
+test("A4 corrigee (avec accents, hors gras sur les mots accentues) : plus de refus sur les mots autrefois manques", () => {
+  const corrigee = enGras("Confier l'IA") + " à " + enGras("un seul") + " salarié de l'équipe, " + enGras("est-il un risque") + " sous-estimé ?";
+  assert.deepEqual(motsAccentManquantCorps(corrigee), []);
+});
+
+// Accroches reelles de A6 et A7 (linkedin/2026-09-30/) : elles doivent PASSER. "peut-il",
+// "a-t-il", "projet", "l'IA" sont les faux positifs a ne jamais produire.
+test("A6 et A7 : les accroches reelles passent", () => {
+  const a6 = enGras("Un dirigeant qui n'utilise jamais l'IA peut-il piloter un projet IA ?");
+  const a7 = enGras("Un formateur qui cache son usage de l'IA a-t-il perdu la confiance de ses stagiaires ?");
+  assert.deepEqual(motsAccentManquantCorps(a6), []);
+  assert.deepEqual(motsAccentManquantCorps(a7), []);
+});
+
+test("pas de faux positifs : \"il a\", \"l'a\", \"a-t-il\", \"A4\", \"projet\", \"risque\" restent valides", () => {
+  for (const phrase of [
+    "Il a un projet",
+    "L'IA a un risque",
+    "Qui l'a vu ? Il l'a dit",
+    "A-t-il un projet ?",
+    "Le format A4 a un risque",
+    "Savoir ce qu'elle a fait",
+    "Tester un outil qui a de la valeur",
+    "Elle a envie de tester",
+    "Il a de la valeur",
+    "Le tableau est vide",
+  ]) {
+    assert.deepEqual(motsAccentManquantCorps(enGras(phrase)), [], phrase);
+  }
+});
+
+test("\"a\" pour \"à\" : devant un infinitif, en debut de phrase, et apres un infinitif sans sujet", () => {
+  for (const phrase of ["Il reste a faire", "A quoi sert ce projet ?", "Confier l'IA a un stagiaire", "Le seul a savoir compter"]) {
+    assert.equal(motsAccentManquantCorps(enGras(phrase)).length >= 1, true, phrase);
+  }
+});
+
+test("participe en -e qui existe en -é : apres etre/avoir, et compose a prefixe en fin de propos", () => {
+  for (const phrase of ["Le risque est sous-estime ?", "Ce choix est marque", "L'IA a change la donne", "Un risque sous-estime ?"]) {
+    assert.equal(motsAccentManquantCorps(enGras(phrase)).length >= 1, true, phrase);
+  }
+  // Le meme mot, dans un emploi qui ne le rend pas participe, reste valide.
+  for (const phrase of ["Un risque marque", "Une marque forte", "Il estime le risque"]) {
+    assert.deepEqual(motsAccentManquantCorps(enGras(phrase)), [], phrase);
+  }
+});
+
+test("mots en e- qui existent en é- : \"equipe\", \"etat\", \"ecole\", y compris apres une elision", () => {
+  for (const phrase of ["L'equipe entiere", "Un etat des lieux", "Une ecole de commerce", "peut-etre demain"]) {
+    assert.equal(motsAccentManquantCorps(enGras(phrase)).length >= 1, true, phrase);
+  }
+});
+
+test("le contexte vient de la ligne entiere : un mot hors gras n'est jamais signale, meme sans accent", () => {
+  assert.deepEqual(motsAccentManquantCorps("Confier l'IA a un seul salarie de l'equipe " + enGras("est-il un risque") + " ?"), []);
 });
