@@ -423,3 +423,31 @@ Phase 5 bis recopie desormais seulement les Id acceptes par `ecrire`.
   miroir et garde-fou non exerces sur donnees reelles (aucune suppression a faire).
 • Incident : valeurs du coffre entourees de backticks ; un export bash non nettoye les a
   executees et a affiche une partie de NOCODB_TOKEN dans une erreur. Regle ajoutee en Phase 1.
+
+(v9.1, 2026-09-29, audit demande par Julien) BUGS, ALLERS-RETOURS, QUALITE DES DONNEES.
+• Skill personnelle claude.ai v5.3 toujours presente (skills/synced) et seule listee dans une
+  session Claude Code sous le nom france-travail-extraction : la v9 etait contournee. A remplacer
+  par le paquet v9.1 (import manuel par Julien). Copie ecole-naturo-ops restee en v8.0 : alignee.
+• dedup : un NOUVEL anonyme etait classe doublon d'un ancien au meme intitule (cle nom + prenom +
+  commune vide), mesure. Corrige : sans prenom, comparaison par email ou telephone seulement.
+  Limite restante : deux anonymes sans email ni telephone ne se dedoublonnent pas.
+• assembler.js : cas synthetique « CV 0 cite BERNARD Luc en reference » -> la v9.0 donnait
+  l'email de MARTIN Paul a BERNARD Luc (ancre gloutonne). Plus longue suite croissante : 2 ancres
+  justes + 1 par ordre. Email du CV choisi par le nom (contact@ecole -> marie.dupont@). Journal de
+  plus de 2 h refuse ; seule la derniere recherche est gardee (deux recherches melangees dans la
+  meme page rendaient des pag en double).
+• extraction-profils.js : verrou (2e __run refuse, teste) ; budget 28 s (un tour peut durer 9 s) ;
+  recherche detectee et journal archive a chaque changement (teste) ; retour compact (146-231
+  caracteres au lieu du lot entier, coupe par le pont vers 1 000) ; commune lue apres « Adresse »,
+  telephone et commune de repli jamais sous « Experiences » (page simulee : l'ancien code prenait
+  le 01 et la ville de l'employeur).
+• notion.js publier : dedup + ecriture + relecture + miroir en un appel (9 s pour 3 fiches) ;
+  situer = resume + connus en une lecture. Delai de 30 s par requete (fetch sans delai = ~5 min par
+  essai). Statut jamais ecrase par le miroir, ecart signale (teste sur fiche TEST).
+• nocodb.js en lecture seule. ocr-par-tour.sh : tour 0 (marqueur de debut de lot, un PDF personnel
+  de 3 h ne bouge plus, teste), attente des .crdownload (teste), Telechargements. nettoyer-cv.sh :
+  un seul PowerShell (0,2 s par fichier auparavant).
+• Mesures : lecture Notion 1,4-2,9 s pour 257 fiches ; OCR 0,4 s/CV et 12 ms par sous-processus :
+  paralleliser l'OCR ne ferait rien gagner.
+• Constate pendant l'audit : les 31 fiches Ecarte ont disparu de Notion entre ~16:40 et ~16:58
+  (aucun script de la skill ne supprime dans Notion ; archiver-test refuse toute requete non TEST-).

@@ -1,22 +1,25 @@
 #!/usr/bin/env node
 // Base Notion « Leads France Travail » par l'API publique (jeton d'integration interne), hors
 // quota du connecteur Notion MCP. Reference du skill depuis la v9.0 : le run ecrit ici, puis
-// NocoDB est aligne en miroir (miroir-nocodb). Aucune valeur secrete n'est jamais affichee.
+// NocoDB est aligne en miroir. Aucune valeur secrete n'est jamais affichee.
 //
-//   node notion.js resume                        profils et emails par requete
-//   node notion.js connus                        JSON ["Prenom NOM", ...] (Phase 1)
-//   node notion.js dedup <lot.json>              lignes du lot deja presentes dans Notion
-//   node notion.js ecrire <lot.json> [--sec]     reprend la file d'attente, puis cree le lot ; --sec = simulation
-//   node notion.js reprendre                     repousse la file d'attente locale vers Notion
-//   node notion.js verifier <AAAA-MM-JJ> <requete>   compte du lot + fiches a Note vide
+// Le run n'a besoin que de deux commandes (une lecture de Notion chacune au plus) :
+//   node notion.js situer <connus.json>          Phase 1 : comptes par requete + noms connus
+//   node notion.js publier <lot.json> [--sec] [--sans-miroir]
+//                                                Phases 5-6 : reprise de la file, dedup (les
+//                                                doublons sont retires et listes), ecriture,
+//                                                relecture, miroir NocoDB
+// Commandes de detail :
+//   node notion.js resume | connus | dedup <lot.json> | ecrire <lot.json> [--sec] | reprendre
+//   node notion.js verifier <AAAA-MM-JJ> <requete>
 //   node notion.js export <fichier.json>         toute la base en JSON (colonnes NocoDB)
-//   node notion.js miroir-nocodb [--sec] [--force]   NocoDB = copie exacte de Notion (hors Ecarte)
-//   node notion.js amorcer [--sec]               une fois : cree dans Notion les fiches presentes dans NocoDB seulement
-//   node notion.js archiver-test <requete>       archive les fiches d'une requete « TEST-… » (essais)
+//   node notion.js miroir-nocodb [--sec] [--force]
+//   node notion.js archiver-test <requete>       archive les fiches d'une requete « TEST-… »
 //
-// Environnement : NOTION_TOKEN_FT (secrets.md, section Notion) ; NOCODB_URL et NOCODB_TOKEN pour
-// miroir-nocodb et amorcer. File d'attente : %LOCALAPPDATA%/france-travail-extraction/notion-attente.json
-// (donnees de candidats : locale, jamais versionnee).
+// Codes de sortie : 0 ok ; 1 erreur ; 2 relecture fausse ou Note vide ; 3 fiches en file d'attente.
+// Environnement : NOTION_TOKEN_FT ; NOCODB_URL et NOCODB_TOKEN pour le miroir.
+// File d'attente : %LOCALAPPDATA%/france-travail-extraction/notion-attente.json (donnees de
+// candidats : locale, jamais versionnee).
 'use strict';
 const fs = require('fs');
 const os = require('os');
@@ -25,6 +28,7 @@ const path = require('path');
 const TOKEN = process.env.NOTION_TOKEN_FT || '';
 const DB = process.env.NOTION_DB_FT || '1cfd41a205fc44f797b39e4e8e1d6978';
 const NOTION_VERSION = '2022-06-28';
+const DELAI_MS = 30000; // par requete : sans lui, une connexion muette bloque ~5 min par essai
 const STATUTS = ['A importer', 'Importe SalesHandy', 'Ecarte'];
 // « Type de requete » est une formule Notion : jamais ecrite, jamais recopiee.
 const COLONNES = ['Nom', 'Prenom', 'Email', 'Telephone', 'Commune', 'Fonction', 'Requete',
@@ -36,10 +40,10 @@ const DOSSIER_FILE = path.join(process.env.LOCALAPPDATA || path.join(os.homedir(
 const FILE = path.join(DOSSIER_FILE, 'notion-attente.json');
 
 function die(msg) { console.error('ERREUR : ' + msg); process.exit(1); }
-if (!TOKEN) die('NOTION_TOKEN_FT absent de l environnement (secrets.md, section Notion)');
+if (!TOKEN) die('NOTION_TOKEN_FT absent de l environnement (coffre de secrets, section Notion)');
 const pause = ms => new Promise(r => setTimeout(r, ms));
 
-// ---- API Notion : ~3 requetes/s, reessais sur 429 / 5xx / reseau ------------------------------
+// ---- API Notion : ~3 requetes/s, reessais sur 429 / 5xx / reseau / delai ----------------------
 let dernier = 0;
 async function notion(method, p, body) {
   for (let essai = 1; ; essai++) {
@@ -52,11 +56,12 @@ async function notion(method, p, body) {
         method,
         headers: { Authorization: 'Bearer ' + TOKEN, 'Notion-Version': NOTION_VERSION, 'content-type': 'application/json' },
         body: body === undefined ? undefined : JSON.stringify(body),
+        signal: AbortSignal.timeout(DELAI_MS),
       });
       txt = await r.text();
     } catch (e) {
       if (essai < 5) { await pause(1000 * essai); continue; }
-      throw new Error('Notion ' + method + ' ' + p + ' -> reseau : ' + e.message);
+      throw new Error('Notion ' + method + ' ' + p.split('?')[0] + ' -> reseau : ' + e.message);
     }
     if (r.ok) return txt ? JSON.parse(txt) : {};
     if ((r.status === 429 || r.status >= 500) && essai < 5) {
@@ -116,10 +121,31 @@ async function toutes(filtre) {
   return out;
 }
 
-// ---- Appariement (repris de nocodb.js reconcilier) --------------------------------------------
+// ---- Identite et doublons ----------------------------------------------------------------------
 const norm = s => (s || '').normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().trim();
+const tel10 = s => { const d = (s || '').replace(/\D/g, '').replace(/^33/, '0'); return d.length === 10 ? d : ''; };
+// Nom + prenom + commune n'identifie une personne que si le prenom est connu : un profil anonyme
+// porte un intitule (« Conseillere en naturopathie ») que d'autres partagent. Mesure du 29/09/2026 :
+// un nouvel anonyme etait classe doublon d'un ancien et retire du lot.
+const cleIdentite = r => norm(r.Prenom) ? [norm(r.Nom), norm(r.Prenom), norm(r.Commune)].join('|') : '';
+function doublons(lot, base) {
+  const parEmail = new Map(), parTel = new Map(), parNom = new Map();
+  for (const r of base) {
+    if (r.Email) parEmail.set(norm(r.Email), r);
+    if (tel10(r.Telephone)) parTel.set(tel10(r.Telephone), r);
+    if (cleIdentite(r)) parNom.set(cleIdentite(r), r);
+  }
+  const out = [];
+  lot.forEach((c, i) => {
+    const hit = (c.Email && parEmail.get(norm(c.Email))) || (tel10(c.Telephone) && parTel.get(tel10(c.Telephone))) ||
+      (cleIdentite(c) && parNom.get(cleIdentite(c)));
+    if (hit) out.push({ index: i, Nom: c.Nom, Prenom: c.Prenom, statut: hit.Statut || 'en file d attente' });
+  });
+  return out;
+}
+// Paires Notion <-> NocoDB (miroir, reprise) : email, puis nom + prenom + commune + requete, au
+// multi-ensemble. Deux fiches identiques restent deux personnes.
 const cleNom = r => [norm(r.Nom), norm(r.Prenom), norm(r.Commune), norm(r.Requete)].join('|');
-// Paires (a, b) : par email d'abord, puis nom + prenom + commune + requete, au multi-ensemble.
 function apparier(A, B) {
   const prisA = new Set(), prisB = new Set(), paires = [];
   const passe = cle => {
@@ -173,7 +199,7 @@ async function creer(rows) {
       const reste = rows.slice(i);
       ecrireFile([...lireFile(), ...reste]);
       console.log('ECHEC NOTION : ' + e.message);
-      console.log('mis en file d attente : ' + reste.length + ' fiche(s) -> reprise par « reprendre » ou au prochain « ecrire »');
+      console.log('mis en file d attente : ' + reste.length + ' fiche(s) -> reprise par « reprendre » ou au prochain « publier »');
       return { crees, enAttente: reste.length };
     }
   }
@@ -190,15 +216,31 @@ async function reprendre() {
   return { ...r, dejaLa: file.length - seulsA.length };
 }
 
-// ---- NocoDB (miroir et amorcage) ---------------------------------------------------------------
+function resumeDe(rows) {
+  const g = {};
+  for (const r of rows) {
+    const k = r.Requete || '(vide)';
+    g[k] = g[k] || { profils: 0, avec_email: 0 };
+    g[k].profils++;
+    if (r.Email) g[k].avec_email++;
+  }
+  console.log('total=' + rows.length + ' file_attente=' + lireFile().length);
+  Object.entries(g).sort((a, b) => b[1].profils - a[1].profils)
+    .forEach(([k, v]) => console.log(v.profils + '\t' + v.avec_email + '\t' + k));
+}
+// Seulement les lignes avec prenom : un profil anonyme n'est jamais saute pendant le parcours.
+const connusDe = rows => rows.filter(r => r.Prenom && r.Prenom.trim()).map(r => r.Prenom.trim() + ' ' + (r.Nom || '').trim());
+
+// ---- NocoDB (miroir) ---------------------------------------------------------------------------
 const NOCO_URL = (process.env.NOCODB_URL || '').replace(/\/+$/, '');
 const NOCO_TOKEN = process.env.NOCODB_TOKEN || '';
 const NOCO_TABLE = process.env.NOCODB_TABLE_ID || 'mjhwgyhkrukdy5m';
 async function noco(method, p, body) {
-  if (!NOCO_URL || !NOCO_TOKEN) die('NOCODB_URL et NOCODB_TOKEN absents de l environnement (secrets.md, section NocoDB)');
+  if (!NOCO_URL || !NOCO_TOKEN) die('NOCODB_URL et NOCODB_TOKEN absents de l environnement (coffre de secrets, section NocoDB)');
   const r = await fetch(NOCO_URL + '/api/v2/tables/' + NOCO_TABLE + p, {
     method, headers: { 'xc-token': NOCO_TOKEN, 'content-type': 'application/json' },
     body: body === undefined ? undefined : JSON.stringify(body),
+    signal: AbortSignal.timeout(DELAI_MS),
   });
   const txt = await r.text();
   if (!r.ok) die('NocoDB ' + method + ' ' + p.split('?')[0] + ' -> HTTP ' + r.status + ' ' + txt.slice(0, 300));
@@ -226,38 +268,95 @@ async function nocoParPaquets(method, rows) {
   return n;
 }
 
+// NocoDB = copie de Notion (hors Ecarte), sauf le Statut d'une fiche existante : on ne sait pas
+// si un autre outil le met a jour dans NocoDB (29/09/2026), donc un ecart se signale sans s'ecraser.
+async function miroir({ sec, force, tousNotion }) {
+  tousNotion = tousNotion || await toutes();
+  const notionRows = tousNotion.filter(r => r.Statut !== 'Ecarte');
+  const nocoRows = await nocoToutes();
+  const { paires, seulsA: aCreer, seulsB: aSupprimer } = apparier(notionRows, nocoRows);
+  const aModifier = [], statuts = [];
+  for (const [i, j] of paires) {
+    const n = notionRows[i], c = nocoRows[j], diff = { Id: c.Id };
+    for (const k of COLONNES) {
+      if (valeur(n[k]) === nocoVal(k, c[k])) continue;
+      if (k === 'Statut') { statuts.push([c.Nom, c.Prenom].filter(Boolean).join(' ') + ' (NocoDB « ' + valeur(c.Statut) + ' », Notion « ' + valeur(n.Statut) + ' »)'); continue; }
+      diff[k] = valeur(n[k]) || null;
+    }
+    if (Object.keys(diff).length > 1) aModifier.push(diff);
+  }
+  console.log('miroir : Notion=' + tousNotion.length + ' (dont ' + (tousNotion.length - notionRows.length) + ' Ecarte ignorees) NocoDB=' + nocoRows.length +
+    ' ; a creer=' + aCreer.length + ' a modifier=' + aModifier.length + ' a supprimer=' + aSupprimer.length);
+  statuts.forEach(s => console.log('  STATUT DIFFERENT, garde dans NocoDB : ' + s));
+  // Garde-fou : une lecture Notion tronquee viderait NocoDB.
+  if (aSupprimer.length > Math.max(20, nocoRows.length * 0.2) && !force) {
+    aSupprimer.slice(0, 20).forEach(r => console.log('  a supprimer : ' + [r.Nom, r.Prenom, r.Requete].filter(Boolean).join(' | ')));
+    console.log('MIROIR ARRETE : ' + aSupprimer.length + ' suppressions, au-dela du garde-fou (20 ou 20 %). Verifier, puis miroir-nocodb --force');
+    return false;
+  }
+  if (sec) { console.log('miroir : simulation, rien ecrit'); return true; }
+  const c = aCreer.length ? await nocoParPaquets('POST', aCreer.map(({ _page, ...r }) => sansVide(r))) : 0;
+  const m = aModifier.length ? await nocoParPaquets('PATCH', aModifier) : 0;
+  const s = aSupprimer.length ? await nocoParPaquets('DELETE', aSupprimer.map(r => ({ Id: r.Id }))) : 0;
+  const relu = (await nocoToutes()).length;
+  console.log('miroir : ' + c + ' creee(s), ' + m + ' modifiee(s), ' + s + ' supprimee(s) ; relu=' + relu + ' attendu=' + notionRows.length);
+  return relu === notionRows.length;
+}
+
 // ---- Commandes ---------------------------------------------------------------------------------
 const cmd = process.argv[2];
-const sec = process.argv.includes('--sec');
+const drapeau = d => process.argv.includes(d);
+const sec = drapeau('--sec');
 (async () => {
-  if (cmd === 'resume') {
-    const rows = await toutes();
-    const g = {};
-    for (const r of rows) {
-      const k = r.Requete || '(vide)';
-      g[k] = g[k] || { profils: 0, avec_email: 0 };
-      g[k].profils++;
-      if (r.Email) g[k].avec_email++;
+  if (cmd === 'situer') {
+    const f = process.argv[3];
+    if (!f) die('usage : situer <connus.json>');
+    const rows = [...await toutes(), ...lireFile()];
+    resumeDe(rows);
+    const connus = connusDe(rows);
+    fs.writeFileSync(f, JSON.stringify(connus));
+    console.log('connus : ' + connus.length + ' nom(s) -> ' + f);
+  } else if (cmd === 'publier') {
+    const propres = valider(lireLot(process.argv[3]));
+    let code = 0;
+    if (!sec) {
+      const f = await reprendre();
+      if (f.crees || f.dejaLa || f.enAttente) console.log('file d attente reprise : ' + f.crees + ' creee(s), ' + f.dejaLa + ' deja dans Notion, ' + f.enAttente + ' encore en attente');
+      if (f.enAttente) { ecrireFile([...lireFile(), ...propres]); console.log('NOTION INDISPONIBLE : lot mis en file d attente sans essai (' + propres.length + ' fiche(s))'); process.exit(3); }
     }
-    console.log('total=' + rows.length + ' file_attente=' + lireFile().length);
-    Object.entries(g).sort((a, b) => b[1].profils - a[1].profils)
-      .forEach(([k, v]) => console.log(v.profils + '\t' + v.avec_email + '\t' + k));
+    const base = await toutes();
+    const d = doublons(propres, [...base, ...lireFile()]);
+    d.forEach(x => console.log('  doublon retire : ' + [x.Nom, x.Prenom].filter(Boolean).join(' ') + ' (deja en base, ' + x.statut + ')'));
+    const exclus = new Set(d.map(x => x.index));
+    const nouveaux = propres.filter((_, i) => !exclus.has(i));
+    console.log('lot=' + propres.length + ' doublons=' + d.length + ' a ecrire=' + nouveaux.length);
+    if (sec) return console.log('simulation : rien ecrit');
+    const r = await creer(nouveaux);
+    console.log('ecrites dans Notion : ' + r.crees + ' / ' + nouveaux.length);
+    if (r.enAttente) code = 3;
+    // Relecture par (date, requete) : attendu = ce que la base avait deja + ce qui vient d'etre cree.
+    const groupes = new Map();
+    nouveaux.slice(0, r.crees).forEach(x => { const k = String(x['Date extraction'] || '').slice(0, 10) + '\u0000' + x.Requete; groupes.set(k, (groupes.get(k) || 0) + 1); });
+    for (const [k, n] of groupes) {
+      const [date, requete] = k.split('\u0000');
+      const parRequete = { property: 'Requete', rich_text: { equals: requete } };
+      const relus = await toutes(date ? { and: [{ property: 'Date extraction', date: { equals: date } }, parRequete] } : parRequete);
+      const vides = relus.filter(x => !x.Note || !x.Note.trim()).length;
+      // Sans date, le filtre ramene toute la requete : pas de compte attendu fiable.
+      const attendu = date ? base.filter(b => b['Date extraction'] === date && b.Requete === requete).length + n : null;
+      console.log('relecture ' + (date || '(sans date)') + ' « ' + requete + ' » : relu=' + relus.length + (attendu === null ? '' : ' attendu=' + attendu) + ' notes_vides=' + vides);
+      if ((attendu !== null && relus.length !== attendu) || vides) code = code || 2;
+    }
+    if (!drapeau('--sans-miroir')) { if (!await miroir({ sec: false, force: false })) code = code || 2; }
+    process.exit(code);
+  } else if (cmd === 'resume') {
+    resumeDe(await toutes());
   } else if (cmd === 'connus') {
-    // Notion + file d'attente ; seulement les lignes avec prenom : un profil anonyme n'est jamais saute.
-    const rows = [...await toutes(), ...lireFile()].filter(r => r.Prenom && r.Prenom.trim());
-    console.log(JSON.stringify(rows.map(r => r.Prenom.trim() + ' ' + (r.Nom || '').trim())));
+    console.log(JSON.stringify(connusDe([...await toutes(), ...lireFile()])));
   } else if (cmd === 'dedup') {
     const lot = lireLot(process.argv[3]);
-    const base = [...await toutes(), ...lireFile()];
-    const parEmail = new Map(base.filter(r => r.Email).map(r => [norm(r.Email), r]));
-    const cle = r => [norm(r.Nom), norm(r.Prenom), norm(r.Commune)].join('|');
-    const parNom = new Map(base.map(r => [cle(r), r]));
-    const doublons = [];
-    lot.forEach((c, i) => {
-      const hit = (c.Email && parEmail.get(norm(c.Email))) || parNom.get(cle(c));
-      if (hit) doublons.push({ index: i, Nom: c.Nom, Prenom: c.Prenom, statut: hit.Statut || 'en file d attente' });
-    });
-    console.log(JSON.stringify({ lot: lot.length, doublons: doublons.length, detail: doublons }));
+    const d = doublons(lot, [...await toutes(), ...lireFile()]);
+    console.log(JSON.stringify({ lot: lot.length, doublons: d.length, detail: d }));
   } else if (cmd === 'ecrire') {
     const propres = valider(lireLot(process.argv[3]));
     if (sec) return console.log('simulation : ' + propres.length + ' ligne(s) valides, file d attente=' + lireFile().length + ', rien ecrit');
@@ -288,41 +387,7 @@ const sec = process.argv.includes('--sec');
     fs.writeFileSync(f, JSON.stringify(rows));
     console.log('exporte : ' + rows.length + ' fiche(s) -> ' + f + ' (donnees de candidats : a supprimer apres usage)');
   } else if (cmd === 'miroir-nocodb') {
-    // Notion fait foi. Les fiches Ecarte de Notion n'ont pas leur place dans NocoDB.
-    const tousNotion = await toutes();
-    const notionRows = tousNotion.filter(r => r.Statut !== 'Ecarte');
-    const nocoRows = await nocoToutes();
-    const { paires, seulsA: aCreer, seulsB: aSupprimer } = apparier(notionRows, nocoRows);
-    const aModifier = [];
-    for (const [i, j] of paires) {
-      const n = notionRows[i], c = nocoRows[j], diff = { Id: c.Id };
-      for (const k of COLONNES) if (valeur(n[k]) !== nocoVal(k, c[k])) diff[k] = valeur(n[k]) || null;
-      if (Object.keys(diff).length > 1) { aModifier.push(diff); console.log('  a modifier : ' + [c.Nom, c.Prenom].filter(Boolean).join(' ') + ' -> ' + Object.keys(diff).slice(1).join(', ')); }
-    }
-    console.log('Notion=' + tousNotion.length + ' (dont ' + (tousNotion.length - notionRows.length) + ' Ecarte ignorees) NocoDB=' + nocoRows.length);
-    console.log('a creer dans NocoDB=' + aCreer.length + ' a modifier=' + aModifier.length + ' a supprimer=' + aSupprimer.length);
-    // Garde-fou : une lecture Notion tronquee viderait NocoDB.
-    if (aSupprimer.length > Math.max(20, nocoRows.length * 0.2) && !process.argv.includes('--force')) {
-      aSupprimer.slice(0, 20).forEach(r => console.log('  a supprimer : ' + [r.Nom, r.Prenom, r.Requete].filter(Boolean).join(' | ')));
-      die(aSupprimer.length + ' suppressions dans NocoDB : au-dela du garde-fou (20 ou 20 %). Verifier, puis relancer avec --force');
-    }
-    if (sec) return console.log('simulation : rien ecrit');
-    const c = aCreer.length ? await nocoParPaquets('POST', aCreer.map(({ _page, ...r }) => sansVide(r))) : 0;
-    const m = aModifier.length ? await nocoParPaquets('PATCH', aModifier) : 0;
-    const s = aSupprimer.length ? await nocoParPaquets('DELETE', aSupprimer.map(r => ({ Id: r.Id }))) : 0;
-    const apres = await nocoToutes();
-    console.log('NocoDB : ' + c + ' creee(s), ' + m + ' modifiee(s), ' + s + ' supprimee(s) ; relu=' + apres.length + ' attendu=' + notionRows.length);
-    process.exit(apres.length === notionRows.length ? 0 : 2);
-  } else if (cmd === 'amorcer') {
-    // Bascule v8 -> v9 : ce que NocoDB a recu pendant la v8.0 et que Notion n'a jamais vu.
-    const { seulsB } = apparier(await toutes(), await nocoToutes());
-    const aCreer = seulsB.filter(r => r.Statut !== 'Ecarte').map(r => Object.fromEntries(COLONNES.map(k => [k, nocoVal(k, r[k])])));
-    console.log('fiches NocoDB absentes de Notion : ' + aCreer.length);
-    aCreer.slice(0, 60).forEach(r => console.log('  ' + [r.Nom, r.Prenom, r.Requete, r['Date extraction']].filter(Boolean).join(' | ')));
-    if (sec || !aCreer.length) return console.log(sec ? 'simulation : rien ecrit' : 'rien a faire');
-    const r = await creer(aCreer);
-    console.log('creees dans Notion : ' + r.crees + ' / ' + aCreer.length);
-    if (r.enAttente) process.exit(3);
+    process.exit(await miroir({ sec, force: drapeau('--force') }) ? 0 : 2);
   } else if (cmd === 'archiver-test') {
     const requete = process.argv[3] || '';
     if (!/^TEST-/.test(requete)) die('archiver-test ne touche qu une requete commencant par « TEST- »');

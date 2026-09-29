@@ -7,10 +7,13 @@
 //       debut de presentation. Sert a choisir les profils a garder.
 //   node assembler.js lot --choix <choix.json> --requete "<requete>" --date <AAAA-MM-JJ>
 //                         --sortie <lot.json> <cv.tsv>...
-//       ecrit le lot au format de nocodb.js (dedup / ecrire).
+//       ecrit le lot au format de notion.js (publier).
 //
 // Option commune : --journal <ft-journal.json>. Par defaut, le plus recent
-// `ft-journal*.json` de Downloads (produit par `window.__exporter()`).
+// `ft-journal*.json` de Downloads (produit par `window.__exporter()`), refuse s'il a plus de
+// 2 h : un export bloque ferait sinon relire, sans le dire, le journal d'un lot precedent.
+// Seule la derniere recherche du journal est gardee (--toutes-recherches pour tout garder) :
+// deux recherches dans la meme page partagent les numeros de pagination.
 //
 // choix.json : seulement les profils GARDES, par numero de pagination :
 //   { "12": "Aspirante naturopathe", "15": { "Fonction": "Sophrologue", "Nom": "DURAND", "Prenom": "Anne" } }
@@ -35,8 +38,9 @@ const args = process.argv.slice(2);
 const cmd = args.shift();
 const opt = {};
 const fichiers = [];
+const SANS_VALEUR = ['toutes-recherches'];
 for (let i = 0; i < args.length; i++) {
-  if (args[i].startsWith('--')) opt[args[i].slice(2)] = args[++i];
+  if (args[i].startsWith('--')) { const k = args[i].slice(2); opt[k] = SANS_VALEUR.includes(k) ? true : args[++i]; }
   else fichiers.push(args[i]);
 }
 
@@ -56,10 +60,19 @@ function journal() {
       .map(n => path.join(dl, n)).sort((a, b) => fs.statSync(b).mtimeMs - fs.statSync(a).mtimeMs);
     if (!c.length) die('aucun ft-journal*.json dans ' + dl + ' : lancer window.__exporter() dans la page');
     f = c[0];
+    const age = (Date.now() - fs.statSync(f).mtimeMs) / 60000;
+    if (age > 120) die(path.basename(f) + ' a ' + Math.round(age) + ' min : journal d un lot precedent ? Relancer window.__exporter(), ou passer --journal <fichier>');
   }
   const j = JSON.parse(fs.readFileSync(f, 'utf8'));
   if (!Array.isArray(j)) die('journal illisible : tableau attendu');
-  return j.filter(r => !r.deja);
+  const derniere = j.length ? j[j.length - 1].recherche : undefined;
+  const garde = opt['toutes-recherches'] || derniere === undefined ? j : j.filter(r => r.recherche === derniere);
+  const neufs = garde.filter(r => !r.deja);
+  const vus = new Set();
+  for (const r of neufs) { if (vus.has(r.pag)) die('pag ' + r.pag + ' en double dans le journal (deux recherches melangees ?) : relancer sans --toutes-recherches'); vus.add(r.pag); }
+  console.error('journal : ' + path.basename(f) + ', ' + neufs.length + ' nouveau(x) profil(s)' +
+    (garde.length < j.length ? ' (derniere recherche seulement, ' + (j.length - garde.length) + ' ligne(s) plus anciennes ignorees)' : ''));
+  return neufs;
 }
 
 // « Prenom NOM » -> {Nom, Prenom}. Tokens en capitales = nom, les autres = prenom.
@@ -110,11 +123,16 @@ function apparier(profils, liste) {
     const qui = tel.map((p, i) => confirme(p, cv) ? i : -1).filter(i => i >= 0);
     if (qui.length === 1) ancres.push([k, qui[0]]);
   });
-  const sures = [];
-  for (const a of ancres) {
-    const prev = sures[sures.length - 1];
-    if (!prev || (a[0] > prev[0] && a[1] > prev[1])) sures.push(a);
+  // Plus longue suite d'ancres croissante des deux cotes : une ancre fausse en tete ne bloque
+  // plus toutes les bonnes qui suivent (l'ancien choix glouton gardait la premiere venue).
+  const lg = ancres.map(() => 1), prec = ancres.map(() => -1);
+  for (let b = 0; b < ancres.length; b++) {
+    for (let a = 0; a < b; a++) {
+      if (ancres[a][0] < ancres[b][0] && ancres[a][1] < ancres[b][1] && lg[a] + 1 > lg[b]) { lg[b] = lg[a] + 1; prec[b] = a; }
+    }
   }
+  const sures = [];
+  for (let x = lg.indexOf(Math.max(0, ...lg)); x >= 0 && ancres.length; x = prec[x]) sures.unshift(ancres[x]);
   sures.forEach(([k, i]) => res.set(tel[i], { cv: liste[k], mode: 'nom' }));
   // 2. segments entre ancres
   const bornes = [[-1, -1], ...sures, [liste.length, tel.length]];
@@ -125,6 +143,18 @@ function apparier(profils, liste) {
     else segP.forEach(p => res.set(p, { cv: null, mode: segCv.length ? 'incertain' : 'non recu' }));
   }
   return res;
+}
+
+// emails-depuis-cv.sh garde le PREMIER email du CV, qui peut etre celui d'un employeur ou d'un
+// referent. Si un autre email du CV porte le nom ou le prenom du candidat, c'est lui qu'on prend.
+const RE_EMAIL = /[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}/g;
+function emailAuNom(p, cv) {
+  if (p.anonyme) return '';
+  const tous = [...new Set([cv.email.replace(/\s*\[RECONSTRUIT\]/, ''), ...(cv.texte.match(RE_EMAIL) || [])].filter(Boolean))];
+  const cles = [norm(p.Nom), norm(p.Prenom.split(/[\s-]/)[0])].map(s => s.replace(/ /g, '')).filter(s => s.length >= 3);
+  const porte = e => { const local = norm(e.split('@')[0]).replace(/ /g, ''); return cles.some(c => local.includes(c)); };
+  if (tous.length < 2 || porte(tous[0])) return '';  // rien a choisir, ou le premier est deja le bon
+  return tous.find(porte) || '';
 }
 
 function construire() {
@@ -140,7 +170,9 @@ function construire() {
     else if (a.mode === 'non recu') motifs.push('CV non recu');
     else {
       telCv = a.cv.tel;
-      if (/\[RECONSTRUIT\]/.test(a.cv.email)) { email = a.cv.email.replace(/\s*\[RECONSTRUIT\]/, ''); motifs.push('email reconstruit'); }
+      const auNom = emailAuNom(p, a.cv);
+      if (auNom) email = auNom;
+      else if (/\[RECONSTRUIT\]/.test(a.cv.email)) { email = a.cv.email.replace(/\s*\[RECONSTRUIT\]/, ''); motifs.push('email reconstruit'); }
       else email = a.cv.email;
       if (!email) motifs.push(a.cv.texte.trim() ? 'email non trouve' : 'PDF illisible');
     }
