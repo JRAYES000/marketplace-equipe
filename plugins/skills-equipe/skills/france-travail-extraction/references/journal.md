@@ -476,3 +476,14 @@ Phase 5 bis recopie desormais seulement les Id acceptes par `ecrire`.
 • Decision de Julien (29/09) : Notion maitre du Statut. miroir() recopie le Statut. Premier miroir
   reel : 0 creee, 137 modifiees (toutes A importer -> Importe SalesHandy), 10 supprimees (Ecarte),
   relu=216 attendu=216 ; relance --sec : 0 ecart.
+
+(v9.3, 2026-09-29, demande de Julien) IMPORT SALESHANDY AUTOMATIQUE.
+• Avant : l'import dans SalesHandy se faisait hors du skill (137 fiches « Importe SalesHandy »,
+  133 prospects dans la sequence « Leads France Travail — reconversion (Ecole Naturo) », dont les
+  29 fiches Infirmiere liberale). Les 64 fiches du 29/09 soir restaient « A importer ».
+• publier (et notion.js saleshandy) : fiches A importer + email + prenom + requete de SH_REQUETES
+  -> POST /v1/sequences/prospects/import-with-field-name (etape 1), suivi par
+  /v1/prospects/import-status, rapport d'echec lu ; Statut Notion -> Importe SalesHandy pour les
+  importes, puis miroir. Code de sortie 4 si l'import echoue ou refuse des prospects.
+• Cle : SALESHANDY_API_KEY du coffre, chargee par charger-secrets.sh ; GET /v1/sequences = 200.
+• Simulation du 29/09 : 28 a importer (toutes Formation naturopathie), 5 laissees (anonymes).

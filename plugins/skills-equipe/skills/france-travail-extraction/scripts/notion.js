@@ -5,10 +5,11 @@
 //
 // Le run n'a besoin que de deux commandes (une lecture de Notion chacune au plus) :
 //   node notion.js situer <connus.json>          Phase 1 : comptes par requete + noms connus
-//   node notion.js publier <lot.json> [--sec] [--sans-miroir]
+//   node notion.js publier <lot.json> [--sec] [--sans-saleshandy] [--sans-miroir]
 //                                                Phases 5-6 : reprise de la file, dedup (les
 //                                                doublons sont retires et listes), ecriture,
-//                                                relecture, miroir NocoDB
+//                                                relecture, import SalesHandy, miroir NocoDB
+//   node notion.js saleshandy [--sec]            import SalesHandy seul (fiches « A importer »), puis miroir
 // Commandes de detail :
 //   node notion.js resume | connus | dedup <lot.json> | ecrire <lot.json> [--sec] | reprendre
 //   node notion.js verifier <AAAA-MM-JJ> <requete>
@@ -16,8 +17,10 @@
 //   node notion.js miroir-nocodb [--sec] [--force]
 //   node notion.js archiver-test <requete>       archive les fiches d'une requete « TEST-… »
 //
-// Codes de sortie : 0 ok ; 1 erreur ; 2 relecture fausse ou Note vide ; 3 fiches en file d'attente.
-// Environnement : NOTION_TOKEN_FT ; NOCODB_URL et NOCODB_TOKEN pour le miroir. A defaut, lus dans
+// Codes de sortie : 0 ok ; 1 erreur ; 2 relecture fausse ou Note vide ; 3 fiches en file d'attente ;
+// 4 import SalesHandy en echec ou partiel (fiches Notion intactes, restees « A importer »).
+// Environnement : NOTION_TOKEN_FT ; NOCODB_URL et NOCODB_TOKEN pour le miroir ; SALESHANDY_API_KEY
+// pour l'import. A defaut, lus dans
 // le fichier ecrit par charger-secrets.sh (secrets-env.js).
 // File d'attente : %LOCALAPPDATA%/france-travail-extraction/notion-attente.json (donnees de
 // candidats : locale, jamais versionnee). Meme dossier : ecartes.json (voir assembler.js).
@@ -317,6 +320,71 @@ async function miroir({ sec, force, tousNotion }) {
   return relu === notionRows.length;
 }
 
+// ---- SalesHandy : les fiches « A importer » avec email entrent dans la sequence ----------------
+// Demande de Julien, 29/09/2026 : chaque personne ecrite dans Notion entre aussi, sans geste de sa
+// part, dans la sequence « Leads France Travail — reconversion (Ecole Naturo) » (URL
+// my.saleshandy.com/sequence/960252 ; l'API ne connait que l'identifiant hache). Etape 1 : les
+// e-mails partent selon le planning de la sequence. Une fiche importee passe « Importe SalesHandy »
+// dans Notion, puis le miroir descend le Statut dans NocoDB.
+// Pas importees : sans email ; sans prenom (le premier e-mail commence par « Bonjour {{First Name}} ») ;
+// requete absente de SH_REQUETES (autre cible que la reconversion bien-etre). Elles restent « A importer ».
+const SH_KEY = process.env.SALESHANDY_API_KEY || '';
+const SH_SEQUENCE = process.env.SALESHANDY_SEQUENCE_FT || 'dlPyooE6zL';
+const SH_ETAPE = process.env.SALESHANDY_STEP_FT || '2AwrBNv3wQ';
+const SH_REQUETES = ['Formation naturopathie', 'Naturopathie', 'Reconversion bien-être'];
+async function sh(method, p, body) {
+  const r = await fetch('https://open-api.saleshandy.com/v1' + p, {
+    method, headers: { 'x-api-key': SH_KEY, 'content-type': 'application/json' },
+    body: body === undefined ? undefined : JSON.stringify(body), signal: AbortSignal.timeout(DELAI_MS),
+  });
+  const txt = await r.text();
+  if (!r.ok) throw new Error('SalesHandy ' + method + ' ' + p + ' -> HTTP ' + r.status + ' ' + txt.slice(0, 300));
+  return txt ? JSON.parse(txt) : {};
+}
+// Colonnes Notion -> champs SalesHandy (libelles exacts de list_fields).
+const versProspect = r => {
+  const o = { 'First Name': r.Prenom, 'Last Name': r.Nom, Email: r.Email.trim().toLowerCase() };
+  if (r.Telephone) o['Phone Number'] = r.Telephone;
+  const ville = (r.Commune || '').replace(/^\d{5}\s*/, '').trim();
+  if (ville) o.City = ville;
+  if (r.Fonction) o['Job Title'] = r.Fonction;
+  return o;
+};
+async function saleshandy({ sec, tousNotion }) {
+  tousNotion = tousNotion || await toutes();
+  const attente = tousNotion.filter(r => r.Statut === 'A importer' && (r.Email || '').includes('@'));
+  const aImporter = attente.filter(r => norm(r.Prenom) && SH_REQUETES.includes(r.Requete));
+  const hors = attente.length - aImporter.length;
+  const parReq = {};
+  aImporter.forEach(r => { parReq[r.Requete] = (parReq[r.Requete] || 0) + 1; });
+  console.log('saleshandy : ' + aImporter.length + ' fiche(s) a importer' + (Object.keys(parReq).length ? ' (' + Object.entries(parReq).map(([k, n]) => k + ' ' + n).join(', ') + ')' : '') +
+    (hors ? ' ; ' + hors + ' laissee(s) « A importer » (sans prenom ou requete hors sequence)' : ''));
+  if (!aImporter.length) return { ok: true, importees: [] };
+  if (sec) { console.log('saleshandy : simulation, rien importe'); return { ok: true, importees: [] }; }
+  if (!SH_KEY) { console.log('SALESHANDY : SALESHANDY_API_KEY absente (charger-secrets.sh), import saute'); return { ok: false, importees: [] }; }
+  const dep = await sh('POST', '/sequences/prospects/import-with-field-name', {
+    stepId: SH_ETAPE, prospectList: aImporter.map(versProspect),
+    verifyProspects: true, conflictAction: 'addMissingFields', tags: ['France Travail'],
+  });
+  const id = dep.payload && dep.payload.requestId;
+  if (!id) throw new Error('SalesHandy : pas de requestId dans la reponse d import');
+  let st = {};
+  for (let i = 0; i < 40 && !st.isCompleted; i++) { await pause(3000); st = (await sh('GET', '/prospects/import-status/' + id)).payload || {}; }
+  if (!st.isCompleted) { console.log('SALESHANDY : import ' + id + ' non termine apres 2 min, statuts Notion inchanges'); return { ok: false, importees: [] }; }
+  // Le rapport d'echec (CSV) liste les prospects refuses : ils restent « A importer ».
+  const rapport = st.reportURL || st.failedProspectsURL;
+  let refuses = new Set();
+  if (rapport) {
+    const csv = await (await fetch(rapport, { signal: AbortSignal.timeout(DELAI_MS) })).text();
+    refuses = new Set((csv.match(/[\w.+-]+@[\w-]+(\.[\w-]+)+/g) || []).map(e => e.toLowerCase()));
+    console.log('saleshandy : ' + refuses.size + ' prospect(s) refuse(s), laisses « A importer »');
+  }
+  const importees = aImporter.filter(r => !refuses.has(r.Email.trim().toLowerCase()));
+  for (const r of importees) { await notion('PATCH', '/pages/' + r._page, { properties: versProprietes({ Statut: 'Importe SalesHandy' }) }); r.Statut = 'Importe SalesHandy'; }
+  console.log('saleshandy : ' + importees.length + ' importee(s) dans la sequence (etape 1), Statut Notion -> Importe SalesHandy');
+  return { ok: !refuses.size, importees };
+}
+
 // ---- Commandes ---------------------------------------------------------------------------------
 const cmd = process.argv[2];
 const drapeau = d => process.argv.includes(d);
@@ -366,6 +434,12 @@ const sec = drapeau('--sec');
       console.log('relecture ' + (date || '(sans date)') + ' « ' + requete + ' » : relu=' + relus.length + (attendu === null ? '' : ' attendu=' + attendu) + ' notes_vides=' + vides);
       if ((attendu !== null && relus.length !== attendu) || vides) code = code || 2;
     }
+    // v9.3 : import SalesHandy avant le miroir, pour que le Statut « Importe SalesHandy » descende
+    // dans NocoDB dans la meme passe. Un echec SalesHandy ne touche pas aux fiches Notion (code 4).
+    if (!drapeau('--sans-saleshandy')) {
+      try { if (!(await saleshandy({ sec: false, tousNotion })).ok) code = code || 4; }
+      catch (e) { console.log('SALESHANDY : ' + e.message); code = code || 4; }
+    }
     if (!drapeau('--sans-miroir')) { if (!await miroir({ sec: false, force: false, tousNotion })) code = code || 2; }
     process.exit(code);
   } else if (cmd === 'resume') {
@@ -405,6 +479,13 @@ const sec = drapeau('--sec');
     const rows = (await toutes()).map(({ _page, ...r }) => r);
     fs.writeFileSync(f, JSON.stringify(rows));
     console.log('exporte : ' + rows.length + ' fiche(s) -> ' + f + ' (donnees de candidats : a supprimer apres usage)');
+  } else if (cmd === 'saleshandy') {
+    const tousNotion = await toutes();
+    let code = 0;
+    try { if (!(await saleshandy({ sec, tousNotion })).ok) code = 4; }
+    catch (e) { console.log('SALESHANDY : ' + e.message); code = 4; }
+    if (!sec && !drapeau('--sans-miroir')) { if (!await miroir({ sec: false, force: false, tousNotion })) code = code || 2; }
+    process.exit(code);
   } else if (cmd === 'miroir-nocodb') {
     process.exit(await miroir({ sec, force: drapeau('--force') }) ? 0 : 2);
   } else if (cmd === 'archiver-test') {

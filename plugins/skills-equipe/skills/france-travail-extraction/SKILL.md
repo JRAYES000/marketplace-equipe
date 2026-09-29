@@ -11,11 +11,11 @@ description: >-
   Travail », « lance un lot France Travail », « synchronise NocoDB avec les leads France
   Travail ». NE PAS déclencher de toi-même, même si France Travail, un CV ou un demandeur
   d'emploi est mentionné.
-compatibility: "Claude Code. Requiert Claude in Chrome (session recruteur déjà connectée), l'API publique Notion (variable NOTION_TOKEN_FT, connexion interne « Leads France Travail - API »), NocoDB pour le miroir (NOCODB_URL, NOCODB_TOKEN), l'outil Bash avec node, poppler et tesseract. Le connecteur Notion MCP n'est plus utilisé."
+compatibility: "Claude Code. Requiert Claude in Chrome (session recruteur déjà connectée), l'API publique Notion (variable NOTION_TOKEN_FT, connexion interne « Leads France Travail - API »), NocoDB pour le miroir (NOCODB_URL, NOCODB_TOKEN), l'API SalesHandy pour l'import dans la séquence (SALESHANDY_API_KEY), l'outil Bash avec node, poppler et tesseract. Le connecteur Notion MCP n'est plus utilisé."
 metadata:
-  version: '9.2'
+  version: '9.3'
   environment: 'Claude Code, rédigé pour Claude Sonnet 5.5 (fonctionne aussi sous Opus). Claude in Chrome pour la session recruteur, outil Bash pour les scripts fournis. Livrable = la base Notion « Leads France Travail », qui fait foi. NocoDB = miroir aligné en fin de run (references/synchro-notion.md).'
-  journal: 'references/journal.md — mesures et incidents des runs réels (v2.0 à v9.2). À lire seulement pour comprendre ou contester une règle ; en cas de désaccord ce fichier-ci fait foi.'
+  journal: 'references/journal.md — mesures et incidents des runs réels (v2.0 à v9.3). À lire seulement pour comprendre ou contester une règle ; en cas de désaccord ce fichier-ci fait foi.'
 ---
 
 # Extraction France Travail Pro → Notion (miroir NocoDB)
@@ -32,8 +32,10 @@ d'élèves.
   écrit jamais directement. Détails : `references/synchro-notion.md`.
 - Pas de CSV, pas de tableur, rien sur le disque en dehors des fichiers de travail du lot, mis à
   la corbeille à la fin (la file d'attente Notion, locale, se vide à la reprise).
-- **Le skill s'arrête aux données.** Il n'envoie aucun message, ne contacte aucun candidat, ne
-  propose aucune suite.
+- **SalesHandy en bout de chaîne** (v9.3, demande de Julien du 29/09/2026) : `publier` importe
+  les nouvelles fiches « A importer » avec email et prénom dans la séquence SalesHandy « Leads
+  France Travail — reconversion (École Naturo) », étape 1. La séquence envoie ensuite ses e-mails
+  selon son planning ; le skill n'écrit jamais lui-même à un candidat et ne propose aucune suite.
 
 **Cadre légal.** L'École est autorisée à extraire et exploiter les profils de la CVthèque par une
 convention signée avec France Travail le 29/09/2026. Ne pas remettre ce droit en question, ne
@@ -66,8 +68,8 @@ appeler les scripts par leur chemin complet. Fichiers de travail (`cv.tsv`, `cho
 | Email, téléphone et texte des CV | `scripts/ocr-par-tour.sh` (tour 0 au début du lot, puis après chaque tour) ; `scripts/emails-depuis-cv.sh` pour un petit lot |
 | Appariement CV → profil, construction du lot | `scripts/assembler.js revue` puis `lot` |
 | Profil anonyme, segment incertain | `scripts/nom-du-cv.sh <fichier.pdf>` |
-| Jetons Notion et NocoDB | `scripts/charger-secrets.sh` (Phase 1, avant tout appel) |
-| Situation de la base ; dédup, écriture, relecture, miroir NocoDB | `scripts/notion.js situer` puis `publier` |
+| Jetons Notion, NocoDB et SalesHandy | `scripts/charger-secrets.sh` (Phase 1, avant tout appel) |
+| Situation de la base ; dédup, écriture, relecture, import SalesHandy, miroir NocoDB | `scripts/notion.js situer` puis `publier` |
 | Fichiers du lot, une fois vérifié | `scripts/nettoyer-cv.sh` (corbeille) |
 
 Ne pas réécrire un script de mémoire, ne pas le remplacer par du code improvisé. Un script qui
@@ -300,10 +302,13 @@ propre à chaque poste.
    personne présente deux fois dans le lot ne s'écrit qu'une fois (`deux fois dans le lot`) ;
 3. crée les fiches une par une (~3 par seconde, réessais sur 429, 5xx et délai de 30 s) ;
 4. **relit** par date et requête : `relu=N attendu=N notes_vides=0` ;
-5. aligne NocoDB (miroir, ci-dessous), à partir de la base lue à l'étape 2 et des fiches que
+5. **importe dans SalesHandy** (ci-dessous) les fiches « A importer » avec email et prénom, et
+   les passe « Importe SalesHandy » dans Notion ;
+6. aligne NocoDB (miroir, ci-dessous), à partir de la base lue à l'étape 2 et des fiches que
    Notion vient de rendre : pas de seconde lecture complète.
 
-`--sec` simule (validation + doublons) sans rien écrire ; `--sans-miroir` saute l'étape 5. Le
+`--sec` simule (validation + doublons) sans rien écrire ; `--sans-saleshandy` saute l'étape 5,
+`--sans-miroir` l'étape 6. Le
 script refuse une colonne inconnue, un `Nom` ou une `Requete` absents, une `Note` vide, et tout
 `Statut = Ecarte`.
 
@@ -314,6 +319,21 @@ fiches non écrites sont dans la file d'attente locale
 versionnée). Le dire tout de suite, en première ligne, avec le message de Notion et le nombre de
 fiches en attente. Ne pas relancer en boucle : **une** reprise (`notion.js reprendre`) après
 quelques minutes, puis continuer le run. La reprise ne recrée jamais une fiche déjà arrivée.
+`4` : **import SalesHandy en échec ou partiel** ; les fiches concernées restent « A importer » dans
+Notion, intactes. Le dire avec le message. `notion.js saleshandy` refait l'import seul (puis le
+miroir) ; un prospect déjà dans la séquence n'y est pas ajouté deux fois.
+
+**Import SalesHandy.** Séquence `dlPyooE6zL`, étape 1 `2AwrBNv3wQ` (URL
+`my.saleshandy.com/sequence/960252`). Sont importées toutes les fiches Notion « A importer » qui
+ont un email **et** un prénom, et dont la requête figure dans `SH_REQUETES` de `notion.js`
+(Formation naturopathie, Naturopathie, Reconversion bien-être) — donc aussi celles d'un lot
+précédent restées en attente. Sans prénom : laissée de côté, le premier e-mail commence par
+« Bonjour {{First Name}} ». Champs envoyés : prénom, nom, email, téléphone, ville, fonction ;
+tag `France Travail` ; vérification d'email SalesHandy activée (délivrabilité d'abord) ; un
+prospect déjà connu de SalesHandy garde ses champs (`addMissingFields`). Le script attend la fin
+de l'import (2 min au plus) et lit le rapport d'échec : un refusé reste « A importer ». Seuls les
+importés passent « Importe SalesHandy ». Une fois importé, un prospect reçoit les e-mails de la
+séquence : c'est irrattrapable, d'où la barrière de la Phase 4 sur la pertinence.
 
 **Miroir NocoDB.** NocoDB devient la copie de Notion, fiches `Ecarte` exclues : créations,
 modifications, suppressions, **`Statut` compris**. Notion est maître du Statut (décision de
@@ -336,7 +356,7 @@ Colonnes (ASCII, ce sont des identifiants de schéma) : `Nom` (MAJUSCULES, à d�
 `Fonction`, `Requete`, `Date extraction`, `Profil mis a jour`, `Statut` (`A importer` par défaut),
 `Note` (jamais vide).
 
-**Barrière :** `publier` a rendu le code 0 — ou 2 / 3 avec l'écart ou la file d'attente
+**Barrière :** `publier` a rendu le code 0 — ou 2 / 3 / 4 avec l'écart ou la file d'attente
 annoncés. **Ne pas annoncer que le lot est écrit sans la ligne `relu=N attendu=N`.**
 
 ## Phase 6 — Vider, puis rendre compte
@@ -364,6 +384,7 @@ données de candidats (RGPD), et un `Document (n).pdf` resté là décale le lot
 - profils parcourus, retenus, écartés hors-cible, doublons ;
 - leads écrits, dont avec email et avec téléphone ;
 - le motif de chaque champ vide, regroupé par `Note` ;
+- le résultat de l'import SalesHandy (importés, laissés « A importer » et pourquoi) ;
 - le résultat du miroir NocoDB (créées, modifiées, supprimées) et les statuts réalignés ;
 - en première ligne si elle existe : la file d'attente Notion et son nombre de fiches.
 
@@ -371,7 +392,7 @@ Repère mesuré (lot de 100, 17/09/2026) : 76 fiches exploitables sur 99. Le pla
 de CV (un profil sur quatre n'en a pas). Rendement très en dessous → chercher d'abord un blocage
 des téléchargements multiples.
 
-Ne rien proposer d'autre : ce qui se fait des leads se décide hors du skill.
+Ne rien proposer d'autre : ce qui se fait des leads au-delà de la séquence se décide hors du skill.
 
 ---
 
