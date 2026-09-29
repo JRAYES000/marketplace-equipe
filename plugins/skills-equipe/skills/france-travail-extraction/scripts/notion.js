@@ -17,13 +17,14 @@
 //   node notion.js archiver-test <requete>       archive les fiches d'une requete « TEST-… »
 //
 // Codes de sortie : 0 ok ; 1 erreur ; 2 relecture fausse ou Note vide ; 3 fiches en file d'attente.
-// Environnement : NOTION_TOKEN_FT ; NOCODB_URL et NOCODB_TOKEN pour le miroir.
+// Environnement : NOTION_TOKEN_FT ; NOCODB_URL et NOCODB_TOKEN pour le miroir. A defaut, lus dans
+// le fichier ecrit par charger-secrets.sh (secrets-env.js).
 // File d'attente : %LOCALAPPDATA%/france-travail-extraction/notion-attente.json (donnees de
-// candidats : locale, jamais versionnee).
+// candidats : locale, jamais versionnee). Meme dossier : ecartes.json (voir assembler.js).
 'use strict';
 const fs = require('fs');
-const os = require('os');
 const path = require('path');
+const { DOSSIER: DOSSIER_FILE } = require('./secrets-env');
 
 const TOKEN = process.env.NOTION_TOKEN_FT || '';
 const DB = process.env.NOTION_DB_FT || '1cfd41a205fc44f797b39e4e8e1d6978';
@@ -36,11 +37,11 @@ const COLONNES = ['Nom', 'Prenom', 'Email', 'Telephone', 'Commune', 'Fonction', 
 const TYPES = { Nom: 'title', Prenom: 'rich_text', Email: 'email', Telephone: 'phone_number',
   Commune: 'rich_text', Fonction: 'rich_text', Requete: 'rich_text', 'Date extraction': 'date',
   'Profil mis a jour': 'date', Statut: 'select', Note: 'rich_text' };
-const DOSSIER_FILE = path.join(process.env.LOCALAPPDATA || path.join(os.homedir(), '.local', 'state'), 'france-travail-extraction');
 const FILE = path.join(DOSSIER_FILE, 'notion-attente.json');
+const ECARTES = path.join(DOSSIER_FILE, 'ecartes.json');
 
 function die(msg) { console.error('ERREUR : ' + msg); process.exit(1); }
-if (!TOKEN) die('NOTION_TOKEN_FT absent de l environnement (coffre de secrets, section Notion)');
+if (!TOKEN) die('NOTION_TOKEN_FT absent de l environnement : lancer charger-secrets.sh');
 const pause = ms => new Promise(r => setTimeout(r, ms));
 
 // ---- API Notion : ~3 requetes/s, reessais sur 429 / 5xx / reseau / delai ----------------------
@@ -139,7 +140,13 @@ function doublons(lot, base) {
   lot.forEach((c, i) => {
     const hit = (c.Email && parEmail.get(norm(c.Email))) || (tel10(c.Telephone) && parTel.get(tel10(c.Telephone))) ||
       (cleIdentite(c) && parNom.get(cleIdentite(c)));
-    if (hit) out.push({ index: i, Nom: c.Nom, Prenom: c.Prenom, statut: hit.Statut || 'en file d attente' });
+    if (hit) { out.push({ index: i, Nom: c.Nom, Prenom: c.Prenom, statut: hit._lot ? 'meme lot' : hit.Statut || 'en file d attente' }); return; }
+    // v9.2 : une fiche gardee sert de reference aux suivantes : une personne vue deux fois dans
+    // la meme recherche ne s'ecrit qu'une fois.
+    const r = { ...c, _lot: true };
+    if (c.Email) parEmail.set(norm(c.Email), r);
+    if (tel10(c.Telephone)) parTel.set(tel10(c.Telephone), r);
+    if (cleIdentite(c)) parNom.set(cleIdentite(c), r);
   });
   return out;
 }
@@ -191,19 +198,20 @@ function ecrireFile(rows) {
 // Cree les fiches une par une ; au premier echec definitif, le reste part dans la file.
 async function creer(rows) {
   let crees = 0;
+  const pages = [];
   for (let i = 0; i < rows.length; i++) {
     try {
-      await notion('POST', '/pages', { parent: { database_id: DB }, properties: versProprietes(rows[i]) });
+      pages.push(lirePage(await notion('POST', '/pages', { parent: { database_id: DB }, properties: versProprietes(rows[i]) })));
       crees++;
     } catch (e) {
       const reste = rows.slice(i);
       ecrireFile([...lireFile(), ...reste]);
       console.log('ECHEC NOTION : ' + e.message);
       console.log('mis en file d attente : ' + reste.length + ' fiche(s) -> reprise par « reprendre » ou au prochain « publier »');
-      return { crees, enAttente: reste.length };
+      return { crees, enAttente: reste.length, pages };
     }
   }
-  return { crees, enAttente: 0 };
+  return { crees, enAttente: 0, pages };
 }
 
 // Repousse la file, sans recreer ce qu'un essai precedent aurait deja ecrit.
@@ -230,6 +238,8 @@ function resumeDe(rows) {
 }
 // Seulement les lignes avec prenom : un profil anonyme n'est jamais saute pendant le parcours.
 const connusDe = rows => rows.filter(r => r.Prenom && r.Prenom.trim()).map(r => r.Prenom.trim() + ' ' + (r.Nom || '').trim());
+// Empreintes des hors-cible deja vus, ecrites par « assembler.js lot » (expiration 180 jours).
+const lireEcartes = () => { try { return JSON.parse(fs.readFileSync(ECARTES, 'utf8')).map(e => e.h); } catch { return []; } };
 
 // ---- NocoDB (miroir) ---------------------------------------------------------------------------
 const NOCO_URL = (process.env.NOCODB_URL || '').replace(/\/+$/, '');
@@ -314,8 +324,10 @@ const sec = drapeau('--sec');
     const rows = [...await toutes(), ...lireFile()];
     resumeDe(rows);
     const connus = connusDe(rows);
-    fs.writeFileSync(f, JSON.stringify(connus));
-    console.log('connus : ' + connus.length + ' nom(s) -> ' + f);
+    const ecartes = lireEcartes();
+    // v9.2 : { noms, ecartes }. extraction-profils.js accepte encore l'ancien tableau de noms.
+    fs.writeFileSync(f, JSON.stringify({ noms: connus, ecartes }));
+    console.log('connus : ' + connus.length + ' nom(s), ' + ecartes.length + ' hors-cible deja vu(s) -> ' + f);
   } else if (cmd === 'publier') {
     const propres = valider(lireLot(process.argv[3]));
     let code = 0;
@@ -326,13 +338,16 @@ const sec = drapeau('--sec');
     }
     const base = await toutes();
     const d = doublons(propres, [...base, ...lireFile()]);
-    d.forEach(x => console.log('  doublon retire : ' + [x.Nom, x.Prenom].filter(Boolean).join(' ') + ' (deja en base, ' + x.statut + ')'));
+    d.forEach(x => console.log('  doublon retire : ' + [x.Nom, x.Prenom].filter(Boolean).join(' ') + (x.statut === 'meme lot' ? ' (deux fois dans le lot)' : ' (deja en base, ' + x.statut + ')')));
     const exclus = new Set(d.map(x => x.index));
     const nouveaux = propres.filter((_, i) => !exclus.has(i));
     console.log('lot=' + propres.length + ' doublons=' + d.length + ' a ecrire=' + nouveaux.length);
     if (sec) return console.log('simulation : rien ecrit');
     const r = await creer(nouveaux);
     console.log('ecrites dans Notion : ' + r.crees + ' / ' + nouveaux.length);
+    // v9.2 : le miroir part de la base deja lue + des pages rendues par Notion a la creation,
+    // au lieu d'une seconde lecture complete (1,4 a 2,9 s mesures pour 257 fiches).
+    const tousNotion = [...base, ...r.pages];
     if (r.enAttente) code = 3;
     // Relecture par (date, requete) : attendu = ce que la base avait deja + ce qui vient d'etre cree.
     const groupes = new Map();
@@ -347,7 +362,7 @@ const sec = drapeau('--sec');
       console.log('relecture ' + (date || '(sans date)') + ' « ' + requete + ' » : relu=' + relus.length + (attendu === null ? '' : ' attendu=' + attendu) + ' notes_vides=' + vides);
       if ((attendu !== null && relus.length !== attendu) || vides) code = code || 2;
     }
-    if (!drapeau('--sans-miroir')) { if (!await miroir({ sec: false, force: false })) code = code || 2; }
+    if (!drapeau('--sans-miroir')) { if (!await miroir({ sec: false, force: false, tousNotion })) code = code || 2; }
     process.exit(code);
   } else if (cmd === 'resume') {
     resumeDe(await toutes());

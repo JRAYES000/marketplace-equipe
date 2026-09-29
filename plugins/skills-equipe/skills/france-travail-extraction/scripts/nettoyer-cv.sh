@@ -9,7 +9,7 @@
 # Corbeille et pas suppression definitive : Julien la vide lui-meme.
 #
 # Usage : bash nettoyer-cv.sh [minutes] [fichier de travail]...
-#   minutes = age maximum des fichiers vises (defaut 240). Seuls les
+#   minutes = repli sans marqueur de debut de lot (defaut 240). Seuls les
 #   Document*.pdf et ft-journal*.json de Downloads modifies dans cette fenetre
 #   partent, plus les dossiers de tour crees par ocr-par-tour.sh (_cv-lot100). Un
 #   Document.pdf plus ancien, qui n'est pas un CV du lot, reste en place.
@@ -18,18 +18,33 @@
 #
 # v9.1 : un seul PowerShell pour tout le lot (0,2 s de demarrage par fichier mesure le
 # 29/09/2026, soit ~20 s pour 100 CV auparavant).
+# v9.2 : la fenetre part du marqueur de debut de lot (_cv-lot100/.debut-lot, pose par
+# « ocr-par-tour.sh 0 ») : seuls les fichiers arrives depuis sont vises. Les minutes ne
+# servent plus que de repli sans marqueur, et deviennent facultatives. Le fichier de jetons
+# de charger-secrets.sh est supprime (pas mis a la corbeille : une copie de jeton n'y a rien
+# a faire). ecartes.json reste : il sert aux lots suivants.
 set -u
-MIN="${1:-240}"
-shift 2>/dev/null
+MIN=240
+case "${1:-}" in ''|*[!0-9]*) ;; *) MIN="$1"; shift ;; esac
 
 if   [ -d "$HOME/Downloads" ];       then DL="$HOME/Downloads"
 elif [ -d "$HOME/Téléchargements" ]; then DL="$HOME/Téléchargements"
 else echo "ERREUR : dossier Downloads introuvable sous $HOME" >&2; exit 1
 fi
 
+DEBUT="$DL/_cv-lot100/.debut-lot"
+if [ -f "$DEBUT" ]; then
+  # Copie du repere hors du dossier du lot : celui-ci part a la corbeille avant le controle final.
+  REPERE=$(mktemp); touch -r "$DEBUT" "$REPERE"; FENETRE=(-newer "$REPERE")
+  echo "fenetre : depuis le debut du lot ($(date -r "$DEBUT" '+%H:%M'))"
+else
+  REPERE=""; FENETRE=(-mmin -"$MIN")
+  echo "fenetre : $MIN dernieres minutes (pas de marqueur de debut de lot : un PDF personnel recent serait pris)"
+fi
+
 cibles=()
 while IFS= read -r f; do [ -n "$f" ] && cibles+=("$f"); done \
-  < <(find "$DL" -maxdepth 1 -type f \( -name 'Document*.pdf' -o -name 'ft-journal*.json' \) -mmin -"$MIN")
+  < <(find "$DL" -maxdepth 1 -type f \( -name 'Document*.pdf' -o -name 'ft-journal*.json' \) "${FENETRE[@]}")
 for f in "$@"; do [ -e "$f" ] && cibles+=("$f"); done
 [ -d "$DL/_cv-lot100" ] && cibles+=("$DL/_cv-lot100")
 
@@ -62,6 +77,13 @@ if [ "${#cibles[@]}" -gt 0 ]; then
   esac
 fi
 
-reste=$(find "$DL" -maxdepth 1 -type f \( -name 'Document*.pdf' -o -name 'ft-journal*.json' \) -mmin -"$MIN" | wc -l)
+reste=$(find "$DL" -maxdepth 1 -type f \( -name 'Document*.pdf' -o -name 'ft-journal*.json' \) "${FENETRE[@]}" | wc -l)
+[ -n "$REPERE" ] && rm -f "$REPERE"
+
+if [ -n "${LOCALAPPDATA:-}" ]; then SEC="$(cygpath -u "$LOCALAPPDATA" 2>/dev/null || printf '%s' "$LOCALAPPDATA")/france-travail-extraction/secrets.env"
+else SEC="$HOME/.local/state/france-travail-extraction/secrets.env"
+fi
+SEC="${FT_SECRETS:-$SEC}"
+[ -f "$SEC" ] && rm -f "$SEC" && echo "jetons du run supprimes"
 echo "$n element(s) mis a la corbeille, $echec echec(s), $reste CV du lot encore dans $DL."
 [ "$echec" -eq 0 ] && [ "$reste" -eq 0 ]

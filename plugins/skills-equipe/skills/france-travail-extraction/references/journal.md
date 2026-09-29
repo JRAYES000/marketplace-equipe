@@ -451,3 +451,25 @@ Phase 5 bis recopie desormais seulement les Id acceptes par `ecrire`.
   paralleliser l'OCR ne ferait rien gagner.
 • Constate pendant l'audit : les 31 fiches Ecarte ont disparu de Notion entre ~16:40 et ~16:58
   (aucun script de la skill ne supprime dans Notion ; archiver-test refuse toute requete non TEST-).
+
+(v9.2, 2026-09-29, demande de Julien) HORS-CIBLE, SECRETS, NETTOYAGE, DEDUP, UNE LECTURE DE MOINS.
+• Hors-cible : plus ecrits nulle part depuis la v9.1, ils etaient retraites (CV + OCR) a chaque
+  lot sur la meme requete. assembler.js lot range leur empreinte dans ecartes.json (180 j) ;
+  situer la transmet ; extraction-profils.js les saute (`sautesEcartes`). Empreinte identique
+  cote node et navigateur (teste). Teste : 1 range, anonymes jamais ranges, retire de la liste
+  quand le profil est garde a un passage suivant.
+• charger-secrets.sh : coffre -> secrets.env (backticks retires, sortie = noms seuls) ; lu par
+  notion.js et nocodb.js via secrets-env.js ; supprime par nettoyer-cv.sh. Teste : 3 cles
+  chargees, situer et miroir --sec passent sans export.
+• nettoyer-cv.sh : fenetre = marqueur _cv-lot100/.debut-lot pose par ocr-par-tour.sh 0.
+  Teste : un Document.pdf de 30 min d'avant le lot reste ; l'ancienne fenetre de 240 min
+  l'emportait.
+• doublons() : une personne deux fois dans le meme lot ne s'ecrit qu'une fois. Teste en reel
+  (TEST-v92) : 3 lignes, 1 doublon interne, 2 ecrites, relu=2 attendu=2 ; relance : 0 ecrite ;
+  archivage 2/2, base revenue a 226.
+• publier : le miroir part de la base lue + pages rendues par Notion (plus de seconde lecture).
+  Chemin non exerce en reel le 29/09 : le test a tourne en --sans-miroir pour ne pas supprimer
+  les 10 lignes Ecarte presentes dans NocoDB sans l'accord de Julien.
+• Constat : miroir --sec liste ~150 STATUT DIFFERENT, tous « Importe SalesHandy » dans Notion et
+  « A importer » dans NocoDB. Le Statut vit donc dans Notion ; decision sur le maitre du Statut
+  demandee a Julien. Notion compte aussi 10 fiches Ecarte (le miroir les retirera de NocoDB).

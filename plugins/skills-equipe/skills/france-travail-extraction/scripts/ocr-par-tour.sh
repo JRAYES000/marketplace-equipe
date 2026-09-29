@@ -31,7 +31,9 @@ MARQUE="$LOT/.fin-dernier-tour"
 # Tour 0 = debut du lot, avant le premier CV : pose le marqueur. Les tours suivants ne prennent
 # alors que les CV arrives depuis ; un Document.pdf personnel plus ancien ne bouge plus.
 if [ "$TOUR" = "0" ]; then
-  mkdir -p "$LOT"; touch "$MARQUE"; rm -f "$LOT/.prec"
+  # .debut-lot reste en place tout le lot : nettoyer-cv.sh s'en sert pour ne viser que les
+  # fichiers du lot (v9.2), au lieu d'une fenetre en minutes qui pouvait emporter un PDF personnel.
+  mkdir -p "$LOT"; touch "$MARQUE" "$LOT/.debut-lot"; rm -f "$LOT/.prec"
   echo "lot demarre : seuls les CV telecharges a partir de maintenant seront pris" >&2; exit 0
 fi
 

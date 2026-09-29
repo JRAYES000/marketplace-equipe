@@ -13,9 +13,9 @@ description: >-
   d'emploi est mentionné.
 compatibility: "Claude Code. Requiert Claude in Chrome (session recruteur déjà connectée), l'API publique Notion (variable NOTION_TOKEN_FT, connexion interne « Leads France Travail - API »), NocoDB pour le miroir (NOCODB_URL, NOCODB_TOKEN), l'outil Bash avec node, poppler et tesseract. Le connecteur Notion MCP n'est plus utilisé."
 metadata:
-  version: '9.1'
+  version: '9.2'
   environment: 'Claude Code, rédigé pour Claude Sonnet 5.5 (fonctionne aussi sous Opus). Claude in Chrome pour la session recruteur, outil Bash pour les scripts fournis. Livrable = la base Notion « Leads France Travail », qui fait foi. NocoDB = miroir aligné en fin de run (references/synchro-notion.md).'
-  journal: 'references/journal.md — mesures et incidents des runs réels (v2.0 à v9.1). À lire seulement pour comprendre ou contester une règle ; en cas de désaccord ce fichier-ci fait foi.'
+  journal: 'references/journal.md — mesures et incidents des runs réels (v2.0 à v9.2). À lire seulement pour comprendre ou contester une règle ; en cas de désaccord ce fichier-ci fait foi.'
 ---
 
 # Extraction France Travail Pro → Notion (miroir NocoDB)
@@ -66,6 +66,7 @@ appeler les scripts par leur chemin complet. Fichiers de travail (`cv.tsv`, `cho
 | Email, téléphone et texte des CV | `scripts/ocr-par-tour.sh` (tour 0 au début du lot, puis après chaque tour) ; `scripts/emails-depuis-cv.sh` pour un petit lot |
 | Appariement CV → profil, construction du lot | `scripts/assembler.js revue` puis `lot` |
 | Profil anonyme, segment incertain | `scripts/nom-du-cv.sh <fichier.pdf>` |
+| Jetons Notion et NocoDB | `scripts/charger-secrets.sh` (Phase 1, avant tout appel) |
 | Situation de la base ; dédup, écriture, relecture, miroir NocoDB | `scripts/notion.js situer` puis `publier` |
 | Fichiers du lot, une fois vérifié | `scripts/nettoyer-cv.sh` (corbeille) |
 
@@ -121,15 +122,19 @@ l'email manquera pour les candidats sans CV.
 
 ## Phase 1 — Situer le lot dans la base
 
-`scripts/notion.js` lit `NOTION_TOKEN_FT` (et `NOCODB_URL`, `NOCODB_TOKEN` pour le miroir) dans
-l'environnement. S'ils sont absents, les charger depuis le coffre de secrets de Julien (règle
-« Mes secrets » de CLAUDE.md) **vers des variables d'environnement**, sans jamais afficher la
-valeur. Dans le coffre, certaines valeurs sont entourées de backticks : les retirer avant tout
-`export`, sinon bash les exécute et affiche la valeur dans l'erreur (incident du 29/09/2026).
+Charger d'abord les jetons :
 
 ```bash
+bash "<skill>/scripts/charger-secrets.sh"
 node "<skill>/scripts/notion.js" situer "<tmp>/connus.json"
 ```
+
+`charger-secrets.sh` lit le coffre de Julien et range `NOTION_TOKEN_FT`, `NOCODB_URL` et
+`NOCODB_TOKEN` dans `%LOCALAPPDATA%/france-travail-extraction/secrets.env`. `notion.js` et
+`nocodb.js` y lisent ce qui manque dans l'environnement. La sortie ne montre que des noms. Ne
+jamais charger ces jetons à la main par `export` : des backticks entourent certaines valeurs du
+coffre, bash les a exécutées et a affiché une partie d'un jeton (incident du 29/09/2026). Hors du
+poste de Julien, définir les trois variables dans l'environnement suffit.
 
 Une seule lecture de Notion (mesuré le 29/09/2026 : 1,4 à 2,9 s pour 257 fiches).
 
@@ -138,10 +143,11 @@ Une seule lecture de Notion (mesuré le 29/09/2026 : 1,4 à 2,9 s pour 257 fiche
   recouvrement est réel (« Naturopathie » et « Formation naturopathie »).
 - `file_attente` > 0 : un lot précédent n'a pas fini d'atteindre Notion. Le dire ; `publier` le
   reprendra en premier.
-- `connus.json` reçoit `["Prenom NOM", …]` (Notion + file d'attente), seulement les lignes avec
-  prénom : un profil anonyme n'est jamais sauté (deux personnes peuvent avoir le même intitulé).
-  Ces noms s'injectent en Phase 3. Mesuré le 29/09/2026 : 17 profils sur 20 déjà en base, chacun
-  coûtait un CV et un OCR pour rien.
+- `connus.json` reçoit `{"noms": ["Prenom NOM", …], "ecartes": [empreintes]}`. Les noms viennent
+  de Notion et de la file d'attente, seulement pour les lignes avec prénom : un profil anonyme
+  n'est jamais sauté (deux personnes peuvent avoir le même intitulé). Les empreintes sont celles
+  des hors-cible déjà vus (Phase 5). Le tout s'injecte en Phase 3. Mesuré le 29/09/2026 : 17
+  profils sur 20 déjà en base, chacun coûtait un CV et un OCR pour rien.
 
 **Barrière :** `situer` a répondu avec le code de sortie 0 (même base vide).
 
@@ -188,8 +194,10 @@ contient « Profil mis à jour le »). L'utilisateur peut reprendre son écran :
 `scripts/arriere-plan.js` est en place. Sans lui, 25 s par profil au lieu de 0,3 à 1,7 s, sans
 erreur : un parcours lent signifie « parades absentes », pas « site lent ».
 
-0. **Injecter les noms connus d'abord**, en un appel : `window.__connusBruts = [contenu de
-   connus.json]`. Contrôle : `window.__connus.size` après l'injection du script.
+0. **Injecter les noms connus d'abord**, en un appel : `window.__connusBruts = <contenu de
+   connus.json>` (l'objet tel quel). Contrôle après l'injection du script : `window.__connus.size`
+   et `window.__ecartes.size`. Un hors-cible déjà vu est sauté comme un profil déjà en base
+   (`sautesEcartes` dans le retour de `__run`).
 1. **Injecter `scripts/extraction-profils.js` précédé de `await`.** Sans `await`, le retour est
    `{}`. L'injection enregistre `window.__run(n)` et traite un premier lot de 8.
 2. **Lots suivants : `await window.__run(n)`**, `n` = nouveaux profils encore voulus. Ne jamais
@@ -275,16 +283,25 @@ qu'il l'a écrite, puis les motifs après ` — ` (`pas de CV`, `CV non recu`, `
 `PDF illisible`, `email reconstruit`, `appariement incertain`, `profil anonyme`). Ce n'est pas une
 analyse du CV.
 
+Il range aussi les **hors-cible** : chaque nouveau profil nommé absent de `choix.json` laisse son
+empreinte (SHA-256 tronqué du « prénom nom ») dans
+`%LOCALAPPDATA%/france-travail-extraction/ecartes.json`, 180 jours au plus. Jamais un nom en
+clair, rien dans Notion ni NocoDB. Les lots suivants sautent ces profils sans CV ni OCR. Un profil
+gardé plus tard est retiré de la liste. Les profils anonymes n'y entrent jamais. La liste est
+propre à chaque poste.
+
 `publier` fait tout en un appel (mesuré le 29/09/2026 : 9 s pour 3 fiches, miroir compris) :
 
 1. reprend la file d'attente d'un lot précédent ;
 2. **retire les doublons** et les liste (`doublon retire : …`) : même email, même téléphone, ou
    même nom + prénom + commune. Un profil **anonyme** (sans prénom) ne se compare que par email ou
    téléphone : son intitulé est partagé par d'autres (mesuré : un nouvel anonyme était retiré à
-   tort en v9.0). Un profil déjà en base est un doublon quel que soit son `Statut` ;
+   tort en v9.0). Un profil déjà en base est un doublon quel que soit son `Statut`. Une même
+   personne présente deux fois dans le lot ne s'écrit qu'une fois (`deux fois dans le lot`) ;
 3. crée les fiches une par une (~3 par seconde, réessais sur 429, 5xx et délai de 30 s) ;
 4. **relit** par date et requête : `relu=N attendu=N notes_vides=0` ;
-5. aligne NocoDB (miroir, ci-dessous).
+5. aligne NocoDB (miroir, ci-dessous), à partir de la base lue à l'étape 2 et des fiches que
+   Notion vient de rendre : pas de seconde lecture complète.
 
 `--sec` simule (validation + doublons) sans rien écrire ; `--sans-miroir` saute l'étape 5. Le
 script refuse une colonne inconnue, un `Nom` ou une `Requete` absents, une `Note` vide, et tout
@@ -306,8 +323,8 @@ arrêté et liste ; `notion.js miroir-nocodb --force` seulement après avoir com
 lecture Notion tronquée viderait NocoDB).
 
 - **Jamais de ligne « Ecarte ».** Julien ne veut plus voir de personnes écartées : un hors-cible
-  se saute. Les 31 lignes `Ecarte` supprimées le 29/09/2026 ne sont plus reconnues et peuvent
-  réapparaître dans une recherche.
+  ne s'écrit pas, il laisse seulement son empreinte (ci-dessus). Les 31 lignes `Ecarte`
+  supprimées le 29/09/2026 ne sont pas dans cette liste et peuvent réapparaître une fois.
 - **Écrire tous les candidats retenus, y compris sans email** : ils servent à la dédup du
   prochain lot.
 - **Écriture refusée ou partielle** → ne pas relancer en aveugle : `publier` à nouveau retire
@@ -328,14 +345,16 @@ annoncés. **Ne pas annoncer que le lot est écrit sans la ligne `relu=N attendu
 Une fois la barrière de la Phase 5 franchie, et seulement là :
 
 ```bash
-bash "<skill>/scripts/nettoyer-cv.sh" <minutes depuis le début du lot> "<tmp>/cv.tsv" "<tmp>/choix.json" "<tmp>/lot.json" "<tmp>/connus.json"
+bash "<skill>/scripts/nettoyer-cv.sh" "<tmp>/cv.tsv" "<tmp>/choix.json" "<tmp>/lot.json" "<tmp>/connus.json"
 ```
 
-Il envoie à la corbeille les `Document*.pdf` et `ft-journal*.json` récents de Downloads, les
-dossiers `_cv-lot100`, et les fichiers de travail. Il rend `N element(s) mis a la corbeille,
-0 echec(s), 0 CV du lot encore dans …`. Deux raisons : données de candidats (RGPD), et un
-`Document (n).pdf` resté là décale le lot suivant. Fenêtre trop large = risque d'emporter un
-`Document.pdf` personnel : la régler sur la durée réelle du lot.
+Il envoie à la corbeille les `Document*.pdf` et `ft-journal*.json` arrivés dans Downloads depuis
+le début du lot (marqueur posé par `ocr-par-tour.sh 0`), les dossiers `_cv-lot100`, et les
+fichiers de travail. Un `Document.pdf` personnel plus ancien reste en place. Sans marqueur, il
+se replie sur les 240 dernières minutes et le dit ; un nombre en premier argument change ce
+repli. Il supprime aussi le fichier de jetons de `charger-secrets.sh`, et garde `ecartes.json`.
+Il rend `N element(s) mis a la corbeille, 0 echec(s), 0 CV du lot encore dans …`. Deux raisons :
+données de candidats (RGPD), et un `Document (n).pdf` resté là décale le lot suivant.
 
 ### Récapitulatif
 

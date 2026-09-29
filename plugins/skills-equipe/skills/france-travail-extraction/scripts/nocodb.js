@@ -11,6 +11,7 @@
 // Environnement : NOCODB_URL, NOCODB_TOKEN (NOCODB_TABLE_ID facultatif).
 'use strict';
 const fs = require('fs');
+require('./secrets-env');
 
 const URL_BASE = (process.env.NOCODB_URL || '').replace(/\/+$/, '');
 const TOKEN = process.env.NOCODB_TOKEN || '';
@@ -19,7 +20,7 @@ const COLONNES = ['Nom', 'Prenom', 'Email', 'Telephone', 'Commune', 'Fonction', 
   'Date extraction', 'Profil mis a jour', 'Statut', 'Note'];
 
 function die(msg) { console.error('ERREUR : ' + msg); process.exit(1); }
-if (!URL_BASE || !TOKEN) die('NOCODB_URL et NOCODB_TOKEN absents de l environnement (coffre de secrets, section NocoDB)');
+if (!URL_BASE || !TOKEN) die('NOCODB_URL et NOCODB_TOKEN absents de l environnement : lancer charger-secrets.sh');
 
 async function api(method, path) {
   const r = await fetch(URL_BASE + '/api/v2/tables/' + TABLE + path, {

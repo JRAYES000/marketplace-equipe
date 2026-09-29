@@ -28,10 +28,24 @@
 //      sont egaux. Sinon : « appariement incertain », email laisse vide.
 // Jamais d'attribution par elimination : un email au mauvais nom est pire
 // qu'un email manquant.
+//
+// Hors-cible (v9.2) : « lot » range dans %LOCALAPPDATA%/france-travail-extraction/ecartes.json
+// l'empreinte de chaque nouveau profil nomme absent de choix.json. « notion.js situer » la
+// transmet a la page, qui saute ces profils au lot suivant sans CV ni OCR. Seule l'empreinte
+// (SHA-256 tronque du « prenom nom » normalise) est gardee, 180 jours au plus ; jamais un nom,
+// et rien n'apparait dans Notion ni NocoDB. Un profil anonyme n'est jamais range.
 'use strict';
 const fs = require('fs');
 const path = require('path');
 const os = require('os');
+const crypto = require('crypto');
+const { DOSSIER } = require('./secrets-env');
+const ECARTES = path.join(DOSSIER, 'ecartes.json');
+const DUREE_ECARTE_J = 180;
+// Meme normalisation que window.__cle dans extraction-profils.js : les deux doivent rester egales.
+const cle = s => (s || '').normalize('NFD').replace(/[̀-ͯ]/g, '')
+  .toLowerCase().replace(/[^a-z0-9]+/g, ' ').trim();
+const empreinte = s => crypto.createHash('sha256').update(cle(s)).digest('hex').slice(0, 16);
 
 function die(m) { console.error('ERREUR : ' + m); process.exit(1); }
 const args = process.argv.slice(2);
@@ -220,6 +234,22 @@ if (cmd === 'revue') {
   fs.writeFileSync(opt.sortie, JSON.stringify(lot, null, 1));
   console.log('lot ecrit : ' + lot.length + ' fiche(s), dont ' + lot.filter(o => o.Email).length + ' avec email et ' +
     lot.filter(o => o.Telephone).length + ' avec telephone -> ' + opt.sortie);
+
+  // Hors-cible : empreintes ajoutees ; un profil garde cette fois en est retire (choix corrige).
+  const garde = new Set(Object.keys(choix));
+  const nommes = r.filter(x => !x.p.anonyme);
+  const aRetirer = new Set(nommes.filter(x => garde.has(String(x.p.pag))).map(x => empreinte(x.p.nom)));
+  const aAjouter = nommes.filter(x => !garde.has(String(x.p.pag))).map(x => empreinte(x.p.nom));
+  let liste = [];
+  try { liste = JSON.parse(fs.readFileSync(ECARTES, 'utf8')); } catch {}
+  const limite = Date.now() - DUREE_ECARTE_J * 864e5;
+  const aujourdhui = new Date().toISOString().slice(0, 10);
+  const parH = new Map(liste.filter(e => Date.parse(e.d) >= limite && !aRetirer.has(e.h)).map(e => [e.h, e]));
+  aAjouter.forEach(h => parH.set(h, { h, d: aujourdhui }));
+  fs.mkdirSync(DOSSIER, { recursive: true });
+  fs.writeFileSync(ECARTES, JSON.stringify([...parH.values()]));
+  console.log('hors-cible ranges : ' + aAjouter.length + ' (anonymes jamais ranges : ' + r.filter(x => x.p.anonyme && !garde.has(String(x.p.pag))).length +
+    ') ; liste : ' + parH.size + ' empreinte(s), ' + DUREE_ECARTE_J + ' jours au plus');
 } else {
   die('commande inconnue. Voir l en-tete du script.');
 }
