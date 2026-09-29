@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Envoie a la corbeille les CV d'un lot TERMINE : a lancer seulement apres la
-# barriere de la Phase 6 (compte relu dans Notion = compte attendu).
+# barriere de la Phase 6 (compte relu dans NocoDB = compte attendu).
 #
 # Pourquoi : les CV sont des donnees de candidats (RGPD), et des Document (n).pdf
 # laisses dans Downloads se melangent au lot suivant — l'appariement par ordre de

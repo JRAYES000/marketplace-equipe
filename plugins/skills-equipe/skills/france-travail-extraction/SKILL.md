@@ -1,29 +1,33 @@
 ---
 name: france-travail-extraction
 description: >-
-  Extrait les profils candidats de France Travail Pro (espace recruteur, CVthèque) vers
-  la base Notion « Leads France Travail » : nom, prénom, téléphone, email, fonction,
-  commune. Pilote la session Chrome déjà connectée (2FA) via Claude in Chrome, lit l'email
-  des CV par OCR, déduplique et écrit dans Notion. Extraction autorisée par la convention
+  Extrait les profils candidats de France Travail Pro (espace recruteur, CVthèque) vers la
+  table NocoDB « Leads France Travail », puis les recopie dans la base Notion du même nom
+  (alerte dans la conversation si Notion atteint sa limite) : nom, prénom, téléphone, email,
+  fonction, commune. Pilote la session Chrome déjà connectée (2FA) via Claude in Chrome, lit
+  l'email des CV par OCR, déduplique et écrit. Extraction autorisée par la convention
   CVthèque signée le 29/09/2026 (École de Naturopathie et Sophrologie). Activation
   MANUELLE uniquement, sur demande explicite : « /france-travail-extraction », « extrais
   des candidats France Travail », « lance un lot France Travail ». NE PAS déclencher de
   toi-même, même si France Travail, un CV ou un demandeur d'emploi est mentionné.
-compatibility: "Claude Code. Requiert Claude in Chrome (session recruteur déjà connectée), le connecteur Notion (base « Leads France Travail ») et l'outil Bash avec poppler + tesseract pour l'OCR des CV."
+compatibility: "Claude Code. Requiert Claude in Chrome (session recruteur déjà connectée), NocoDB (table « Leads France Travail », variables NOCODB_URL et NOCODB_TOKEN), le connecteur Notion (base « Leads France Travail ») et l'outil Bash avec poppler + tesseract pour l'OCR des CV."
 metadata:
-  version: '5.3'
-  environment: 'Claude Code, rédigé pour Claude Sonnet 5.5 (fonctionne aussi sous Opus). Claude in Chrome pour la session recruteur, outil Bash pour les scripts fournis, connecteur Notion pour la lecture et l écriture. Livrable unique = la base Notion « Leads France Travail ».'
-  journal: 'references/journal.md — mesures et incidents des runs réels (v2.0 à v4.7). À lire seulement pour comprendre ou contester une règle ; en cas de désaccord, ce fichier-ci fait foi.'
+  version: '7.0'
+  environment: 'Claude Code, rédigé pour Claude Sonnet 5.5 (fonctionne aussi sous Opus). Claude in Chrome pour la session recruteur, outil Bash pour les scripts fournis, scripts/nocodb.js (Node) pour la lecture et l écriture NocoDB, connecteur Notion pour le miroir. Livrables = la table NocoDB « Leads France Travail » (référence) et la base Notion du même nom (miroir).'
+  journal: 'references/journal.md — mesures et incidents des runs réels (v2.0 à v7.0). À lire seulement pour comprendre ou contester une règle ; en cas de désaccord ce fichier-ci fait foi.'
 ---
 
-# Extraction France Travail Pro → Notion
+# Extraction France Travail Pro → NocoDB + Notion
 
 Extrait les profils candidats de `pro.francetravail.fr/recherche-profil` et les écrit dans la
-base Notion « Leads France Travail ». Pour École Naturo, ces profils servent au recrutement
-d'élèves.
+table NocoDB « Leads France Travail » (base « Leads »), puis les recopie dans la base Notion
+« Leads France Travail ». Pour École Naturo, ces profils servent au recrutement d'élèves.
 
-- **Livrable unique : la base Notion.** Pas de CSV, pas de tableur, rien d'écrit sur le disque
-  en dehors des CV temporaires.
+- **Deux destinations, une référence.** **NocoDB fait foi** : dédoublonnage, liste des profils
+  connus, comptes et vérifications se lisent là. **Notion est un miroir**, écrit après NocoDB,
+  avec les mêmes fiches. Pas de CSV, pas de tableur, rien d'écrit sur le disque en dehors des CV
+  temporaires (et du fichier d'attente Notion, voir Phase 5 bis).
+- **Une limite Notion n'arrête pas le run, mais elle se crie.** Voir « Alerte limite Notion ».
 - **Le skill s'arrête aux données.** Il n'envoie aucun message, ne contacte aucun candidat, ne
   propose aucune suite.
 
@@ -64,8 +68,10 @@ chemin complet.
 | Email et téléphone depuis les CV | `scripts/emails-depuis-cv.sh` (outil **Bash**) |
 | Lot de plus de ~30 profils | `scripts/ocr-par-tour.sh <n> <sortie.tsv>` |
 | Appariement douteux, profil sans nom | `scripts/nom-du-cv.sh <fichier.pdf>` |
-| CV du lot, une fois le lot vérifié dans Notion | `scripts/nettoyer-cv.sh [minutes]` (corbeille) |
-| Dédup, écriture, vérification | **connecteur Notion** |
+| CV du lot, une fois le lot vérifié dans NocoDB | `scripts/nettoyer-cv.sh [minutes]` (corbeille) |
+| Dédup, écriture, vérification (référence) | `scripts/nocodb.js` (outil **Bash**, `node`) |
+| Miroir Notion : fiches à recopier, file d'attente | `scripts/nocodb.js notion-pages` / `attente` |
+| Miroir Notion : écriture et relecture | **connecteur Notion** (`notion-create-pages`, `notion-query-data-sources`) |
 
 Ne pas réécrire un script de mémoire, ne pas en recopier le contenu dans un message, ne pas le
 remplacer par du code improvisé. Un script qui échoue se diagnostique ; il ne se contourne pas.
@@ -89,6 +95,32 @@ remplacer par du code improvisé. Un script qui échoue se diagnostique ; il ne 
 - **Plusieurs Chrome connectés** → demander lequel piloter avant d'agir.
 - **Ne jamais inventer une valeur.** Un champ vide accompagné de sa `Note` est une information ;
   une valeur inventée est une fausse piste que personne ne rattrapera.
+- **Limite Notion = alerte immédiate dans la conversation** (voir « Alerte limite Notion »).
+  Jamais de réessai en boucle, jamais de silence jusqu'au récapitulatif.
+
+### Alerte limite Notion
+
+Notion plafonne ses appels (mesuré le 29/09/2026 : `query_data_sources` a répondu
+`usage_limit_reached` après un gros lot). Est une **limite Notion** toute réponse de l'un de ses
+outils qui contient `usage_limit_reached`, `usage limit`, `rate_limited`, `entitlement` ou un
+refus équivalent.
+
+Dès qu'elle tombe, **sans attendre le récapitulatif** :
+
+1. **Alerter dans la conversation**, en texte visible, première ligne du message :
+   `⚠️ LIMITE NOTION ATTEINTE — <outil> : <message de Notion>. NocoDB est à jour (<N> fiches) ;
+   Notion attend <M> fiches.`
+2. **Ne pas relancer l'appel Notion.** Un réessai immédiat échoue de la même façon et brûle du
+   quota.
+3. **Mettre les fiches non recopiées en attente** :
+   `node "<skill>/scripts/nocodb.js" attente <ids séparés par des virgules>`.
+4. **Continuer le run**, NocoDB inclus : il n'en dépend pas.
+5. **Répéter l'alerte en tête du récapitulatif final**, avec le nombre de fiches en attente,
+   puis proposer deux issues : réessayer plus tard (`notion-pages --attente`), ou l'option de
+   récupération que l'erreur fournit (reprendre son libellé et son lien tels quels).
+
+Un lot n'est **jamais** annoncé « écrit dans Notion » tant que la relecture n'a pas eu lieu. Si la
+relecture est elle-même bloquée par la limite, écrire « Notion : non vérifié » noir sur blanc.
 
 ### Pourquoi Claude in Chrome, et pas une autre route
 
@@ -123,20 +155,23 @@ Trois questions, en un seul appel :
    nombre de profils absents de la base, ou quand le vivier pertinent est épuisé.
 3. **Filtres** — garder « Disponibilité immédiate » + « Profil mis à jour < 3 mois » ? Lieu ?
 
-Puis confirmer en une ligne : requête, taille du lot, filtres, destination Notion, et le fait
-que l'email manquera pour les candidats sans CV.
+Puis confirmer en une ligne : requête, taille du lot, filtres, destinations (NocoDB, puis miroir
+Notion), et le fait que l'email manquera pour les candidats sans CV.
 
 **Barrière :** requête, taille et filtres connus.
 
 ## Phase 1 — Situer le lot dans la base
 
-Data source (fixe) : `collection://c9a8febd-29ae-468e-a320-bd2fd62a161f`
+Table NocoDB « Leads France Travail » (base « Leads »), atteinte par `scripts/nocodb.js`
+(`<skill>` = dossier de ce skill). Il lit `NOCODB_URL` et `NOCODB_TOKEN` dans l'environnement.
+S'ils sont absents, les charger depuis le coffre de secrets de Julien (règle « Mes secrets » de
+CLAUDE.md) **vers des variables d'environnement**, sans jamais afficher la valeur.
 
-```sql
-SELECT Requete, COUNT(*) AS profils,
-       SUM(CASE WHEN Email IS NOT NULL AND Email<>'' THEN 1 ELSE 0 END) AS avec_email
-FROM "collection://c9a8febd-29ae-468e-a320-bd2fd62a161f" GROUP BY Requete ORDER BY profils DESC
+```bash
+node "<skill>/scripts/nocodb.js" resume
 ```
+
+Rend `total=N`, puis une ligne `profils <TAB> avec_email <TAB> requête` par requête.
 
 Annoncer à l'utilisateur ce que le vivier a déjà donné, et signaler une requête voisine déjà
 passée : **le recouvrement entre requêtes est réel** (un profil capté par « Naturopathie »
@@ -145,18 +180,16 @@ ressort sous « Formation naturopathie »).
 ### Charger les profils déjà connus (dédoublonnage avant parcours)
 
 Mesuré le 29/09/2026 : 17 profils sur 20 étaient déjà en base. Chacun a coûté un clic, un CV
-téléchargé, un OCR et un appariement pour rien. Depuis la v5.2, le script saute un profil
-connu **avant tout clic**, sur son nom lu dans le panneau (~0,3 s au lieu de ~3 s, et ni CV
-ni OCR). Il lui faut la liste des noms connus, chargée ici :
+téléchargé, un OCR et un appariement pour rien. Le script d'extraction saute un profil connu
+**avant tout clic**, sur son nom lu dans le panneau (~0,3 s au lieu de ~3 s, et ni CV ni OCR).
+Il lui faut la liste des noms connus :
 
-```sql
-SELECT Prenom || ' ' || Nom AS k FROM "collection://c9a8febd-29ae-468e-a320-bd2fd62a161f"
-WHERE Prenom IS NOT NULL AND Prenom<>'' ORDER BY Nom LIMIT 100 OFFSET <0, 100, 200…>
+```bash
+node "<skill>/scripts/nocodb.js" connus
 ```
 
-- **Paginer par 100 avec `OFFSET`.** Le connecteur coupe la réponse à 100 lignes et ne le
-  signale que par `has_more: true` (mesuré le 29/09 : 100 lignes rendues sur 160). Continuer
-  tant que `has_more` vaut `true`. Ne pas passer par `group_concat` : il tronque en silence.
+- Rend un tableau JSON `["Prenom NOM", …]`, toutes pages chargées par le script (1 000 lignes
+  par requête, pagination vérifiée sur `isLastPage`).
 - **Seulement les lignes avec prénom.** Un profil anonyme (intitulé à la place du nom) n'est
   jamais sauté : deux personnes différentes peuvent avoir le même intitulé (« Formation
   Naturopathie » cachait Marine CRETTE).
@@ -165,8 +198,7 @@ WHERE Prenom IS NOT NULL AND Prenom<>'' ORDER BY Nom LIMIT 100 OFFSET <0, 100, 2
 La Phase 5 garde sa déduplication : c'est le filet de sécurité (profil anonyme, prénom écrit
 autrement). Base vide au premier run : aucune ligne, ce n'est pas une erreur.
 
-**Barrière :** la requête a répondu (même vide), et toutes les pages de noms connus sont
-chargées (dernière réponse avec `has_more: false`).
+**Barrière :** `resume` et `connus` ont répondu avec le code de sortie 0 (même vides).
 
 ## Phase 2 — Ouvrir la recherche (onglet visible)
 
@@ -306,7 +338,7 @@ et un tour écrase le précédent. L'OCR d'un tour peut tourner pendant que le s
 télécharge.
 
 - **Adresse suffixée `[RECONSTRUIT]`** : l'OCR a déformé l'arobase (`mdurandegmail.com`) ou le
-  PDF coupait le domaine (`YAHO O.COM`). L'écrire dans Notion **en le disant dans la `Note`**,
+  PDF coupait le domaine (`YAHO O.COM`). L'écrire dans NocoDB **en le disant dans la `Note`**,
   jamais comme sûre.
 - **Rien trouvé après OCR** → `email non trouve` dans la `Note`, et on passe.
 - **Le script sort en `ERREUR : pdftotext absent`** (ou tesseract) : le signaler et s'arrêter.
@@ -337,83 +369,138 @@ classer un profil sans nom comme inexploitable.
 
 **Barrière :** chaque CV reçu est attribué à un profil, ou marqué incertain avec sa raison.
 
-## Phase 5 — Écrire dans Notion
+## Phase 5 — Écrire dans NocoDB
 
 ### Dédupliquer, en ciblant le lot
 
-Interroger la base avec les valeurs du lot, jamais la charger entière :
+Écrire le lot en JSON dans un fichier du dossier temporaire (un tableau d'objets, clés = noms
+de colonnes ci-dessous), puis :
 
-```sql
-SELECT Nom, Prenom, Email, Commune, Requete
-FROM "collection://c9a8febd-29ae-468e-a320-bd2fd62a161f"
-WHERE lower(Email) IN ('email1','email2', …)
-   OR upper(Nom)   IN ('NOM1','NOM2', …)
+```bash
+node "<skill>/scripts/nocodb.js" dedup <lot.json>
 ```
+
+Il rend `{lot, doublons, detail}` : les lignes du lot déjà en base, à retirer du lot ensuite.
 
 - **Par email en priorité.** À défaut, NOM + prénom + commune, sans tenir compte de la casse ni
   des accents.
 - **Un homonyme n'est pas un doublon** : deux MARTIN, Lucie et Claire, sont deux
-  personnes. Comparer le couple complet avant d'écarter.
+  personnes. Le script compare le couple complet.
+- **Un profil déjà en base est un doublon quel que soit son `Statut`**, y compris `Ecarte`.
+
+### Jamais de ligne « Ecarte »
+
+Julien ne veut plus voir de personnes écartées. Le skill **n'écrit jamais** `Statut = Ecarte`
+(`nocodb.js ecrire` refuse la ligne), et un candidat déjà marqué `Ecarte` en base n'est **jamais
+ré-ajouté** : il est un doublon. Un profil hors-cible se saute, il ne s'enregistre pas.
+⚠️ Les lignes `Ecarte` ont été supprimées le 29/09/2026 (31 lignes) : ces personnes ne sont plus
+reconnues comme connues et peuvent réapparaître dans une recherche. Pour éviter cela à
+l'avenir, marquer `Ecarte` sans supprimer.
 
 ### Écrire
 
-`notion-create-pages` avec
-`parent={"type":"data_source_id","data_source_id":"c9a8febd-29ae-468e-a320-bd2fd62a161f"}`,
-par paquets de **100 pages au maximum**, `allow_async=false`.
+```bash
+node "<skill>/scripts/nocodb.js" ecrire <lot.json>
+```
 
-| Propriété | Contenu |
+`--sec` valide sans écrire. Le script insère par paquets de 100, refuse une colonne inconnue,
+un `Nom` ou une `Requete` absents, une `Note` vide.
+
+| Colonne | Contenu |
 |---|---|
-| `Nom` (titre) | NOM de famille en MAJUSCULES ; à défaut, l'intitulé du profil |
+| `Nom` | NOM de famille en MAJUSCULES ; à défaut, l'intitulé du profil |
 | `Prenom` | prénom, casse normale |
 | `Email` | depuis le CV uniquement |
 | `Telephone` | `06 XX XX XX XX` — CV d'abord, panneau en repli |
 | `Commune` | relevée sur le panneau |
 | `Fonction` | le titre du profil, condensé |
 | `Requete` | la **requête exacte** du lot, ex. `Formation naturopathie` — sans exception |
-| `Date extraction` | `date:Date extraction:start` = date du run, `AAAA-MM-JJ` |
-| `Profil mis a jour` | `date:Profil mis a jour:start` = `maj` du journal |
-| `Statut` | `A importer` (autres options : `Importe SalesHandy`, `Ecarte`) |
-| `Type de requete` | **ne rien écrire** : c'est une formule |
+| `Date extraction` | date du run, `AAAA-MM-JJ` |
+| `Profil mis a jour` | `maj` du journal, `AAAA-MM-JJ` |
+| `Statut` | `A importer` par défaut (autre option : `Importe SalesHandy` ; `Ecarte` n'est jamais écrit par le skill) |
 | `Note` | **Jamais vide.** Le texte de présentation du candidat (`presentation` du journal), tel qu'il l'a écrit, accents compris. Puis, s'il y a lieu, le motif d'un champ vide ou douteux après ` — ` : `pas de CV`, `email non trouve`, `PDF illisible`, `email reconstruit`, `appariement incertain`. Présentation vide sur le profil : `Pas de texte de presentation` suivi des motifs. Ce n'est **pas** une analyse du CV : on ne résume pas, on n'interprète pas |
 
-- Noms de propriétés en ASCII, sans accent : ce sont des identifiants de schéma.
-- **Omettre une propriété vide** plutôt que d'envoyer `null`.
+- Noms de colonnes en ASCII, sans accent : ce sont des identifiants de schéma.
+- **Omettre une clé vide** plutôt que d'envoyer `null` (le script les retire).
 - **Écrire tous les candidats retenus, y compris sans email.** Ils servent à la dédup du
   prochain lot : ce sont eux qu'on ne veut pas re-traiter dans six semaines.
-- **Écriture refusée ou partielle** → ne pas relancer le lot en aveugle. Relire la base, puis
-  n'écrire que ce qui manque.
+- **Écriture refusée ou partielle** → ne pas relancer le lot en aveugle. Relire la table
+  (`verifier`), puis n'écrire que ce qui manque.
 
-**Barrière :** chaque paquet a reçu une réponse de l'outil.
+`ecrire` rend aussi `ids=12,13,…` : les `Id` NocoDB des lignes insérées. **Les garder** : ils
+servent au miroir Notion (Phase 5 bis).
+
+**Barrière :** `ecrire` a rendu un nombre de lignes et une liste `ids=`, code de sortie 0.
+
+## Phase 5 bis — Recopier dans Notion (miroir)
+
+Base Notion « Leads France Travail », source de données fixe :
+`collection://c9a8febd-29ae-468e-a320-bd2fd62a161f`. **Toujours après NocoDB**, et seulement les
+fiches que NocoDB vient d'accepter : jamais un candidat écarté comme doublon.
+
+1. **Récupérer les fiches déjà au format Notion**, sans les retaper :
+
+   ```bash
+   node "<skill>/scripts/nocodb.js" notion-pages <ids séparés par des virgules>
+   ```
+
+   Rend un tableau JSON `[{"properties": {…}}]`, prêt pour `notion-create-pages`. Le script
+   renomme les dates (`date:Date extraction:start`, `date:Profil mis a jour:start`) et n'envoie
+   jamais `Type de requete` : c'est une formule dans les deux bases, elle se calcule seule.
+2. **Écrire** avec `notion-create-pages`, `parent={"type":"data_source_id","data_source_id":
+   "c9a8febd-29ae-468e-a320-bd2fd62a161f"}`, `allow_async=false`, par paquets de **100 pages au
+   maximum**. Recopier le tableau tel que rendu : ne pas reformuler une `Note`.
+3. **Limite Notion** à n'importe quelle étape → « Alerte limite Notion » (règles non
+   négociables) : alerte visible, `attente <ids restants>`, pas de réessai, le run continue.
+4. **Reprise** une fois Notion revenu : `node "<skill>/scripts/nocodb.js" notion-pages
+   --attente` rend les fiches en attente ; les écrire, puis vider avec
+   `node "<skill>/scripts/nocodb.js" attente-vider`. Le fichier d'attente est dans le dossier
+   temporaire du système (`leads-ft-notion-en-attente.txt`) : c'est la seule chose que ce skill
+   écrit sur le disque hors des CV.
+5. **Écriture Notion refusée ou partielle** (hors limite) → ne pas relancer le lot en aveugle :
+   relire, n'écrire que ce qui manque.
+
+**Barrière :** chaque paquet Notion a reçu une réponse, ou l'alerte limite a été émise et les
+fiches sont en attente.
 
 ## Phase 6 — Vérifier, puis rendre compte
 
-**Ne pas annoncer que le lot est écrit avant cette vérification.** `notion-create-pages` peut
-annoncer un succès partiel ; seule la relecture de la base fait foi.
+**Ne pas annoncer que le lot est écrit avant cette vérification.** La réponse de `ecrire` ne
+fait pas foi ; seule la relecture de la table fait foi.
+
+```bash
+node "<skill>/scripts/nocodb.js" verifier <AAAA-MM-JJ> "<requête du lot>"
+```
+
+Il rend `compte=N notes_vides=M`, liste chaque fiche à `Note` vide, et sort en code 2 s'il y en
+a. Le compte doit égaler le nombre de candidats retenus (moins les doublons écartés). S'il ne
+l'égale pas, le dire avec les deux chiffres, et appliquer la règle d'écriture partielle. Toute
+fiche à `Note` vide se complète avant de continuer.
+
+**Barrière NocoDB :** compte relu = compte attendu (ou écart annoncé avec ses deux chiffres),
+**et** zéro `Note` vide.
+
+### Relire Notion
+
+Un seul appel, sur le lot :
 
 ```sql
 SELECT COUNT(*) FROM "collection://c9a8febd-29ae-468e-a320-bd2fd62a161f"
 WHERE "date:Date extraction:start" = '<AAAA-MM-JJ>' AND Requete = '<requête du lot>'
 ```
 
-Le compte doit égaler le nombre de candidats retenus (moins les doublons écartés). S'il ne
-l'égale pas, le dire avec les deux chiffres, et appliquer la règle d'écriture partielle.
+Le compte doit égaler le nombre de fiches recopiées, **plus** ce que Notion contenait déjà pour
+cette date et cette requête (deux runs le même jour). Si la requête tombe sur la limite Notion :
+alerte (règles non négociables) et « Notion : non vérifié ». Ce n'est pas une raison de retenir le
+récapitulatif ni le nettoyage des CV : les données sont dans NocoDB.
 
-Puis contrôler qu'aucune fiche du lot n'a de `Note` vide (deux fiches du 29/09/2026 en
-avaient, faute de règle) :
-
-```sql
-SELECT Nom, Prenom FROM "collection://c9a8febd-29ae-468e-a320-bd2fd62a161f"
-WHERE "date:Date extraction:start" = '<AAAA-MM-JJ>' AND (Note IS NULL OR Note = '')
-```
-
-Toute ligne rendue se complète avant de continuer.
-
-**Barrière :** compte relu = compte attendu (ou écart annoncé avec ses deux chiffres), **et**
-zéro `Note` vide.
+**Barrière Notion :** compte relu = compte attendu, **ou** limite annoncée avec le nombre de
+fiches en attente.
 
 ### Vider les CV du lot
 
-Une fois la barrière franchie, et seulement là :
+Une fois la barrière NocoDB franchie (la barrière Notion n'est pas requise : NocoDB garde les
+données), et seulement là :
 
 ```bash
 bash "<skill>/scripts/nettoyer-cv.sh" <minutes depuis le début du lot>
@@ -429,9 +516,13 @@ régler sur la durée réelle du lot.
 
 Puis un récapitulatif court :
 
-- le lien de la base ;
+- **en première ligne, si elle a eu lieu : l'alerte limite Notion** et le nombre de fiches en
+  attente ;
+- le lien de la table NocoDB (base « Leads », table « Leads France Travail ») et celui de la
+  base Notion (`https://app.notion.com/p/1cfd41a205fc44f797b39e4e8e1d6978`) ;
 - profils parcourus, retenus, écartés hors-cible, doublons ;
-- leads écrits, dont avec email et avec téléphone ;
+- leads écrits dans NocoDB, dont avec email et avec téléphone ; leads recopiés dans Notion
+  (relus, ou « non vérifié ») ;
 - le motif de chaque champ vide, regroupé par `Note`.
 
 Repère mesuré (lot de 100, 2026-09-17) : 76 fiches exploitables sur 99. Le plafond n'est pas
@@ -452,6 +543,8 @@ Ne rien proposer ensuite : ce qui se fait des leads se décide hors du skill.
 | Un seul CV pour tout un lot | téléchargements multiples non autorisés dans Chrome |
 | « Afficher le numéro » absent alors qu'un bloc contact existe | un scroll ou un rechargement de la section, puis conclure à l'absence de téléphone |
 | `ERREUR : … absent` dans un script Bash | poppler ou tesseract manquent : le signaler, ne pas continuer sans OCR |
+| Réponse Notion `usage_limit_reached` (ou équivalent) | limite Notion : alerte visible, `attente`, pas de réessai, le run continue (voir « Alerte limite Notion ») |
+| Notion et NocoDB ne comptent pas le même nombre de lignes | normal avant la reprise de l'attente, ou si la base Notion a été alimentée par l'ancienne version (5.3) : NocoDB fait foi |
 
 ---
 
