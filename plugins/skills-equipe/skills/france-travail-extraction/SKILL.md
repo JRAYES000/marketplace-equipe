@@ -33,7 +33,7 @@ d'élèves.
 - Pas de CSV, pas de tableur, rien sur le disque en dehors des fichiers de travail du lot, mis à
   la corbeille à la fin (la file d'attente Notion, locale, se vide à la reprise).
 - **SalesHandy en bout de chaîne** (v9.3, demande de Julien du 29/09/2026) : `publier` importe
-  les nouvelles fiches « A importer » avec email et prénom dans la séquence SalesHandy « Leads
+  les nouvelles fiches « A importer » avec email dans la séquence SalesHandy « Leads
   France Travail — reconversion (École Naturo) », étape 1. La séquence envoie ensuite ses e-mails
   selon son planning ; le skill n'écrit jamais lui-même à un candidat et ne propose aucune suite.
 
@@ -302,7 +302,7 @@ propre à chaque poste.
    personne présente deux fois dans le lot ne s'écrit qu'une fois (`deux fois dans le lot`) ;
 3. crée les fiches une par une (~3 par seconde, réessais sur 429, 5xx et délai de 30 s) ;
 4. **relit** par date et requête : `relu=N attendu=N notes_vides=0` ;
-5. **importe dans SalesHandy** (ci-dessous) les fiches « A importer » avec email et prénom, et
+5. **importe dans SalesHandy** (ci-dessous) les fiches « A importer » avec email, et
    les passe « Importe SalesHandy » dans Notion ;
 6. aligne NocoDB (miroir, ci-dessous), à partir de la base lue à l'étape 2 et des fiches que
    Notion vient de rendre : pas de seconde lecture complète.
@@ -325,10 +325,12 @@ miroir) ; un prospect déjà dans la séquence n'y est pas ajouté deux fois.
 
 **Import SalesHandy.** Séquence `dlPyooE6zL`, étape 1 `2AwrBNv3wQ` (URL
 `my.saleshandy.com/sequence/960252`). Sont importées toutes les fiches Notion « A importer » qui
-ont un email **et** un prénom, et dont la requête figure dans `SH_REQUETES` de `notion.js`
-(Formation naturopathie, Naturopathie, Reconversion bien-être) — donc aussi celles d'un lot
-précédent restées en attente. Sans prénom : laissée de côté, le premier e-mail commence par
-« Bonjour {{First Name}} ». Champs envoyés : prénom, nom, email, téléphone, ville, fonction ;
+ont un email et dont la requête figure dans `SH_REQUETES` de `notion.js` (Formation
+naturopathie, Naturopathie, Reconversion bien-être, Infirmière libérale — souvent en
+reconversion vers la naturopathie) — donc aussi celles d'un lot précédent restées en attente.
+Un profil sans prénom est importé sans prénom ni nom (son « Nom » est l'intitulé du profil) :
+le premier e-mail dira « Bonjour , », accepté par Julien le 29/09/2026. Champs envoyés :
+prénom, nom, email, téléphone, ville, fonction ;
 tag `France Travail` ; vérification d'email SalesHandy activée (délivrabilité d'abord) ; un
 prospect déjà connu de SalesHandy garde ses champs (`addMissingFields`). Le script attend la fin
 de l'import (2 min au plus) et lit le rapport d'échec : un refusé reste « A importer ». Seuls les
