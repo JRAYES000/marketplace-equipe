@@ -487,3 +487,7 @@ Phase 5 bis recopie desormais seulement les Id acceptes par `ecrire`.
   importes, puis miroir. Code de sortie 4 si l'import echoue ou refuse des prospects.
 • Cle : SALESHANDY_API_KEY du coffre, chargee par charger-secrets.sh ; GET /v1/sequences = 200.
 • Simulation du 29/09 : 28 a importer (toutes Formation naturopathie), 5 laissees (anonymes).
+• Premier import reel (29/09) : 28 importees, sequence 133 -> 161 prospects, 28 statuts
+  Notion -> Importe SalesHandy, miroir 28 modifiees, relu=280 attendu=280.
+• Decisions de Julien (29/09) : Infirmiere liberale dans la sequence ; profils sans prenom
+  importes aussi (sans prenom ni nom, « Bonjour , » accepte).

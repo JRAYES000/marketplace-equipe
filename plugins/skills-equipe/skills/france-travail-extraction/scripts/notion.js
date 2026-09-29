@@ -326,12 +326,14 @@ async function miroir({ sec, force, tousNotion }) {
 // my.saleshandy.com/sequence/960252 ; l'API ne connait que l'identifiant hache). Etape 1 : les
 // e-mails partent selon le planning de la sequence. Une fiche importee passe « Importe SalesHandy »
 // dans Notion, puis le miroir descend le Statut dans NocoDB.
-// Pas importees : sans email ; sans prenom (le premier e-mail commence par « Bonjour {{First Name}} ») ;
-// requete absente de SH_REQUETES (autre cible que la reconversion bien-etre). Elles restent « A importer ».
+// Pas importees : sans email ; requete absente de SH_REQUETES. Elles restent « A importer ».
+// Infirmiere liberale incluse (Julien, 29/09 : souvent en reconversion vers la naturopathie).
+// Profil sans prenom importe aussi (Julien, 29/09 : « Bonjour , » n'est pas dramatique) : ni prenom
+// ni nom envoyes, son « Nom » est l'intitule du profil.
 const SH_KEY = process.env.SALESHANDY_API_KEY || '';
 const SH_SEQUENCE = process.env.SALESHANDY_SEQUENCE_FT || 'dlPyooE6zL';
 const SH_ETAPE = process.env.SALESHANDY_STEP_FT || '2AwrBNv3wQ';
-const SH_REQUETES = ['Formation naturopathie', 'Naturopathie', 'Reconversion bien-être'];
+const SH_REQUETES = ['Formation naturopathie', 'Naturopathie', 'Reconversion bien-être', 'Infirmiere liberale'];
 async function sh(method, p, body) {
   const r = await fetch('https://open-api.saleshandy.com/v1' + p, {
     method, headers: { 'x-api-key': SH_KEY, 'content-type': 'application/json' },
@@ -343,7 +345,8 @@ async function sh(method, p, body) {
 }
 // Colonnes Notion -> champs SalesHandy (libelles exacts de list_fields).
 const versProspect = r => {
-  const o = { 'First Name': r.Prenom, 'Last Name': r.Nom, Email: r.Email.trim().toLowerCase() };
+  const o = { Email: r.Email.trim().toLowerCase() };
+  if (norm(r.Prenom)) { o['First Name'] = r.Prenom; o['Last Name'] = r.Nom; }
   if (r.Telephone) o['Phone Number'] = r.Telephone;
   const ville = (r.Commune || '').replace(/^\d{5}\s*/, '').trim();
   if (ville) o.City = ville;
@@ -353,12 +356,12 @@ const versProspect = r => {
 async function saleshandy({ sec, tousNotion }) {
   tousNotion = tousNotion || await toutes();
   const attente = tousNotion.filter(r => r.Statut === 'A importer' && (r.Email || '').includes('@'));
-  const aImporter = attente.filter(r => norm(r.Prenom) && SH_REQUETES.includes(r.Requete));
+  const aImporter = attente.filter(r => SH_REQUETES.includes(r.Requete));
   const hors = attente.length - aImporter.length;
   const parReq = {};
   aImporter.forEach(r => { parReq[r.Requete] = (parReq[r.Requete] || 0) + 1; });
   console.log('saleshandy : ' + aImporter.length + ' fiche(s) a importer' + (Object.keys(parReq).length ? ' (' + Object.entries(parReq).map(([k, n]) => k + ' ' + n).join(', ') + ')' : '') +
-    (hors ? ' ; ' + hors + ' laissee(s) « A importer » (sans prenom ou requete hors sequence)' : ''));
+    (hors ? ' ; ' + hors + ' laissee(s) « A importer » (requete hors sequence)' : ''));
   if (!aImporter.length) return { ok: true, importees: [] };
   if (sec) { console.log('saleshandy : simulation, rien importe'); return { ok: true, importees: [] }; }
   if (!SH_KEY) { console.log('SALESHANDY : SALESHANDY_API_KEY absente (charger-secrets.sh), import saute'); return { ok: false, importees: [] }; }
