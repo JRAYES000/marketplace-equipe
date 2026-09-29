@@ -380,3 +380,28 @@ le matin du 29/09, apres la migration) importees dans NocoDB ; 3 doublons Notion
 publique » deja presente). Relecture : NocoDB 226, Notion 260, 0 fiche NocoDB absente de Notion.
 Lecon : une ecriture Notion faite AVANT le dedoublonnage NocoDB cree des doublons Notion ; la
 Phase 5 bis recopie desormais seulement les Id acceptes par `ecrire`.
+
+(v8.0, 2026-09-29, demande de Julien) AUDIT ET REFONTE DE L'APPARIEMENT, NOTION EN DIFFERE.
+• Deux copies divergentes : la skill personnalisee claude.ai (v5.3, destination Notion seule,
+  declenchement automatique) masquait la v7.1 du plugin dans la liste des skills d'une session
+  Claude Code (meme nom). Une session lancee ce jour-la aurait ecrit dans Notion seul.
+• Bug : emails-depuis-cv.sh listait les CV par `sort` sur le nom, soit (1), (10), (2)… et
+  Document.pdf en dernier, alors que l'appariement repose sur l'ordre. Corrige : rang tire du
+  numero Chrome (Document.pdf = 0), tri numerique, rang en premiere colonne. Teste sur 4 PDF
+  factices (0, 1, 2, 10) : ordre exact.
+• Appariement automatise (`assembler.js`) : la page note `dlRang` a chaque telechargement ; le
+  texte de chaque CV est garde dans cv.tsv ; un CV qui porte le nom + prenom, le telephone ou un
+  email au nom d'un profil devient une ancre ; entre deux ancres, rattachement par ordre
+  seulement si les comptes sont egaux, sinon « appariement incertain ». Teste : CV perdu entre
+  deux ancres -> « CV non recu » ; CV perdu hors ancres -> les deux profils « incertain », aucun
+  email attribue.
+• `window.__exporter()` telecharge le journal (ft-journal.json) : plus de relecture tronquee
+  par get_page_text ni de transcription a la main. `assembler.js lot` construit lot.json (Note
+  et motifs compris) depuis un choix.json { pag: Fonction }.
+• Notion retire du run : plus d'alerte de limite, plus de file d'attente GitHub (commandes
+  `attente` / `attente-vider` supprimees ; la file etait vide). Synchro a la demande :
+  references/synchro-notion.md.
+• ocr-par-tour.sh ne deplace plus que les CV des 4 dernieres heures ; nettoyer-cv.sh emporte
+  aussi ft-journal*.json et les fichiers de travail passes en argument.
+• SKILL.md : 36,5 Ko -> 19,2 Ko ; replis, conformite detaillee, relecture manuelle du journal
+  dans references/annexes.md.
