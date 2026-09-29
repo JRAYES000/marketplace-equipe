@@ -355,3 +355,17 @@ reference (dedup, connus, verifier) ; Notion devient un miroir ecrit apres NocoD
   lot etaient deja en base).
 • Colonne « Type de requete » ajoutee dans NocoDB (formule : « formation » -> Intention de
   formation, « reconversion » -> Reconversion, sinon Metier exerce). Jamais ecrite par le skill.
+
+(v7.1, 2026-09-29, demande de Julien) FILE D'ATTENTE NOTION SUR GITHUB + RECONCILIATION.
+• La file d'attente Notion n'est plus un fichier du dossier temporaire de Windows : c'est
+  `etat/notion-en-attente-leads-france-travail.txt` dans le depot prive JRAYES000/claude-config
+  (Id NocoDB seulement, aucune donnee personnelle), ecrit par `gh` ; conflit de deux sessions
+  detecte par le sha et rejoue une fois. Teste de bout en bout (ajout, second ajout fusionne,
+  lecture, vidage).
+• `nocodb.js reconcilier <export.csv|.json> [--importer]` : ecarts NocoDB <-> Notion, appariement
+  par email puis nom+prenom+commune+requete (multi-ensemble), fiches Ecarte jamais importees.
+  Teste sur un export factice (223 lignes, 3 absentes cote Notion, 1 fiche en plus, 1 Ecarte) :
+  chiffres exacts ; import d'une fiche d'essai (date francaise -> ISO, note multiligne) relue puis
+  supprimee, table revenue a 224 lignes.
+• Blocage constate le 29/09/2026 : `query_data_sources` en limite, Notion absent de Composio, la
+  recherche Notion ne liste pas 250 lignes. D'ou l'export CSV manuel comme voie sans quota.

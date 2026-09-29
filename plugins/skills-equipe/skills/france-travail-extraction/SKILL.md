@@ -12,9 +12,9 @@ description: >-
   toi-même, même si France Travail, un CV ou un demandeur d'emploi est mentionné.
 compatibility: "Claude Code. Requiert Claude in Chrome (session recruteur déjà connectée), NocoDB (table « Leads France Travail », variables NOCODB_URL et NOCODB_TOKEN), le connecteur Notion (base « Leads France Travail ») et l'outil Bash avec poppler + tesseract pour l'OCR des CV."
 metadata:
-  version: '7.0'
+  version: '7.1'
   environment: 'Claude Code, rédigé pour Claude Sonnet 5.5 (fonctionne aussi sous Opus). Claude in Chrome pour la session recruteur, outil Bash pour les scripts fournis, scripts/nocodb.js (Node) pour la lecture et l écriture NocoDB, connecteur Notion pour le miroir. Livrables = la table NocoDB « Leads France Travail » (référence) et la base Notion du même nom (miroir).'
-  journal: 'references/journal.md — mesures et incidents des runs réels (v2.0 à v7.0). À lire seulement pour comprendre ou contester une règle ; en cas de désaccord ce fichier-ci fait foi.'
+  journal: 'references/journal.md — mesures et incidents des runs réels (v2.0 à v7.1). À lire seulement pour comprendre ou contester une règle ; en cas de désaccord ce fichier-ci fait foi.'
 ---
 
 # Extraction France Travail Pro → NocoDB + Notion
@@ -26,7 +26,7 @@ table NocoDB « Leads France Travail » (base « Leads »), puis les recopie dan
 - **Deux destinations, une référence.** **NocoDB fait foi** : dédoublonnage, liste des profils
   connus, comptes et vérifications se lisent là. **Notion est un miroir**, écrit après NocoDB,
   avec les mêmes fiches. Pas de CSV, pas de tableur, rien d'écrit sur le disque en dehors des CV
-  temporaires (et du fichier d'attente Notion, voir Phase 5 bis).
+  temporaires. La file d'attente Notion vit sur GitHub (Phase 5 bis), pas sur le disque.
 - **Une limite Notion n'arrête pas le run, mais elle se crie.** Voir « Alerte limite Notion ».
 - **Le skill s'arrête aux données.** Il n'envoie aucun message, ne contacte aucun candidat, ne
   propose aucune suite.
@@ -113,7 +113,10 @@ Dès qu'elle tombe, **sans attendre le récapitulatif** :
 2. **Ne pas relancer l'appel Notion.** Un réessai immédiat échoue de la même façon et brûle du
    quota.
 3. **Mettre les fiches non recopiées en attente** :
-   `node "<skill>/scripts/nocodb.js" attente <ids séparés par des virgules>`.
+   `node "<skill>/scripts/nocodb.js" attente <ids séparés par des virgules>`. La file est un
+   fichier d'`Id` (aucune donnée personnelle) dans le dépôt privé `JRAYES000/claude-config`,
+   `etat/notion-en-attente-leads-france-travail.txt`, écrit par `gh`. Si `gh` échoue, **écrire les
+   `Id` dans le message d'alerte lui-même** : ils ne doivent pas se perdre.
 4. **Continuer le run**, NocoDB inclus : il n'en dépend pas.
 5. **Répéter l'alerte en tête du récapitulatif final**, avec le nombre de fiches en attente,
    puis proposer deux issues : réessayer plus tard (`notion-pages --attente`), ou l'option de
@@ -454,9 +457,9 @@ fiches que NocoDB vient d'accepter : jamais un candidat écarté comme doublon.
    négociables) : alerte visible, `attente <ids restants>`, pas de réessai, le run continue.
 4. **Reprise** une fois Notion revenu : `node "<skill>/scripts/nocodb.js" notion-pages
    --attente` rend les fiches en attente ; les écrire, puis vider avec
-   `node "<skill>/scripts/nocodb.js" attente-vider`. Le fichier d'attente est dans le dossier
-   temporaire du système (`leads-ft-notion-en-attente.txt`) : c'est la seule chose que ce skill
-   écrit sur le disque hors des CV.
+   `node "<skill>/scripts/nocodb.js" attente-vider`. La file d'attente est sur GitHub
+   (`etat/notion-en-attente-leads-france-travail.txt`, dépôt privé `claude-config`), pas dans un
+   dossier temporaire.
 5. **Écriture Notion refusée ou partielle** (hors limite) → ne pas relancer le lot en aveugle :
    relire, n'écrire que ce qui manque.
 
@@ -533,6 +536,29 @@ Ne rien proposer ensuite : ce qui se fait des leads se décide hors du skill.
 
 ---
 
+## Réconciliation NocoDB ↔ Notion (à la demande)
+
+Les deux bases dérivent : Notion garde ce que NocoDB n'a plus (les fiches `Ecarte` supprimées le
+29/09/2026), NocoDB a ce que Notion n'a jamais reçu (lots écrits pendant une limite Notion). Se
+lance sur demande, jamais en fin de run.
+
+1. **Obtenir la base Notion en fichier.** Sans requête SQL, donc sans quota : dans Notion, base
+   « Leads France Travail » → ⋯ → Exporter → CSV, puis déposer le fichier dans Téléchargements. Si
+   le quota Notion le permet, `notion-query-data-sources` (100 lignes par appel, pagination sur
+   `has_more`) donne le même contenu ; l'écrire en JSON avec les colonnes de la table.
+2. **Simuler** : `node "<skill>/scripts/nocodb.js" reconcilier <export.csv|.json>`. Rend les
+   comptes, les `Id` NocoDB absents de Notion, et la liste des fiches Notion absentes de NocoDB.
+   Appariement par email, sinon par nom + prénom + commune + requête, **au multi-ensemble** : deux
+   profils au même intitulé sont deux personnes.
+3. **NocoDB → Notion** : `notion-pages <ids>` puis `notion-create-pages` (Phase 5 bis).
+4. **Notion → NocoDB** : relancer avec `--importer`. **Les fiches `Ecarte` ne sont jamais
+   importées** (règle « Jamais de ligne Ecarte »). Les dates de l'export (« 29 septembre 2026 »,
+   « September 29, 2026 », `JJ/MM/AAAA`) sont converties en `AAAA-MM-JJ`.
+5. **Relire** avec `resume` (NocoDB) puis relancer l'étape 2 : elle doit rendre 0 et 0 (hors
+   `Ecarte`).
+
+---
+
 ## Replis
 
 | Symptôme | Cause et geste |
@@ -544,7 +570,7 @@ Ne rien proposer ensuite : ce qui se fait des leads se décide hors du skill.
 | « Afficher le numéro » absent alors qu'un bloc contact existe | un scroll ou un rechargement de la section, puis conclure à l'absence de téléphone |
 | `ERREUR : … absent` dans un script Bash | poppler ou tesseract manquent : le signaler, ne pas continuer sans OCR |
 | Réponse Notion `usage_limit_reached` (ou équivalent) | limite Notion : alerte visible, `attente`, pas de réessai, le run continue (voir « Alerte limite Notion ») |
-| Notion et NocoDB ne comptent pas le même nombre de lignes | normal avant la reprise de l'attente, ou si la base Notion a été alimentée par l'ancienne version (5.3) : NocoDB fait foi |
+| Notion et NocoDB ne comptent pas le même nombre de lignes | normal avant la reprise de l'attente, ou si la base Notion a été alimentée par l'ancienne version (5.3) : NocoDB fait foi. Lancer la « Réconciliation » |
 
 ---
 
