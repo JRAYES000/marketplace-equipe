@@ -1,4 +1,8 @@
-// Script d'extraction v5.3 — un lot de profils France Travail Pro.
+// Script d'extraction v8.0 — un lot de profils France Travail Pro.
+// v8.0 (2026-09-29) : chaque profil telecharge porte `dlRang` (0, 1, 2…), son rang
+//   de telechargement dans la session. `window.__exporter()` fait telecharger le
+//   journal en `ft-journal.json` : plus de transcription a la main, `assembler.js`
+//   le lit directement dans Downloads.
 // v5.3 (2026-09-29) : chaque profil journalise aussi `presentation`, le texte
 //   que le candidat ecrit sur son profil. Il alimente la Note NocoDB, qui ne
 //   doit plus jamais rester vide (deux fiches du 29/09 l'etaient).
@@ -52,11 +56,13 @@
 // d'adresse. Autoriser pro.francetravail.fr à télécharger plusieurs fichiers
 // AVANT de lancer un lot, sinon tous les emails manqueront sauf un.
 
-// S'injecte une fois, puis se rappelle par `await window.__run(15)` : re-injecter
-// le script entier a chaque lot coute des jetons pour rien. La taille de lot est
-// un parametre, pas une constante — 15 passe sans probleme onglet visible, alors
-// que 10 depasse le timeout CDP de 45 s des que l'onglet est cache.
+// S'injecte une fois, puis se rappelle par `await window.__run(n)` : re-injecter
+// le script entier a chaque lot coute des jetons pour rien. Chaque appel s'arrete
+// de lui-meme sur son budget de temps (35 s), sous le timeout CDP de 45 s.
 window.__log = window.__log || [];
+// Rang du prochain telechargement. Chrome enregistre les CV dans cet ordre :
+// `assembler.js` s'en sert pour rattacher chaque CV a son profil.
+window.__dl = window.__dl || 0;
 window.__connus = window.__connus || new Set();
 
 // Cle de dedoublonnage : minuscules, sans accents ni ponctuation, espaces
@@ -169,7 +175,8 @@ window.__run = async (BATCH = 8, BUDGET_MS = 35000) => {
 
     const btnDL = q ? [...q.querySelectorAll('a,button')].find(e => /Télécharger/i.test(norm(e.textContent))) : null;
     let dl = false;
-    if (btnDL) { btnDL.click(); dl = true; await pause(1500); }
+    let dlRang = null;
+    if (btnDL) { btnDL.click(); dl = true; dlRang = window.__dl++; await pause(1500); }
 
     const rec = {
       pag: courant,
@@ -181,6 +188,7 @@ window.__run = async (BATCH = 8, BUDGET_MS = 35000) => {
       telSource: telChamp ? 'champ' : (telTexte ? 'texte' : ''),
       aCV: !!btnDL,
       telecharge: dl,
+      dlRang,
       // Texte de presentation ecrit par le candidat, entre la ligne
       // « Disponibilite » et « Points forts ». C'est la source OBLIGATOIRE de la
       // Note NocoDB (depuis le 29/09/2026). Coupe avant « Adresse » : un
@@ -203,6 +211,18 @@ window.__run = async (BATCH = 8, BUDGET_MS = 35000) => {
     telecharges: window.__log.filter(r => r.telecharge).length,
     arret, secondes: Math.round((Date.now() - debut) / 1000), lot
   });
+};
+
+// Fait telecharger le journal complet en `ft-journal.json` (Downloads). Remplace
+// la relecture par get_page_text, tronquee et couteuse : `assembler.js` lit ce
+// fichier tel quel. Donnees de candidats : `nettoyer-cv.sh` l'envoie a la corbeille.
+window.__exporter = () => {
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob([JSON.stringify(window.__log)], { type: 'application/json' }));
+  a.download = 'ft-journal.json';
+  document.body.appendChild(a); a.click(); a.remove();
+  return 'journal exporte : ' + window.__log.length + ' ligne(s), dont ' +
+    window.__log.filter(r => r.telecharge).length + ' CV telecharge(s)';
 };
 
 // Premier lot des l'injection, pour ne pas perdre un aller-retour.

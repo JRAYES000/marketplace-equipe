@@ -1,12 +1,20 @@
 #!/usr/bin/env bash
 # Recupere les CV fraichement telecharges et en extrait email + telephone.
 #
-# Usage : bash scripts/emails-depuis-cv.sh [minutes]
-#         minutes = age maximum des CV a prendre dans Downloads (defaut 60)
+# Usage : bash scripts/emails-depuis-cv.sh [minutes] [sortie.tsv]
+#         minutes    = age maximum des CV a prendre dans Downloads (defaut 60)
+#         sortie.tsv = fichier ou AJOUTER les lignes completes, pour assembler.js.
+#                      Un fichier neuf par lot.
 #
-# Sortie sur stdout, une ligne par CV :
-#   <fichier> <TAB> <email> <TAB> <telephone>
+# Sur stdout, une ligne courte par CV, dans l ORDRE REEL de telechargement :
+#   <rang> <TAB> <fichier> <TAB> <email> <TAB> <telephone>
+# Dans sortie.tsv, la meme ligne plus une 5e colonne : le texte du CV (page 1)
+# sur une seule ligne. assembler.js y cherche le nom de chaque candidat.
 # Les champs vides le sont pour de vrai. Aucune valeur n est inventee.
+#
+# Rang : Document.pdf = 0, Document (n).pdf = n, et les CV sortent tries sur ce
+# rang. Jamais de `sort` sur les noms : il rend (1), (10), (2)… et Document.pdf
+# en dernier, ce qui decalait l appariement (bug corrige en v8.0).
 #
 # Ce script remplace l ancien couple copier-cv.sh + ocr-lot.sh : une seule
 # commande, parce que l agent n avait aucune raison de piloter les deux etapes
@@ -16,15 +24,12 @@
 # Le nom affiche sur France Travail est cosmetique et n arrive jamais jusqu au
 # fichier : on selectionne par date de telechargement, jamais par nom.
 #
-# Appariement CV -> candidat : c est l ORDRE de telechargement qui porte
-# (Document.pdf d abord, puis (1), (2)...), et les emails qui portent un nom
-# (marie.dupont@... -> Marie DUPONT) servent d ancres pour le valider. Un
-# telechargement rate decale la suite : le trou se tranche avec nom-du-cv.sh.
-# Methode complete : SKILL.md, Phase 4.
+# Appariement CV -> candidat : assembler.js (SKILL.md, Phase 4).
 
 set -u
 
 MINUTES="${1:-60}"
+SORTIE="${2:-}"
 RE_EMAIL='[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}'
 RE_TEL='(\+33|0)[ .]?[1-9]([ .]?[0-9]{2}){4}'
 
@@ -118,9 +123,18 @@ emails_du_fichier() {
     tel=$(printf '%s' "$tel" | tr -d ' .' | sed -E 's/^\+33/0/' | sed -E 's/(..)/\1 /g' | sed 's/ $//')
   fi
 
-  printf '%s\t%s\t%s\n' "$(basename "$pdf")" "$email" "$tel"
+  nomf=$(basename "$pdf")
+  rang=$(printf '%s' "$nomf" | sed -nE 's/.*\(([0-9]+)\)\.pdf$/\1/p')
+  [ -z "$rang" ] && rang=0
+  printf '%s\t%s\t%s\t%s\n' "$rang" "$nomf" "$email" "$tel"
+  if [ -n "$SORTIE" ]; then
+    texte=$(cat "$base.couche" "$base.txt" 2>/dev/null | tr '\t\r\n' '   ' | tr -s ' ' | cut -c1-6000)
+    printf '%s\t%s\t%s\t%s\t%s\n' "$rang" "$nomf" "$email" "$tel" "$texte" >> "$SORTIE"
+  fi
 done <<EOF
-$(find "$SOURCE" -maxdepth 1 -iname "Document*.pdf" -mmin "-$MINUTES" -print 2>/dev/null | sort)
+$(find "$SOURCE" -maxdepth 1 -iname "Document*.pdf" -mmin "-$MINUTES" -print 2>/dev/null \
+  | sed -E 's/^(.*\(([0-9]+)\)\.pdf)$/\2\t\1/; t; s/^/0\t/' \
+  | sort -n -k1,1 | cut -f2-)
 EOF
 
 if [ "$n" -eq 0 ]; then

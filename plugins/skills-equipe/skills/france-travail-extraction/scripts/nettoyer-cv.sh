@@ -8,13 +8,16 @@
 #
 # Corbeille et pas suppression definitive : Julien la vide lui-meme.
 #
-# Usage : bash nettoyer-cv.sh [minutes]
+# Usage : bash nettoyer-cv.sh [minutes] [fichier de travail]...
 #   minutes = age maximum des fichiers vises (defaut 240). Seuls les
-#   Document*.pdf de Downloads modifies dans cette fenetre partent, plus les
-#   dossiers de tour crees par ocr-par-tour.sh (_cv-lot100). Un Document.pdf plus
-#   ancien, qui n'est pas un CV du lot, reste en place.
+#   Document*.pdf et ft-journal*.json de Downloads modifies dans cette fenetre
+#   partent, plus les dossiers de tour crees par ocr-par-tour.sh (_cv-lot100). Un
+#   Document.pdf plus ancien, qui n'est pas un CV du lot, reste en place.
+#   Fichiers de travail = cv.tsv, choix.json, lot.json du lot : ils contiennent
+#   aussi des donnees de candidats et partent a la corbeille avec le reste.
 set -u
 MIN="${1:-240}"
+shift 2>/dev/null
 
 if   [ -d "$HOME/Downloads" ];       then DL="$HOME/Downloads"
 elif [ -d "$HOME/Téléchargements" ]; then DL="$HOME/Téléchargements"
@@ -43,12 +46,17 @@ n=0; echec=0
 while IFS= read -r f; do
   [ -z "$f" ] && continue
   if a_la_corbeille "$f"; then n=$((n + 1)); else echec=$((echec + 1)); fi
-done < <(find "$DL" -maxdepth 1 -type f -name 'Document*.pdf' -mmin -"$MIN")
+done < <(find "$DL" -maxdepth 1 -type f \( -name 'Document*.pdf' -o -name 'ft-journal*.json' \) -mmin -"$MIN")
+
+for f in "$@"; do
+  [ -e "$f" ] || continue
+  if a_la_corbeille "$f"; then n=$((n + 1)); else echec=$((echec + 1)); fi
+done
 
 if [ -d "$DL/_cv-lot100" ]; then
   if a_la_corbeille "$DL/_cv-lot100"; then n=$((n + 1)); else echec=$((echec + 1)); fi
 fi
 
-reste=$(find "$DL" -maxdepth 1 -type f -name 'Document*.pdf' -mmin -"$MIN" | wc -l)
+reste=$(find "$DL" -maxdepth 1 -type f \( -name 'Document*.pdf' -o -name 'ft-journal*.json' \) -mmin -"$MIN" | wc -l)
 echo "$n element(s) mis a la corbeille, $echec echec(s), $reste CV du lot encore dans $DL."
 [ "$echec" -eq 0 ] && [ "$reste" -eq 0 ]

@@ -1,49 +1,23 @@
 #!/usr/bin/env node
 // Lecture et ecriture de la table NocoDB « Leads France Travail ».
-// Remplace le connecteur Notion (v6.0). Aucune valeur secrete n'est jamais affichee.
+// Reference unique du skill depuis la v8.0 : Notion n'est plus ecrit pendant le run, il se
+// synchronise en differe (reconcilier + notion-pages). Aucune valeur secrete n'est jamais affichee.
 //
 //   node nocodb.js resume                       profils et emails par requete
 //   node nocodb.js connus                       JSON ["Prenom NOM", ...] (Phase 1)
 //   node nocodb.js dedup <lot.json>             lignes du lot deja presentes en base
 //   node nocodb.js ecrire <lot.json> [--sec]    insere le lot (100 par paquet) ; --sec = simulation
 //   node nocodb.js verifier <AAAA-MM-JJ> <requete>   compte du lot + fiches a Note vide
-//   node nocodb.js notion-pages <ids|--attente>   fiches au format notion-create-pages (miroir Notion)
-//   node nocodb.js attente <ids>                  met des Id en attente Notion (fichier GitHub prive)
-//   node nocodb.js attente-vider                  vide la file d'attente Notion
+//   node nocodb.js notion-pages <ids>             fiches au format notion-create-pages (synchro Notion differee)
 //   node nocodb.js reconcilier <export-notion.csv|.json> [--importer]   ecarts NocoDB <-> Notion ; --importer ecrit dans NocoDB les fiches Notion absentes
 //
 // Environnement : NOCODB_URL, NOCODB_TOKEN (NOCODB_TABLE_ID facultatif).
 'use strict';
 const fs = require('fs');
-const { execFileSync } = require('child_process');
 
 const URL_BASE = (process.env.NOCODB_URL || '').replace(/\/+$/, '');
 const TOKEN = process.env.NOCODB_TOKEN || '';
 const TABLE = process.env.NOCODB_TABLE_ID || 'mjhwgyhkrukdy5m';
-// File d'attente du miroir Notion : un fichier de Id NocoDB (aucune donnee personnelle) dans le
-// depot prive JRAYES000/claude-config, via `gh`. Elle survit au poste, a la session et au dossier
-// temporaire de Windows ; un conflit (deux sessions) est detecte par le sha et rejoue une fois.
-const ATTENTE_REPO = 'JRAYES000/claude-config';
-const ATTENTE_FICHIER = 'etat/notion-en-attente-leads-france-travail.txt';
-function gh(args, input) {
-  try { return execFileSync('gh', args, { input, encoding: 'utf8', stdio: ['pipe', 'pipe', 'pipe'] }); }
-  catch (e) { const m = String((e.stderr || '') + (e.message || '')); const err = new Error(m); err.http404 = /HTTP 404|Not Found/i.test(m); err.http409 = /HTTP 409|HTTP 422|does not match/i.test(m); throw err; }
-}
-function lireAttente() {
-  try {
-    const d = JSON.parse(gh(['api', 'repos/' + ATTENTE_REPO + '/contents/' + ATTENTE_FICHIER]));
-    const txt = Buffer.from(d.content, 'base64').toString('utf8');
-    return { ids: txt.split(/[\s,]+/).filter(Boolean), sha: d.sha };
-  } catch (e) {
-    if (e.http404) return { ids: [], sha: null };
-    die('file d attente GitHub illisible (gh connecte ?) : ' + e.message.slice(0, 200));
-  }
-}
-function ecrireAttente(ids, sha, message) {
-  const body = { message, content: Buffer.from(ids.join(',') + '\n').toString('base64') };
-  if (sha) body.sha = sha;
-  gh(['api', '-X', 'PUT', 'repos/' + ATTENTE_REPO + '/contents/' + ATTENTE_FICHIER, '--input', '-'], JSON.stringify(body));
-}
 const STATUTS = ['A importer', 'Importe SalesHandy', 'Ecarte'];
 // Seules ces colonnes s'ecrivent ; « Type de requete » n'existe plus (formule Notion).
 const COLONNES = ['Nom', 'Prenom', 'Email', 'Telephone', 'Commune', 'Fonction', 'Requete',
@@ -187,12 +161,9 @@ const cmd = process.argv[2];
   } else if (cmd === 'notion-pages') {
     // Fiches NocoDB -> format notion-create-pages. `Type de requete` n'est jamais envoye (formule).
     const arg = process.argv[3];
-    if (!arg) die('usage : notion-pages <ids separes par des virgules | --attente>');
-    const lireIds = t => t.split(/[\s,]+/).map(x => x.trim()).filter(Boolean);
-    const ids = arg === '--attente'
-      ? lireAttente().ids
-      : lireIds(arg);
-    if (!ids.length) die('aucun Id (file d attente vide ?)');
+    if (!arg) die('usage : notion-pages <ids separes par des virgules>');
+    const ids = arg.split(/[\s,]+/).map(x => x.trim()).filter(Boolean);
+    if (!ids.length) die('aucun Id');
     if (ids.some(x => !/^\d+$/.test(x))) die('les Id doivent etre des entiers');
     const wanted = new Set(ids.map(Number));
     const rows = (await toutes()).filter(r => wanted.has(r.Id));
@@ -209,19 +180,6 @@ const cmd = process.argv[2];
       return { properties: p };
     });
     console.log(JSON.stringify(pages));
-  } else if (cmd === 'attente') {
-    const ids = (process.argv[3] || '').split(/[\s,]+/).filter(Boolean);
-    if (!ids.length || ids.some(x => !/^\d+$/.test(x))) die('usage : attente <ids separes par des virgules>');
-    for (let essai = 0; ; essai++) {
-      const cur = lireAttente();
-      const tous = [...new Set([...cur.ids, ...ids])];
-      try { ecrireAttente(tous, cur.sha, 'leads FT : ' + ids.length + ' fiche(s) en attente Notion'); console.log('en attente Notion : ' + tous.length + ' fiche(s) (GitHub ' + ATTENTE_REPO + ')'); break; }
-      catch (e) { if (e.http409 && essai < 1) continue; die('ecriture de la file d attente GitHub : ' + e.message.slice(0, 200)); }
-    }
-  } else if (cmd === 'attente-vider') {
-    const cur = lireAttente();
-    if (cur.sha) ecrireAttente([], cur.sha, 'leads FT : file d attente Notion videe');
-    console.log('file d attente Notion videe');
   } else if (cmd === 'reconcilier') {
     const f = process.argv[3];
     if (!f) die('usage : reconcilier <export-notion.csv|.json> [--importer]');
