@@ -1,4 +1,8 @@
-// Script d'extraction v9.1 — un lot de profils France Travail Pro.
+// Script d'extraction v9.2 — un lot de profils France Travail Pro.
+// v9.2 (2026-09-29) : les hors-cible deja vus sont sautes comme les profils deja en base.
+//   `window.__connusBruts` peut etre l'objet { noms, ecartes } rendu par « notion.js situer » :
+//   `ecartes` = empreintes SHA-256 tronquees (16 hex) de la cle « prenom nom », calculees ici
+//   avec crypto.subtle. La ligne du journal porte `deja: true, ecarte: true`.
 // v9.1 (2026-09-29, audit) :
 //   • verrou : un second `__run` pendant qu'un premier tourne (timeout CDP) est refuse au lieu
 //     de cliquer « Suivant » en double ;
@@ -97,7 +101,14 @@ window.__cle = s => (s || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '')
 // Noms connus injectes BRUTS avant le script (`window.__connusBruts = [...]`,
 // « Prenom NOM » tels que « notion.js situer » les rend) : la normalisation se fait ici, une
 // seule fois, avec la meme fonction que pour les noms lus dans le panneau.
-(window.__connusBruts || []).forEach(n => window.__connus.add(window.__cle(n)));
+const __bruts = window.__connusBruts || [];
+(Array.isArray(__bruts) ? __bruts : (__bruts.noms || [])).forEach(n => window.__connus.add(window.__cle(n)));
+// Hors-cible deja vus : empreintes seules (assembler.js), jamais un nom en clair.
+window.__ecartes = window.__ecartes || new Set();
+(Array.isArray(__bruts) ? [] : (__bruts.ecartes || [])).forEach(h => window.__ecartes.add(h));
+// Doit rester egale a `empreinte` d'assembler.js : SHA-256 de la cle, 16 premiers hex.
+window.__empreinte = async s => [...new Uint8Array(await crypto.subtle.digest('SHA-256', new TextEncoder().encode(window.__cle(s))))]
+  .map(b => b.toString(16).padStart(2, '0')).join('').slice(0, 16);
 
 // BATCH = nombre de NOUVEAUX profils voulus. BUDGET_MS = duree max d'un appel :
 // un profil deja connu coute ~0,3 s, un nouveau ~2-3 s, et un tour peut aller a ~9 s
@@ -148,7 +159,7 @@ window.__corps = async (BATCH, BUDGET_MS) => {
 
   const lot = [];
   let arret = 'batch atteint';
-  let sautes = 0;
+  let sautes = 0, sautesEcartes = 0;
 
   for (let i = 0; lot.length < BATCH; i++) {
     if (Date.now() - debut > BUDGET_MS) { arret = 'budget'; break; }
@@ -170,9 +181,12 @@ window.__corps = async (BATCH, BUDGET_MS) => {
     // `\n+` : le panneau met une ligne vide entre la date et le nom (mesure du 29/09/2026 :
     // sans cela nom0 restait vide et aucun profil deja en base n'etait saute).
     const nom0 = ((t0.match(/Profil mis à jour le [^\n]+\n+([^\n]+)/) || [])[1] || '').trim();
-    if (nom0 && window.__connus.has(window.__cle(nom0))) {
-      window.__log.push({ pag: courant, nom: nom0, deja: true, recherche: window.__recherche || null });
+    const ecarte = !!nom0 && window.__ecartes.size > 0 && !window.__connus.has(window.__cle(nom0)) &&
+      window.__ecartes.has(await window.__empreinte(nom0));
+    if (nom0 && (ecarte || window.__connus.has(window.__cle(nom0)))) {
+      window.__log.push({ pag: courant, nom: nom0, deja: true, ...(ecarte ? { ecarte: true } : {}), recherche: window.__recherche || null });
       sautes++;
+      if (ecarte) sautesEcartes++;
       const nxd = suivant();
       if (!nxd) { arret = 'suivant introuvable'; break; }
       nxd.click();
@@ -251,7 +265,7 @@ window.__corps = async (BATCH, BUDGET_MS) => {
 
   // Compact : le pont coupe vers 1 000 caracteres. Le detail se lit par `__exporter()`.
   return JSON.stringify({
-    nouveaux: lot.length, sautes, total: window.__log.length,
+    nouveaux: lot.length, sautes, sautesEcartes, total: window.__log.length,
     nouveauxTotal: window.__log.filter(r => !r.deja).length,
     telecharges: window.__log.filter(r => r.telecharge).length,
     arret, secondes: Math.round((Date.now() - debut) / 1000),

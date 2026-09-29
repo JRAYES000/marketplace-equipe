@@ -64,3 +64,9 @@ l'emploi, et constituer la base de l'École.
 - supprimer une fiche sur demande, et au plus tard **24 mois** après le dernier contact
   (`Date extraction` sert de point de départ quand aucun contact n'a eu lieu) ;
 - ne jamais céder, louer ni vendre la base (art. 3.3).
+
+Côté skill, depuis la v9.2 : les hors-cible ne sont jamais écrits. Seule une empreinte
+(SHA-256 tronqué du « prénom nom ») reste dans `%LOCALAPPDATA%/france-travail-extraction/ecartes.json`,
+180 jours au plus, pour ne pas retraiter la même personne. C'est une donnée pseudonymisée, pas
+anonyme : un nom connu se reteste contre la liste. La supprimer efface toute trace des
+hors-cible.
