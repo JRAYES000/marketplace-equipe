@@ -69,23 +69,127 @@ for (const mot of DICTIONNAIRE) {
   INDEX_SANS_ACCENT.get(norm).add(motMin);
 }
 
-// Extrait les mots d'un segment de gras deja ramene en ASCII (versAscii applique en amont
-// si besoin) et signale ceux dont la forme SANS accent n'est pas un mot francais valide,
-// mais dont une forme AVEC accent existe dans le dictionnaire. Ignore les mots de moins de
-// 2 lettres (evite "a"/"c" etc., ambigus et sans risque de sens).
-function motsAccentManquant(segmentAscii) {
-  const mots = segmentAscii.match(/[a-zA-Z]+(?:['’-][a-zA-Z]+)*/g) || [];
-  const fautifs = [];
-  for (const motBrut of mots) {
-    const mot = motBrut.toLowerCase();
-    if (mot.length < 2) continue;
-    if (DICT_SET.has(mot)) continue;
-    const candidats = INDEX_SANS_ACCENT.get(mot);
-    if (candidats && candidats.size > 0) {
-      fautifs.push(`"${motBrut}" (accente attendu : "${[...candidats].join('" ou "')}")`);
-    }
+// Controle des accents manquants dans le gras -- refait le 29/09/2026 apres un cas reel :
+// la 1re ligne de A4, "Confier l'IA a un seul salarie de l'equipe est-il un risque
+// sous-estime ?", tout en gras sans accent, avait obtenu 14/14. Diagnostic : TROIS trous
+// cumules dans l'ancien controle, qui lisait chaque segment de gras isole, mot a mot :
+//   1. l'elision : "l'equipe" restait UN seul mot (le motif acceptait l'apostrophe), donc
+//      "l'equipe" n'etait ni au dictionnaire ni dans l'index -> jamais signale ;
+//   2. les homographes : "salarie", "estime", "sous-estime" existent AUSSI sans accent
+//      (autre forme du verbe), donc le dictionnaire les jugeait valides ;
+//   3. "a" (1 lettre) etait ignore d'office, alors que "a" pour "à" est la faute la plus
+//      courante ; et le gras Unicode, coupe a chaque "?", "-" ou virgule, faisait perdre
+//      tout contexte (l'accroche arrivait en trois morceaux).
+// Le controle lit donc maintenant la LIGNE ENTIERE (le contexte), decoupe l'elision, et ne
+// juge que les mots effectivement en gras. Un homographe n'est signale que si le CONTEXTE
+// impose la forme accentuee -- jamais sur le seul mot ("risque", "projet", "il a" restent
+// valides). Limite connue : un homographe nom/verbe sans indice de contexte (ex. "un seul
+// salarie") ne se voit pas sans frequence d'usage ; un autre mot de la phrase doit le reveler.
+const AUXILIAIRES = new Set(("est sont etait etaient sera seront serait seraient soit soient fut furent ete etre " +
+  "suis es sommes etes semble semblent reste restent parait paraissent devient deviennent " +
+  "a ont avait avaient aura auront aurait auraient ai as avons avez avoir eu").split(" "));
+// Noms et adjectifs courants qui suivent etre/avoir sans etre un participe ("a envie", "a charge
+// de", "est vide", "est calme") alors qu'une forme en -e accentue existe : jamais signales.
+const PAS_UN_PARTICIPE = new Set(("envie charge classe cote place vide calme libre sobre large juste rare riche faible " +
+  "utile simple stable sage sale lisse fixe pire pure propre claire").split(" "));
+// Mots apres lesquels un mot en -e n'est pas un participe : determinants, prepositions,
+// pronoms sujets, conjonctions, adverbes courts. Sert a la regle "compose a prefixe en fin de propos".
+const PAS_UN_NOM = new Set(("le la l les un une des ce cet cette ces mon ma mes ton ta tes son sa ses notre nos votre vos " +
+  "leur leurs du de d au aux en dans sur sous pour par avec sans chez entre vers ne n me m te t se s nous vous il elle on " +
+  "ils elles je j tu qui que qu et ou mais donc car ni si tres plus moins aussi trop bien mal tout toute tous toutes quel " +
+  "quelle chaque plusieurs quelques y c ca cela ceci").split(" "));
+// Mots qui ferment une proposition : apres eux, un infinitif precedent n'a plus de lien avec "a".
+const COUPE_PROPOSITION = new Set(("il elle on ils elles je j tu nous vous qui que qu quand lorsque si ou mais car donc ni " +
+  "ce c ca cela ceci pourquoi comment y").split(" "));
+const PREFIXES_TIRET = /^(sous|sur|mal|bien|non|re|pre|semi|mi|co|auto|contre)-/;
+const INFINITIF = /(?:er|ir|oir|ndre|rdre|ttre|uire|aire|indre|ire)$/;
+
+const estCharGras = (cp) =>
+  (cp >= SANS_SERIF.maj && cp <= SANS_SERIF.maj + 25) || (cp >= SANS_SERIF.min && cp <= SANS_SERIF.min + 25) ||
+  (cp >= SERIF.maj && cp <= SERIF.maj + 25) || (cp >= SERIF.min && cp <= SERIF.min + 25);
+
+// Une ligne -> { ascii, gras[] } : ascii = texte ramene en lettres ordinaires (les ** retires),
+// gras[i] = le caractere i est en gras (markdown ou Unicode, les deux polices).
+function ligneAvecGras(ligne) {
+  let ascii = "";
+  const gras = [];
+  let dansMarkdown = false;
+  const chars = [...ligne];
+  for (let i = 0; i < chars.length; i++) {
+    if (chars[i] === "*" && chars[i + 1] === "*") { dansMarkdown = !dansMarkdown; i++; continue; }
+    const cp = chars[i].codePointAt(0);
+    const c = versAscii(chars[i]);
+    ascii += c;
+    for (let k = 0; k < c.length; k++) gras.push(dansMarkdown || estCharGras(cp));
   }
+  return { ascii, gras };
+}
+
+function motsAccentManquantLigne(ligne) {
+  const { ascii, gras } = ligneAvecGras(ligne);
+  const jetons = [...ascii.matchAll(/\p{L}+(?:-\p{L}+)*/gu)].map((m) => ({
+    mot: m[0], bas: m[0].toLowerCase(), cle: sansAccent(m[0].toLowerCase()),
+    debut: m.index, fin: m.index + m[0].length, gras: gras[m.index] === true,
+  }));
+  const fautifs = [];
+  let dernierInfinitif = -1;
+  jetons.forEach((j, i) => {
+    const avant = jetons[i - 1];
+    const ecart = ascii.slice(avant ? avant.fin : 0, j.debut);
+    if (/[,;:.!?()«»]/.test(ecart)) dernierInfinitif = -1;
+    const apostropheAvant = /['’]$/.test(ecart);
+    const precedent = avant && !/[.!?]/.test(ecart) ? avant : null;
+    const compose = j.mot.includes("-");
+    const suite = ascii.slice(j.fin).replace(/^\s+/, "");
+    const finDePropos = suite === "" || /^[,;:.!?)»]/.test(suite);
+    const debutDePhrase = /(^|[.!?:])$/.test(ascii.slice(0, j.debut).replace(/[\s\p{Extended_Pictographic}️]+$/u, ""));
+    const signaler = (attendu) => fautifs.push(`"${j.mot}" (accente attendu : "${attendu}")`);
+
+    if (j.gras) {
+      const candidats = INDEX_SANS_ACCENT.get(j.bas);
+      let signale = false;
+      // Regle de base : mot absent du dictionnaire mais dont une forme accentuee existe.
+      // Un compose ("peut-etre") est teste en entier, puis partie par partie.
+      if (!DICT_SET.has(j.bas) && candidats && candidats.size > 0) {
+        signaler([...candidats].join('" ou "')); signale = true;
+      } else if (compose && !DICT_SET.has(j.bas)) {
+        for (const partie of j.bas.split("-")) {
+          const c = INDEX_SANS_ACCENT.get(partie);
+          if (partie.length > 1 && !DICT_SET.has(partie) && c && c.size > 0) { signaler([...c].join('" ou "')); signale = true; }
+        }
+      }
+      // "a" seul pour "à" : devant un infinitif, en debut de phrase, ou apres un infinitif de la
+      // meme proposition sans sujet entre les deux ("Confier l'IA a ..."). Jamais "a-t-il"
+      // (compose), "l'a" (elision), "A4" (colle a un chiffre) ni "il a".
+      if (!signale && j.bas === "a" && !apostropheAvant && /^(\s|$)/.test(ascii.slice(j.fin))) {
+        const suivant = jetons[i + 1];
+        const devantInfinitif = suivant && !/[,;:.!?()]/.test(ascii.slice(j.fin, suivant.debut)) &&
+          INFINITIF.test(suivant.bas) && DICT_SET.has(suivant.bas);
+        const infinitifProche = dernierInfinitif >= 0 && i - dernierInfinitif <= 4;
+        if (debutDePhrase || devantInfinitif || infinitifProche) { signaler("à"); signale = true; }
+      }
+      // Mot en -e dont la forme en -é existe : seulement si le contexte impose le participe
+      // (apres etre/avoir, ou compose a prefixe -- "sous-estime" -- en fin de propos).
+      if (!signale && j.bas.endsWith("e") && !j.bas.endsWith("ee") && DICT_SET.has(j.bas)) {
+        const forme = j.bas.slice(0, -1) + "é";
+        if (candidats && candidats.has(forme)) {
+          const apresAuxiliaire = precedent && !apostropheAvant && AUXILIAIRES.has(precedent.cle) && !PAS_UN_PARTICIPE.has(j.bas) &&
+            j.bas.length >= 4 && !PAS_UN_NOM.has(j.bas);
+          const prefixe = PREFIXES_TIRET.test(j.bas) && finDePropos && precedent && !PAS_UN_NOM.has(precedent.cle);
+          if (apresAuxiliaire || prefixe) signaler(forme);
+        }
+      }
+    }
+    // Suivi de l'infinitif pour la regle "a" (tous les jetons non composes, gras ou non).
+    if (COUPE_PROPOSITION.has(j.cle)) dernierInfinitif = -1;
+    else if (!compose && INFINITIF.test(j.bas) && DICT_SET.has(j.bas)) dernierInfinitif = i;
+  });
   return fautifs;
+}
+
+// Tous les mots en gras d'un texte dont l'accent manque (voir le bloc ci-dessus).
+export function motsAccentManquantCorps(corps) {
+  return corps.split("\n").flatMap(motsAccentManquantLigne);
 }
 
 const BASES_ECRITURE = [
@@ -296,7 +400,7 @@ export function verifierTexte(corps) {
   // Nouveau critere (28/09/2026) : voir l'en-tete de fichier. Chaque segment gras est
   // ramene en ASCII (deja le cas pour le markdown, versAscii() pour l'Unicode deja
   // converti), puis chaque mot est compare au dictionnaire -- voir motsAccentManquant().
-  const motsFautifs = gras.flatMap((g) => motsAccentManquant(versAscii(g)));
+  const motsFautifs = motsAccentManquantCorps(corps);
   resultats.push(dire(
     motsFautifs.length === 0,
     "aucun accent manquant dans le gras",
