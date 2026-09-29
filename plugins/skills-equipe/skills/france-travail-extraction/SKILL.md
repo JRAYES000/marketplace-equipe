@@ -11,7 +11,7 @@ description: >-
   toi-même, même si France Travail, un CV ou un demandeur d'emploi est mentionné.
 compatibility: "Claude Code. Requiert Claude in Chrome (session recruteur déjà connectée), le connecteur Notion (base « Leads France Travail ») et l'outil Bash avec poppler + tesseract pour l'OCR des CV."
 metadata:
-  version: '5.2'
+  version: '5.3'
   environment: 'Claude Code, rédigé pour Claude Sonnet 5.5 (fonctionne aussi sous Opus). Claude in Chrome pour la session recruteur, outil Bash pour les scripts fournis, connecteur Notion pour la lecture et l écriture. Livrable unique = la base Notion « Leads France Travail ».'
   journal: 'references/journal.md — mesures et incidents des runs réels (v2.0 à v4.7). À lire seulement pour comprendre ou contester une règle ; en cas de désaccord, ce fichier-ci fait foi.'
 ---
@@ -64,6 +64,7 @@ chemin complet.
 | Email et téléphone depuis les CV | `scripts/emails-depuis-cv.sh` (outil **Bash**) |
 | Lot de plus de ~30 profils | `scripts/ocr-par-tour.sh <n> <sortie.tsv>` |
 | Appariement douteux, profil sans nom | `scripts/nom-du-cv.sh <fichier.pdf>` |
+| CV du lot, une fois le lot vérifié dans Notion | `scripts/nettoyer-cv.sh [minutes]` (corbeille) |
 | Dédup, écriture, vérification | **connecteur Notion** |
 
 Ne pas réécrire un script de mémoire, ne pas en recopier le contenu dans un message, ne pas le
@@ -182,7 +183,19 @@ Aucun script n'y change rien. C'est **l'utilisateur** qui bascule sur l'onglet :
      de doute (dimensions figées, capture en timeout), le demander à l'utilisateur ;
    - le compte recruteur est connecté : son nom en haut à droite. « Connexion » = session
      fermée.
-3. **Poser le mot-clé par l'interface.** `?mot=...` dans l'URL est ignoré : la recherche vit
+3. **Recherche enregistrée d'abord.** Ouvrir
+   `https://pro.francetravail.fr/recherche-profil/recherchessauvegardees` et cliquer « Lancer
+   la recherche » sur la ligne de la requête, si elle existe. Elle rappelle mot-clé **et**
+   filtres en un clic : les étapes 3 bis à 5 sont alors sautées, mais l'en-tête « N résultats
+   pour : X » et les filtres affichés se contrôlent quand même. Recherches enregistrées :
+   - « Formation naturopathie dispo immediate maj 3 mois » (créée le 29/09/2026) ;
+   - « naturopathe » (créée le 02/05/2026, pas par ce skill : filtres non vérifiés).
+
+   **Nouvelle requête** : après les étapes 3 bis à 5, l'enregistrer par « Enregistrez votre
+   recherche » (colonne de droite), nom en ASCII sans `<` (un nom avec `<` a bloqué la
+   fenêtre sur « Enregistrement en cours… »), **case d'abonnement décochée** : elle déclenche
+   des e-mails d'alerte que personne n'a demandés. Ajouter la ligne à la liste ci-dessus.
+3 bis. **Poser le mot-clé par l'interface.** `?mot=...` dans l'URL est ignoré : la recherche vit
    côté serveur. Cliquer le champ « Métier, compétences, mots clés », taper la requête, puis
    cliquer la suggestion « **Ajouter : <requête>** ». La touche Entrée vide le champ sans créer
    de tag. Un tag existant se retire par sa croix (`li.tag span.delete`, clic JavaScript).
@@ -230,7 +243,7 @@ signifie « parades absentes », pas « site lent ».
 
 ### Ce que fait le script
 
-Pour chaque profil : il lit nom, titre, commune, date de mise à jour (`maj`, déjà en ISO) et
+Pour chaque profil : il lit nom, titre, texte de présentation (`presentation`), commune, date de mise à jour (`maj`, déjà en ISO) et
 téléphone affiché ; clique « Télécharger » quand il y a un CV ; puis avance. Il clique
 « Afficher le numéro » **seulement pour les profils sans CV** : le CV donne le téléphone plus
 souvent que le panneau, et ce clic coûtait 1,6 s par profil. `telSource` vaut `champ`, `texte`
@@ -245,7 +258,7 @@ plus, injecter le journal dans la page puis le lire avec `get_page_text` (~10 00
 ```js
 const a = document.createElement('article');
 a.id = '__dump';
-a.textContent = window.__log.filter(r => !r.deja).map(r => [r.pag, r.nom, r.titre, r.maj, r.commune, r.tel, r.telecharge].join('~')).join('\n');
+a.textContent = window.__log.filter(r => !r.deja).map(r => [r.pag, r.nom, r.titre, r.maj, r.commune, r.tel, r.telecharge, r.presentation].join('~')).join('\n');
 document.body.insertBefore(a, document.body.firstChild);
 ```
 
@@ -361,7 +374,7 @@ par paquets de **100 pages au maximum**, `allow_async=false`.
 | `Profil mis a jour` | `date:Profil mis a jour:start` = `maj` du journal |
 | `Statut` | `A importer` (autres options : `Importe SalesHandy`, `Ecarte`) |
 | `Type de requete` | **ne rien écrire** : c'est une formule |
-| `Note` | motif d'un champ vide ou douteux : `pas de CV`, `email non trouve`, `PDF illisible`, `email reconstruit`, `appariement incertain` |
+| `Note` | **Jamais vide.** Le texte de présentation du candidat (`presentation` du journal), tel qu'il l'a écrit, accents compris. Puis, s'il y a lieu, le motif d'un champ vide ou douteux après ` — ` : `pas de CV`, `email non trouve`, `PDF illisible`, `email reconstruit`, `appariement incertain`. Présentation vide sur le profil : `Pas de texte de presentation` suivi des motifs. Ce n'est **pas** une analyse du CV : on ne résume pas, on n'interprète pas |
 
 - Noms de propriétés en ASCII, sans accent : ce sont des identifiants de schéma.
 - **Omettre une propriété vide** plutôt que d'envoyer `null`.
@@ -385,7 +398,34 @@ WHERE "date:Date extraction:start" = '<AAAA-MM-JJ>' AND Requete = '<requête du 
 Le compte doit égaler le nombre de candidats retenus (moins les doublons écartés). S'il ne
 l'égale pas, le dire avec les deux chiffres, et appliquer la règle d'écriture partielle.
 
-**Barrière :** compte relu = compte attendu, ou écart annoncé avec ses deux chiffres.
+Puis contrôler qu'aucune fiche du lot n'a de `Note` vide (deux fiches du 29/09/2026 en
+avaient, faute de règle) :
+
+```sql
+SELECT Nom, Prenom FROM "collection://c9a8febd-29ae-468e-a320-bd2fd62a161f"
+WHERE "date:Date extraction:start" = '<AAAA-MM-JJ>' AND (Note IS NULL OR Note = '')
+```
+
+Toute ligne rendue se complète avant de continuer.
+
+**Barrière :** compte relu = compte attendu (ou écart annoncé avec ses deux chiffres), **et**
+zéro `Note` vide.
+
+### Vider les CV du lot
+
+Une fois la barrière franchie, et seulement là :
+
+```bash
+bash "<skill>/scripts/nettoyer-cv.sh" <minutes depuis le début du lot>
+```
+
+Il envoie à la corbeille les `Document*.pdf` de Downloads plus récents que la fenêtre donnée,
+et les dossiers `_cv-lot100` de `ocr-par-tour.sh`. Il rend `N element(s) mis a la corbeille,
+0 echec(s), 0 CV du lot encore dans …` et sort en erreur sinon. Deux raisons : ce sont des
+données de candidats (RGPD), et un `Document (n).pdf` resté là décale l'appariement du lot
+suivant sans aucun message d'erreur. Corbeille et non suppression définitive : l'utilisateur
+la vide lui-même. Fenêtre trop large = risque d'emporter un `Document.pdf` personnel : la
+régler sur la durée réelle du lot.
 
 Puis un récapitulatif court :
 

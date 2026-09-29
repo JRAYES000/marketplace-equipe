@@ -1,4 +1,7 @@
-// Script d'extraction v5.2 — un lot de profils France Travail Pro.
+// Script d'extraction v5.3 — un lot de profils France Travail Pro.
+// v5.3 (2026-09-29) : chaque profil journalise aussi `presentation`, le texte
+//   que le candidat ecrit sur son profil. Il alimente la Note Notion, qui ne
+//   doit plus jamais rester vide (deux fiches du 29/09 l'etaient).
 // v5.2 (2026-09-29) : dedoublonnage PENDANT le parcours. `window.__connus`
 //   (Set de cles « prenom nom » normalisees, construit depuis `window.__connusBruts`
 //   injecte avant le script)
@@ -175,7 +178,12 @@ window.__run = async (BATCH = 8, BUDGET_MS = 35000) => {
       tel: telChamp || telTexte,
       telSource: telChamp ? 'champ' : (telTexte ? 'texte' : ''),
       aCV: !!btnDL,
-      telecharge: dl
+      telecharge: dl,
+      // Texte de presentation ecrit par le candidat, entre la ligne
+      // « Disponibilite » et « Points forts ». C'est la source OBLIGATOIRE de la
+      // Note Notion (depuis le 29/09/2026). Coupe avant « Adresse » : un
+      // candidat y avait colle son adresse postale.
+      presentation: norm((t.match(/\nDisponibilit[^\n]*\n([\s\S]*?)(?:\n\s*(?:Points forts|Pour des raisons de s|Adresse\b)|$)/) || [])[1] || '')
     };
     window.__log.push(rec);
     lot.push(rec);

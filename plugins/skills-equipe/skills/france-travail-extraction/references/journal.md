@@ -315,3 +315,16 @@ methode ni de logique de script. Ce qui a change dans SKILL.md :
   gagner : aucun calcul n'est lent ici (pas de Python dans la chaine ; pdftotext et
   tesseract sont deja du C/C++). La vitesse de parcours est bornee par le site, dont il
   faut de toute facon respecter le rythme.
+
+(v5.3) NOTE OBLIGATOIRE, RECHERCHE ENREGISTREE, CV A LA CORBEILLE (2026-09-29)
+• Sur les lots du 17/09, la Note portait le texte de presentation du candidat, recopie a la
+  main par l assistant : aucune regle ne le demandait (la Note n etait prevue que pour le
+  motif d un champ vide). Au lot du 29/09, deux fiches sur trois sont donc sorties sans Note.
+  Correctif : le script releve `presentation` (entre « Disponibilite » et « Points forts »,
+  coupe avant « Adresse » : un candidat y avait colle son adresse postale), la Note est
+  obligatoire, et la Phase 6 controle qu aucune Note du lot n est vide.
+• Recherche enregistree sur France Travail (« Formation naturopathie dispo immediate maj 3
+  mois ») : mot-cle et filtres rappeles en un clic. Un premier essai avec « < » dans le nom a
+  laisse la fenetre bloquee sur « Enregistrement en cours… » sans rien creer.
+• `nettoyer-cv.sh` envoie les CV du lot a la corbeille apres verification Notion : 13 CV
+  retires le 29/09, 0 echec.
