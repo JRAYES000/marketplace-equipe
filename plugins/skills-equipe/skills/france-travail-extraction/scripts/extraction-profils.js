@@ -1,6 +1,6 @@
 // Script d'extraction v5.3 — un lot de profils France Travail Pro.
 // v5.3 (2026-09-29) : chaque profil journalise aussi `presentation`, le texte
-//   que le candidat ecrit sur son profil. Il alimente la Note Notion, qui ne
+//   que le candidat ecrit sur son profil. Il alimente la Note NocoDB, qui ne
 //   doit plus jamais rester vide (deux fiches du 29/09 l'etaient).
 // v5.2 (2026-09-29) : dedoublonnage PENDANT le parcours. `window.__connus`
 //   (Set de cles « prenom nom » normalisees, construit depuis `window.__connusBruts`
@@ -60,13 +60,13 @@ window.__log = window.__log || [];
 window.__connus = window.__connus || new Set();
 
 // Cle de dedoublonnage : minuscules, sans accents ni ponctuation, espaces
-// reduits. Doit rester identique a celle construite depuis Notion (SKILL.md,
+// reduits. Doit rester identique a celle construite depuis NocoDB (SKILL.md,
 // Phase 1) : « Prenom NOM » cote page, `Prenom || ' ' || Nom` cote base.
 window.__cle = s => (s || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '')
   .toLowerCase().replace(/[^a-z0-9]+/g, ' ').trim();
 
 // Noms connus injectes BRUTS avant le script (`window.__connusBruts = [...]`,
-// « Prenom NOM » tels que Notion les rend) : la normalisation se fait ici, une
+// « Prenom NOM » tels que NocoDB les rend) : la normalisation se fait ici, une
 // seule fois, avec la meme fonction que pour les noms lus dans le panneau.
 (window.__connusBruts || []).forEach(n => window.__connus.add(window.__cle(n)));
 
@@ -125,7 +125,9 @@ window.__run = async (BATCH = 8, BUDGET_MS = 35000) => {
     // Un profil anonyme (nom remplace par l'intitule) n'est jamais saute : son
     // identite ne se lit que dans le CV.
     const t0 = p.innerText || '';
-    const nom0 = ((t0.match(/Profil mis à jour le [^\n]+\n([^\n]+)/) || [])[1] || '').trim();
+    // `\n+` : le panneau met une ligne vide entre la date et le nom (mesure du 29/09/2026 :
+    // sans cela nom0 restait vide et aucun profil deja en base n'etait saute).
+    const nom0 = ((t0.match(/Profil mis à jour le [^\n]+\n+([^\n]+)/) || [])[1] || '').trim();
     if (nom0 && window.__connus.has(window.__cle(nom0))) {
       window.__log.push({ pag: courant, nom: nom0, deja: true });
       sautes++;
@@ -152,7 +154,7 @@ window.__run = async (BATCH = 8, BUDGET_MS = 35000) => {
     const bloc = (t.match(/Profil mis à jour le [^\n]+\n([\s\S]*?)\nDisponibilit/) || [])[1] || '';
     const L = bloc.split('\n').map(s => s.trim()).filter(Boolean);
 
-    // Date de mise a jour du profil, convertie en ISO pour Notion. C est le seul
+    // Date de mise a jour du profil, convertie en ISO pour NocoDB. C est le seul
     // indicateur de fraicheur d un lead : un profil de trois mois n a pas la
     // meme valeur qu un profil d hier.
     const dm = t.match(/Profil mis à jour le\s+(\d{2})\/(\d{2})\/(\d{4})/);
@@ -181,7 +183,7 @@ window.__run = async (BATCH = 8, BUDGET_MS = 35000) => {
       telecharge: dl,
       // Texte de presentation ecrit par le candidat, entre la ligne
       // « Disponibilite » et « Points forts ». C'est la source OBLIGATOIRE de la
-      // Note Notion (depuis le 29/09/2026). Coupe avant « Adresse » : un
+      // Note NocoDB (depuis le 29/09/2026). Coupe avant « Adresse » : un
       // candidat y avait colle son adresse postale.
       presentation: norm((t.match(/\nDisponibilit[^\n]*\n([\s\S]*?)(?:\n\s*(?:Points forts|Pour des raisons de s|Adresse\b)|$)/) || [])[1] || '')
     };

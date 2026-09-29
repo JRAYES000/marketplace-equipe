@@ -328,3 +328,30 @@ methode ni de logique de script. Ce qui a change dans SKILL.md :
   laisse la fenetre bloquee sur « Enregistrement en cours… » sans rien creer.
 • `nettoyer-cv.sh` envoie les CV du lot a la corbeille apres verification Notion : 13 CV
   retires le 29/09, 0 echec.
+
+(v6.0, 2026-09-29, demande de Julien) DESTINATION NOCODB. Notion remplace par NocoDB (base
+« Leads », table « Leads France Travail », 197 lignes migrees, memes colonnes sauf « Type de
+requete », formule Notion non reprise). Lecture et ecriture par scripts/nocodb.js (resume,
+connus, dedup, ecrire, verifier) ; il remplace notion-query-data-sources et notion-create-pages.
+• Regle Ecarte : le skill n'ecrit jamais Statut=Ecarte ; un profil Ecarte en base reste un
+  doublon, jamais ré-ajouté. Les 31 lignes Ecarte ont ete supprimees de NocoDB le 29/09/2026
+  (table passee de 197 a 166). Effet de bord : ces personnes ne sont plus reconnues comme connues.
+• Test ecriture : une ligne d'essai inseree puis supprimee (total revenu a 197 avant la purge).
+
+(v7.0, 2026-09-29, demande de Julien) DOUBLE DESTINATION NOCODB + NOTION. NocoDB reste la
+reference (dedup, connus, verifier) ; Notion devient un miroir ecrit apres NocoDB.
+• Incident a l'origine : la v5.3 du plugin (ancienne destination Notion) a ete utilisee alors que
+  le depot etait deja en v6.0 (NocoDB) : 60 fiches ecrites dans Notion, aucune dans NocoDB. Les
+  deux copies du skill (depot ecole-naturo-ops et plugin marketplace-equipe) doivent rester alignees.
+• Limite Notion : `query_data_sources` a repondu `usage_limit_reached` le 29/09/2026 apres un gros
+  lot. Regle : alerte visible dans la conversation des la premiere reponse de limite, pas de
+  reessai, fiches mises en attente (`nocodb.js attente`), run poursuivi, alerte repetee en tete
+  du recapitulatif. « Notion : non vérifié » si la relecture est elle-meme bloquee.
+• nocodb.js : `ecrire` rend `ids=` ; `notion-pages <ids|--attente>` sort les fiches au format
+  notion-create-pages (plus de retape a la main, source d'erreurs : une date et deux Notes
+  deformees le 29/09) ; `attente` / `attente-vider` gerent la file d'attente Notion.
+• extraction-profils.js : regex du nom corrigee (`\n+`), le panneau met une ligne vide entre la
+  date et le nom. Avant : nom0 toujours vide, aucun profil connu saute (6 profils sur 8 du premier
+  lot etaient deja en base).
+• Colonne « Type de requete » ajoutee dans NocoDB (formule : « formation » -> Intention de
+  formation, « reconversion » -> Reconversion, sinon Metier exerce). Jamais ecrite par le skill.
