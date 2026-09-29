@@ -316,9 +316,10 @@ fiches en attente. Ne pas relancer en boucle : **une** reprise (`notion.js repre
 quelques minutes, puis continuer le run. La reprise ne recrée jamais une fiche déjà arrivée.
 
 **Miroir NocoDB.** NocoDB devient la copie de Notion, fiches `Ecarte` exclues : créations,
-modifications, suppressions. **Sauf le `Statut` d'une fiche existante** : on ne sait pas si un
-autre outil le met à jour dans NocoDB, donc un écart est listé (`STATUT DIFFERENT, garde dans
-NocoDB`) sans être écrasé. Garde-fou : plus de 20 suppressions (ou 20 % de la table) → miroir
+modifications, suppressions, **`Statut` compris**. Notion est maître du Statut (décision de
+Julien, 29/09/2026) : un Statut changé dans NocoDB est écrasé au miroir suivant. Les statuts
+réalignés sont comptés par transition (`statut aligne sur Notion : A importer -> Importe
+SalesHandy : N`). Garde-fou : plus de 20 suppressions (ou 20 % de la table) → miroir
 arrêté et liste ; `notion.js miroir-nocodb --force` seulement après avoir compris l'écart (une
 lecture Notion tronquée viderait NocoDB).
 
@@ -363,7 +364,7 @@ données de candidats (RGPD), et un `Document (n).pdf` resté là décale le lot
 - profils parcourus, retenus, écartés hors-cible, doublons ;
 - leads écrits, dont avec email et avec téléphone ;
 - le motif de chaque champ vide, regroupé par `Note` ;
-- le résultat du miroir NocoDB (créées, modifiées, supprimées) et les `STATUT DIFFERENT` ;
+- le résultat du miroir NocoDB (créées, modifiées, supprimées) et les statuts réalignés ;
 - en première ligne si elle existe : la file d'attente Notion et son nombre de fiches.
 
 Repère mesuré (lot de 100, 17/09/2026) : 76 fiches exploitables sur 99. Le plafond est le dépôt

@@ -473,3 +473,6 @@ Phase 5 bis recopie desormais seulement les Id acceptes par `ecrire`.
 • Constat : miroir --sec liste ~150 STATUT DIFFERENT, tous « Importe SalesHandy » dans Notion et
   « A importer » dans NocoDB. Le Statut vit donc dans Notion ; decision sur le maitre du Statut
   demandee a Julien. Notion compte aussi 10 fiches Ecarte (le miroir les retirera de NocoDB).
+• Decision de Julien (29/09) : Notion maitre du Statut. miroir() recopie le Statut. Premier miroir
+  reel : 0 creee, 137 modifiees (toutes A importer -> Importe SalesHandy), 10 supprimees (Ecarte),
+  relu=216 attendu=216 ; relance --sec : 0 ecart.

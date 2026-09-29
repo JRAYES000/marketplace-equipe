@@ -278,8 +278,9 @@ async function nocoParPaquets(method, rows) {
   return n;
 }
 
-// NocoDB = copie de Notion (hors Ecarte), sauf le Statut d'une fiche existante : on ne sait pas
-// si un autre outil le met a jour dans NocoDB (29/09/2026), donc un ecart se signale sans s'ecraser.
+// NocoDB = copie de Notion (hors Ecarte), Statut compris : Notion est maitre du Statut (decision de
+// Julien, 29/09/2026). Avant, un ecart de Statut etait garde dans NocoDB et ~150 fiches
+// « Importe SalesHandy » dans Notion y restaient « A importer ».
 async function miroir({ sec, force, tousNotion }) {
   tousNotion = tousNotion || await toutes();
   const notionRows = tousNotion.filter(r => r.Statut !== 'Ecarte');
@@ -290,14 +291,17 @@ async function miroir({ sec, force, tousNotion }) {
     const n = notionRows[i], c = nocoRows[j], diff = { Id: c.Id };
     for (const k of COLONNES) {
       if (valeur(n[k]) === nocoVal(k, c[k])) continue;
-      if (k === 'Statut') { statuts.push([c.Nom, c.Prenom].filter(Boolean).join(' ') + ' (NocoDB « ' + valeur(c.Statut) + ' », Notion « ' + valeur(n.Statut) + ' »)'); continue; }
+      if (k === 'Statut') statuts.push(valeur(c.Statut) + ' -> ' + valeur(n.Statut));
       diff[k] = valeur(n[k]) || null;
     }
     if (Object.keys(diff).length > 1) aModifier.push(diff);
   }
   console.log('miroir : Notion=' + tousNotion.length + ' (dont ' + (tousNotion.length - notionRows.length) + ' Ecarte ignorees) NocoDB=' + nocoRows.length +
     ' ; a creer=' + aCreer.length + ' a modifier=' + aModifier.length + ' a supprimer=' + aSupprimer.length);
-  statuts.forEach(s => console.log('  STATUT DIFFERENT, garde dans NocoDB : ' + s));
+  // Statuts realignes sur Notion, comptes par transition (« A importer -> Importe SalesHandy » : n).
+  const parTransition = {};
+  statuts.forEach(s => { parTransition[s] = (parTransition[s] || 0) + 1; });
+  Object.entries(parTransition).forEach(([t, n]) => console.log('  statut aligne sur Notion : ' + t + ' : ' + n));
   // Garde-fou : une lecture Notion tronquee viderait NocoDB.
   if (aSupprimer.length > Math.max(20, nocoRows.length * 0.2) && !force) {
     aSupprimer.slice(0, 20).forEach(r => console.log('  a supprimer : ' + [r.Nom, r.Prenom, r.Requete].filter(Boolean).join(' | ')));

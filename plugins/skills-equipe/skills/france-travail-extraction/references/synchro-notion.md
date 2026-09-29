@@ -28,7 +28,7 @@ Les commandes de détail (`resume`, `connus`, `dedup`, `ecrire`, `reprendre`, `v
 ## Le miroir
 
 ```bash
-node "<skill>/scripts/notion.js" miroir-nocodb --sec   # simulation : comptes, écarts de Statut
+node "<skill>/scripts/notion.js" miroir-nocodb --sec   # simulation : comptes, statuts à réaligner
 node "<skill>/scripts/notion.js" miroir-nocodb         # applique, puis relit
 ```
 
@@ -37,9 +37,10 @@ node "<skill>/scripts/notion.js" miroir-nocodb         # applique, puis relit
   du même intitulé, l'appariement est arbitraire : le miroir réécrit alors plusieurs champs,
   mais le contenu final de NocoDB est bien celui de Notion.
 - Fiches `Ecarte` de Notion : jamais recopiées ; si NocoDB en avait, elles y sont supprimées.
-- **`Statut` d'une fiche existante : jamais écrasé** (v9.1). On ne sait pas si un autre outil le
-  met à jour dans NocoDB ; un écart est listé `STATUT DIFFERENT, garde dans NocoDB : …`. Si Julien
-  confirme que seul Notion porte le Statut, retirer l'exception dans `miroir()`.
+- **`Statut` : Notion est maître** (v9.2, décision de Julien du 29/09/2026). Le miroir recopie le
+  Statut comme les autres colonnes et compte les transitions. Le Statut se change dans Notion,
+  jamais dans NocoDB. Premier alignement : 137 fiches passées de « A importer » à « Importe
+  SalesHandy » dans NocoDB.
 - Garde-fou : plus de 20 suppressions ou 20 % de la table → arrêt, sauf `--force`.
 - Mesures du 29/09/2026 : premier miroir, 8 modifications, relu = attendu = 226. Test v9.1 sur
   3 fiches `TEST-` : création 3, Statut changé dans NocoDB conservé et signalé, puis suppression 3
