@@ -1,4 +1,15 @@
-// Script d'extraction v8.0 — un lot de profils France Travail Pro.
+// Script d'extraction v9.1 — un lot de profils France Travail Pro.
+// v9.1 (2026-09-29, audit) :
+//   • verrou : un second `__run` pendant qu'un premier tourne (timeout CDP) est refuse au lieu
+//     de cliquer « Suivant » en double ;
+//   • budget 28 s au lieu de 35 : un tour peut durer ~9 s, et 35 + 9 frolait le timeout de 45 s ;
+//   • recherche detectee (« N resultats pour : X ») : si elle change, `__log` est archive et
+//     remis a zero, sinon ses numeros de pagination faisaient sauter les profils de la nouvelle
+//     recherche. Chaque ligne porte `recherche`. `window.__reset()` le fait a la main ;
+//   • retour compact (compteurs + « pag nom ») : le pont coupe la sortie vers 1 000 caracteres,
+//     le lot complet se lit par `__exporter()` ;
+//   • commune lue d'abord apres « Adresse », telephone du texte cherche avant « Experiences »
+//     (sinon ceux d'un employeur pouvaient etre pris).
 // v8.0 (2026-09-29) : chaque profil telecharge porte `dlRang` (0, 1, 2…), son rang
 //   de telechargement dans la session. `window.__exporter()` fait telecharger le
 //   journal en `ft-journal.json` : plus de transcription a la main, `assembler.js`
@@ -58,29 +69,54 @@
 
 // S'injecte une fois, puis se rappelle par `await window.__run(n)` : re-injecter
 // le script entier a chaque lot coute des jetons pour rien. Chaque appel s'arrete
-// de lui-meme sur son budget de temps (35 s), sous le timeout CDP de 45 s.
+// de lui-meme sur son budget de temps (28 s), sous le timeout CDP de 45 s.
 window.__log = window.__log || [];
+window.__logArchive = window.__logArchive || [];
+// Vide `__log` sans le reassigner ; ce qu'il contenait reste dans `__logArchive`.
+window.__reset = (motif = 'a la main') => {
+  const n = window.__log.length;
+  window.__logArchive.push(...window.__log.splice(0));
+  return 'journal remis a zero (' + motif + ') : ' + n + ' ligne(s) archivee(s)';
+};
+// Signature de la recherche affichee : l'en-tete « N resultats pour : X ».
+window.__signature = () => {
+  const m = (document.body.innerText || '').match(/(\d[\d\s ]*)\s*r[ée]sultats?\s+pour\s*:?\s*([^\n]+)/i);
+  return m ? (m[1].replace(/\D/g, '') + ' | ' + m[2].replace(/\s+/g, ' ').trim()) : null;
+};
 // Rang du prochain telechargement. Chrome enregistre les CV dans cet ordre :
 // `assembler.js` s'en sert pour rattacher chaque CV a son profil.
 window.__dl = window.__dl || 0;
 window.__connus = window.__connus || new Set();
 
 // Cle de dedoublonnage : minuscules, sans accents ni ponctuation, espaces
-// reduits. Doit rester identique a celle construite depuis NocoDB (SKILL.md,
+// reduits. Doit rester identique a celle construite depuis Notion (SKILL.md,
 // Phase 1) : « Prenom NOM » cote page, `Prenom || ' ' || Nom` cote base.
 window.__cle = s => (s || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '')
   .toLowerCase().replace(/[^a-z0-9]+/g, ' ').trim();
 
 // Noms connus injectes BRUTS avant le script (`window.__connusBruts = [...]`,
-// « Prenom NOM » tels que NocoDB les rend) : la normalisation se fait ici, une
+// « Prenom NOM » tels que « notion.js situer » les rend) : la normalisation se fait ici, une
 // seule fois, avec la meme fonction que pour les noms lus dans le panneau.
 (window.__connusBruts || []).forEach(n => window.__connus.add(window.__cle(n)));
 
 // BATCH = nombre de NOUVEAUX profils voulus. BUDGET_MS = duree max d'un appel :
-// un profil deja connu coute ~0,3 s, un nouveau ~2-3 s ; 35 s laisse de la marge
-// sous le timeout CDP de 45 s. Relancer `__run` tant que `arret` vaut « budget ».
-window.__run = async (BATCH = 8, BUDGET_MS = 35000) => {
+// un profil deja connu coute ~0,3 s, un nouveau ~2-3 s, et un tour peut aller a ~9 s
+// (1,6 + 1,5 + 6) ; 28 s + 9 s reste sous le timeout CDP de 45 s. Relancer `__run`
+// tant que `arret` vaut « budget ».
+window.__run = async (BATCH = 8, BUDGET_MS = 28000) => {
+  if (window.__enCours) return JSON.stringify({
+    erreur: '__run deja en cours depuis ' + Math.round((Date.now() - window.__enCours) / 1000) + ' s : ne pas relancer, sonder window.__log.length jusqu a stabilisation'
+  });
+  window.__enCours = Date.now();
+  try { return await window.__corps(BATCH, BUDGET_MS); } finally { window.__enCours = 0; }
+};
+
+window.__corps = async (BATCH, BUDGET_MS) => {
   const debut = Date.now();
+  let reset = '';
+  const sig = window.__signature();
+  if (sig && window.__recherche && sig !== window.__recherche) reset = window.__reset('recherche changee : ' + sig);
+  if (sig) window.__recherche = sig;
   // Toutes les attentes passent par le Worker de `arriere-plan.js`. Sans lui, repli
   // sur setTimeout : le script tourne, mais 22 fois plus lentement en arriere-plan.
   const pause = window.__pause || (ms => new Promise(r => setTimeout(r, ms)));
@@ -135,7 +171,7 @@ window.__run = async (BATCH = 8, BUDGET_MS = 35000) => {
     // sans cela nom0 restait vide et aucun profil deja en base n'etait saute).
     const nom0 = ((t0.match(/Profil mis à jour le [^\n]+\n+([^\n]+)/) || [])[1] || '').trim();
     if (nom0 && window.__connus.has(window.__cle(nom0))) {
-      window.__log.push({ pag: courant, nom: nom0, deja: true });
+      window.__log.push({ pag: courant, nom: nom0, deja: true, recherche: window.__recherche || null });
       sautes++;
       const nxd = suivant();
       if (!nxd) { arret = 'suivant introuvable'; break; }
@@ -160,7 +196,7 @@ window.__run = async (BATCH = 8, BUDGET_MS = 35000) => {
     const bloc = (t.match(/Profil mis à jour le [^\n]+\n([\s\S]*?)\nDisponibilit/) || [])[1] || '';
     const L = bloc.split('\n').map(s => s.trim()).filter(Boolean);
 
-    // Date de mise a jour du profil, convertie en ISO pour NocoDB. C est le seul
+    // Date de mise a jour du profil, convertie en ISO pour la base. C est le seul
     // indicateur de fraicheur d un lead : un profil de trois mois n a pas la
     // meme valeur qu un profil d hier.
     const dm = t.match(/Profil mis à jour le\s+(\d{2})\/(\d{2})\/(\d{4})/);
@@ -171,7 +207,14 @@ window.__run = async (BATCH = 8, BUDGET_MS = 35000) => {
     // champ en priorité, le texte en repli, et on note d'où vient la valeur.
     const zoneTel = (t.match(/Numéro de téléphone\n([^\n]+)/) || [])[1] || '';
     const telChamp = (zoneTel.match(/(?:\+33|0)[ .]?[1-9](?:[ .]?\d{2}){4}/) || [])[0] || '';
-    const telTexte = (t.match(/(?:\+33|0)[ .]?[1-9](?:[ .]?\d{2}){4}/) || [])[0] || '';
+    // Le repli ne lit que le haut du panneau : sous « Experiences », un numero est celui d'un employeur.
+    const hautPanneau = t.split(/\n\s*Exp[ée]riences?\b/i)[0];
+    const telTexte = (hautPanneau.match(/(?:\+33|0)[ .]?[1-9](?:[ .]?\d{2}){4}/) || [])[0] || '';
+    // Commune : d'abord apres « Adresse » ; a defaut, le premier « 12345 VILLE » du haut du panneau
+    // (jamais sous « Experiences » : ce serait la ville d'un employeur).
+    const RE_COMMUNE = /\b\d{5}\s+[A-ZÀ-Ü' -]+/;
+    const iAdr = t.search(/\nAdresse\b/);
+    const communeAdr = iAdr >= 0 ? ((t.slice(iAdr).match(RE_COMMUNE) || [''])[0]).trim() : '';
 
     const btnDL = q ? [...q.querySelectorAll('a,button')].find(e => /Télécharger/i.test(norm(e.textContent))) : null;
     let dl = false;
@@ -183,7 +226,8 @@ window.__run = async (BATCH = 8, BUDGET_MS = 35000) => {
       nom: L[0] || '',
       titre: L[1] || '',
       maj,
-      commune: ((t.match(/\b\d{5}\s+[A-ZÀ-Ü' -]+/) || [''])[0]).trim(),
+      commune: communeAdr || ((hautPanneau.match(RE_COMMUNE) || [''])[0]).trim(),
+      recherche: window.__recherche || null,
       tel: telChamp || telTexte,
       telSource: telChamp ? 'champ' : (telTexte ? 'texte' : ''),
       aCV: !!btnDL,
@@ -191,7 +235,7 @@ window.__run = async (BATCH = 8, BUDGET_MS = 35000) => {
       dlRang,
       // Texte de presentation ecrit par le candidat, entre la ligne
       // « Disponibilite » et « Points forts ». C'est la source OBLIGATOIRE de la
-      // Note NocoDB (depuis le 29/09/2026). Coupe avant « Adresse » : un
+      // Note de la fiche (depuis le 29/09/2026). Coupe avant « Adresse » : un
       // candidat y avait colle son adresse postale.
       presentation: norm((t.match(/\nDisponibilit[^\n]*\n([\s\S]*?)(?:\n\s*(?:Points forts|Pour des raisons de s|Adresse\b)|$)/) || [])[1] || '')
     };
@@ -205,11 +249,14 @@ window.__run = async (BATCH = 8, BUDGET_MS = 35000) => {
     if (np === courant) { arret = 'pagination bloquee a ' + courant; break; }
   }
 
+  // Compact : le pont coupe vers 1 000 caracteres. Le detail se lit par `__exporter()`.
   return JSON.stringify({
     nouveaux: lot.length, sautes, total: window.__log.length,
     nouveauxTotal: window.__log.filter(r => !r.deja).length,
     telecharges: window.__log.filter(r => r.telecharge).length,
-    arret, secondes: Math.round((Date.now() - debut) / 1000), lot
+    arret, secondes: Math.round((Date.now() - debut) / 1000),
+    ...(reset ? { reset } : {}),
+    noms: lot.map(r => r.pag + ' ' + r.nom.slice(0, 28)).join(' ; ').slice(0, 600)
   });
 };
 
