@@ -1,7 +1,8 @@
 #!/usr/bin/env node
 // Lecture et ecriture de la table NocoDB « Leads France Travail ».
-// Reference unique du skill depuis la v8.0 : Notion n'est plus ecrit pendant le run, il se
-// synchronise en differe (reconcilier + notion-pages). Aucune valeur secrete n'est jamais affichee.
+// Depuis la v9.0, Notion fait foi : le run passe par notion.js, et NocoDB n'est plus ecrit que par
+// « notion.js miroir-nocodb ». Ce script reste pour la lecture et le controle (resume, reconcilier
+// sans --importer). Aucune valeur secrete n'est jamais affichee.
 //
 //   node nocodb.js resume                       profils et emails par requete
 //   node nocodb.js connus                       JSON ["Prenom NOM", ...] (Phase 1)
