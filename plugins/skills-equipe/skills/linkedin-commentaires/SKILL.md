@@ -41,6 +41,9 @@ aujourd'hui ».
    `reglages-comptes.json`, il n'y a pas de filtre par compte) execute les etapes 1-5 sans
    jamais appeler `publierCommentaire`. Bascule sur le jeu fixture des que `APIFY_TOKEN` est
    absent (a lui seul, meme si `comptes_cibles` est rempli) et/ou que `comptes_cibles` est vide.
+   **Sortie ecrite dans `dry-run-sortie/dernier-dry-run.json`** (non suivi, `.gitignore`) : jamais
+   dans la fixture versionnee, qui n'est que lue (regle du 29/09/2026 : un dry-run avec une cle
+   reelle ne reecrit aucun fichier versionne).
 
 ## Point de situation
 
