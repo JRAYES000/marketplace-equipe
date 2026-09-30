@@ -360,6 +360,7 @@ async function mettreAJourStatistiques7j({
 }
 
 module.exports = {
+  appelNotion,
   creerBaseVeilleEtPosts,
   creerVuesParCompte,
   ajouterEntreeVeille,
