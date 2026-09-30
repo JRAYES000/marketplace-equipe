@@ -27,19 +27,23 @@ test('publierPost refuse un commentary sans gras avant tout appel reseau', async
   );
 });
 
-test('publierPost refuse un commentary avec gras mais sans hook (pas de "?" dans les 140 premiers caracteres)', async () => {
+// Depuis le 30/09/2026 l'accroche n'est plus forcement une question (consigne de Julien du
+// 29/09) : ce texte, qui ouvre par une affirmation, n'est donc plus refuse pour sa forme mais
+// parce qu'il est bien trop court.
+test('publierPost refuse un commentary trop court, meme avec un gras et une accroche libre', async () => {
   await assert.rejects(
     () => publierPost({
       authorUrn: 'urn:li:person:test',
       commentary: 'Une affirmation qui ouvre le post sans jamais poser de question. **Un point cle** ressort quand meme du texte. 🚀',
     }),
-    /point d'interrogation/
+    /longueur 1300-1900/
   );
 });
 
 test("publierPost refuse un commentary conforme aux onze autres criteres mais hors de la fourchette d'emojis", async () => {
-  // Fixture verifiee le 22/09/2026 (node lib/valider-mise-en-forme.js) : 11/12 criteres
-  // passes, seul "3 a 6 emojis" echoue (7 trouves) -- isole ce seul critere pour ne pas
+  // Fixture d'origine verifiee le 22/09/2026 ; depuis le 30/09/2026 (gras limite a 2 par post,
+  // plafond de 6 emojis), le refus se lit sur "6 emojis au maximum" (7 trouves), parmi d'autres
+  // criteres que cette fixture ne cherche plus a isoler -- isole ce seul critere pour ne pas
   // rendre ce test fragile aux dix autres, contrairement a l'ancienne fixture (3 mots),
   // qui echouait simultanement sur la longueur, le gras et les titres et ne testait donc
   // plus vraiment "la fourchette d'emojis" depuis le passage aux douze criteres.
@@ -68,6 +72,6 @@ test("publierPost refuse un commentary conforme aux onze autres criteres mais ho
 
   await assert.rejects(
     () => publierPost({ authorUrn: 'urn:li:person:test', commentary }),
-    /3 a 6 emojis \(7 trouve\(s\)\)/
+    /6 emojis au maximum \(7 trouve\(s\)\)/
   );
 });

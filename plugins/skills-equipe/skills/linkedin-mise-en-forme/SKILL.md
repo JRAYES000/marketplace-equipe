@@ -2,25 +2,26 @@
 name: linkedin-mise-en-forme
 description: >-
   Regles de forme obligatoires pour tout post LinkedIn de Julien, compte Claude
-  Agency comme compte Claude Partners : accroche formulee en question qui
-  interpelle, gras Unicode sur les segments qui portent le message (au moins
-  huit par post), trois sections a titre en gras, 3 a 6 emojis poses en tete de
-  ligne, niveau de lecture d'un enfant de 13 ans, et passe humanizer anti-tell
-  IA. Se combine avec contenu-linkedin, qui fournit les hooks et les regles
-  d'algorithme : celle-ci definit COMMENT le texte est mis en forme, l'autre
-  QUOI ecrire. Declencher des qu'il s'agit d'ecrire, reecrire, relire, traduire
-  ou auditer un post LinkedIn, un brouillon dans sortants/, une accroche ou un
-  texte destine au fil LinkedIn. Triggers : « ecris un post LinkedIn », «
-  prepare un post pour LinkedIn », « relis ce post », « mets ca en forme pour
-  LinkedIn », « un post sur X ». NE PAS utiliser pour un commentaire LinkedIn
-  (skill linkedin-commentaires), un carrousel (linkedin-carrousel), un e-mail ou
-  un contenu de site.
+  Agency comme compte Claude Partners : accroche libre (question, position,
+  chiffre ou situation) qui donne envie de cliquer sur « ... plus », 1 a 4 blocs
+  avec ou sans titre, fin libre, 1 ou 2 passages en gras au maximum, niveau de
+  lecture d'un enfant de 13 ans, tournures interdites, jamais deux posts de suite
+  avec le meme schema, passe humanizer. Se combine avec contenu-linkedin (QUOI
+  ecrire) : celle-ci definit COMMENT. Declencher des qu'il s'agit d'ecrire,
+  reecrire, relire ou auditer un post LinkedIn, un brouillon dans sortants/ ou
+  une accroche. Triggers : « ecris un post LinkedIn », « relis ce post », « mets
+  ca en forme pour LinkedIn », « un post sur X ». NE PAS utiliser pour un
+  commentaire (linkedin-commentaires), un carrousel (linkedin-carrousel), un
+  e-mail ou un contenu de site.
 ---
 
 # LinkedIn — mise en forme
 
-Six regles de forme, decidees par Julien les 2026-09-18. Elles s'appliquent aux
-**deux comptes**, Claude Agency et Claude Partners, au meme niveau.
+Regles de forme decidees par Julien le 2026-09-18, **assouplies et completees le
+2026-09-29** (mail de 22h08) : accroche libre, 1 a 4 blocs, fin libre, gras reduit a
+1 ou 2 passages, trois tournures interdites de plus, et une regle de variete. Elles
+s'appliquent aux **deux comptes**, Claude Agency et Claude Partners, au meme niveau.
+Ce qui n'a pas change : le controle des accents (regle 2) et des anglicismes.
 
 ## Ordre de travail
 
@@ -36,40 +37,39 @@ quelle -- rediger le fond a la main, sans le charger.
    regles d'algorithme 2026, si le dossier de travail le permet (voir note
    ci-dessus). Cette skill-ci ne remplace rien : elle se pose par-dessus.
 2. Rediger le fond.
-3. Appliquer les six regles ci-dessous.
+3. Appliquer les regles ci-dessous.
 4. **Passe `humanizer`** — la skill, pas seulement le fichier de references de
    `contenu-linkedin`.
-5. Passer le script de controle avant de deposer le brouillon.
+5. Passer le script de controle avant de deposer le brouillon, en lui donnant le
+   **post precedent du meme compte** (regle 7).
 
-## 1. L'accroche est une question
+## 1. L'accroche : libre, mais elle fait cliquer
 
-**Toute accroche se formule en question**, en une ou deux phrases, et elle doit
-provoquer une reaction forte : interpeller le lecteur, le surprendre, ou le
-mettre devant un risque qu'il n'avait pas vu. Regle de Julien du 2026-09-18.
+L'accroche peut etre **une question, une prise de position, un chiffre ou une
+situation concrete**. Rien n'impose plus la question. Ce qui compte : **les deux
+premieres lignes doivent donner envie de cliquer sur « ... plus »**. C'est le temps
+de lecture qui decide de la distribution (15,6 % d'engagement au-dela d'une minute
+contre 1,2 % en survol, mesure du 09/09).
 
-    "Votre automatisation marche a la livraison."          ->  constat, elle tombe a plat
-    "Et si votre automatisation IA parlait au mauvais       ->  question, elle inquiete
-     client depuis trois semaines, sans que personne
-     le voie ?"
+    "Un recrutement lent coute plus cher qu'une mauvaise embauche."     ->  prise de position
+    "Lundi, un candidat a relance mon equipe pour la quatrieme fois."  ->  situation concrete
+    "Et si votre automatisation parlait au mauvais client ?"           ->  question
 
-Trois contraintes qui se cumulent :
+Contraintes qui restent :
 
-- **140 caracteres au maximum**, gras compris : c'est le seuil du « … voir
-  plus » sur mobile, et la question doit tenir entiere avant le pli.
-- **La question n'enonce pas la reponse.** Le hook ouvre, le corps referme.
-  C'est le temps de lecture qui decide de la distribution (15,6 % d'engagement
-  au-dela d'une minute contre 1,2 % en survol, mesure du 09/09).
-- **Elle passe en gras**, donc elle s'ecrit **sans aucune lettre accentuee**
-  (voir la regle 2). C'est la contrainte qui coute le plus a l'ecriture : une
-  question sans accent se trouve toujours, elle se cherche.
+- **140 caracteres au maximum** : c'est le seuil du « ... voir plus » sur mobile, et
+  l'accroche doit tenir entiere avant le pli.
+- **L'accroche n'enonce pas la reponse.** Le hook ouvre, le corps referme.
+- Trois mots au moins : le script n'attrape que l'accroche vide ou reduite a un
+  fragment. Si elle donne envie de cliquer, c'est a l'oeil qu'on le juge.
 
-## 2. Gras — au moins huit passages, sans accent
+## 2. Gras : 1 ou 2 phrases importantes, sans accent
 
 LinkedIn n'a pas d'editeur riche : le gras se fabrique avec les caracteres
 Unicode Mathematical Sans-Serif Bold. **Ce bloc ne contient aucune lettre
-accentuee.** Un segment accentue mis en gras rend `𝗺𝗲𝘀𝘂𝗿é` — l'accent retombe en
-maigre au milieu du mot, visible et moche. Mesure sur le poste de Julien le
-2026-09-18.
+accentuee.** Un segment accentue mis en gras rend `𝗺𝗲𝘀𝘂𝗿é` — l'accent
+retombe en maigre au milieu du mot, visible et moche. Mesure sur le poste de
+Julien le 2026-09-18.
 
 La regle : **ne mettre en gras que des segments sans accent**. Si le segment qui
 porte le message en contient un, le reformuler jusqu'a en trouver un qui n'en a
@@ -77,10 +77,9 @@ pas — pas le passer en gras quand meme.
 
     "La verite mesuree"  ->  reformuler en  "Trois mois pour rien"
 
-**Au moins huit passages en gras par post** (Julien, 2026-09-18) : l'accroche,
-les trois titres de section, et quatre a six segments de 2 a 8 mots dans le
-corps — la phrase qui porte la lecon, le chiffre qui frappe, la regle qu'on
-s'impose. Un post qui n'en portait que deux se lisait comme un bloc.
+**1 ou 2 passages en gras par post, 2 au maximum** (Julien, 2026-09-29, remplace
+« au moins huit ») : la phrase qui porte la lecon, le chiffre qui frappe. Un titre de
+bloc en gras compte dans ces deux passages. Le script refuse un troisieme.
 
 Ce qui ne se met **pas** en gras : un paragraphe entier (ce n'est plus un accent,
 c'est du bruit), et des mots isoles disperses sans rapport entre eux.
@@ -95,31 +94,30 @@ node "<dossier de la skill>/scripts/verif-post.mjs" gras "Trois mois pour rien"
 Il refuse tout segment accentue, avec le caractere fautif. Sous Windows, chemin
 en `C:/...` : node ne resout pas la forme `/c/Users/...`.
 
-## 3. Trois sections, chacune avec son titre en gras
+## 3. Un a quatre blocs, avec ou sans titre
 
-Un post se lit en un coup d'oeil ou ne se lit pas. **Chaque section porte un
-titre**, sur sa propre ligne, **en gras et precede d'un emoji** — regle de Julien
-du 2026-09-18, posee pour qu'on voie les parties sans lire le texte.
+Un post se lit en un coup d'oeil ou ne se lit pas. Il compte **1, 2, 3 ou 4 blocs**
+(groupes de paragraphes), chacun **avec ou sans titre** — au choix, selon le sujet
+(Julien, 2026-09-29).
 
-    👉 **Le constat**
-    ⚡ **Mes trois gestes**
-    ✅ **Ce que je ne confie plus**
+- Un titre, s'il y en a un, est **court** et sur sa propre ligne. Il peut etre en
+  gras (sans accent, et il compte dans les 2 passages de la regle 2) ou en texte
+  simple.
+- **Aucun titre ni emoji n'est impose** : plus de « 👉 ⚡ ✅ » obligatoires. Un post
+  d'un seul bloc, sans titre, est valide.
+- L'accroche vit **au-dessus** du premier bloc, avec une ou deux lignes de tension.
+  Le pied commercial vit **sous** le dernier, sans titre.
+- **La fin est libre** : une question, une prise de position, une phrase seche.
+  « Et vous ? » n'est plus obligatoire, et il ne se met pas par reflexe.
+- Le script ne voit que les titres en gras : il plafonne a 4, et un bloc sans titre
+  ne laisse aucune trace a mesurer. Le « 1 a 4 blocs » des autres cas se juge a l'oeil.
 
-- **Trois sections**, c'est la forme par defaut : ce qui se passe, ce qu'on fait,
-  ce qu'on en retient. Deux passent sur un post court, quatre jamais.
-- **Le titre est court et sans accent**, puisqu'il est en gras. « Le constat »
-  passe, « Ce que dit la video » non. Le titre annonce, il ne resume pas.
-- L'accroche vit **au-dessus** de la premiere section, avec une ou deux lignes de
-  tension. Le pied commercial vit **sous** la derniere, sans titre.
+## 4. Emojis : facultatifs, 6 au maximum, en tete de ligne
 
-## 4. Emojis — 3 a 6, en tete de ligne
-
-Ils remplacent les tirets de liste et portent les titres de section. Poses **en
-debut de ligne**, jamais glisses au milieu d'une phrase pour faire joli.
-
-Trois minimum, six maximum, sur tout le post. Au-dela, le post passe pour un
-gabarit. **Avec trois titres de section, le budget est deja presque consomme** :
-c'est voulu, les puces du corps se passent d'emoji.
+Plus aucun emoji n'est impose. S'il y en a, ils remplacent les tirets de liste ou
+marquent un titre, poses **en debut de ligne**, jamais glisses au milieu d'une phrase
+pour faire joli. Six au maximum sur tout le post : au-dela, le post passe pour un
+gabarit.
 
 ## 5. Niveau de lecture : 13 ans
 
@@ -141,13 +139,12 @@ IA, celle-ci chasse la complexite. Les deux passent.
 
 ## 6. Arbitrage — l'anti-IA prime
 
-Question en accroche, gras, emojis et titres de section, lus ensemble, peuvent
-faire « post fabrique ». Quand le brouillon sonne artificiel apres la passe
-humanizer, **retirer de la mise en forme**, dans cet ordre :
+Une accroche travaillee, du gras et des emojis, lus ensemble, peuvent faire « post
+fabrique ». Quand le brouillon sonne artificiel apres la passe humanizer, **retirer de
+la mise en forme**, dans cet ordre :
 
-1. un emoji de puce, jamais celui d'un titre de section (plancher de 3) ;
-2. un segment en gras du corps, jamais l'accroche ni un titre (plancher de 8
-   seulement si le post est long ; sur un post court, descendre a 5 est permis) ;
+1. un emoji ;
+2. un passage en gras ;
 3. rien d'autre.
 
 **Un chiffre source, une entite nommee ou un detail concret ne se coupent
@@ -155,23 +152,50 @@ jamais** pour gagner en simplicite : ce sont eux qui rendent le post credible.
 Si la simplicite et la precision se heurtent, c'est la phrase qu'on reecrit, pas
 le fait qu'on supprime.
 
-## Guardrails — avant depot dans sortants/
+## 7. Tournures interdites en plus, et regle de variete
 
-Les criteres de `contenu-linkedin`, plus les onze suivants. Le script en mesure
-quinze au total (les criteres 2 et 4 comptent double, le gras accentue et l'accent
-manquant dans le gras sont deux mesures distinctes) ; seul le niveau de lecture se
-relit :
+Ajoutees le 2026-09-29 (mail de Julien de 22h08) a la banque des formulations
+interdites (garde-fou 7 ci-dessous) : **« Notre lecture : »**, **« Testons-la. »**,
+**« Suivons son regard. »**. Le script les refuse en clair comme deja converties en
+gras Unicode.
+
+**Regle de variete : ne jamais publier deux posts de suite sur un compte avec la
+meme accroche, le meme nombre de blocs et la meme fin.** Le script en donne une
+lecture mecanique, qui compare le brouillon au post precedent du meme compte :
+
+- *type d'accroche* : question, chiffre (un chiffre dans la premiere ligne) ou
+  affirmation (prise de position ou situation concrete, indiscernables par code) ;
+- *nombre de blocs* : les titres en gras, ou 1 si le post n'en a pas ;
+- *type de fin* : question, lien (URL ou claudeagency.fr) ou affirmation. Une ligne
+  `Source : ...` ou de hashtags en dernier ne compte pas comme fin.
+
+Les trois identiques : refus. Il suffit de varier **un** des trois. Le brouillon se
+compare au dernier post publie **de ce compte**, pas d'un autre.
 
 ```bash
-node "<dossier de la skill>/scripts/verif-post.mjs" verif "C:/chemin/vers/brouillon.txt"
+node "<dossier de la skill>/scripts/verif-post.mjs" verif "C:/brouillon.txt" "C:/post-precedent.txt"
 ```
 
-1. L'accroche tient en **140 caracteres** et **se termine par un point
-   d'interrogation**.
-2. **Au moins huit passages en gras**, aucun caractere accentue dedans, tous
+Sans le second chemin, ce critere n'est pas mesure : le script ne devine pas le post
+precedent, et rien dans ce paquet ne le lui fournit pour l'instant.
+
+## Guardrails — avant depot dans sortants/
+
+Les criteres de `contenu-linkedin`, plus les suivants. Le script en mesure
+quatorze (quinze avec le post precedent, regle 7 ; les criteres 2 et 4 comptent
+double, le gras accentue et l'accent manquant dans le gras sont deux mesures
+distinctes) ; seul le niveau de lecture se relit :
+
+```bash
+node "<dossier de la skill>/scripts/verif-post.mjs" verif "C:/chemin/vers/brouillon.txt" ["C:/chemin/vers/post-precedent.txt"]
+```
+
+1. L'accroche tient en **140 caracteres**, sans autre contrainte de forme (revu le
+   29/09 : elle ne doit plus finir par un point d'interrogation).
+2. **2 passages en gras au maximum**, aucun caractere accentue dedans, tous
    dans la **bonne police** (voir plus bas).
-3. **Trois titres de section**, chacun sur sa ligne, en gras, precede d'un emoji.
-4. Entre 3 et 6 emojis, tous en tete de ligne.
+3. **4 titres de bloc en gras au maximum** ; un post sans titre est valide.
+4. **6 emojis au maximum**, tous en tete de ligne ; aucun n'est impose.
 5. Aucune phrase de plus de 20 mots ; aucun terme technique non explique.
 6. **Longueur du corps entre 1 300 et 1 900 caracteres**, pied compris — la
    fourchette la plus engageante, mesuree le 09/09 sur le corpus de van der
@@ -247,7 +271,7 @@ Mathematical Bold avec empattement — ex. Double-Struck, Fullwidth, Fraktur) n'
 NI compte comme un gras existant, NI signale comme une police fautive : il
 disparait silencieusement du calcul, comme s'il n'existait pas. Verifie avec un
 segment en Double-Struck (`𝕡𝕣𝕠𝕔𝕖𝕤𝕤 𝕥𝕣𝕠𝕡 𝕝𝕖𝕟𝕥`) : le critere 2 continue de passer
-tant que les AUTRES segments suffisent a atteindre huit, sans jamais signaler
+tant que les AUTRES segments ne depassent pas le plafond de deux, sans jamais signaler
 que ce segment-la ne rendra pas en gras sur LinkedIn. Pas corrige : il existe
 plus d'une dizaine de styles Unicode "alphanumeriques stylises" (Double-Struck,
 Fullwidth, Fraktur, Script, Sans Italic, Monospace...) — en couvrir un troisieme

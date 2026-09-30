@@ -356,16 +356,61 @@ export const INTERDITS = [
   { regex: /taguez\s+quelqu['’]un/i, motif: '"taguez quelqu\'un"' },
   { regex: /linkedin\s+(?:est\s+)?(?:nul|pourri|inutile|une\s+plaie|un\s+cirque)/i, motif: "critique de LinkedIn" },
   { regex: /\b[A-ZÀ-Ý]{5,}\b/, motif: "mot ecrit tout en majuscules" },
+  // Ajoutees le 30/09/2026 (consigne de Julien du 29/09, 22h08). `enGrasAussi` : lues aussi
+  // sur le texte ramene en ASCII, pour qu'une tournure deja convertie en gras Unicode n'y
+  // echappe pas (les anciennes entrees restent lues sur le texte brut, comportement inchange).
+  { regex: /notre\s+lecture\s*:/i, motif: 'tournure interdite "Notre lecture :"', enGrasAussi: true },
+  { regex: /testons[-\s]la\b/i, motif: 'tournure interdite "Testons-la."', enGrasAussi: true },
+  { regex: /suivons\s+son\s+regard/i, motif: 'tournure interdite "Suivons son regard."', enGrasAussi: true },
 ];
+
+// Repere une tournure interdite dans le texte, brut puis (si l'entree le demande) en ASCII.
+function trouverInterdit(corps) {
+  const ascii = versAscii(corps);
+  for (const { regex, motif, enGrasAussi } of INTERDITS) {
+    const m = corps.match(regex) || (enGrasAussi ? ascii.match(regex) : null);
+    if (m) return { motif, extrait: m[0] };
+  }
+  return null;
+}
+
+// Titres de bloc detectables : ligne entierement en gras (markdown ou Unicode), emoji facultatif
+// devant, hors accroche (ligne 0). Un bloc sans titre ne laisse aucune trace dans le texte.
+const TITRE_BLOC = new RegExp(`^(?:${EMOJI.source}\\s+)?(?:\\*\\*[^*]+\\*\\*|[${PLAGE_SANS_SERIF}${PLAGE_SERIF}${PONCTUATION_RUN}\\u0020]+)\\s*$`, "u");
+function titresDeBloc(lignes) {
+  return lignes.slice(1).filter((l) => TITRE_BLOC.test(l) && (l.includes("**") || contientUnVraiGras(l)));
+}
+
+// Schema d'un post : type d'accroche, nombre de blocs, type de fin. Sert a la regle du
+// 30/09/2026 : jamais deux posts de suite sur un compte avec la meme accroche, le meme nombre
+// de blocs et la meme fin. "Meme accroche" se lit comme meme TYPE d'accroche (question,
+// chiffre, affirmation) : deux textes mot pour mot identiques ne posent pas la question.
+export function schemaPost(corps) {
+  const lignes = corps.replace(/\r\n/g, "\n").trim().split("\n");
+  const clair = (l) => versAscii(l).replace(/\*\*/g, "").trim();
+  const typeDe = (l) => (/\?["»)\s]*$/.test(l) ? "question" : /\d/.test(l) ? "chiffre" : "affirmation");
+  const utiles = lignes.map(clair).filter((l) => l && !/^source\s*:/i.test(l) && !/^(#\S+\s*)+$/.test(l) && !/^https?:\/\/\S+$/.test(l));
+  const fin = utiles[utiles.length - 1] || "";
+  return {
+    accroche: typeDe(clair(lignes[0])),
+    blocs: Math.max(1, titresDeBloc(lignes).length),
+    fin: /https?:\/\/|claudeagency\.fr|claudepartners/i.test(fin) ? "lien" : typeDe(fin),
+  };
+}
+export const memeSchema = (a, b) => {
+  const x = schemaPost(a), y = schemaPost(b);
+  return x.accroche === y.accroche && x.blocs === y.blocs && x.fin === y.fin;
+};
 
 const dire = (bon, nom, detail) => ({ bon, nom, detail });
 
 /**
- * Mesure les douze criteres sur le corps deja extrait (frontmatter retire). Fonction
+ * Mesure les criteres de forme sur le corps deja extrait (frontmatter retire). Fonction
  * pure : aucune lecture de fichier, aucun exit -- pour rester testable par import direct.
- * Retourne { resultats, passes, total }.
+ * `precedent` (facultatif) : texte du post precedent du meme compte, ajoute le critere
+ * "schema different du post precedent". Retourne { resultats, passes, total }.
  */
-export function verifierTexte(corps) {
+export function verifierTexte(corps, { precedent } = {}) {
   const lignes = corps.split("\n");
   const resultats = [];
 
@@ -375,31 +420,30 @@ export function verifierTexte(corps) {
   const accroche = lignes[0].replace(/\*\*/g, "");
   const tailleAccroche = [...accroche].length;
   resultats.push(dire(tailleAccroche <= 140, "accroche <= 140 caracteres", `${tailleAccroche} caracteres`));
-  const finAccroche = accroche.trim().replace(/\*\*/g, "").slice(-1);
-  resultats.push(dire(finAccroche === "?", "accroche formulee en question", finAccroche === "?" ? "finit par ?" : "pas de point d'interrogation"));
 
-  // Garde-fou anti-degenerescence : ne mesure PAS si le hook est "irresistible" (ca
-  // reste un jugement de Julien, voir SKILL.md) -- attrape seulement le cas ou
-  // l'accroche est vide ou reduite a un fragment ("?" seul passait les deux controles
-  // ci-dessus avant ce critere). Trois mots est un plancher deliberement bas : il ne
-  // pretend mesurer aucune force, juste l'absence d'un hook degenere.
-  const motsAccroche = accroche.replace(/\*\*/g, "").trim().split(/\s+/).filter(Boolean);
+  // Depuis le 30/09/2026 (consigne de Julien du 29/09), l'accroche n'est plus forcement une
+  // question : question, prise de position, chiffre ou situation concrete. Plus aucun controle
+  // sur sa forme, seulement l'anti-degenerescence ci-dessous : ne mesure PAS si le hook donne
+  // envie de cliquer sur "... plus" (jugement de Julien, aucun code ne le remplace), attrape
+  // seulement l'accroche vide ou reduite a un fragment ("?" seul).
+  const motsAccroche = accroche.trim().split(/\s+/).filter(Boolean);
   resultats.push(dire(motsAccroche.length >= 3, "accroche non degeneree (3 mots mini)", `${motsAccroche.length} mot(s)`));
 
   const nu = [...corps.replace(/\*\*/g, "")].length;
   resultats.push(dire(nu >= 1300 && nu <= 1900, "longueur 1300-1900", `${nu} caracteres`));
 
   // Deux formes acceptees pour compter un gras : le markdown, et le gras Unicode deja
-  // converti -- dans l'une ou l'autre police (voir UNICODE_GRAS plus haut).
+  // converti -- dans l'une ou l'autre police (voir UNICODE_GRAS plus haut). Depuis le
+  // 30/09/2026 : 2 passages au maximum par post (avant : au moins huit).
   const gras = [...corps.matchAll(/\*\*(.+?)\*\*/g)].map((m) => m[1])
     .concat((corps.match(UNICODE_GRAS) || []).map((s) => s.trim()).filter(Boolean).filter(contientUnVraiGras));
-  resultats.push(dire(gras.length >= 8, "au moins 8 passages en gras", `${gras.length} trouve(s)`));
+  resultats.push(dire(gras.length <= 2, "gras : 2 passages au maximum", `${gras.length} trouve(s)`));
   const fautifs = gras.filter((g) => ACCENTUE.test(g.replace(EMOJI_G, "").replace(UNICODE_GRAS, "")));
   resultats.push(dire(fautifs.length === 0, "aucun gras accentue", fautifs.length ? fautifs.join(" | ") : "tous sans accent"));
 
-  // Nouveau critere (28/09/2026) : voir l'en-tete de fichier. Chaque segment gras est
-  // ramene en ASCII (deja le cas pour le markdown, versAscii() pour l'Unicode deja
-  // converti), puis chaque mot est compare au dictionnaire -- voir motsAccentManquant().
+  // Critere du 28/09/2026 : voir l'en-tete de fichier. Chaque segment gras est ramene en
+  // ASCII (deja le cas pour le markdown, versAscii() pour l'Unicode deja converti), puis
+  // chaque mot est compare au dictionnaire -- voir motsAccentManquant().
   const motsFautifs = motsAccentManquantCorps(corps);
   resultats.push(dire(
     motsFautifs.length === 0,
@@ -407,9 +451,9 @@ export function verifierTexte(corps) {
     motsFautifs.length ? motsFautifs.join(" ; ") : "tous les mots verifies au dictionnaire"
   ));
 
-  // Nouveau critere (22/09/2026) : le gras deja converti doit etre dans la police que
-  // Julien a choisie (Sans-Serif Bold), pas l'autre (voir SERIF plus haut). Un
-  // segment en markdown **ainsi** n'est pas concerne, il n'est pas encore converti.
+  // Critere du 22/09/2026 : le gras deja converti doit etre dans la police que Julien a
+  // choisie (Sans-Serif Bold), pas l'autre (voir SERIF plus haut). Un segment en markdown
+  // **ainsi** n'est pas concerne, il n'est pas encore converti.
   const segmentsSerif = (corps.match(UNICODE_GRAS_SERIF_RUN) || []).map((s) => s.trim()).filter(Boolean).filter(contientUnVraiGras);
   resultats.push(dire(
     segmentsSerif.length === 0,
@@ -417,12 +461,14 @@ export function verifierTexte(corps) {
     segmentsSerif.length ? `Mathematical Bold (avec empattement) trouve : ${segmentsSerif.join(" | ")}` : "aucun gras serif"
   ));
 
-  const titre = new RegExp(`^${EMOJI.source}\\s+(\\*\\*[^*]+\\*\\*|[${PLAGE_SANS_SERIF}${PLAGE_SERIF}${PONCTUATION_RUN}\\u0020]+)\\s*$`, "u");
-  const titres = lignes.filter((l) => titre.test(l));
-  resultats.push(dire(titres.length === 3, "trois titres de section en gras", titres.length ? titres.join(" / ") : "aucun"));
+  // Depuis le 30/09/2026 : 1 a 4 blocs, avec ou sans titre, plus d'emojis imposes. Seuls les
+  // titres detectables (ligne entierement en gras, emoji facultatif) se comptent : un bloc
+  // sans titre ne laisse aucune trace dans le texte.
+  const titres = titresDeBloc(lignes);
+  resultats.push(dire(titres.length <= 4, "4 blocs a titre au maximum", titres.length ? titres.join(" / ") : "aucun titre en gras"));
 
   const emojis = corps.match(EMOJI_G) || [];
-  resultats.push(dire(emojis.length >= 3 && emojis.length <= 6, "3 a 6 emojis", `${emojis.length} trouve(s)`));
+  resultats.push(dire(emojis.length <= 6, "6 emojis au maximum", `${emojis.length} trouve(s)`));
   const horsTete = lignes.filter((l) => EMOJI.test(l) && !new RegExp(`^${EMOJI.source}`, "u").test(l));
   resultats.push(dire(horsTete.length === 0, "emojis en tete de ligne", horsTete.length ? horsTete[0].slice(0, 50) : "toutes en tete"));
 
@@ -436,14 +482,14 @@ export function verifierTexte(corps) {
   // juger un contenu "fabrique"/"AI slop" ailleurs dans ce meme depot.
   const compact = compacter(corps);
   const compactTrouve = MOTIFS_COMPACTS.find(({ compact: r }) => r.test(compact));
-  const interditTrouve = INTERDITS.find(({ regex }) => regex.test(corps));
+  const interditTrouve = trouverInterdit(corps);
   resultats.push(dire(
     !interditTrouve && !compactTrouve,
     "aucune formulation interdite",
     compactTrouve
       ? `${compactTrouve.motif}, meme espacee/ponctuee pour contourner la detection`
       : interditTrouve
-        ? `${interditTrouve.motif} -- "${corps.match(interditTrouve.regex)[0]}"`
+        ? `${interditTrouve.motif} -- "${interditTrouve.extrait}"`
         : "aucune trouvee"
   ));
 
@@ -470,6 +516,18 @@ export function verifierTexte(corps) {
       ? anglicismes.map((a) => `"${a.trouve}" (dites plutot "${a.attendu}")`).join(", ")
       : "aucun de la liste"
   ));
+
+  // Regle du 30/09/2026 : jamais deux posts de suite, sur un compte, avec la meme accroche, le
+  // meme nombre de blocs et la meme fin. Mesuree seulement si le post precedent est fourni.
+  if (precedent !== undefined) {
+    const a = schemaPost(corps), b = schemaPost(precedent);
+    const memes = a.accroche === b.accroche && a.blocs === b.blocs && a.fin === b.fin;
+    resultats.push(dire(
+      !memes,
+      "schema different du post precedent",
+      `accroche ${a.accroche}, ${a.blocs} bloc(s), fin ${a.fin}` + (memes ? " : identique au post precedent" : ` (precedent : ${b.accroche}, ${b.blocs}, ${b.fin})`)
+    ));
+  }
 
   const passes = resultats.filter((r) => r.bon).length;
   return { resultats, passes, total: resultats.length };
