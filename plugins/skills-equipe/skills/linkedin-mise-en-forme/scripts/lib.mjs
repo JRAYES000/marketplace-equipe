@@ -385,22 +385,73 @@ function titresDeBloc(lignes) {
 // 30/09/2026 : jamais deux posts de suite sur un compte avec la meme accroche, le meme nombre
 // de blocs et la meme fin. "Meme accroche" se lit comme meme TYPE d'accroche (question,
 // chiffre, affirmation) : deux textes mot pour mot identiques ne posent pas la question.
+const clairLigne = (l) => versAscii(l).replace(/\*\*/g, "").trim();
+const typeDeLigne = (l) => (/\?["»)\s]*$/.test(l) ? "question" : /\d/.test(l) ? "chiffre" : "affirmation");
+const EST_LIEN = /https?:\/\/|claudeagency\.fr|claudepartners/i;
+const lignesDe = (corps) => corps.replace(/\r\n/g, "\n").trim().split("\n");
+// Derniere ligne "utile" : ni Source, ni hashtags, ni URL seule. C'est la fin au sens de la regle.
+const finDuPost = (corps) => {
+  const utiles = lignesDe(corps).map(clairLigne).filter((l) => l && !/^source\s*:/i.test(l) && !/^(#\S+\s*)+$/.test(l) && !/^https?:\/\/\S+$/.test(l));
+  return utiles[utiles.length - 1] || "";
+};
 export function schemaPost(corps) {
-  const lignes = corps.replace(/\r\n/g, "\n").trim().split("\n");
-  const clair = (l) => versAscii(l).replace(/\*\*/g, "").trim();
-  const typeDe = (l) => (/\?["»)\s]*$/.test(l) ? "question" : /\d/.test(l) ? "chiffre" : "affirmation");
-  const utiles = lignes.map(clair).filter((l) => l && !/^source\s*:/i.test(l) && !/^(#\S+\s*)+$/.test(l) && !/^https?:\/\/\S+$/.test(l));
-  const fin = utiles[utiles.length - 1] || "";
+  const lignes = lignesDe(corps);
+  const fin = finDuPost(corps);
   return {
-    accroche: typeDe(clair(lignes[0])),
+    accroche: typeDeLigne(clairLigne(lignes[0])),
     blocs: Math.max(1, titresDeBloc(lignes).length),
-    fin: /https?:\/\/|claudeagency\.fr|claudepartners/i.test(fin) ? "lien" : typeDe(fin),
+    fin: EST_LIEN.test(fin) ? "lien" : typeDeLigne(fin),
   };
 }
-export const memeSchema = (a, b) => {
-  const x = schemaPost(a), y = schemaPost(b);
-  return x.accroche === y.accroche && x.blocs === y.blocs && x.fin === y.fin;
-};
+const memesSchemas = (x, y) => x.accroche === y.accroche && x.blocs === y.blocs && x.fin === y.fin;
+export const memeSchema = (a, b) => memesSchemas(schemaPost(a), schemaPost(b));
+
+// Segments en gras d'un post : markdown **ainsi** ou gras Unicode deja converti (les deux polices).
+const segmentsGras = (corps) => [...corps.matchAll(/\*\*(.+?)\*\*/g)].map((m) => m[1])
+  .concat((corps.match(UNICODE_GRAS) || []).map((s) => s.trim()).filter(Boolean).filter(contientUnVraiGras));
+
+// Forme comparable : gras Unicode -> ASCII, sans accent ni ponctuation, en minuscules.
+const cleTexte = (s) => versAscii(s).normalize("NFD").replace(/\p{M}/gu, "").toLowerCase().replace(/[^a-z0-9]+/g, " ").trim();
+const NB_MOTS_DEBUT = 3;
+const NB_MOTS_GRAS_MIN = 2;
+const debutDuPost = (corps) => cleTexte(lignesDe(corps)[0]).split(" ").slice(0, NB_MOTS_DEBUT).join(" ");
+
+/**
+ * Regle de variete etendue (30/09/2026) : le brouillon est compare a chacun des derniers posts du
+ * meme compte (`precedents`, du plus recent, rang 1, au plus ancien). Quatre repetitions sont
+ * refusees, reperees avec le rang du post en cause :
+ *   - schema : meme type d'accroche, meme nombre de blocs ET meme type de fin (voir schemaPost) ;
+ *   - debut : les trois premiers mots de l'accroche sont les memes ;
+ *   - fin : derniere ligne identique mot pour mot (hors lien, hors ligne Source) ;
+ *   - gras : une phrase en gras (2 mots minimum) deja utilisee.
+ * Un meme TYPE d'accroche ou de fin repete sur plusieurs posts n'est pas refuse : il n'y a que trois
+ * types, l'exiger rendrait la regle intenable (finir sur une vraie question est une consigne
+ * permanente). Retourne [{ type, rang, detail }], [] si tout est varie.
+ */
+export function varieteSur(corps, precedents = []) {
+  const moi = schemaPost(corps);
+  const debut = debutDuPost(corps);
+  const fin = finDuPost(corps);
+  const cleFin = EST_LIEN.test(fin) ? "" : cleTexte(fin);
+  const gras = new Set(segmentsGras(corps).map(cleTexte).filter((g) => g.split(" ").length >= NB_MOTS_GRAS_MIN));
+  const violations = [];
+  precedents.forEach((texte, i) => {
+    const rang = i + 1;
+    if (memesSchemas(moi, schemaPost(texte))) {
+      violations.push({ type: "schema", rang, detail: `schema identique au post n°${rang} (accroche ${moi.accroche}, ${moi.blocs} bloc(s), fin ${moi.fin})` });
+    }
+    if (debut.split(" ").length === NB_MOTS_DEBUT && debut === debutDuPost(texte)) {
+      violations.push({ type: "debut", rang, detail: `accroche commencant comme le post n°${rang} (« ${debut} »)` });
+    }
+    if (cleFin && cleFin === cleTexte(finDuPost(texte))) {
+      violations.push({ type: "fin", rang, detail: `meme derniere ligne que le post n°${rang} (« ${fin.slice(0, 50)} »)` });
+    }
+    for (const g of new Set(segmentsGras(texte).map(cleTexte))) {
+      if (gras.has(g)) violations.push({ type: "gras", rang, detail: `meme phrase en gras que le post n°${rang} (« ${g} »)` });
+    }
+  });
+  return violations;
+}
 
 const dire = (bon, nom, detail) => ({ bon, nom, detail });
 
@@ -408,9 +459,11 @@ const dire = (bon, nom, detail) => ({ bon, nom, detail });
  * Mesure les criteres de forme sur le corps deja extrait (frontmatter retire). Fonction
  * pure : aucune lecture de fichier, aucun exit -- pour rester testable par import direct.
  * `precedent` (facultatif) : texte du post precedent du meme compte, ajoute le critere
- * "schema different du post precedent". Retourne { resultats, passes, total }.
+ * "schema different du post precedent". `precedents` (facultatif) : les derniers posts du meme
+ * compte, du plus recent au plus ancien (5 au plus) ; le premier tient lieu de `precedent`, et le
+ * critere "variete sur les 5 derniers posts" s'ajoute. Retourne { resultats, passes, total }.
  */
-export function verifierTexte(corps, { precedent } = {}) {
+export function verifierTexte(corps, { precedent, precedents } = {}) {
   const lignes = corps.split("\n");
   const resultats = [];
 
@@ -435,8 +488,7 @@ export function verifierTexte(corps, { precedent } = {}) {
   // Deux formes acceptees pour compter un gras : le markdown, et le gras Unicode deja
   // converti -- dans l'une ou l'autre police (voir UNICODE_GRAS plus haut). Depuis le
   // 30/09/2026 : 2 passages au maximum par post (avant : au moins huit).
-  const gras = [...corps.matchAll(/\*\*(.+?)\*\*/g)].map((m) => m[1])
-    .concat((corps.match(UNICODE_GRAS) || []).map((s) => s.trim()).filter(Boolean).filter(contientUnVraiGras));
+  const gras = segmentsGras(corps);
   resultats.push(dire(gras.length <= 2, "gras : 2 passages au maximum", `${gras.length} trouve(s)`));
   const fautifs = gras.filter((g) => ACCENTUE.test(g.replace(EMOJI_G, "").replace(UNICODE_GRAS, "")));
   resultats.push(dire(fautifs.length === 0, "aucun gras accentue", fautifs.length ? fautifs.join(" | ") : "tous sans accent"));
@@ -519,13 +571,24 @@ export function verifierTexte(corps, { precedent } = {}) {
 
   // Regle du 30/09/2026 : jamais deux posts de suite, sur un compte, avec la meme accroche, le
   // meme nombre de blocs et la meme fin. Mesuree seulement si le post precedent est fourni.
-  if (precedent !== undefined) {
-    const a = schemaPost(corps), b = schemaPost(precedent);
-    const memes = a.accroche === b.accroche && a.blocs === b.blocs && a.fin === b.fin;
+  const recents = precedents && precedents.length ? precedents : undefined;
+  const dernier = recents ? recents[0] : precedent;
+  if (dernier !== undefined) {
+    const a = schemaPost(corps), b = schemaPost(dernier);
+    const memes = memesSchemas(a, b);
     resultats.push(dire(
       !memes,
       "schema different du post precedent",
       `accroche ${a.accroche}, ${a.blocs} bloc(s), fin ${a.fin}` + (memes ? " : identique au post precedent" : ` (precedent : ${b.accroche}, ${b.blocs}, ${b.fin})`)
+    ));
+  }
+  // Extension du 30/09/2026 : les memes repetitions, cherchees dans les 5 derniers posts du compte.
+  if (recents) {
+    const violations = varieteSur(corps, recents);
+    resultats.push(dire(
+      violations.length === 0,
+      "variete sur les 5 derniers posts",
+      `${recents.length} post${recents.length > 1 ? "s" : ""} compares` + (violations.length ? ` : ${violations.map((v) => v.detail).join(" ; ")}` : " : aucune repetition")
     ));
   }
 

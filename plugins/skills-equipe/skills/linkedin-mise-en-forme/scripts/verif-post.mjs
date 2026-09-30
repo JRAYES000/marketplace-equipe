@@ -30,7 +30,7 @@
 // Le brouillon se donne en markdown (**ainsi**) ou deja converti en gras Unicode : les
 // deux formes comptent. Chemins en C:/... — node ne resout pas la forme /c/Users/...
 import { readFileSync, existsSync } from "node:fs";
-import { join } from "node:path";
+import { basename } from "node:path";
 import { enGras, ACCENTUE, verifierTexte } from "./lib.mjs";
 import { lireCorpsFichier, resoudrePrecedent } from "./precedent.mjs";
 
@@ -78,6 +78,7 @@ function cleZernio() {
 const corps = lireCorpsFichier(arg);
 
 let precedent;
+let precedents;
 const aLaMain = options.precedent || precedentPositionnel;
 if (aLaMain) {
   precedent = lireCorpsFichier(aLaMain);
@@ -87,11 +88,16 @@ if (aLaMain) {
     brouillon: arg, compte: options.compte, dossier: options.dossier,
     apiKey: cleZernio, // lue seulement si le dossier local n'a rien donne
   });
-  if (r.texte !== undefined) { precedent = r.texte; console.log(`Post precedent : ${r.source}`); }
+  if (r.texte !== undefined) {
+    precedent = r.texte;
+    precedents = r.textes;
+    console.log(`Post precedent : ${r.source}`);
+    if (r.textes.length > 1) console.log(`Posts compares (${r.textes.length}) : ${r.sources.map((x) => basename(x)).join(", ")}`);
+  }
   else console.log(`AVERTISSEMENT : ${r.avertissement}`);
 }
 
-const { resultats, passes, total } = verifierTexte(corps, precedent !== undefined ? { precedent } : {});
+const { resultats, passes, total } = verifierTexte(corps, precedent !== undefined ? { precedent, precedents } : {});
 for (const r of resultats) console.log(`${r.bon ? "OK   " : "ECHEC"} ${r.nom.padEnd(38)} ${r.detail}`);
 console.log(`\n${passes}/${total} criteres passes`);
 process.exit(passes === total ? 0 : 1);
