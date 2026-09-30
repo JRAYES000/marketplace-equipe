@@ -40,7 +40,7 @@ quelle -- rediger le fond a la main, sans le charger.
 3. Appliquer les regles ci-dessous.
 4. **Passe `humanizer`** — la skill, pas seulement le fichier de references de
    `contenu-linkedin`.
-5. Passer le script de controle avant de deposer le brouillon, en lui donnant le
+5. Passer le script de controle avant de deposer le brouillon : il retrouve seul le
    **post precedent du meme compte** (regle 7).
 
 ## 1. L'accroche : libre, mais elle fait cliquer
@@ -169,25 +169,38 @@ lecture mecanique, qui compare le brouillon au post precedent du meme compte :
 - *type de fin* : question, lien (URL ou claudeagency.fr) ou affirmation. Une ligne
   `Source : ...` ou de hashtags en dernier ne compte pas comme fin.
 
-Les trois identiques : refus. Il suffit de varier **un** des trois. Le brouillon se
-compare au dernier post publie **de ce compte**, pas d'un autre.
+Les trois identiques : refus. Il suffit de varier **un** des trois.
+
+**Le post precedent se trouve tout seul** (30/09/2026, `scripts/precedent.mjs`). Le compte se
+deduit du nom du brouillon (`a<N>.final.txt` = julien-agency, `p<N>.final.txt` =
+julien-partners), sinon `--compte`. Recherche, dans l'ordre :
+
+1. le `.final.txt` le plus recent **de ce compte** dans
+   `livrables-Claude-Agency/linkedin/` (ordre : dossier date, puis numero). Si le brouillon est
+   lui-meme dans ce dossier, on prend le dernier post **strictement avant lui** ;
+2. sinon le dernier post publie via l'API Zernio (`GET /v1/posts?status=published`, filtre sur
+   le `zernio_account_id` du compte, lecture seule, cle `ZERNIO_API_KEY` de l'environnement ou du
+   `.env` de `linkedin-carrousel`, jamais affichee) ;
+3. sinon un **AVERTISSEMENT** : la regle de variete n'est pas mesuree, le script n'echoue pas.
 
 ```bash
-node "<dossier de la skill>/scripts/verif-post.mjs" verif "C:/brouillon.txt" "C:/post-precedent.txt"
+node "<dossier de la skill>/scripts/verif-post.mjs" verif "C:/.../linkedin/2026-10-01/a8.final.txt"
 ```
 
-Sans le second chemin, ce critere n'est pas mesure : le script ne devine pas le post
-precedent, et rien dans ce paquet ne le lui fournit pour l'instant.
+Options : `--precedent <fichier>` (a la main, prioritaire ; un second chemin positionnel reste
+accepte), `--compte <compte>`, `--dossier <dossier>` (sinon la variable
+`LIVRABLES_LINKEDIN_DIR`, sinon `~/OneDrive/Documents/GitHub/livrables-Claude-Agency/linkedin`),
+`--sans-precedent`.
 
 ## Guardrails — avant depot dans sortants/
 
 Les criteres de `contenu-linkedin`, plus les suivants. Le script en mesure
-quatorze (quinze avec le post precedent, regle 7 ; les criteres 2 et 4 comptent
+quatorze (quinze quand un post precedent est trouve, regle 7 ; les criteres 2 et 4 comptent
 double, le gras accentue et l'accent manquant dans le gras sont deux mesures
 distinctes) ; seul le niveau de lecture se relit :
 
 ```bash
-node "<dossier de la skill>/scripts/verif-post.mjs" verif "C:/chemin/vers/brouillon.txt" ["C:/chemin/vers/post-precedent.txt"]
+node "<dossier de la skill>/scripts/verif-post.mjs" verif "C:/chemin/vers/a8.final.txt"
 ```
 
 1. L'accroche tient en **140 caracteres**, sans autre contrainte de forme (revu le

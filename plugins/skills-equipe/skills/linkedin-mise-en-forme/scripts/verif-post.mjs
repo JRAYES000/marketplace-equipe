@@ -15,17 +15,35 @@
 // usage inchanges.
 //
 //   node verif-post.mjs gras "Trois mois pour rien"     -> le segment en gras Unicode
-//   node verif-post.mjs verif "C:/chemin/brouillon.txt" ["C:/chemin/post-precedent.txt"]
-//                                                       -> les criteres, code 1 si un echoue ; avec le
-//                                                          post precedent du compte, mesure aussi qu'il n'a
-//                                                          pas le meme schema (regle du 30/09/2026)
+//   node verif-post.mjs verif "C:/chemin/a6.final.txt" [options]
+//       -> les criteres, code 1 si un echoue. Le post precedent du MEME compte est trouve
+//          tout seul (voir precedent.mjs : .final.txt le plus recent du compte dans
+//          livrables-Claude-Agency/linkedin/, sinon dernier post publie via Zernio). Sans
+//          post precedent : un AVERTISSEMENT, jamais un echec (regle du 30/09/2026).
+//   options : --precedent <fichier>  post precedent donne a la main (prioritaire)
+//             --compte <julien-agency|julien-partners>  sinon deduit du nom a<N>/p<N>.final.txt
+//             --dossier <dossier>    dossier des livrables (sinon LIVRABLES_LINKEDIN_DIR, sinon
+//                                    ~/OneDrive/Documents/GitHub/livrables-Claude-Agency/linkedin)
+//             --sans-precedent       ne mesure pas la regle de variete
+//   (un second chemin positionnel reste accepte comme --precedent, comme avant le 30/09)
 //
 // Le brouillon se donne en markdown (**ainsi**) ou deja converti en gras Unicode : les
 // deux formes comptent. Chemins en C:/... — node ne resout pas la forme /c/Users/...
-import { readFileSync } from "node:fs";
+import { readFileSync, existsSync } from "node:fs";
+import { join } from "node:path";
 import { enGras, ACCENTUE, verifierTexte } from "./lib.mjs";
+import { lireCorpsFichier, resoudrePrecedent } from "./precedent.mjs";
 
-const [, , action, arg, precedentChemin] = process.argv;
+const OPTIONS_AVEC_VALEUR = ["--precedent", "--compte", "--dossier"];
+const brut = process.argv.slice(2);
+const options = {};
+const positionnels = [];
+for (let i = 0; i < brut.length; i++) {
+  if (OPTIONS_AVEC_VALEUR.includes(brut[i])) options[brut[i].slice(2)] = brut[++i];
+  else if (brut[i] === "--sans-precedent") options.sansPrecedent = true;
+  else positionnels.push(brut[i]);
+}
+const [action, arg, precedentPositionnel] = positionnels;
 
 if (action === "gras") {
   if (!arg) { console.error("usage : verif-post.mjs gras \"segment sans accent\""); process.exit(1); }
@@ -40,18 +58,40 @@ if (action === "gras") {
 }
 
 if (action !== "verif" || !arg) {
-  console.error("usage : verif-post.mjs gras \"segment\" | verif \"chemin/brouillon.txt\" [\"chemin/post-precedent.txt\"]");
+  console.error("usage : verif-post.mjs gras \"segment\" | verif \"chemin/brouillon.txt\" [--precedent f] [--compte c] [--dossier d] [--sans-precedent]");
   process.exit(1);
 }
 
-// Un brouillon de sortants/ porte un frontmatter : il ne part pas chez le lecteur.
-const lireCorps = (chemin) => {
-  const texte = readFileSync(chemin, "utf8").replace(/\r\n/g, "\n").trim();
-  return texte.startsWith("---") ? texte.slice(texte.indexOf("\n---", 3) + 4).trim() : texte;
-};
-const corps = lireCorps(arg);
+// Cle Zernio : environnement d'abord, sinon le .env de linkedin-carrousel (meme mecanisme que
+// publier-zernio.js). Lue seulement si le dossier local n'a rien donne ; jamais affichee.
+function cleZernio() {
+  if (process.env.ZERNIO_API_KEY) return process.env.ZERNIO_API_KEY;
+  const env = new URL("../../linkedin-carrousel/.env", import.meta.url);
+  if (!existsSync(env)) return undefined;
+  for (const ligne of readFileSync(env, "utf8").split(/\r?\n/)) {
+    const m = ligne.match(/^ZERNIO_API_KEY=(.*)$/);
+    if (m && m[1].trim()) return m[1].trim();
+  }
+  return undefined;
+}
 
-const { resultats, passes, total } = verifierTexte(corps, precedentChemin ? { precedent: lireCorps(precedentChemin) } : {});
+const corps = lireCorpsFichier(arg);
+
+let precedent;
+const aLaMain = options.precedent || precedentPositionnel;
+if (aLaMain) {
+  precedent = lireCorpsFichier(aLaMain);
+  console.log(`Post precedent (donne a la main) : ${aLaMain}`);
+} else if (!options.sansPrecedent) {
+  const r = await resoudrePrecedent({
+    brouillon: arg, compte: options.compte, dossier: options.dossier,
+    apiKey: cleZernio, // lue seulement si le dossier local n'a rien donne
+  });
+  if (r.texte !== undefined) { precedent = r.texte; console.log(`Post precedent : ${r.source}`); }
+  else console.log(`AVERTISSEMENT : ${r.avertissement}`);
+}
+
+const { resultats, passes, total } = verifierTexte(corps, precedent !== undefined ? { precedent } : {});
 for (const r of resultats) console.log(`${r.bon ? "OK   " : "ECHEC"} ${r.nom.padEnd(38)} ${r.detail}`);
 console.log(`\n${passes}/${total} criteres passes`);
 process.exit(passes === total ? 0 : 1);
