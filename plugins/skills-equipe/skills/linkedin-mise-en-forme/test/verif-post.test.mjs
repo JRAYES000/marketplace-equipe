@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { enGras, verifierTexte, motsAccentManquantCorps } from "../scripts/lib.mjs";
+import { enGras, verifierTexte, motsAccentManquantCorps, schemaPost, memeSchema } from "../scripts/lib.mjs";
 
 // Fabrique du Mathematical Bold AVEC empattement (bases documentees dans lib.mjs,
 // SERIF) -- sert uniquement a construire des fixtures de test pour la mauvaise police,
@@ -17,31 +17,34 @@ const enGrasSerif = (s) => [...s].map((c) => {
 }).join("");
 
 // Fixture "conforme" : construite pour ce test, pas un vrai post publie -- passe
-// mecaniquement les douze criteres. Sert de reference : toute regression sur un
-// critere existant doit d'abord casser ce test-la.
+// mecaniquement tous les criteres. Sert de reference : toute regression sur un critere
+// existant doit d'abord casser ce test-la. Depuis le 30/09/2026 : accroche libre (ici une
+// question, mais rien ne l'impose), titres de bloc sans gras ni emoji impose, 2 gras au maximum.
 const CONFORME = [
-  "**Et si votre processus de recrutement faisait fuir vos meilleurs candidats sans que vous le voyiez ?**",
+  "Et si votre processus de recrutement faisait fuir vos meilleurs candidats sans que vous le voyiez ?",
   "",
-  "\u{1F449} **Le constat**",
+  "\u{1F449} Le constat",
   "",
   "Un **processus trop lent** coute des candidats avant meme l'offre. Personne ne s'en rend compte a temps.",
   "",
-  "\u{26A1} **Trois gestes**",
+  "\u{26A1} Trois gestes",
   "",
-  "On evite les **questions qui reviennent sans cesse**. On repond sous deux jours. On explique chaque etape.",
+  "On evite les questions qui reviennent sans cesse. On repond sous deux jours. On explique chaque etape.",
   "",
-  "\u{2705} **Ce qui reste**",
+  "\u{2705} Ce qui reste",
   "",
   "Le **silence total suivant l'entretien** cree plus de degats que n'importe quel refus explique. Voici " +
     "Ce post sert uniquement de gabarit de test pour verifier automatiquement les regles de forme. ".repeat(9).trim(),
   "",
-  "Les **trois signes utiles** tiennent en une phrase, et **dix minutes suffisent** pour les corriger.",
+  "Les trois signes utiles tiennent en une phrase, et dix minutes suffisent pour les corriger.",
 ].join("\n");
 
-test("fixture conforme : 15/15 criteres passes", () => {
+const critere = (corps, nom, opts) => verifierTexte(corps, opts).resultats.find((x) => x.nom === nom);
+
+test("fixture conforme : 14/14 criteres passes", () => {
   const { resultats, passes, total } = verifierTexte(CONFORME);
-  assert.equal(total, 15);
-  assert.equal(passes, 15, resultats.filter((r) => !r.bon).map((r) => `${r.nom}: ${r.detail}`).join("; "));
+  assert.equal(total, 14);
+  assert.equal(passes, 14, resultats.filter((r) => !r.bon).map((r) => `${r.nom}: ${r.detail}`).join("; "));
 });
 
 test("enGras fabrique du Sans-Serif Bold, jamais l'autre police -- verifie par point de code", () => {
@@ -55,25 +58,37 @@ test("enGras fabrique du Sans-Serif Bold, jamais l'autre police -- verifie par p
   // comme un gras existant, dans la BONNE police.
   const corps = CONFORME.replace("**processus trop lent**", enGras("processus trop lent"));
   const { resultats } = verifierTexte(corps);
-  assert.equal(resultats.find((x) => x.nom === "au moins 8 passages en gras").bon, true);
+  const gras = resultats.find((x) => x.nom === "gras : 2 passages au maximum");
+  assert.equal(gras.bon, true);
+  assert.equal(gras.detail, "2 trouve(s)", "le gras converti est bien compte, comme le markdown");
   assert.equal(resultats.find((x) => x.nom === "gras dans la bonne police (Sans-Serif Bold)").bon, true);
 });
 
 test("accroche > 140 caracteres refusee", () => {
   const corps = CONFORME.replace(
-    /^\*\*.+?\*\*/,
-    `**${"Et si votre processus de recrutement au sens le plus large et le plus complet qui soit faisait vraiment fuir absolument tous vos meilleurs candidats sans que vous le voyiez jamais ?"}**`
+    CONFORME.split("\n")[0],
+    "Et si votre processus de recrutement au sens le plus large et le plus complet qui soit faisait vraiment fuir absolument tous vos meilleurs candidats sans que vous le voyiez jamais ?"
   );
   const { resultats } = verifierTexte(corps);
   const r = resultats.find((x) => x.nom === "accroche <= 140 caracteres");
   assert.equal(r.bon, false);
 });
 
-test("accroche qui ne finit pas par un point d'interrogation refusee", () => {
-  const corps = CONFORME.replace("le voyiez ?**", "le voyiez.**");
-  const { resultats } = verifierTexte(corps);
-  const r = resultats.find((x) => x.nom === "accroche formulee en question");
-  assert.equal(r.bon, false);
+// Consigne de Julien du 29/09/2026 : l'accroche peut etre une question, une prise de position,
+// un chiffre ou une situation concrete -- plus aucun controle sur sa forme.
+test("accroche libre : prise de position, chiffre et situation concrete passent, question non imposee", () => {
+  const accroches = [
+    "Un recrutement lent coute plus cher qu'une mauvaise embauche.",
+    "Trois candidats sur quatre attendent une reponse sous deux semaines.",
+    "Lundi matin, un candidat a relance mon equipe pour la quatrieme fois.",
+  ];
+  for (const a of accroches) {
+    const corps = CONFORME.replace(CONFORME.split("\n")[0], a);
+    const { resultats } = verifierTexte(corps);
+    assert.equal(resultats.some((x) => /question/.test(x.nom)), false, "plus de critere 'question'");
+    assert.equal(critere(corps, "accroche non degeneree (3 mots mini)").bon, true, a);
+    assert.equal(critere(corps, "accroche <= 140 caracteres").bon, true, a);
+  }
 });
 
 test("accroche degeneree (un seul mot) refusee -- ne mesure pas la force du hook, juste son absence", () => {
@@ -91,12 +106,24 @@ test("longueur hors fourchette 1300-1900 refusee", () => {
   assert.equal(r.bon, false);
 });
 
-test("moins de 8 passages en gras refuse", () => {
-  const corps = CONFORME.replace(/\*\*(processus trop lent)\*\*/, "$1")
-    .replace(/\*\*(questions qui reviennent sans cesse)\*\*/, "$1");
-  const { resultats } = verifierTexte(corps);
-  const r = resultats.find((x) => x.nom === "au moins 8 passages en gras");
+// Consigne du 29/09/2026 : 1 ou 2 phrases importantes en gras par post au maximum
+// (remplace "au moins huit").
+test("plus de 2 passages en gras refuse, 1 ou 2 acceptes", () => {
+  const troisGras = CONFORME.replace("dix minutes suffisent", "**dix minutes suffisent**");
+  const r = critere(troisGras, "gras : 2 passages au maximum");
   assert.equal(r.bon, false);
+  assert.equal(r.detail, "3 trouve(s)");
+  const unGras = CONFORME.replace("**silence total suivant l'entretien**", "silence total suivant l'entretien");
+  assert.equal(critere(unGras, "gras : 2 passages au maximum").bon, true);
+  assert.equal(critere(CONFORME, "gras : 2 passages au maximum").bon, true);
+});
+
+test("plus de 2 passages en gras refuse aussi quand le gras est deja converti en Unicode", () => {
+  const corps = CONFORME
+    .replace("**processus trop lent**", enGras("processus trop lent"))
+    .replace("**silence total suivant l'entretien**", enGras("silence total suivant l'entretien"))
+    .replace("dix minutes suffisent", enGras("dix minutes suffisent"));
+  assert.equal(critere(corps, "gras : 2 passages au maximum").bon, false);
 });
 
 test("un gras accentue est refuse", () => {
@@ -118,7 +145,7 @@ test("un gras dans l'autre police (Mathematical Bold avec empattement) est reper
   const segmentSerif = enGrasSerif("deux briques");
   const corps = CONFORME.replace("**processus trop lent**", segmentSerif);
   const { resultats } = verifierTexte(corps);
-  const gras = resultats.find((x) => x.nom === "au moins 8 passages en gras");
+  const gras = resultats.find((x) => x.nom === "gras : 2 passages au maximum");
   const accent = resultats.find((x) => x.nom === "aucun gras accentue");
   const police = resultats.find((x) => x.nom === "gras dans la bonne police (Sans-Serif Bold)");
   assert.equal(gras.bon, true, "le gras serif compte bien comme un gras existant");
@@ -145,21 +172,32 @@ test("les deux vrais posts de veille deja publies restent sous le seuil (regress
   assert.match(police.detail, /deux briques|empattement/);
 });
 
-test("moins de 3 ou plus de 3 titres de section refuse", () => {
-  const corps = CONFORME.replace("\u{2705} **Ce qui reste**\n\n", "");
+// Consigne du 29/09/2026 : 1, 2, 3 ou 4 blocs, avec ou sans titre, plus d'emojis imposes.
+test("un post sans aucun titre et sans emoji est accepte (1 bloc)", () => {
+  const corps = CONFORME.replace(/^[\u{1F449}\u{26A1}\u{2705}] [^\n]+\n\n/gmu, "");
   const { resultats } = verifierTexte(corps);
-  const r = resultats.find((x) => x.nom === "trois titres de section en gras");
-  assert.equal(r.bon, false);
+  assert.equal(critere(corps, "4 blocs a titre au maximum").bon, true);
+  assert.equal(critere(corps, "6 emojis au maximum").detail, "0 trouve(s)");
+  assert.equal(schemaPost(corps).blocs, 1);
 });
 
-test("moins de 3 emojis refuse", () => {
-  const corps = CONFORME
-    .replace("\u{1F449} ", "")
-    .replace("\u{26A1} ", "")
-    .replace("\u{2705} ", "* ");
-  const { resultats } = verifierTexte(corps);
-  const r = resultats.find((x) => x.nom === "3 a 6 emojis");
+test("plus de 4 titres de bloc en gras refuse, 4 acceptes", () => {
+  const titre = (t) => `\u{1F449} ${enGras(t)}\n\nUne phrase courte.\n\n`;
+  const avec = (n) => "Une accroche de trois mots ou plus ?\n\n" + [...Array(n).keys()].map((i) => titre(`Bloc ${i + 1}`)).join("");
+  assert.equal(critere(avec(4), "4 blocs a titre au maximum").bon, true);
+  assert.equal(schemaPost(avec(4)).blocs, 4);
+  assert.equal(critere(avec(5), "4 blocs a titre au maximum").bon, false);
+});
+
+test("plus de 6 emojis refuse, 3 emojis ou moins acceptes", () => {
+  const corps = CONFORME.replace(
+    "Les trois signes utiles",
+    ["\u{1F449}", "\u{26A1}", "\u{2705}", "\u{1F4A1}"].map((e) => `${e} Un point.\n\n`).join("") + "Les trois signes utiles"
+  );
+  const r = critere(corps, "6 emojis au maximum");
   assert.equal(r.bon, false);
+  assert.equal(r.detail, "7 trouve(s)");
+  assert.equal(critere(CONFORME, "6 emojis au maximum").bon, true);
 });
 
 test("un emoji hors tete de ligne refuse", () => {
@@ -202,13 +240,13 @@ test("une formulation interdite (banque reprise de linkedin-carrousel) est refus
 // un titre "Ce qui a change" passait, mais "Ce que j'en retiens" non -- l'apostrophe,
 // une fois le titre converti en gras Unicode, coupait le run en deux et le regex de
 // titre (qui exige un seul run contigu jusqu'a la fin de ligne) ne matchait plus rien.
-test("un titre en gras Unicode contenant une apostrophe est reconnu comme un titre valide", () => {
+test("un titre en gras Unicode contenant une apostrophe est reconnu comme un titre de bloc", () => {
   const titreConverti = "\u{1F4BC} " + enGras("Ce que j'en retiens");
-  const corps = CONFORME.replace("\u{2705} **Ce qui reste**", titreConverti);
-  const { resultats } = verifierTexte(corps);
-  const r = resultats.find((x) => x.nom === "trois titres de section en gras");
+  const corps = CONFORME.replace("\u{2705} Ce qui reste", titreConverti);
+  const r = critere(corps, "4 blocs a titre au maximum");
   assert.equal(r.bon, true, r.detail);
-  assert.equal(r.detail.split(" / ").length, 3, r.detail);
+  assert.equal(r.detail, titreConverti, "le titre avec apostrophe est vu comme UN titre, pas coupe en deux");
+  assert.equal(schemaPost(corps).blocs, 1);
 });
 
 // Meme correctif, envers oppose : une apostrophe de texte COURANT (donc jamais grasse,
@@ -221,8 +259,8 @@ test("une apostrophe de texte courant, hors de tout gras, ne compte jamais comme
     "coute des candidats avant meme l'offre, qu'il s'agisse d'un stage ou d'un poste"
   );
   const { resultats } = verifierTexte(corps);
-  const r = resultats.find((x) => x.nom === "au moins 8 passages en gras");
-  assert.equal(r.detail, "9 trouve(s)", "les apostrophes de texte courant ajoutees ne doivent pas faire monter le compte");
+  const r = resultats.find((x) => x.nom === "gras : 2 passages au maximum");
+  assert.equal(r.detail, "2 trouve(s)", "les apostrophes de texte courant ajoutees ne doivent pas faire monter le compte");
 });
 
 // Nouveau critere (22/09/2026, trouve par test adversarial demande par Nomena) : reprise
@@ -377,11 +415,73 @@ test("un mot deja accentue correctement dans le gras (donc deja refuse par \"auc
 test("une accroche redigee dans une autre langue que le francais passe (comportement voulu, pas une faille)", () => {
   const corps = CONFORME.replace(
     CONFORME.split("\n")[0],
-    "**Why do your best candidates disappear before the offer even arrives ?**"
+    "Why do your best candidates disappear before the offer even arrives ?"
   );
-  const { resultats } = verifierTexte(corps);
-  const r = resultats.find((x) => x.nom === "accroche formulee en question");
-  assert.equal(r.bon, true);
+  assert.equal(critere(corps, "accroche non degeneree (3 mots mini)").bon, true);
+  assert.equal(critere(corps, "accroche <= 140 caracteres").bon, true);
+});
+
+// Consigne du 29/09/2026 : trois tournures interdites de plus. Rejouees telles quelles, y
+// compris converties en gras Unicode (le gras ne doit pas les faire echapper).
+test("« Notre lecture : », « Testons-la. » et « Suivons son regard. » sont refuses, en clair comme en gras", () => {
+  const cas = [
+    ["Notre lecture : le delai tue la confiance.", /Notre lecture/],
+    ["Testons-la.", /Testons-la/],
+    ["Suivons son regard.", /Suivons son regard/],
+    [enGras("Notre lecture") + " : le delai tue la confiance.", /Notre lecture/],
+    [enGras("Testons-la") + ".", /Testons-la/],
+    [enGras("Suivons son regard") + ".", /Suivons son regard/],
+  ];
+  for (const [phrase, motif] of cas) {
+    const corps = CONFORME.replace("Personne ne s'en rend compte a temps.", `Personne ne s'en rend compte a temps. ${phrase}`);
+    const r = critere(corps, "aucune formulation interdite");
+    assert.equal(r.bon, false, `non refuse : ${phrase}`);
+    assert.match(r.detail, motif);
+  }
+});
+
+test("les mots de ces tournures, employes autrement, ne sont pas refuses a tort", () => {
+  const corps = CONFORME.replace(
+    "Personne ne s'en rend compte a temps.",
+    "Personne ne s'en rend compte a temps. Nous testons cette lecture avec vous. Ils suivent son regard sur la salle."
+  );
+  assert.equal(critere(corps, "aucune formulation interdite").bon, true);
+});
+
+// Fin libre : « Et vous ? » n'est plus obligatoire, et n'est pas interdit non plus.
+test("la fin est libre : ni « Et vous ? » ni question finale ne sont exigees, une question finale passe", () => {
+  const sansQuestion = verifierTexte(CONFORME);
+  assert.equal(sansQuestion.passes, sansQuestion.total);
+  const avecQuestion = verifierTexte(CONFORME + "\n\nEt vous ?");
+  assert.equal(avecQuestion.passes, avecQuestion.total, avecQuestion.resultats.filter((r) => !r.bon).map((r) => r.detail).join("; "));
+});
+
+// Regle du 29/09/2026 : jamais deux posts de suite sur un compte avec la meme accroche, le
+// meme nombre de blocs et la meme fin.
+const POST_A = "Un recrutement lent coute plus cher qu'une mauvaise embauche.\n\n\u{1F449} " + enGras("Le constat") + "\n\nTexte.\n\nEt vous ?";
+
+test("schemaPost : type d'accroche, nombre de blocs, type de fin", () => {
+  assert.deepEqual(schemaPost(POST_A), { accroche: "affirmation", blocs: 1, fin: "question" });
+  assert.deepEqual(schemaPost("Trois candidats sur quatre partent ?\n\nTexte.\n\nSource : Insee, 2026"), { accroche: "question", blocs: 1, fin: "affirmation" });
+  assert.deepEqual(schemaPost("Un chiffre : 40 jours.\n\nTexte.\n\nclaudeagency.fr"), { accroche: "chiffre", blocs: 1, fin: "lien" });
+});
+
+test("memeSchema : identique seulement si accroche, blocs ET fin sont identiques", () => {
+  const b = POST_A.replace("Un recrutement lent coute plus cher qu'une mauvaise embauche.", "Personne ne relance vos candidats.");
+  assert.equal(memeSchema(POST_A, b), true, "meme type d'accroche, 1 bloc, meme fin");
+  assert.equal(memeSchema(POST_A, b.replace("Personne ne relance vos candidats.", "Qui relance vos candidats ?")), false, "accroche differente");
+  assert.equal(memeSchema(POST_A, b.replace("Et vous ?", "Voila.")), false, "fin differente");
+  assert.equal(memeSchema(POST_A, b.replace("\u{1F449} " + enGras("Le constat") + "\n\nTexte.", "\u{1F449} " + enGras("Un") + "\n\nA.\n\n\u{26A1} " + enGras("Deux") + "\n\nB.")), false, "nombre de blocs different");
+});
+
+test("verifierTexte avec le post precedent : refuse un schema identique, accepte un schema different, ne mesure rien sans precedent", () => {
+  const meme = critere(CONFORME, "schema different du post precedent", { precedent: CONFORME });
+  assert.equal(meme.bon, false);
+  assert.match(meme.detail, /identique au post precedent/);
+  const autre = critere(CONFORME, "schema different du post precedent", { precedent: POST_A });
+  assert.equal(autre.bon, true, autre.detail);
+  assert.equal(verifierTexte(CONFORME).resultats.some((x) => x.nom === "schema different du post precedent"), false);
+  assert.equal(verifierTexte(CONFORME, { precedent: CONFORME }).total, 15);
 });
 
 // Critere 15 (29/09/2026) : anglicismes, liste PARTAGEE avec linkedin-carrousel.

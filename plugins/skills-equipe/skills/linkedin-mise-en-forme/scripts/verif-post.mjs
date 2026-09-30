@@ -15,14 +15,17 @@
 // usage inchanges.
 //
 //   node verif-post.mjs gras "Trois mois pour rien"     -> le segment en gras Unicode
-//   node verif-post.mjs verif "C:/chemin/brouillon.txt" -> les douze criteres, code 1 si un echoue
+//   node verif-post.mjs verif "C:/chemin/brouillon.txt" ["C:/chemin/post-precedent.txt"]
+//                                                       -> les criteres, code 1 si un echoue ; avec le
+//                                                          post precedent du compte, mesure aussi qu'il n'a
+//                                                          pas le meme schema (regle du 30/09/2026)
 //
 // Le brouillon se donne en markdown (**ainsi**) ou deja converti en gras Unicode : les
 // deux formes comptent. Chemins en C:/... — node ne resout pas la forme /c/Users/...
 import { readFileSync } from "node:fs";
 import { enGras, ACCENTUE, verifierTexte } from "./lib.mjs";
 
-const [, , action, arg] = process.argv;
+const [, , action, arg, precedentChemin] = process.argv;
 
 if (action === "gras") {
   if (!arg) { console.error("usage : verif-post.mjs gras \"segment sans accent\""); process.exit(1); }
@@ -37,15 +40,18 @@ if (action === "gras") {
 }
 
 if (action !== "verif" || !arg) {
-  console.error("usage : verif-post.mjs gras \"segment\" | verif \"chemin/brouillon.txt\"");
+  console.error("usage : verif-post.mjs gras \"segment\" | verif \"chemin/brouillon.txt\" [\"chemin/post-precedent.txt\"]");
   process.exit(1);
 }
 
-const texte = readFileSync(arg, "utf8").replace(/\r\n/g, "\n").trim();
 // Un brouillon de sortants/ porte un frontmatter : il ne part pas chez le lecteur.
-const corps = texte.startsWith("---") ? texte.slice(texte.indexOf("\n---", 3) + 4).trim() : texte;
+const lireCorps = (chemin) => {
+  const texte = readFileSync(chemin, "utf8").replace(/\r\n/g, "\n").trim();
+  return texte.startsWith("---") ? texte.slice(texte.indexOf("\n---", 3) + 4).trim() : texte;
+};
+const corps = lireCorps(arg);
 
-const { resultats, passes, total } = verifierTexte(corps);
+const { resultats, passes, total } = verifierTexte(corps, precedentChemin ? { precedent: lireCorps(precedentChemin) } : {});
 for (const r of resultats) console.log(`${r.bon ? "OK   " : "ECHEC"} ${r.nom.padEnd(38)} ${r.detail}`);
 console.log(`\n${passes}/${total} criteres passes`);
 process.exit(passes === total ? 0 : 1);
