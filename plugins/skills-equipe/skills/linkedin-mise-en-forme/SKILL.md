@@ -171,16 +171,32 @@ lecture mecanique, qui compare le brouillon au post precedent du meme compte :
 
 Les trois identiques : refus. Il suffit de varier **un** des trois.
 
+**Etendue aux 5 derniers posts du compte (30/09/2026).** Le script compare le brouillon a
+chacun des 5 derniers posts, pas seulement au precedent (critere « variete sur les 5 derniers
+posts », n°1 = le plus recent). Il refuse, en nommant le post en cause :
+
+- le **meme schema** (accroche, blocs, fin) qu'un de ces 5 posts ;
+- les **trois premiers mots de l'accroche** identiques ;
+- la **meme derniere ligne**, mot pour mot (accents et ponctuation ignores ; un lien ou une
+  ligne `Source` ne compte pas) ;
+- une **meme phrase en gras** (deux mots au moins), en markdown comme en gras Unicode.
+
+Un meme *type* d'accroche ou de fin sur plusieurs posts reste permis : il n'y a que trois types,
+et finir sur une vraie question est une consigne permanente. Pour passer : changer de debut
+d'accroche, de derniere phrase ou de phrase en gras, ou varier le schema.
+
 **Le post precedent se trouve tout seul** (30/09/2026, `scripts/precedent.mjs`). Le compte se
 deduit du nom du brouillon (`a<N>.final.txt` = julien-agency, `p<N>.final.txt` =
 julien-partners), sinon `--compte`. Recherche, dans l'ordre :
 
-1. le `.final.txt` le plus recent **de ce compte** dans
+1. les **5 derniers** `.final.txt` **de ce compte** dans
    `livrables-Claude-Agency/linkedin/` (ordre : dossier date, puis numero). Si le brouillon est
-   lui-meme dans ce dossier, on prend le dernier post **strictement avant lui** ;
-2. sinon le dernier post publie via l'API Zernio (`GET /v1/posts?status=published`, filtre sur
-   le `zernio_account_id` du compte, lecture seule, cle `ZERNIO_API_KEY` de l'environnement ou du
-   `.env` de `linkedin-carrousel`, jamais affichee) ;
+   lui-meme dans ce dossier, on prend les posts **strictement avant lui** ;
+2. sinon les 5 derniers posts publies via l'API Zernio (`GET /v1/posts?status=published&limit=5`,
+   filtre sur le `zernio_account_id` du compte, lecture seule, cle `ZERNIO_API_KEY` de
+   l'environnement ou du `.env` de `linkedin-carrousel`, jamais affichee). Dossier local et Zernio
+   ne se completent pas : un post publie existe deja en `.final.txt`, les melanger le compterait
+   deux fois ;
 3. sinon un **AVERTISSEMENT** : la regle de variete n'est pas mesuree, le script n'echoue pas.
 
 ```bash
@@ -195,7 +211,7 @@ accepte), `--compte <compte>`, `--dossier <dossier>` (sinon la variable
 ## Guardrails — avant depot dans sortants/
 
 Les criteres de `contenu-linkedin`, plus les suivants. Le script en mesure
-quatorze (quinze quand un post precedent est trouve, regle 7 ; les criteres 2 et 4 comptent
+quatorze (quinze quand un post precedent est trouve, seize quand il en trouve plusieurs, regle 7 ; les criteres 2 et 4 comptent
 double, le gras accentue et l'accent manquant dans le gras sont deux mesures
 distinctes) ; seul le niveau de lecture se relit :
 

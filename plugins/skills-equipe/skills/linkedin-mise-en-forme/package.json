@@ -1,7 +1,7 @@
 {
   "name": "linkedin-mise-en-forme",
   "private": true,
-  "version": "1.5.0",
+  "version": "1.6.0",
   "description": "Controle de forme des posts LinkedIn de Julien (deux comptes) : gras Unicode, accroche, titres de section, emojis",
   "type": "module",
   "scripts": {

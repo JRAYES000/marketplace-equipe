@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { enGras, verifierTexte, motsAccentManquantCorps, schemaPost, memeSchema } from "../scripts/lib.mjs";
+import { enGras, verifierTexte, motsAccentManquantCorps, schemaPost, memeSchema, varieteSur } from "../scripts/lib.mjs";
 
 // Fabrique du Mathematical Bold AVEC empattement (bases documentees dans lib.mjs,
 // SERIF) -- sert uniquement a construire des fixtures de test pour la mauvaise police,
@@ -599,4 +599,91 @@ test("mots en e- qui existent en é- : \"equipe\", \"etat\", \"ecole\", y compri
 
 test("le contexte vient de la ligne entiere : un mot hors gras n'est jamais signale, meme sans accent", () => {
   assert.deepEqual(motsAccentManquantCorps("Confier l'IA a un seul salarie de l'equipe " + enGras("est-il un risque") + " ?"), []);
+});
+
+// Extension du 30/09/2026 : variete mesuree sur les 5 derniers posts du compte, pas seulement le
+// precedent. `precedents` = du plus recent (rang 1) au plus ancien.
+const NOM_VARIETE = "variete sur les 5 derniers posts";
+// Post distinct a chaque appel : accroche, fin et gras propres a `id`, un seul bloc, pas de titre.
+// Les six ids connus (NOMS) ont six schemas differents (accroche question/affirmation/chiffre x fin
+// question/affirmation) ; un id inconnu prend le schema du premier. `accroche`, `fin` et `gras`
+// remplacent le texte par defaut.
+const NOMS = ["un", "deux", "trois", "quatre", "cinq", "six"];
+const SCHEMAS = [["q", "q"], ["q", "a"], ["a", "q"], ["c", "q"], ["c", "a"], ["a", "a"]];
+const ACCROCHES = {
+  q: (id) => `Sujet ${id} : pourquoi personne ne repond aux relances de ${id} ?`,
+  a: (id) => `Sujet ${id} : personne ne repond aux relances de ${id}.`,
+  c: (id) => `Sujet ${id} : 3 relances sur 4 restent sans reponse chez ${id}.`,
+};
+const FINS = { q: (id) => `Question finale ${id} : et chez vous ?`, a: (id) => `Conclusion ${id} : voila ce qu'il faut retenir.` };
+const distinct = (id, { accroche, fin, gras } = {}) => {
+  const [a, f] = SCHEMAS[Math.max(0, NOMS.indexOf(id))];
+  return [
+    accroche ?? ACCROCHES[a](id),
+    "",
+    `Un **${gras ?? `point cle numero ${id}`}** change la suite. Le reste du texte est propre au post ${id}.`,
+    "",
+    fin ?? FINS[f](id),
+  ].join("\n");
+};
+const CINQ = NOMS.slice(0, 5).map((id) => distinct(id));
+const types = (v) => v.map((x) => [x.type, x.rang]);
+
+test("varieteSur : cinq posts tous differents -> aucune violation, et aucune sans precedents", () => {
+  assert.deepEqual(varieteSur(distinct("six"), CINQ), []);
+  assert.deepEqual(varieteSur(distinct("six"), []), []);
+});
+
+test("varieteSur : schema identique a un post plus ancien que le precedent (rang 3) est repere avec son rang", () => {
+  const lointain = distinct("x", { accroche: "Un constat net sur les relances sans reponse.", fin: "Voila la suite." });
+  const cible = distinct("y", { accroche: "Un autre constat sur les delais sans reponse.", fin: "Voila autre chose." });
+  const v = varieteSur(cible, [CINQ[0], CINQ[1], lointain, CINQ[3], CINQ[4]]);
+  assert.deepEqual(types(v), [["schema", 3]]);
+  assert.equal(memeSchema(cible, CINQ[0]), false, "le post precedent (rang 1) ne suffit pas a le voir");
+});
+
+test("varieteSur : memes trois premiers mots d'accroche, meme a rang 5, meme avec accents et gras Unicode", () => {
+  const ancien = distinct("a", { accroche: "Une mission courte ne suffit pas ?" });
+  const cible = distinct("b", { accroche: enGras("Une mission courte") + " change tout." });
+  const v = varieteSur(cible, [...CINQ.slice(0, 4), ancien]);
+  assert.deepEqual(types(v).filter(([t]) => t === "debut"), [["debut", 5]]);
+  assert.equal(varieteSur(distinct("b", { accroche: "Une mission longue change tout." }), [ancien]).length, 0, "deux mots communs seulement : pas de doublon");
+});
+
+test("varieteSur : meme derniere ligne mot pour mot (accents et ponctuation ignores), sauf un lien ou une ligne Source", () => {
+  const v = varieteSur(distinct("b", { fin: "Et vous, qu'en pensez-vous ?" }), [CINQ[0], distinct("c", { fin: "Et vous, qu’en pensez-vous ?" })]);
+  assert.deepEqual(types(v).filter(([t]) => t === "fin"), [["fin", 2]]);
+  const lien = distinct("d", { fin: "claudeagency.fr" });
+  assert.equal(varieteSur(lien, [distinct("e", { fin: "claudeagency.fr" })]).some((x) => x.type === "fin"), false, "un lien repete n'est pas une phrase repetee");
+  const source = distinct("f") + "\n\nSource : Insee, 2026";
+  assert.equal(varieteSur(source, [distinct("g") + "\n\nSource : Insee, 2026"]).some((x) => x.type === "fin"), false);
+});
+
+test("varieteSur : meme phrase en gras (markdown ou Unicode, accents ignores), 2 mots minimum", () => {
+  const ancien = distinct("a", { gras: "La relance qui change tout" });
+  const cible = distinct("b", { gras: "La relance qui change tout" }).replace("**La relance qui change tout**", enGras("La relance qui change tout"));
+  const v = varieteSur(cible, [CINQ[0], ancien]);
+  assert.deepEqual(types(v).filter(([t]) => t === "gras"), [["gras", 2]]);
+  assert.match(v.find((x) => x.type === "gras").detail, /relance qui change tout/i);
+  assert.equal(varieteSur(distinct("b", { gras: "Jour" }), [distinct("a", { gras: "Jour" })]).some((x) => x.type === "gras"), false, "un seul mot : trop courant pour compter");
+});
+
+test("verifierTexte avec `precedents` : critere 16 nomme, le rang 1 nourrit aussi l'ancien critere, [] ne mesure rien", () => {
+  const ok = verifierTexte(distinct("six"), { precedents: CINQ });
+  const variete = ok.resultats.find((x) => x.nom === NOM_VARIETE);
+  assert.equal(variete.bon, true, variete.detail);
+  assert.match(variete.detail, /5 posts compares/);
+  assert.equal(ok.resultats.some((x) => x.nom === "schema different du post precedent"), true);
+  assert.equal(ok.total, verifierTexte(distinct("six")).total + 2);
+  const lointain = distinct("x", { accroche: "Un constat net sur les relances sans reponse.", fin: "Voila la suite." });
+  const ko = verifierTexte(distinct("y", { accroche: "Un autre constat sur les delais sans reponse.", fin: "Voila autre chose." }), { precedents: [CINQ[0], CINQ[1], lointain] });
+  assert.equal(ko.resultats.find((x) => x.nom === "schema different du post precedent").bon, true);
+  const v = ko.resultats.find((x) => x.nom === NOM_VARIETE);
+  assert.equal(v.bon, false);
+  assert.match(v.detail, /schema identique au post n°3/);
+  const vide = verifierTexte(distinct("six"), { precedents: [] });
+  assert.equal(vide.resultats.some((x) => x.nom === NOM_VARIETE), false);
+  assert.equal(vide.total, verifierTexte(distinct("six")).total);
+  const seul = verifierTexte(distinct("six"), { precedent: CINQ[0] });
+  assert.equal(seul.resultats.some((x) => x.nom === NOM_VARIETE), false, "un seul precedent donne a la main : ancien critere seulement");
 });
