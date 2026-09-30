@@ -422,6 +422,7 @@ async function mettreAJourStatistiques({
 }
 
 module.exports = {
+  appelNotion,
   creerBaseCommentaires,
   creerVueComparaisonHebdomadaire,
   calculerComparaisonHebdomadaire,
