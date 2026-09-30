@@ -241,3 +241,45 @@ test('un succes ne cree AUCUNE entree dans le registre d\'echecs (pas de faux po
     fs.rmSync(cheminRegistreEchecs, { force: true });
   }
 });
+
+test('un serveur MCP sans Mcp-Session-Id (sans etat) fonctionne : aucune erreur, aucun en-tete de session envoye ensuite', async () => {
+  const fetchOriginal = global.fetch;
+  const entetesSessionVus = [];
+  global.fetch = async (url, opts) => {
+    const corps = JSON.parse(opts.body);
+    entetesSessionVus.push(opts.headers['Mcp-Session-Id']);
+    if (corps.method === 'initialize') {
+      return { ok: true, status: 200, headers: { get: () => null }, text: async () => JSON.stringify({ jsonrpc: '2.0', id: 1, result: {} }) };
+    }
+    if (corps.method === 'notifications/initialized') {
+      return { ok: true, status: 200, headers: { get: () => null }, text: async () => '' };
+    }
+    const enveloppe = { successful: true, data: { results: [{ response: { successful: true, data: { id: 'aFqu-W7ClW' } } }] } };
+    return { ok: true, status: 200, headers: { get: () => null }, text: async () => JSON.stringify({ jsonrpc: '2.0', id: 2, result: { content: [{ type: 'text', text: JSON.stringify(enveloppe) }] } }) };
+  };
+  const cheminRegistreEchecs = cheminRegistreJetable();
+  try {
+    const resultat = await executerActionComposio('LINKEDIN_GET_MY_INFO', { compte: 'julien-agency', arguments: {}, apiKey: 'ck_test', cheminRegistreEchecs });
+    assert.equal(resultat.data.id, 'aFqu-W7ClW');
+    assert.deepEqual(entetesSessionVus, [undefined, undefined, undefined], 'aucun Mcp-Session-Id ne doit etre envoye');
+    assert.equal(fs.existsSync(cheminRegistreEchecs), false);
+  } finally {
+    global.fetch = fetchOriginal;
+    fs.rmSync(cheminRegistreEchecs, { force: true });
+  }
+});
+
+test('un HTTP != 200 a initialize reste une erreur meme sans Mcp-Session-Id', async () => {
+  const fetchOriginal = global.fetch;
+  global.fetch = async () => ({ ok: false, status: 500, headers: { get: () => null }, text: async () => JSON.stringify({ error: 'boom' }) });
+  const cheminRegistreEchecs = cheminRegistreJetable();
+  try {
+    await assert.rejects(
+      () => executerActionComposio('LINKEDIN_GET_MY_INFO', { compte: 'julien-agency', arguments: {}, apiKey: 'ck_test', cheminRegistreEchecs }),
+      /HTTP 500/
+    );
+  } finally {
+    global.fetch = fetchOriginal;
+    fs.rmSync(cheminRegistreEchecs, { force: true });
+  }
+});

@@ -157,11 +157,11 @@ async function executerActionMcpBrut(slug, { arguments: args = {}, userId, apiKe
     null,
     'initialize'
   );
-  if (!sessionId) {
-    const err = new Error('Composio MCP (initialize) : aucun Mcp-Session-Id recu, session non etablie.');
-    err.source = 'composio';
-    throw err;
-  }
+  // Mcp-Session-Id est FACULTATIF dans le protocole MCP (transport HTTP streamable) : un serveur
+  // sans etat ne l'envoie pas. Depuis le 30/09/2026 connect.composio.dev/mcp repond 200 a
+  // `initialize` sans cet en-tete ; on continue alors sans session (appelMcpBrut n'envoie
+  // l'en-tete que si sessionId est renseigne). Les vrais echecs (HTTP != 200, corps illisible)
+  // restent des erreurs, levees par appelMcpBrut.
 
   // Notification standard MCP, pas de reponse attendue -- ignore le corps.
   await appelMcpBrut({ jsonrpc: '2.0', method: 'notifications/initialized' }, cle, sessionId, 'notifications/initialized');
