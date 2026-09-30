@@ -116,6 +116,10 @@ Elles vivent ici maintenant, une fois pour toutes, pour ne plus avoir à les ret
   envoyer un message ou un mail, modifier un réglage partagé : toujours attendre un accord
   explicite donné **dans la conversation en cours**, jamais déduit d'un accord donné une fois
   dans le passé pour un cas différent.
+  **Exception — posts LinkedIn des comptes `julien-agency` et `julien-partners`** : feu vert
+  permanent donné par Julien par écrit (mail du 29/09/2026, 22h08). On corrige, programme et
+  publie, puis on lui envoie les liens LinkedIn. Tout le reste (clients, autres comptes, mails)
+  garde la règle du feu vert.
 - **Aucun envoi d'email par outil/CLI, jamais** (règle ajoutée le 18/09/2026, après un envoi réel
   via `hostinger-mail-claudeagency` — accord explicite obtenu avant l'envoi, mais le canal
   lui-même n'est plus autorisé, décision prise une fois l'envoi déjà parti et irréversible). Un
