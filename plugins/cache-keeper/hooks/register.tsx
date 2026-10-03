@@ -56,7 +56,9 @@ const DIVIDER = `<svg xmlns="http://www.w3.org/2000/svg" width="1" height="16" v
 const findFast = async ($: EngineInterface): Promise<CacheFast> => {
   const row = (await $.config.list()).find(one => /fast/i.test(one.key) && typeof one.value === 'boolean')
   if (row !== undefined) return { kind: 'config', key: row.key, isOn: row.value === true }
-  const hasCommand = (await $.command.list()).some(command => command.name === 'fast')
+  // /fast answers "not available in the Agent SDK" under the desktop app: offer it on the terminal only.
+  const isTerminal = (await $.session.surfaces()).includes('terminal')
+  const hasCommand = isTerminal && (await $.command.list()).some(command => command.name === 'fast')
 
   return hasCommand ? { kind: 'command' } : null
 }

@@ -26,6 +26,16 @@ const parse = (text: string): string[] => {
   }
 }
 
+const PICK = /^\s*[1-9](\s*(,|;|\+|&|et)\s*[1-9])*\s*\.?\s*$/i
+
+const pick = (text: string, list: string[]): string[] => {
+  if (list.length === 0 || !PICK.test(text)) return []
+  const numbers = [...new Set(text.match(/[1-9]/g) ?? [])].map(Number)
+  if (numbers.some(n => n > list.length)) return []
+
+  return numbers.map(n => list[n - 1]!)
+}
+
 export const register: Register = on => {
   on('session.start', async ($, e, next) => {
     await $.command.register({
@@ -47,10 +57,18 @@ export const register: Register = on => {
     return { text: isOn ? 'Prochaines étapes activées.' : 'Prochaines étapes coupées.' }
   })
 
+  // "1", "1 et 3", "2, 3" or "1+2" typed while suggestions show sends those suggestions.
   on('prompt.submit', async ($, e, next) => {
+    const list = await read($, steps)
     await update($, steps, () => [])
+    const picked = pick(e.text, list)
+    if (picked.length === 0) return next(e)
 
-    return next(e)
+    const text = picked.length === 1
+      ? picked[0]!
+      : `Fais ces étapes dans l'ordre :\n${picked.map((step, index) => `${index + 1}. ${step}`).join('\n')}`
+
+    return next({ ...e, text })
   })
 
   on('turn.complete', async ($, e, next) => {
@@ -88,7 +106,7 @@ export const register: Register = on => {
         <Text bold color={ACCENT}>
           Prochaines étapes
         </Text>
-        <Text dimColor>{isThinking ? 'en préparation…' : 'touche 1, 2 ou 3 pour envoyer'}</Text>
+        <Text dimColor>{isThinking ? 'en préparation…' : 'clic, touche 1 à 3, ou tape « 1 et 2 »'}</Text>
         <Box flexGrow={1} />
         {!isThinking && (
           <Button key="dismiss" label="Ignorer" role="dismiss" dimColor onPress={() => update($, steps, () => [])} />
