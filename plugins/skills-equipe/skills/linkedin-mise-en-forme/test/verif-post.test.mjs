@@ -200,6 +200,17 @@ test("plus de 6 emojis refuse, 3 emojis ou moins acceptes", () => {
   assert.equal(critere(CONFORME, "6 emojis au maximum").bon, true);
 });
 
+test("chaque emoji compte pour un, selecteur de variante et plage U+23xx compris", () => {
+  // Coeur + selecteur U+FE0F comptait 2 ; sablier et reveil (U+23xx) comptaient 0.
+  const corps = CONFORME.replace(
+    "Les trois signes utiles",
+    ["\u{2764}\u{FE0F}", "\u{23F3}", "\u{23F0}", "\u{231B}"].map((e) => `${e} Un point.\n\n`).join("") + "Les trois signes utiles"
+  );
+  const avant = Number(critere(CONFORME, "6 emojis au maximum").detail.split(" ")[0]);
+  assert.equal(critere(corps, "6 emojis au maximum").detail, `${avant + 4} trouve(s)`);
+  assert.equal(critere(corps, "emojis en tete de ligne").bon, true);
+});
+
 test("un emoji hors tete de ligne refuse", () => {
   const corps = CONFORME.replace(
     "Un **processus trop lent** coute",

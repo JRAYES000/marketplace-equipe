@@ -14,9 +14,10 @@ julien-agency ».
 ## Regles d'ecriture -- linkedin-mise-en-forme, source de verite (rebranche le 22/09/2026)
 
 Cette skill redige des posts LinkedIn a publier (pas des commentaires) : elle applique donc les
-douze criteres documentes dans `linkedin-mise-en-forme/SKILL.md` (accroche en question, au moins
-huit passages en gras, trois titres de section, 3 a 6 emojis en tete de ligne, aucune formulation
-interdite, etc.) -- ce fichier-ci ne les redecrit pas, `linkedin-mise-en-forme` fait foi.
+criteres documentes dans `linkedin-mise-en-forme/SKILL.md` -- ce fichier-ci ne les redecrit pas,
+`linkedin-mise-en-forme` fait foi. (Jusqu'au 03/10/2026, cette ligne en recopiait la version du
+18/09 -- accroche en question, huit gras, trois titres --, perimee depuis l'assouplissement du
+29/09 : c'est exactement la derive qu'un renvoi sans recopie evite.)
 
 **Garde-fou automatique**, jamais duplique : `lib/publier.js` (`publierPost`) et `dry-run.js`
 (`executerPourCompte`) importent tous les deux `convertirGras`/`validerMiseEnForme` depuis
