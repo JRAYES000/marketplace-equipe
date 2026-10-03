@@ -20,6 +20,9 @@ export type CacheHandoff = { status: 'pending' } | { status: 'ready'; text: stri
 // A prompt held back because sending it would rewrite a large cold cache.
 export type CacheHeld = { text: string; tokens: number } | null
 
+// Context tokens after each of the last turns, oldest first: the weather chart's bars.
+export type CacheHistory = number[]
+
 declare module 'claude-code' {
   interface PluginState {
     'cache-keeper': {
@@ -30,6 +33,7 @@ declare module 'claude-code' {
       handoff: CacheHandoff
       held: CacheHeld
       isCompacting: boolean
+      history: CacheHistory
     }
   }
 }

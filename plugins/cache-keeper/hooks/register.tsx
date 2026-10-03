@@ -1,7 +1,7 @@
 import { atom, read, update } from 'claude-code'
 import type { EngineInterface, ModelUsage, Register } from 'claude-code'
 
-import type { CacheAlert, CacheHandoff, CacheHeld, CacheMeter, CacheTtl } from '../types'
+import type { CacheAlert, CacheHandoff, CacheHeld, CacheHistory, CacheMeter, CacheTtl } from '../types'
 
 const MINUTE = 60 * 1000
 const TICK_MS = 30 * 1000
@@ -17,6 +17,10 @@ const ttl = atom({ plugin: 'cache-keeper', key: 'ttl' } as const, { minutes: 60,
 const handoff = atom({ plugin: 'cache-keeper', key: 'handoff' } as const, null)
 const held = atom({ plugin: 'cache-keeper', key: 'held' } as const, null)
 const isCompacting = atom({ plugin: 'cache-keeper', key: 'isCompacting' } as const, false)
+const history = atom({ plugin: 'cache-keeper', key: 'history' } as const, [])
+
+// Turns the context chart keeps.
+const HISTORY = 12
 
 // The lastAt an alert was raised for: one alert per warm period, a dismissal stays dismissed.
 let warnedFor = -1
@@ -58,7 +62,36 @@ const gauge = (percent: number, tone: Tone) => {
 <rect width="${fill}" height="6" rx="3" fill="${TONE[tone]}"/></svg>`
 }
 
-const DIVIDER = `<svg xmlns="http://www.w3.org/2000/svg" width="1" height="16" viewBox="0 0 1 16">\
+// The context forecast, after Anthropic's token-weather mod: single-width symbols, not emoji,
+// so they line up in a terminal font too.
+const weather = (percent: number) =>
+  percent < 25 ? { icon: '☀', word: 'dégagé' }
+    : percent < 50 ? { icon: '☁', word: 'nuageux' }
+    : percent < 75 ? { icon: '☂', word: 'averses' }
+    : percent < 90 ? { icon: '☇', word: 'orage' }
+    : { icon: '↯', word: 'compacter bientôt' }
+
+// Bars scale to the fullest turn shown, so growth shows at any fill; the latest turn is opaque.
+const chart = (readings: CacheHistory, tone: Tone) => {
+  const top = Math.max(...readings, 1)
+  const bars = readings.map((tokens, index) => {
+    const height = Math.max(2, Math.round((tokens / top) * 14))
+    const opacity = index === readings.length - 1 ? 1 : 0.5
+
+    return `<rect x="${index * 4}" y="${14 - height}" width="3" height="${height}" rx="1" fill="${TONE[tone]}" fill-opacity="${opacity}"/>`
+  })
+
+  return `<svg xmlns="http://www.w3.org/2000/svg" width="${readings.length * 4}" height="14" viewBox="0 0 ${readings.length * 4} 14">${bars.join('')}</svg>`
+}
+
+const BLOCKS = '▁▂▃▄▅▆▇█'
+const blocks = (readings: CacheHistory) => {
+  const top = Math.max(...readings, 1)
+
+  return readings.map(tokens => BLOCKS[Math.min(7, Math.floor((tokens / top) * 7))]).join('')
+}
+
+const DIVIDER =`<svg xmlns="http://www.w3.org/2000/svg" width="1" height="16" viewBox="0 0 1 16">\
 <rect width="1" height="16" fill="#8A8A8A" fill-opacity="0.35"/></svg>`
 
 // Milliseconds before the cache lapses; undefined before the first request.
@@ -234,6 +267,9 @@ export const register: Register = on => {
     const done = await next(e)
     if (e.agentId !== undefined) return done
 
+    const tokens = (await $.session.usage()).context.tokens ?? 0
+    if (tokens > 0) await update($, history, readings => [...readings, tokens].slice(-HISTORY))
+
     const pending = await read($, handoff)
     if (pending?.status === 'pending') {
       const text = e.answer.trim()
@@ -251,6 +287,7 @@ export const register: Register = on => {
     const waiting = await read($, held)
     const compacting = await read($, isCompacting)
     const life = await read($, ttl)
+    const readings = await read($, history)
     if (e.props.hasSurvey || figures === null) return next(e)
 
     const elements = $.ui.resolve(e)
@@ -291,9 +328,30 @@ export const register: Register = on => {
             cacheTone(figures.cacheMinutes, life.minutes) === 'calm' ? lifetime : rewrite,
           )
 
+    // Contexte: the forecast symbol, the gauge, the figure, then the last turns and what the last one added.
+    const contextTone = usageTone(figures.contextPercent)
+    const forecast = weather(figures.contextPercent)
+    const delta = readings.length < 2 ? 0 : readings[readings.length - 1]! - readings[readings.length - 2]!
+    const trend = delta > 0 ? `▲ +${kilo(delta)}` : delta < 0 ? `▼ ${kilo(-delta)}` : undefined
+    const context = (
+      <Box key="context" flexDirection="row" alignItems="center" gap={1}>
+        <Text color={TONE[contextTone]} bold>{forecast.icon}</Text>
+        <Text dimColor>Contexte</Text>
+        {Svg !== undefined && (
+          <Svg source={gauge(figures.contextPercent, contextTone)} alt={`Contexte ${figures.contextPercent} %, ${forecast.word}`} width={64} height={6} />
+        )}
+        <Text bold color={TONE[contextTone]}>{figures.contextPercent} %</Text>
+        <Text dimColor>{kilo(figures.tokens)}</Text>
+        {readings.length >= 2 && (Svg === undefined
+          ? <Text color={TONE[contextTone]}>{blocks(readings)}</Text>
+          : <Svg source={chart(readings, contextTone)} alt={`Contexte des ${readings.length} derniers tours`} width={readings.length * 4} height={14} />)}
+        {trend !== undefined && <Text dimColor>{trend}</Text>}
+      </Box>
+    )
+
     const metrics = [
       cache,
-      metric('context', 'Contexte', `${figures.contextPercent} %`, usageTone(figures.contextPercent), figures.contextPercent, kilo(figures.tokens)),
+      context,
       ...figures.limits.map(limit =>
         metric(
           `limit-${limit.label}`,
