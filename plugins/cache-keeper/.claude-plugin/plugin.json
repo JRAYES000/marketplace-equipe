@@ -1,6 +1,6 @@
 {
   "name": "cache-keeper",
-  "version": "0.4.0",
+  "version": "0.5.0",
   "description": "Jauges colorées cache, contexte et quotas au-dessus du prompt ; boutons Compact, Handoff, Clear et reprendre ; alerte 5 min avant l'expiration du cache",
   "types": "./types/index.d.ts",
   "author": {
