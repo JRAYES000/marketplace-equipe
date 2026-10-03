@@ -1,7 +1,7 @@
 import { atom, read, update } from 'claude-code'
 import type { EngineInterface, Register } from 'claude-code'
 
-import type { CacheAlert, CacheFast, CacheHandoff, CacheMeter } from '../types'
+import type { CacheAlert, CacheHandoff, CacheMeter } from '../types'
 
 // Prompt cache lifetime of these sessions (1 h); the alert fires this long before it lapses.
 const TTL_MS = 60 * 60 * 1000
@@ -11,7 +11,6 @@ const TICK_MS = 30 * 1000
 const lastAt = atom({ plugin: 'cache-keeper', key: 'lastAt' } as const, 0)
 const alert = atom({ plugin: 'cache-keeper', key: 'alert' } as const, null)
 const meter = atom({ plugin: 'cache-keeper', key: 'meter' } as const, null)
-const fast = atom({ plugin: 'cache-keeper', key: 'fast' } as const, null)
 const handoff = atom({ plugin: 'cache-keeper', key: 'handoff' } as const, null)
 
 // The lastAt an alert was raised for: one alert per warm period, a dismissal stays dismissed.
@@ -52,17 +51,6 @@ const gauge = (percent: number, tone: Tone) => {
 const DIVIDER = `<svg xmlns="http://www.w3.org/2000/svg" width="1" height="16" viewBox="0 0 1 16">\
 <rect width="1" height="16" fill="#8A8A8A" fill-opacity="0.35"/></svg>`
 
-// Fast mode through the /config row when the engine has one (its state then known), else /fast.
-const findFast = async ($: EngineInterface): Promise<CacheFast> => {
-  const row = (await $.config.list()).find(one => /fast/i.test(one.key) && typeof one.value === 'boolean')
-  if (row !== undefined) return { kind: 'config', key: row.key, isOn: row.value === true }
-  // /fast answers "not available in the Agent SDK" under the desktop app: offer it on the terminal only.
-  const isTerminal = (await $.session.surfaces()).includes('terminal')
-  const hasCommand = isTerminal && (await $.command.list()).some(command => command.name === 'fast')
-
-  return hasCommand ? { kind: 'command' } : null
-}
-
 const refresh = async ($: EngineInterface) => {
   const usage = await $.session.usage()
   const last = await read($, lastAt)
@@ -81,8 +69,6 @@ const refresh = async ($: EngineInterface) => {
     })),
   }
   await update($, meter, () => next)
-  const fastMode = await findFast($).catch(() => null)
-  await update($, fast, () => fastMode)
 
   const isLapsing = left !== undefined && left > 0 && left <= WARN_MS
   const current = await read($, alert)
@@ -147,7 +133,6 @@ export const register: Register = on => {
   on('ui.render', { component: 'AbovePrompt' }, async ($, e, next) => {
     const figures = await read($, meter)
     const current = await read($, alert)
-    const fastMode = await read($, fast)
     const passing = await read($, handoff)
     if (e.props.hasSurvey || figures === null) return next(e)
 
@@ -195,26 +180,18 @@ export const register: Register = on => {
       ),
     ]
 
-    const toggleFast = async () => {
-      if (fastMode?.kind === 'config') {
-        const result = await $.config.set({ key: fastMode.key, value: !fastMode.isOn })
-        if ('deny' in result && result.deny !== undefined) $.ui.toast(`Mode fast : ${result.deny}`)
-      } else {
-        await $.command.run({ command: 'fast' })
-      }
-      await update($, fast, () => null)
-      await refresh($)
-    }
-
     const actions = (
       <Box key="actions" flexDirection="row" alignItems="center" gap={1}>
-        {fastMode !== null && (
+        {isIdle && (
           <Button
-            key="fast"
-            label={fastMode.kind === 'config' ? (fastMode.isOn ? 'Fast : activé' : 'Fast : désactivé') : 'Mode fast'}
-            variant={fastMode.kind === 'config' && fastMode.isOn ? 'primary' : 'secondary'}
-            dimColor={!(fastMode.kind === 'config' && fastMode.isOn)}
-            onPress={toggleFast}
+            key="compact-now"
+            label="Compact"
+            dimColor
+            onPress={async () => {
+              await update($, alert, () => null)
+              const { skip } = await $.session.compact()
+              if (skip !== undefined) $.ui.toast(`Compactage refusé : ${skip}`)
+            }}
           />
         )}
         {isIdle && passing === null && (

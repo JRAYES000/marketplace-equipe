@@ -10,9 +10,6 @@ export type CacheMeter = {
   limits: CacheMeterLimit[]
 } | null
 
-// How fast mode is reached here: a /config row (its state known), the /fast command, or not at all.
-export type CacheFast = { kind: 'config'; key: string; isOn: boolean } | { kind: 'command' } | null
-
 // The last handoff's text while it waits for "Clear et reprendre"; `pending` while /handoff runs.
 export type CacheHandoff = { status: 'pending' } | { status: 'ready'; text: string } | null
 
@@ -22,7 +19,6 @@ declare module 'claude-code' {
       lastAt: number
       alert: CacheAlert
       meter: CacheMeter
-      fast: CacheFast
       handoff: CacheHandoff
     }
   }
