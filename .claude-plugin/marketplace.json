@@ -11,11 +11,6 @@
       "description": "Les meilleures skills partagées de l'équipe : mode autonome à condition d'arrêt (fonce), qualité des réponses (phrase-magique), parallélisation des gros lots, délégation à une IA moins chère."
     },
     {
-      "name": "collision-guard",
-      "source": "./plugins/collision-guard",
-      "description": "Avant chaque modification de fichier, demande quoi faire si une autre session l'a modifié dans les 30 dernières minutes"
-    },
-    {
       "name": "next-steps",
       "source": "./plugins/next-steps",
       "description": "À la fin de chaque tour, propose 3 prochaines étapes cliquables au-dessus du prompt"
