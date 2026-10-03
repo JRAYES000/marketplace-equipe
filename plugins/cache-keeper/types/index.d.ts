@@ -29,6 +29,7 @@ declare module 'claude-code' {
       ttl: CacheTtl
       handoff: CacheHandoff
       held: CacheHeld
+      isCompacting: boolean
     }
   }
 }

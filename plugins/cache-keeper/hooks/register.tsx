@@ -16,6 +16,7 @@ const meter = atom({ plugin: 'cache-keeper', key: 'meter' } as const, null)
 const ttl = atom({ plugin: 'cache-keeper', key: 'ttl' } as const, { minutes: 60, source: 'assumed' })
 const handoff = atom({ plugin: 'cache-keeper', key: 'handoff' } as const, null)
 const held = atom({ plugin: 'cache-keeper', key: 'held' } as const, null)
+const isCompacting = atom({ plugin: 'cache-keeper', key: 'isCompacting' } as const, false)
 
 // The lastAt an alert was raised for: one alert per warm period, a dismissal stays dismissed.
 let warnedFor = -1
@@ -118,6 +119,24 @@ const markWarm = async ($: EngineInterface) => {
   await update($, lastAt, () => now)
   await update($, alert, () => null)
   await refresh($)
+}
+
+// Compacts through /compact, the command the person would type: a press on $.session.compact()
+// did nothing visible in the desktop app (03/10/2026). Says so when it fails; true once compacted.
+const compactNow = async ($: EngineInterface) => {
+  await update($, alert, () => null)
+  await update($, isCompacting, () => true)
+  try {
+    await $.command.run({ command: 'compact' })
+
+    return true
+  } catch (error) {
+    $.ui.toast(`Compactage impossible : ${error instanceof Error ? error.message : String(error)}`, { timeoutMs: 10000 })
+
+    return false
+  } finally {
+    await update($, isCompacting, () => false)
+  }
 }
 
 // What the first request after a pause says about the cache: read back means it outlived the
@@ -230,6 +249,7 @@ export const register: Register = on => {
     const current = await read($, alert)
     const passing = await read($, handoff)
     const waiting = await read($, held)
+    const compacting = await read($, isCompacting)
     const life = await read($, ttl)
     if (e.props.hasSurvey || figures === null) return next(e)
 
@@ -288,16 +308,12 @@ export const register: Register = on => {
 
     const actions = (
       <Box key="actions" flexDirection="row" alignItems="center" gap={1}>
-        {isIdle && (
+        {isIdle && !compacting && (
           <Button
             key="compact-now"
             label="Compact"
             dimColor
-            onPress={async () => {
-              await update($, alert, () => null)
-              const { skip } = await $.session.compact()
-              if (skip !== undefined) $.ui.toast(`Compactage refusé : ${skip}`)
-            }}
+            onPress={() => compactNow($)}
           />
         )}
         {isIdle && passing === null && (
@@ -324,6 +340,11 @@ export const register: Register = on => {
 
     return (
       <Box flexDirection="column" gap={1}>
+        {compacting && (
+          <Text bold color={TONE.accent}>
+            Compactage en cours… Sur une longue conversation, ça peut prendre une minute.
+          </Text>
+        )}
         {waiting !== null && isIdle && (
           <Box flexDirection="column" gap={1}>
             <Text bold color={TONE.act}>
@@ -336,8 +357,8 @@ export const register: Register = on => {
                 variant="primary"
                 onPress={async () => {
                   await update($, held, () => null)
-                  await $.session.compact()
-                  await send(waiting.text)
+                  if (await compactNow($)) await send(waiting.text)
+                  else await $.prompt.fill({ text: waiting.text })
                 }}
               />
               <Button
@@ -380,10 +401,7 @@ export const register: Register = on => {
               <Button
                 key="compact"
                 label="Compacter"
-                onPress={async () => {
-                  await update($, alert, () => null)
-                  await $.session.compact()
-                }}
+                onPress={() => compactNow($)}
               />
               <Button key="dismiss" label="Ignorer" role="dismiss" onPress={() => update($, alert, () => null)} />
             </Box>
