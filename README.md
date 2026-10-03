@@ -56,6 +56,26 @@ La colonne *Skill* ci-dessous abrège au nom court pour tenir dans le tableau ; 
 
 > **Une nouvelle skill n'apparaît pas ?** Les mises à jour ne sont pas instantanées. Va dans **Réglages → Capacités → Plugins**, et rafraîchis (ou désinstalle puis réinstalle `skills-equipe`). Redémarrer Claude Desktop aide aussi.
 
+## 🧱 Les mods (à installer un par un)
+
+Un mod change ce que tu vois dans Claude Code : une ligne d'info sous le prompt, des boutons au-dessus, une question avant une action. Il marche dans l'app desktop (onglet Code) et dans le terminal.
+
+**Attention : un mod s'active tout seul dès qu'il est installé.** C'est pour ça qu'ils ne sont pas dans `skills-equipe` : tu choisis lesquels tu veux. Pour en retirer un, désinstalle-le.
+
+Pour en installer un, tape dans Claude Code :
+
+```
+/plugin install collision-guard@marketplace-equipe
+```
+
+Remplace `collision-guard` par le nom du mod voulu. Le mod apparaît à la prochaine conversation.
+
+| Mod | Version | Dernière mise à jour | Ce qu'il fait |
+|---|---|---|---|
+| `collision-guard` | 0.1.0 | 03/10/2026 | Tu travailles dans deux conversations en même temps ? Avant que Claude modifie un fichier, il vérifie si l'autre conversation l'a modifié dans les 30 dernières minutes. Si oui, une question s'affiche : **Continuer**, **Passer en worktree** (une copie à part du projet) ou **Annuler**. Ça évite qu'une conversation écrase le travail de l'autre. |
+| `next-steps` | 0.1.0 | 03/10/2026 | À la fin de chaque réponse, trois idées de « prochaine étape » s'affichent au-dessus du prompt. Un clic (ou la touche 1, 2 ou 3) l'envoie à Claude. **Ignorer** les fait disparaître. `/next-steps off` le coupe, `/next-steps on` le remet. Chaque suggestion consomme un peu de ton quota. |
+| `cache-keeper` | 0.1.0 | 03/10/2026 | Une ligne sous le prompt montre : combien de minutes il reste avant que Claude « oublie » la conversation en mémoire rapide (le cache), la taille de la conversation, ton quota sur 5 h et sur la semaine. 5 minutes avant l'oubli, un bandeau propose **Garder au chaud** (relance la mémoire pour une heure), **Compacter** (résume la conversation) ou **Ignorer**. `/cache` affiche l'état. |
+
 ## ⭐ Les modules à installer toi-même
 
 Ceux-là ne sont pas dans notre paquet : ils appartiennent à Anthropic ou à d'autres gens, qui les mettent à jour de leur côté. Installe ceux qui servent à **ton** travail, pas tous.
