@@ -65,14 +65,13 @@ Un mod change ce que tu vois dans Claude Code : une ligne d'info sous le prompt,
 Pour en installer un, tape dans Claude Code :
 
 ```
-/plugin install collision-guard@marketplace-equipe
+/plugin install next-steps@marketplace-equipe
 ```
 
-Remplace `collision-guard` par le nom du mod voulu. Le mod apparaît à la prochaine conversation.
+Remplace `next-steps` par le nom du mod voulu. Le mod apparaît à la prochaine conversation.
 
 | Mod | Version | Dernière mise à jour | Ce qu'il fait |
 |---|---|---|---|
-| `collision-guard` | 0.2.1 | 03/10/2026 | Tu travailles dans deux conversations en même temps ? Avant que Claude modifie un fichier, il vérifie si l'autre conversation l'a modifié dans les 30 dernières minutes. Si oui, une question s'affiche : **Continuer**, **Passer en worktree** (une copie à part du projet) ou **Annuler**. Il repère aussi un fichier changé par une commande, par un autre programme ou par toi à la main, tant que ce n'est pas cette conversation qui l'a fait. Ça évite qu'une conversation écrase le travail de l'autre. Une conversation lancée en ligne de commande (`claude -p`) ne pose jamais la question, mais ses modifications sont repérées par les autres. |
 | `next-steps` | 0.4.0 | 03/10/2026 | À la fin de chaque réponse, trois idées de « prochaine étape » s'affichent au-dessus du prompt. Un clic (ou la touche 1, 2 ou 3) l'envoie à Claude. Tu peux aussi taper « 1 et 3 » dans le prompt : Claude reçoit les deux étapes, dans l'ordre. **Ignorer** les fait disparaître. `/next-steps off` le coupe, `/next-steps on` le remet. Rien n'est proposé quand Claude vient de te poser une question, ni après une commande (`/handoff`, une skill…) ou un compactage. Chaque suggestion consomme un peu de ton quota. |
 | `cache-keeper` | 0.5.0 | 03/10/2026 | Une rangée de jauges colorées au-dessus du prompt (vert ça va, orange attention, rouge il faut agir) : combien de minutes il reste avant que Claude « oublie » la conversation en mémoire rapide (le cache), la taille de la conversation, ton quota de la session de 5 h et de la semaine, avec le temps avant leur remise à zéro. La durée de la mémoire rapide (1 h ou 5 min) est mesurée pour de vrai : elle tombe à 5 min quand un quota est dépassé. Quand la mémoire est presque ou déjà vidée, la jauge dit combien de texte le prochain message devra relire. Si tu envoies un message alors qu'elle est vidée et que la conversation est longue, il est mis de côté : **Compacter puis envoyer**, **Envoyer quand même** ou **Annuler**. Une notification te prévient aussi si la mémoire a été vidée sans raison apparente. À droite, deux boutons : **Compact** résume la conversation pour libérer de la place ; **Handoff** fait écrire à Claude un document de passation (il faut la skill `/handoff`) ; une fois prêt, **Clear et reprendre** vide la conversation et repart de ce document. 5 minutes avant l'oubli, un bandeau propose **Garder au chaud** (relance la mémoire), **Compacter** ou **Ignorer**. `/cache` affiche l'état. |
 
