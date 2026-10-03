@@ -1,7 +1,7 @@
 import { atom, read, update } from 'claude-code'
 import type { EngineInterface, Register } from 'claude-code'
 
-import type { CacheAlert, CacheMeter } from '../types'
+import type { CacheAlert, CacheFast, CacheHandoff, CacheMeter } from '../types'
 
 // Prompt cache lifetime of these sessions (1 h); the alert fires this long before it lapses.
 const TTL_MS = 60 * 60 * 1000
@@ -11,6 +11,8 @@ const TICK_MS = 30 * 1000
 const lastAt = atom({ plugin: 'cache-keeper', key: 'lastAt' } as const, 0)
 const alert = atom({ plugin: 'cache-keeper', key: 'alert' } as const, null)
 const meter = atom({ plugin: 'cache-keeper', key: 'meter' } as const, null)
+const fast = atom({ plugin: 'cache-keeper', key: 'fast' } as const, null)
+const handoff = atom({ plugin: 'cache-keeper', key: 'handoff' } as const, null)
 
 // The lastAt an alert was raised for: one alert per warm period, a dismissal stays dismissed.
 let warnedFor = -1
@@ -19,10 +21,11 @@ let warnedFor = -1
 const TONE = { calm: '#2E9E5B', watch: '#C98A0B', act: '#D14B3A', accent: '#D97757' } as const
 type Tone = keyof typeof TONE
 
-const WINDOW_LABEL: Record<string, string> = { five_hour: '5 h', seven_day: 'Semaine' }
+const WINDOW_LABEL: Record<string, string> = { five_hour: 'Session 5 h', seven_day: 'Semaine' }
+
+const RESUME = 'Reprends le travail à partir de ce document de passation :\n\n'
 
 const kilo = (tokens: number) => `${Math.round(tokens / 1000)}k`
-const money = (usd: number) => usd.toFixed(2).replace('.', ',')
 
 const usageTone = (percent: number): Tone => (percent < 60 ? 'calm' : percent < 85 ? 'watch' : 'act')
 const cacheTone = (minutes: number): Tone => (minutes > 15 ? 'calm' : minutes > 5 ? 'watch' : 'act')
@@ -46,6 +49,18 @@ const gauge = (percent: number, tone: Tone) => {
 <rect width="${fill}" height="6" rx="3" fill="${TONE[tone]}"/></svg>`
 }
 
+const DIVIDER = `<svg xmlns="http://www.w3.org/2000/svg" width="1" height="16" viewBox="0 0 1 16">\
+<rect width="1" height="16" fill="#8A8A8A" fill-opacity="0.35"/></svg>`
+
+// Fast mode through the /config row when the engine has one (its state then known), else /fast.
+const findFast = async ($: EngineInterface): Promise<CacheFast> => {
+  const row = (await $.config.list()).find(one => /fast/i.test(one.key) && typeof one.value === 'boolean')
+  if (row !== undefined) return { kind: 'config', key: row.key, isOn: row.value === true }
+  const hasCommand = (await $.command.list()).some(command => command.name === 'fast')
+
+  return hasCommand ? { kind: 'command' } : null
+}
+
 const refresh = async ($: EngineInterface) => {
   const usage = await $.session.usage()
   const last = await read($, lastAt)
@@ -62,9 +77,10 @@ const refresh = async ($: EngineInterface) => {
       percent: limit.percentUsed,
       resetsInMs: limit.resetsAt === undefined ? null : Date.parse(limit.resetsAt) - now,
     })),
-    usd: usage.cost?.usd ?? null,
   }
   await update($, meter, () => next)
+  const fastMode = await findFast($).catch(() => null)
+  await update($, fast, () => fastMode)
 
   const isLapsing = left !== undefined && left > 0 && left <= WARN_MS
   const current = await read($, alert)
@@ -113,7 +129,15 @@ export const register: Register = on => {
 
   on('turn.complete', async ($, e, next) => {
     const done = await next(e)
-    if (e.agentId === undefined && e.usage !== undefined) await markWarm($)
+    if (e.agentId !== undefined) return done
+
+    const pending = await read($, handoff)
+    if (pending?.status === 'pending') {
+      const text = e.answer.trim()
+      const ready: CacheHandoff = text === '' || e.isAborted ? null : { status: 'ready', text }
+      await update($, handoff, () => ready)
+    }
+    if (e.usage !== undefined) await markWarm($)
 
     return done
   })
@@ -121,6 +145,8 @@ export const register: Register = on => {
   on('ui.render', { component: 'AbovePrompt' }, async ($, e, next) => {
     const figures = await read($, meter)
     const current = await read($, alert)
+    const fastMode = await read($, fast)
+    const passing = await read($, handoff)
     if (e.props.hasSurvey || figures === null) return next(e)
 
     const elements = $.ui.resolve(e)
@@ -128,6 +154,12 @@ export const register: Register = on => {
     // The terminal has no Svg: its gauges fall back to the colored figure alone.
     const Svg = 'Svg' in elements ? elements.Svg : undefined
     const below = await next(e)
+    const isIdle = !e.props.isWorking
+
+    const divider = (key: string) =>
+      Svg === undefined
+        ? <Text key={key} dimColor>|</Text>
+        : <Svg key={key} source={DIVIDER} alt="séparateur" width={1} height={16} />
 
     const metric = (key: string, label: string, value: string, tone: Tone, percent: number | null, note?: string) => (
       <Box key={key} flexDirection="row" alignItems="center" gap={1}>
@@ -146,9 +178,63 @@ export const register: Register = on => {
         ? metric('cache', 'Cache', 'froid', 'act', 0)
         : metric('cache', 'Cache', `${figures.cacheMinutes} min`, cacheTone(figures.cacheMinutes), (figures.cacheMinutes / 60) * 100)
 
+    const metrics = [
+      cache,
+      metric('context', 'Contexte', `${figures.contextPercent} %`, usageTone(figures.contextPercent), figures.contextPercent, kilo(figures.tokens)),
+      ...figures.limits.map(limit =>
+        metric(
+          `limit-${limit.label}`,
+          limit.label,
+          `${Math.round(limit.percent)} %`,
+          usageTone(limit.percent),
+          limit.percent,
+          limit.resetsInMs === null ? undefined : `reset ${duration(limit.resetsInMs)}`,
+        ),
+      ),
+    ]
+
+    const toggleFast = async () => {
+      if (fastMode?.kind === 'config') {
+        const result = await $.config.set({ key: fastMode.key, value: !fastMode.isOn })
+        if ('deny' in result && result.deny !== undefined) $.ui.toast(`Mode fast : ${result.deny}`)
+      } else {
+        await $.command.run({ command: 'fast' })
+      }
+      await update($, fast, () => null)
+      await refresh($)
+    }
+
+    const actions = (
+      <Box key="actions" flexDirection="row" alignItems="center" gap={1}>
+        {fastMode !== null && (
+          <Button
+            key="fast"
+            label={fastMode.kind === 'config' ? (fastMode.isOn ? 'Fast : activé' : 'Fast : désactivé') : 'Mode fast'}
+            variant={fastMode.kind === 'config' && fastMode.isOn ? 'primary' : 'secondary'}
+            dimColor={!(fastMode.kind === 'config' && fastMode.isOn)}
+            onPress={toggleFast}
+          />
+        )}
+        {isIdle && passing === null && (
+          <Button
+            key="handoff"
+            label="Handoff"
+            dimColor
+            onPress={async () => {
+              await update($, handoff, () => ({ status: 'pending' }))
+              await $.command.run({ command: 'handoff' }).catch(async () => {
+                await update($, handoff, () => null)
+                $.ui.toast('Handoff impossible : la skill /handoff est introuvable.')
+              })
+            }}
+          />
+        )}
+      </Box>
+    )
+
     return (
       <Box flexDirection="column" gap={1}>
-        {current !== null && !e.props.isWorking && (
+        {current !== null && isIdle && (
           <Box flexDirection="column" gap={1}>
             <Text bold color={TONE.act}>
               Le cache expire dans {current.minutesLeft} min. Le prochain message réécrira {kilo(current.tokens)} tokens.
@@ -177,25 +263,29 @@ export const register: Register = on => {
             </Box>
           </Box>
         )}
-        <Box flexDirection="row" flexWrap="wrap" columnGap={3} rowGap={0}>
-          {cache}
-          {metric('context', 'Contexte', `${figures.contextPercent} %`, usageTone(figures.contextPercent), figures.contextPercent, kilo(figures.tokens))}
-          {figures.limits.map(limit =>
-            metric(
-              `limit-${limit.label}`,
-              limit.label,
-              `${Math.round(limit.percent)} %`,
-              usageTone(limit.percent),
-              limit.percent,
-              limit.resetsInMs === null ? undefined : `reset ${duration(limit.resetsInMs)}`,
-            ),
-          )}
-          {figures.usd !== null && (
-            <Box key="cost" flexDirection="row" gap={1}>
-              <Text dimColor>Coût API</Text>
-              <Text bold>{money(figures.usd)} $</Text>
-            </Box>
-          )}
+        {passing?.status === 'ready' && isIdle && (
+          <Box flexDirection="row" alignItems="center" gap={1}>
+            <Text bold color={TONE.accent}>Passation prête.</Text>
+            <Text dimColor>Repartir d'une conversation vierge avec ce document ?</Text>
+            <Button
+              key="resume"
+              label="Clear et reprendre"
+              variant="primary"
+              onPress={async () => {
+                const text = passing.text
+                await update($, handoff, () => null)
+                await $.command.run({ command: 'clear' })
+                await update($, lastAt, () => 0)
+                await $.prompt.submit({ text: `${RESUME}${text}` })
+              }}
+            />
+            <Button key="keep" label="Rester ici" role="dismiss" onPress={() => update($, handoff, () => null)} />
+          </Box>
+        )}
+        <Box flexDirection="row" flexWrap="wrap" alignItems="center" columnGap={2}>
+          {metrics.flatMap((one, index) => (index === 0 ? [one] : [divider(`divider-${index}`), one]))}
+          <Box flexGrow={1} />
+          {actions}
         </Box>
         {below}
       </Box>
