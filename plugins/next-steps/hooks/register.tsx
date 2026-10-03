@@ -36,6 +36,16 @@ const pick = (text: string, list: string[]): string[] => {
   return numbers.map(n => list[n - 1]!)
 }
 
+// An answer that ends on a question waits for the person's reply, not for suggestions.
+const endsOnQuestion = (answer: string) => {
+  const lastLine = answer.trim().split('\n').at(-1) ?? ''
+
+  return /\?$/.test(lastLine.replace(/[\s*_`)»"']+$/, ''))
+}
+
+// When a slash command or a compaction last ran: a turn that covers it gets no suggestions.
+let quietAt = 0
+
 export const register: Register = on => {
   on('session.start', async ($, e, next) => {
     await $.command.register({
@@ -71,10 +81,24 @@ export const register: Register = on => {
     return next({ ...e, text })
   })
 
+  on('command.run', async ($, e, next) => {
+    quietAt = await $.clock.now()
+
+    return next(e)
+  })
+
+  on('session.compact', async ($, e, next) => {
+    quietAt = await $.clock.now()
+
+    return next(e)
+  })
+
   on('turn.complete', async ($, e, next) => {
     const done = await next(e)
     const isMainAnswer = e.agentId === undefined && !e.isAborted && e.reason === 'answer'
     if (!isMainAnswer || !(await read($, isEnabled))) return done
+    const isAfterCommand = quietAt >= (await $.clock.now()) - e.durationMs - 1000
+    if (isAfterCommand || endsOnQuestion(e.answer)) return done
 
     // Outside the dispatch, so the turn ends at once.
     $.clock.after(1, async () => {
