@@ -11,6 +11,10 @@ const CANCEL = 'Annuler'
 type Entry = { session: string; at: number }
 type Ledger = Record<string, Entry>
 
+// Whether someone can answer: the desktop app, like `claude -p`, declares no surface at start
+// ($.session.surfaces() stays empty), but it draws the band above the prompt; `-p` never does.
+let hasDisplay = false
+
 // This session's shell runs: a file they touched changes its date without passing Edit or Write.
 const shellRuns: { from: number; to: number }[] = []
 
@@ -68,6 +72,12 @@ const otherChange = async ($: EngineInterface, path: string, key: string, sessio
 }
 
 export const register: Register = on => {
+  on('ui.render', { component: 'AbovePrompt' }, ($, e, next) => {
+    hasDisplay = true
+
+    return next(e)
+  })
+
   on('tool.call', async ($, e, next) => {
     if (e.tool === 'Bash' || e.tool === 'PowerShell') {
       const from = await $.clock.now()
@@ -88,7 +98,7 @@ export const register: Register = on => {
     const now = await $.clock.now()
     const other = await otherChange($, path, key, session, now)
 
-    if (other !== undefined && (await $.session.surfaces()).length > 0) {
+    if (other !== undefined && (hasDisplay || (await $.session.surfaces()).length > 0)) {
       const name = path.replace(/\\/g, '/').split('/').at(-1)
       const when = ago(now - other.at)
       const choice = await $.ui

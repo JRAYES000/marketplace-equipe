@@ -1,6 +1,6 @@
 {
   "name": "collision-guard",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "Avant chaque modification de fichier, demande quoi faire si une autre session l'a modifié dans les 30 dernières minutes",
   "author": {
     "name": "Julien Rayes"
