@@ -23,7 +23,7 @@
     {
       "name": "cache-keeper",
       "source": "./plugins/cache-keeper",
-      "description": "Jauges colorées cache, contexte, quotas et coût au-dessus du prompt ; alerte 5 min avant l'expiration du cache, avec relance ou compactage en un clic"
+      "description": "Jauges colorées cache, contexte et quotas au-dessus du prompt ; boutons Handoff, Clear et reprendre, mode fast ; alerte 5 min avant l'expiration du cache"
     }
   ]
 }
