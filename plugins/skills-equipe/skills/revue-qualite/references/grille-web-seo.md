@@ -3,7 +3,9 @@
 Article de blog, page, fiche, métadonnées, maillage. Les règles de fond d'un site ont
 priorité sur cette grille : si une skill dédiée au site existe dans la session (par exemple
 `seo-blog-ecole-naturo` ou `wordpress-ops-ecole-naturo`), **charge-la et applique ses
-critères**. Cette grille sert de filet quand elle manque, et de rappel des oublis
+critères**. Elle fournit des critères, pas la forme de la sortie : son score, son
+journal et son rapport complet n'entrent pas dans la revue, qui garde le format court de
+`SKILL.md`. Cette grille sert de filet quand elle manque, et de rappel des oublis
 fréquents.
 
 Chaque contrôle se fait sur la **page en ligne**, pas sur le brouillon : ouvre l'URL

@@ -4,9 +4,9 @@ description: >-
   Revue qualité de fin de tâche, à lancer quand le travail est terminé et avant
   de le rendre à Julien. Relit la demande d'origine et les livrables réels,
   contrôle le socle commun puis la grille du type de tâche (contenu web / SEO,
-  réseaux sociaux), donne 3 à 5 pistes d'amélioration classées par impact avec
-  l'action à faire, puis pose 4 à 8 questions de challenge ancrées dans le
-  livrable. Juge chaque réponse, en tire les corrections et rend un verdict
+  réseaux sociaux), donne en version courte les 3 corrections prioritaires avec
+  l'action à faire (tout le détail sur demande), puis pose 4 à 8 questions de
+  challenge ancrées dans le livrable. Juge chaque réponse, en tire les corrections et rend un verdict
   PRÊT / À REPRENDRE. Ton de coach exigeant. Activation MANUELLE uniquement :
   « /revue-qualite », « revue qualité », « lance la revue qualité », « challenge
   mon travail », « relis mon travail avant que je le rende ». NE PAS déclencher
@@ -99,16 +99,45 @@ Rien entre les trois. « Globalement bon » n'est pas un statut.
 Applique la grille chargée à l'étape 1. Elle renvoie à des skills métier et à des
 scripts : quand un script de contrôle existe, **lance-le** plutôt que de juger à l'œil.
 
-## Étape 3 — Rendre la revue (un seul message)
+## Étape 3 — Rendre la revue (un seul message, version courte)
 
-Format, dans cet ordre. Visé : lisible en deux minutes.
+Tout ce qui a été trouvé aux étapes 1 et 2 est gardé en réserve, mais le message n'en montre
+que l'essentiel. **400 mots au plus**, lisible en deux minutes. Les essais du 03/10/2026 ont
+donné des revues complètes de 1 200 à 1 400 mots : trop pour être lues à chaque tâche, et une
+revue qu'on survole ne fait progresser personne.
 
 ```
 ## Revue qualité — <titre court de la tâche>
 
-**Demande d'origine** : <citation ou résumé fidèle en une ligne>
-**Livrables relus** : <liste, avec chemin ou URL>
+**Demande** : <citation ou résumé fidèle en une ligne>
+**Relu** : <livrables, avec chemin ou URL>
+**Contrôles** : <n> à reprendre · <n> non vérifiés · <n> OK
 
+### Les 3 corrections prioritaires
+1. **<constat>** — « <extrait court du livrable> »
+   → <action concrète, faisable maintenant>
+   → À retenir : <le principe, en une ligne>
+2. ...
+3. ...
+
+### Questions de challenge
+<4 à 8 questions numérotées, deux lignes au plus chacune>
+
+Réponds à chaque question par son numéro. Je juge ensuite tes réponses et je te donne le
+verdict. Tape « détail » pour voir tous les contrôles et toutes les pistes.
+```
+
+- **3 corrections**, choisies parmi tout ce qui est `À REPRENDRE` et toutes les pistes, par
+  impact sur le lecteur final. Un `NON VÉRIFIÉ` qui compte (publication, chiffre, lien)
+  peut en faire partie : la correction est alors « vérifier X ».
+- Rien d'autre dans ce message : pas de tableau, pas de conseils de méthode, pas de
+  sortie de script.
+
+### Sur « détail »
+
+Rendre alors, en un message :
+
+```
 ### Contrôles
 | Contrôle | Statut | Preuve |
 |---|---|---|
@@ -116,22 +145,18 @@ Format, dans cet ordre. Visé : lisible en deux minutes.
 (un script de contrôle = une seule ligne, qui cite ses critères en échec ; sa sortie
 brute complète ne s'affiche que si on la demande)
 
-### Pistes d'amélioration (par impact décroissant)
+### Toutes les pistes d'amélioration (par impact décroissant)
 1. **<constat>** — « <extrait du livrable> »
    → À faire : <action concrète, faisable maintenant>
    → À retenir : <le principe, pour les prochaines tâches>
-(3 à 5 pistes)
+(3 à 5 pistes, les 3 déjà données comprises)
 
 ### Pour faire mieux la prochaine fois
 <1 ou 2 conseils de méthode : comment cadrer, quelle skill existante utiliser, quoi
 vérifier plus tôt, comment gagner du temps>
-
-### Questions de challenge
-<4 à 8 questions numérotées>
-
-Réponds à chaque question par son numéro. Je juge ensuite tes réponses et je te donne le
-verdict.
 ```
+
+Puis rappeler en une ligne que les questions attendent leurs réponses.
 
 ### Les pistes d'amélioration
 
@@ -217,6 +242,6 @@ Veux-tu qu'on les fasse maintenant ?
 
 ## Si la personne veut aller vite
 
-« Juste le verdict » ou « pas le temps » : fais les étapes 1 et 2, donne les 3 pistes les
-plus importantes et le verdict, **sans** les questions. Signale en une ligne que le
+« Juste le verdict » ou « pas le temps » : fais les étapes 1 et 2, donne les 3 corrections
+prioritaires et le verdict, **sans** les questions. Signale en une ligne que le
 challenge a été sauté.
