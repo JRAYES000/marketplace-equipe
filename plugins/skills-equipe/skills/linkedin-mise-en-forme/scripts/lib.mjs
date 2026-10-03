@@ -211,7 +211,11 @@ export const enGras = (s) => [...s].map((c) => {
 // Ce que le gras ne sait rendre dans AUCUNE des deux polices : tout ce qui n'est ni
 // ASCII, ni ponctuation courante, ni espace. Les accents en font partie.
 export const ACCENTUE = /[^\x00-\x7F«»…’—\s]/u;
-export const EMOJI = /[\u{1F300}-\u{1FAFF}☀-➿⬀-⯿️]/u;
+// Un emoji = un pictogramme suivi, ou non, du selecteur de variante U+FE0F. Corrige le
+// 03/10/2026 : la classe contenait U+FE0F comme un caractere a part, donc un coeur avec
+// selecteur comptait pour deux emojis, et U+231A-231B / U+23E9-23FA (sablier, reveil...)
+// n'etaient pas comptes du tout -- vu sur un post reel a 4 emojis mesure a 3.
+export const EMOJI = /[\u{1F300}-\u{1FAFF}\u{231A}\u{231B}\u{23E9}-\u{23FA}\u{2600}-\u{27BF}\u{2B00}-\u{2BFF}]\u{FE0F}?/u;
 export const EMOJI_G = new RegExp(EMOJI.source, "gu");
 
 // Un passage deja converti, dans l'une OU l'autre police : une suite de lettres/chiffres
