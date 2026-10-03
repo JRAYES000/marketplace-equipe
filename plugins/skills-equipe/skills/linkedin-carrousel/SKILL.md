@@ -12,6 +12,18 @@ demande explicite.
 Variantes probables : « genere le carrousel du jour », « carrousel LinkedIn sur <sujet> »,
 « carrousel pour julien-agency/julien-partners », « prepare le carrousel de la semaine ».
 
+**Installation, une fois par poste** (dans le dossier de cette skill) :
+
+```bash
+npm ci
+npx playwright install chromium
+```
+
+Sans la premiere, `playwright` et le dictionnaire francais manquent ; sans la seconde, tout
+rendu de PDF echoue (« Executable doesn't exist »). Constat du 03/10/2026 sur un clone neuf :
+62 tests sur 196 en echec pour ces seules raisons, 196/196 une fois les deux lancees.
+`npm ci` et non `npm install`, qui reecrirait `package-lock.json`.
+
 ## Refonte du design -- 6 modeles de page (24/09/2026, demande de Julien)
 
 Avant cette date, les gabarits `julien-agency.html`/`julien-partners.html` n'avaient qu'un seul
