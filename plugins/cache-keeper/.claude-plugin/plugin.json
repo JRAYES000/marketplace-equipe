@@ -1,0 +1,9 @@
+{
+  "name": "cache-keeper",
+  "version": "0.1.0",
+  "description": "Ligne d'état cache, contexte, limites et coût ; alerte 5 min avant l'expiration du cache, avec relance ou compactage en un clic",
+  "types": "./types/index.d.ts",
+  "author": {
+    "name": "Julien Rayes"
+  }
+}
