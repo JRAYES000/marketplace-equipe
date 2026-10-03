@@ -73,8 +73,8 @@ Remplace `collision-guard` par le nom du mod voulu. Le mod apparaît à la proch
 | Mod | Version | Dernière mise à jour | Ce qu'il fait |
 |---|---|---|---|
 | `collision-guard` | 0.1.0 | 03/10/2026 | Tu travailles dans deux conversations en même temps ? Avant que Claude modifie un fichier, il vérifie si l'autre conversation l'a modifié dans les 30 dernières minutes. Si oui, une question s'affiche : **Continuer**, **Passer en worktree** (une copie à part du projet) ou **Annuler**. Ça évite qu'une conversation écrase le travail de l'autre. |
-| `next-steps` | 0.1.0 | 03/10/2026 | À la fin de chaque réponse, trois idées de « prochaine étape » s'affichent au-dessus du prompt. Un clic (ou la touche 1, 2 ou 3) l'envoie à Claude. **Ignorer** les fait disparaître. `/next-steps off` le coupe, `/next-steps on` le remet. Chaque suggestion consomme un peu de ton quota. |
-| `cache-keeper` | 0.1.0 | 03/10/2026 | Une ligne sous le prompt montre : combien de minutes il reste avant que Claude « oublie » la conversation en mémoire rapide (le cache), la taille de la conversation, ton quota sur 5 h et sur la semaine. 5 minutes avant l'oubli, un bandeau propose **Garder au chaud** (relance la mémoire pour une heure), **Compacter** (résume la conversation) ou **Ignorer**. `/cache` affiche l'état. |
+| `next-steps` | 0.2.0 | 03/10/2026 | À la fin de chaque réponse, trois idées de « prochaine étape » s'affichent au-dessus du prompt. Un clic (ou la touche 1, 2 ou 3) l'envoie à Claude. **Ignorer** les fait disparaître. `/next-steps off` le coupe, `/next-steps on` le remet. Chaque suggestion consomme un peu de ton quota. |
+| `cache-keeper` | 0.2.0 | 03/10/2026 | Une rangée de jauges colorées au-dessus du prompt montre (vert ça va, orange attention, rouge il faut agir) : combien de minutes il reste avant que Claude « oublie » la conversation en mémoire rapide (le cache), la taille de la conversation, ton quota sur 5 h et sur la semaine. 5 minutes avant l'oubli, un bandeau propose **Garder au chaud** (relance la mémoire pour une heure), **Compacter** (résume la conversation) ou **Ignorer**. `/cache` affiche l'état. |
 
 ## ⭐ Les modules à installer toi-même
 

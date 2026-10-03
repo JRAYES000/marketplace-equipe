@@ -23,7 +23,7 @@
     {
       "name": "cache-keeper",
       "source": "./plugins/cache-keeper",
-      "description": "Ligne d'état cache, contexte, limites et coût ; alerte 5 min avant l'expiration du cache, avec relance ou compactage en un clic"
+      "description": "Jauges colorées cache, contexte, quotas et coût au-dessus du prompt ; alerte 5 min avant l'expiration du cache, avec relance ou compactage en un clic"
     }
   ]
 }
