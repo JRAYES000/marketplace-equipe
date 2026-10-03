@@ -1,6 +1,6 @@
 {
   "name": "next-steps",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "À la fin de chaque tour, propose 3 prochaines étapes cliquables au-dessus du prompt",
   "types": "./types/index.d.ts",
   "author": {

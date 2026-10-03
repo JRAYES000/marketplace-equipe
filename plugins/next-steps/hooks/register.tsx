@@ -3,6 +3,12 @@ import type { Register } from 'claude-code'
 
 const steps = atom({ plugin: 'next-steps', key: 'steps' } as const, [])
 const isEnabled = atom({ plugin: 'next-steps', key: 'isEnabled' } as const, true)
+const isLoading = atom({ plugin: 'next-steps', key: 'isLoading' } as const, false)
+
+const ACCENT = '#D97757'
+
+// Lucide's corner-down-right, stroked in the accent: reads as "what comes next".
+const ICON = `<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="${ACCENT}" stroke-width="2.25" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 10 20 15 15 20"/><path d="M4 4v7a4 4 0 0 0 4 4h12"/></svg>`
 
 const ASK = `Propose exactement 3 prochaines étapes concrètes pour faire avancer ce travail, \
 formulées comme des consignes que l'utilisateur t'enverrait (en français, 80 caractères maximum chacune). \
@@ -54,8 +60,13 @@ export const register: Register = on => {
 
     // Outside the dispatch, so the turn ends at once.
     $.clock.after(1, async () => {
-      const reply = await $.model.fork({ prompt: ASK })
-      if (reply.isAnswered) await update($, steps, () => parse(reply.text))
+      await update($, isLoading, () => true)
+      try {
+        const reply = await $.model.fork({ prompt: ASK })
+        if (reply.isAnswered) await update($, steps, () => parse(reply.text))
+      } finally {
+        await update($, isLoading, () => false)
+      }
     })
 
     return done
@@ -63,27 +74,45 @@ export const register: Register = on => {
 
   on('ui.render', { component: 'AbovePrompt' }, async ($, e, next) => {
     const list = await read($, steps)
-    if (e.props.hasSurvey || e.props.isWorking || list.length === 0) return next(e)
+    const isThinking = await read($, isLoading)
+    if (e.props.hasSurvey || e.props.isWorking || (list.length === 0 && !isThinking)) return next(e)
 
-    const { Box, Button, Text } = $.ui.resolve(e)
+    const elements = $.ui.resolve(e)
+    const { Box, Button, Text } = elements
+    const Svg = 'Svg' in elements ? elements.Svg : undefined
     const below = await next(e)
 
+    const header = (
+      <Box key="header" flexDirection="row" alignItems="center" gap={1}>
+        {Svg !== undefined && <Svg source={ICON} alt="Suite" width={14} height={14} />}
+        <Text bold color={ACCENT}>
+          Prochaines étapes
+        </Text>
+        <Text dimColor>{isThinking ? 'en préparation…' : 'touche 1, 2 ou 3 pour envoyer'}</Text>
+        <Box flexGrow={1} />
+        {!isThinking && (
+          <Button key="dismiss" label="Ignorer" role="dismiss" dimColor onPress={() => update($, steps, () => [])} />
+        )}
+      </Box>
+    )
+
     return (
-      <Box flexDirection="column">
-        <Text dimColor>Prochaines étapes</Text>
-        {list.map((step, index) => (
-          <Button
-            key={`step-${index}`}
-            label={step}
-            hotkey={String(index + 1)}
-            plain
-            onPress={async () => {
-              await update($, steps, () => [])
-              void $.prompt.submit({ text: step })
-            }}
-          />
-        ))}
-        <Button key="dismiss" label="Ignorer" role="dismiss" dimColor onPress={() => update($, steps, () => [])} />
+      <Box flexDirection="column" gap={1}>
+        <Box flexDirection="column">
+          {header}
+          {list.map((step, index) => (
+            <Button
+              key={`step-${index}`}
+              label={step}
+              hotkey={String(index + 1)}
+              plain
+              onPress={async () => {
+                await update($, steps, () => [])
+                void $.prompt.submit({ text: step })
+              }}
+            />
+          ))}
+        </Box>
         {below}
       </Box>
     )
