@@ -1,17 +1,18 @@
 #!/usr/bin/env bash
 # Charge les jetons du run depuis le coffre de Julien (depot prive
-# JRAYES000/claude-config, env/secrets.md) vers un fichier lu par notion.js et nocodb.js.
+# JRAYES000/claude-config, env/secrets.md) vers un fichier lu par notion.js.
 #
 # Pourquoi (v9.2) : le 29/09/2026, un export bash fait a la main a execute les backticks
-# qui entourent certaines valeurs du coffre, et l'erreur a affiche une partie de
-# NOCODB_TOKEN. Ici, rien ne passe par un export : backticks et espaces sont retires,
+# qui entourent certaines valeurs du coffre, et l'erreur a affiche une partie d'un
+# jeton. Ici, rien ne passe par un export : backticks et espaces sont retires,
 # la valeur va dans un fichier a droits 600, et la sortie ne porte que des noms.
 #
 # Usage : bash charger-secrets.sh
 #   Ecrit %LOCALAPPDATA%/france-travail-extraction/secrets.env (ou $FT_SECRETS).
 #   nettoyer-cv.sh l'envoie a la corbeille en fin de run.
 # v9.3 : SALESHANDY_API_KEY en plus (import dans la sequence, notion.js).
-# Hors du poste de Julien : definir NOTION_TOKEN_FT, NOCODB_URL, NOCODB_TOKEN et SALESHANDY_API_KEY dans
+# v10.0 : plus de jetons NocoDB (NocoDB abandonne, Julien 04/10/2026).
+# Hors du poste de Julien : definir NOTION_TOKEN_FT et SALESHANDY_API_KEY dans
 # l'environnement ; ce script n'est alors pas necessaire.
 #
 # Format du coffre (identique a visibilite-ops/scripts/coffre-registre.sh) : 11 colonnes,
@@ -24,7 +25,7 @@ if [ -n "${LOCALAPPDATA:-}" ]; then D="$(cygpath -u "$LOCALAPPDATA" 2>/dev/null 
 else D="$HOME/.local/state/france-travail-extraction"
 fi
 F="${FT_SECRETS:-$D/secrets.env}"
-CLES="NOTION_TOKEN_FT NOCODB_URL NOCODB_TOKEN SALESHANDY_API_KEY"
+CLES="NOTION_TOKEN_FT SALESHANDY_API_KEY"
 
 mkdir -p "$(dirname "$F")"
 umask 177

@@ -23,11 +23,20 @@
 # servent plus que de repli sans marqueur, et deviennent facultatives. Le fichier de jetons
 # de charger-secrets.sh est supprime (pas mis a la corbeille : une copie de jeton n'y a rien
 # a faire). ecartes.json reste : il sert aux lots suivants.
+# v10.0 : route Playwright. Le dossier de telechargements du lot (playwright.js) part en entier,
+# avec les copies que le serveur MCP garde dans <session>/.playwright-mcp/ (Document*.pdf,
+# ft-journal*.json, captures page-* et journaux console-* du lot) et les fichiers ft-*.js
+# generes, qui contiennent les noms connus.
+# A lancer depuis le dossier de la session, comme le reste du skill.
 set -u
 MIN=240
 case "${1:-}" in ''|*[!0-9]*) ;; *) MIN="$1"; shift ;; esac
 
-if   [ -d "$HOME/Downloads" ];       then DL="$HOME/Downloads"
+if [ -n "${LOCALAPPDATA:-}" ]; then FT="$(cygpath -u "$LOCALAPPDATA" 2>/dev/null || printf '%s' "$LOCALAPPDATA")/france-travail-extraction/telechargements"
+else FT="$HOME/.local/state/france-travail-extraction/telechargements"
+fi
+if   [ -d "$FT" ];                 then DL="$FT"
+elif [ -d "$HOME/Downloads" ];       then DL="$HOME/Downloads"
 elif [ -d "$HOME/Téléchargements" ]; then DL="$HOME/Téléchargements"
 else echo "ERREUR : dossier Downloads introuvable sous $HOME" >&2; exit 1
 fi
@@ -47,6 +56,16 @@ while IFS= read -r f; do [ -n "$f" ] && cibles+=("$f"); done \
   < <(find "$DL" -maxdepth 1 -type f \( -name 'Document*.pdf' -o -name 'ft-journal*.json' \) "${FENETRE[@]}")
 for f in "$@"; do [ -e "$f" ] && cibles+=("$f"); done
 [ -d "$DL/_cv-lot100" ] && cibles+=("$DL/_cv-lot100")
+if [ "$DL" = "$FT" ]; then
+  # Dossier propre au lot : il part en entier, playwright.js le recree au lot suivant.
+  cibles=("$FT")
+  for f in "$@" "$PWD/.playwright-mcp"/Document*.pdf "$PWD/.playwright-mcp"/ft-journal*.json "$PWD/.playwright-mcp"/ft-*.js; do
+    [ -e "$f" ] && cibles+=("$f")
+  done
+  # Captures et journaux console du serveur MCP pendant le lot : ils portent des noms de candidats.
+  while IFS= read -r f; do [ -n "$f" ] && cibles+=("$f"); done \
+    < <(find "$PWD/.playwright-mcp" -maxdepth 1 -type f \( -name 'page-*' -o -name 'console-*' \) "${FENETRE[@]}" 2>/dev/null)
+fi
 
 n=0; echec=0
 if [ "${#cibles[@]}" -gt 0 ]; then
@@ -77,7 +96,7 @@ if [ "${#cibles[@]}" -gt 0 ]; then
   esac
 fi
 
-reste=$(find "$DL" -maxdepth 1 -type f \( -name 'Document*.pdf' -o -name 'ft-journal*.json' \) "${FENETRE[@]}" | wc -l)
+reste=$( [ -d "$DL" ] || { echo 0; exit 0; }; find "$DL" -maxdepth 1 -type f \( -name 'Document*.pdf' -o -name 'ft-journal*.json' \) "${FENETRE[@]}" | wc -l)
 [ -n "$REPERE" ] && rm -f "$REPERE"
 
 if [ -n "${LOCALAPPDATA:-}" ]; then SEC="$(cygpath -u "$LOCALAPPDATA" 2>/dev/null || printf '%s' "$LOCALAPPDATA")/france-travail-extraction/secrets.env"

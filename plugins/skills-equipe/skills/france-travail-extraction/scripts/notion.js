@@ -1,25 +1,24 @@
 #!/usr/bin/env node
 // Base Notion « Leads France Travail » par l'API publique (jeton d'integration interne), hors
-// quota du connecteur Notion MCP. Reference du skill depuis la v9.0 : le run ecrit ici, puis
-// NocoDB est aligne en miroir. Aucune valeur secrete n'est jamais affichee.
+// quota du connecteur Notion MCP. Reference du skill depuis la v9.0. NocoDB n'est plus utilise
+// (v10.0, Julien 04/10/2026). Aucune valeur secrete n'est jamais affichee.
 //
 // Le run n'a besoin que de deux commandes (une lecture de Notion chacune au plus) :
 //   node notion.js situer <connus.json>          Phase 1 : comptes par requete + noms connus
-//   node notion.js publier <lot.json> [--sec] [--sans-saleshandy] [--sans-miroir]
+//   node notion.js publier <lot.json> [--sec] [--sans-saleshandy]
 //                                                Phases 5-6 : reprise de la file, dedup (les
 //                                                doublons sont retires et listes), ecriture,
-//                                                relecture, import SalesHandy, miroir NocoDB
-//   node notion.js saleshandy [--sec]            import SalesHandy seul (fiches « A importer »), puis miroir
+//                                                relecture, import SalesHandy
+//   node notion.js saleshandy [--sec]            import SalesHandy seul (fiches « A importer »)
 // Commandes de detail :
 //   node notion.js resume | connus | dedup <lot.json> | ecrire <lot.json> [--sec] | reprendre
 //   node notion.js verifier <AAAA-MM-JJ> <requete>
-//   node notion.js export <fichier.json>         toute la base en JSON (colonnes NocoDB)
-//   node notion.js miroir-nocodb [--sec] [--force]
+//   node notion.js export <fichier.json>         toute la base en JSON
 //   node notion.js archiver-test <requete>       archive les fiches d'une requete « TEST-… »
 //
 // Codes de sortie : 0 ok ; 1 erreur ; 2 relecture fausse ou Note vide ; 3 fiches en file d'attente ;
 // 4 import SalesHandy en echec ou partiel (fiches Notion intactes, restees « A importer »).
-// Environnement : NOTION_TOKEN_FT ; NOCODB_URL et NOCODB_TOKEN pour le miroir ; SALESHANDY_API_KEY
+// Environnement : NOTION_TOKEN_FT ; SALESHANDY_API_KEY
 // pour l'import. A defaut, lus dans
 // le fichier ecrit par charger-secrets.sh (secrets-env.js).
 // File d'attente : %LOCALAPPDATA%/france-travail-extraction/notion-attente.json (donnees de
@@ -153,7 +152,7 @@ function doublons(lot, base) {
   });
   return out;
 }
-// Paires Notion <-> NocoDB (miroir, reprise) : email, puis nom + prenom + requete, au
+// Paires lot <-> Notion (reprise de la file d'attente) : email, puis nom + prenom + requete, au
 // multi-ensemble. Deux fiches identiques restent deux personnes.
 const cleNom = r => [norm(r.Nom), norm(r.Prenom), norm(r.Requete)].join('|');
 function apparier(A, B) {
@@ -244,88 +243,12 @@ const connusDe = rows => rows.filter(r => r.Prenom && r.Prenom.trim()).map(r => 
 // Empreintes des hors-cible deja vus, ecrites par « assembler.js lot » (expiration 180 jours).
 const lireEcartes = () => { try { return JSON.parse(fs.readFileSync(ECARTES, 'utf8')).map(e => e.h); } catch { return []; } };
 
-// ---- NocoDB (miroir) ---------------------------------------------------------------------------
-const NOCO_URL = (process.env.NOCODB_URL || '').replace(/\/+$/, '');
-const NOCO_TOKEN = process.env.NOCODB_TOKEN || '';
-const NOCO_TABLE = process.env.NOCODB_TABLE_ID || 'mjhwgyhkrukdy5m';
-async function noco(method, p, body) {
-  if (!NOCO_URL || !NOCO_TOKEN) die('NOCODB_URL et NOCODB_TOKEN absents de l environnement (coffre de secrets, section NocoDB)');
-  const r = await fetch(NOCO_URL + '/api/v2/tables/' + NOCO_TABLE + p, {
-    method, headers: { 'xc-token': NOCO_TOKEN, 'content-type': 'application/json' },
-    body: body === undefined ? undefined : JSON.stringify(body),
-    signal: AbortSignal.timeout(DELAI_MS),
-  });
-  const txt = await r.text();
-  if (!r.ok) die('NocoDB ' + method + ' ' + p.split('?')[0] + ' -> HTTP ' + r.status + ' ' + txt.slice(0, 300));
-  return txt ? JSON.parse(txt) : {};
-}
-async function nocoToutes() {
-  const champs = ['Id', ...COLONNES].map(encodeURIComponent).join(',');
-  const out = [];
-  for (let offset = 0; ; offset += 1000) {
-    const d = await noco('GET', '/records?limit=1000&offset=' + offset + '&fields=' + champs);
-    out.push(...d.list);
-    if (d.pageInfo.isLastPage) break;
-  }
-  return out;
-}
-const valeur = v => (v === null || v === undefined ? '' : String(v).trim());
-const nocoVal = (k, v) => (TYPES[k] === 'date' ? valeur(v).slice(0, 10) : valeur(v));
-const sansVide = o => Object.fromEntries(Object.entries(o).filter(([, v]) => v !== ''));
-async function nocoParPaquets(method, rows) {
-  let n = 0;
-  for (let i = 0; i < rows.length; i += 100) {
-    const r = await noco(method, '/records', rows.slice(i, i + 100));
-    n += Array.isArray(r) ? r.length : 1;
-  }
-  return n;
-}
-
-// NocoDB = copie de Notion (hors Ecarte), Statut compris : Notion est maitre du Statut (decision de
-// Julien, 29/09/2026). Avant, un ecart de Statut etait garde dans NocoDB et ~150 fiches
-// « Importe SalesHandy » dans Notion y restaient « A importer ».
-async function miroir({ sec, force, tousNotion }) {
-  tousNotion = tousNotion || await toutes();
-  const notionRows = tousNotion.filter(r => r.Statut !== 'Ecarte');
-  const nocoRows = await nocoToutes();
-  const { paires, seulsA: aCreer, seulsB: aSupprimer } = apparier(notionRows, nocoRows);
-  const aModifier = [], statuts = [];
-  for (const [i, j] of paires) {
-    const n = notionRows[i], c = nocoRows[j], diff = { Id: c.Id };
-    for (const k of COLONNES) {
-      if (valeur(n[k]) === nocoVal(k, c[k])) continue;
-      if (k === 'Statut') statuts.push(valeur(c.Statut) + ' -> ' + valeur(n.Statut));
-      diff[k] = valeur(n[k]) || null;
-    }
-    if (Object.keys(diff).length > 1) aModifier.push(diff);
-  }
-  console.log('miroir : Notion=' + tousNotion.length + ' (dont ' + (tousNotion.length - notionRows.length) + ' Ecarte ignorees) NocoDB=' + nocoRows.length +
-    ' ; a creer=' + aCreer.length + ' a modifier=' + aModifier.length + ' a supprimer=' + aSupprimer.length);
-  // Statuts realignes sur Notion, comptes par transition (« A importer -> Importe SalesHandy » : n).
-  const parTransition = {};
-  statuts.forEach(s => { parTransition[s] = (parTransition[s] || 0) + 1; });
-  Object.entries(parTransition).forEach(([t, n]) => console.log('  statut aligne sur Notion : ' + t + ' : ' + n));
-  // Garde-fou : une lecture Notion tronquee viderait NocoDB.
-  if (aSupprimer.length > Math.max(20, nocoRows.length * 0.2) && !force) {
-    aSupprimer.slice(0, 20).forEach(r => console.log('  a supprimer : ' + [r.Nom, r.Prenom, r.Requete].filter(Boolean).join(' | ')));
-    console.log('MIROIR ARRETE : ' + aSupprimer.length + ' suppressions, au-dela du garde-fou (20 ou 20 %). Verifier, puis miroir-nocodb --force');
-    return false;
-  }
-  if (sec) { console.log('miroir : simulation, rien ecrit'); return true; }
-  const c = aCreer.length ? await nocoParPaquets('POST', aCreer.map(({ _page, ...r }) => sansVide(r))) : 0;
-  const m = aModifier.length ? await nocoParPaquets('PATCH', aModifier) : 0;
-  const s = aSupprimer.length ? await nocoParPaquets('DELETE', aSupprimer.map(r => ({ Id: r.Id }))) : 0;
-  const relu = (await nocoToutes()).length;
-  console.log('miroir : ' + c + ' creee(s), ' + m + ' modifiee(s), ' + s + ' supprimee(s) ; relu=' + relu + ' attendu=' + notionRows.length);
-  return relu === notionRows.length;
-}
-
 // ---- SalesHandy : les fiches « A importer » avec email entrent dans la sequence ----------------
 // Demande de Julien, 29/09/2026 : chaque personne ecrite dans Notion entre aussi, sans geste de sa
 // part, dans la sequence « Leads France Travail — reconversion (Ecole Naturo) » (URL
 // my.saleshandy.com/sequence/960252 ; l'API ne connait que l'identifiant hache). Etape 1 : les
 // e-mails partent selon le planning de la sequence. Une fiche importee passe « Importe SalesHandy »
-// dans Notion, puis le miroir descend le Statut dans NocoDB.
+// dans Notion.
 // Pas importees : sans email ; requete absente de SH_REQUETES. Elles restent « A importer ».
 // Infirmiere liberale incluse (Julien, 29/09 : souvent en reconversion vers la naturopathie).
 // Profil sans prenom importe aussi (Julien, 29/09 : « Bonjour , » n'est pas dramatique) : ni prenom
@@ -424,8 +347,7 @@ const sec = drapeau('--sec');
     if (sec) return console.log('simulation : rien ecrit');
     const r = await creer(nouveaux);
     console.log('ecrites dans Notion : ' + r.crees + ' / ' + nouveaux.length);
-    // v9.2 : le miroir part de la base deja lue + des pages rendues par Notion a la creation,
-    // au lieu d'une seconde lecture complete (1,4 a 2,9 s mesures pour 257 fiches).
+    // SalesHandy part de la base deja lue + des pages rendues par Notion a la creation.
     const tousNotion = [...base, ...r.pages];
     if (r.enAttente) code = 3;
     // Relecture par (date, requete) : attendu = ce que la base avait deja + ce qui vient d'etre cree.
@@ -441,13 +363,11 @@ const sec = drapeau('--sec');
       console.log('relecture ' + (date || '(sans date)') + ' « ' + requete + ' » : relu=' + relus.length + (attendu === null ? '' : ' attendu=' + attendu) + ' notes_vides=' + vides);
       if ((attendu !== null && relus.length !== attendu) || vides) code = code || 2;
     }
-    // v9.3 : import SalesHandy avant le miroir, pour que le Statut « Importe SalesHandy » descende
-    // dans NocoDB dans la meme passe. Un echec SalesHandy ne touche pas aux fiches Notion (code 4).
+    // Un echec SalesHandy ne touche pas aux fiches Notion (code 4).
     if (!drapeau('--sans-saleshandy')) {
       try { if (!(await saleshandy({ sec: false, tousNotion })).ok) code = code || 4; }
       catch (e) { console.log('SALESHANDY : ' + e.message); code = code || 4; }
     }
-    if (!drapeau('--sans-miroir')) { if (!await miroir({ sec: false, force: false, tousNotion })) code = code || 2; }
     process.exit(code);
   } else if (cmd === 'resume') {
     resumeDe(await toutes());
@@ -491,10 +411,7 @@ const sec = drapeau('--sec');
     let code = 0;
     try { if (!(await saleshandy({ sec, tousNotion })).ok) code = 4; }
     catch (e) { console.log('SALESHANDY : ' + e.message); code = 4; }
-    if (!sec && !drapeau('--sans-miroir')) { if (!await miroir({ sec: false, force: false, tousNotion })) code = code || 2; }
     process.exit(code);
-  } else if (cmd === 'miroir-nocodb') {
-    process.exit(await miroir({ sec, force: drapeau('--force') }) ? 0 : 2);
   } else if (cmd === 'archiver-test') {
     const requete = process.argv[3] || '';
     if (!/^TEST-/.test(requete)) die('archiver-test ne touche qu une requete commencant par « TEST- »');

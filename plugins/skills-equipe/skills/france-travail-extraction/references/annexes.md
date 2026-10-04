@@ -1,18 +1,31 @@
 # Annexes — à lire quand le sujet se présente
 
-## Pourquoi Claude in Chrome, et pas une autre route
+## Pourquoi Playwright (v10.0)
 
-Trois impasses testées, à ne pas refaire :
+Mesuré le 04/10/2026 sur le profil Playwright `C:/Users/julien/.chrome-claude` :
 
 - **Pas d'API.** `recherche-profil` est une appli Apache Tapestry rendue côté serveur.
-- **Pas de Playwright ni de fetch anonyme.** L'OTP de la 2FA bloque systématiquement.
-- **Pas le navigateur intégré, ni Firecrawl.** Ils n'ont pas la session recruteur : une page
-  déconnectée ne montre ni nom ni CV.
+- **La double authentification ne bloque qu'une fois.** La première connexion complète (code
+  compris) pose le cookie `EnrolementEffectue` (un an) : l'appareil est enrôlé. Ensuite,
+  identifiant + mot de passe suffisent, sans écran de code (relevé écran par écran, 55 s). Le
+  journal de juin (« Playwright bloque sur l'OTP ») date d'avant cet enrôlement.
+- **La session ne survit pas à la fermeture du navigateur** : ses cookies (`JSESSIONID_CVRECHERCHE`,
+  `idtkes`) sont des cookies de session. Le navigateur Playwright se relance avec chaque
+  session Claude, donc Julien retape son mot de passe à chaque run. Elle est aussi tombée une fois
+  sans cause identifiée, alors qu'elle a tenu plus de 9 min sans activité le même jour.
+- **Pas d'onglet visible à tenir.** Playwright lance Chrome avec
+  `--disable-backgrounding-occluded-windows` et `--disable-renderer-backgrounding` : fenêtre
+  réduite, la page reste `visible` et le parcours tourne à pleine vitesse (2 profils en 2 s).
+  `arriere-plan.js` ne sert plus qu'au repli Claude in Chrome.
+- **Pas d'autorisation « téléchargements multiples »**, et la souris de Julien n'est jamais
+  touchée : les clics passent par le protocole.
+- **Pas le navigateur intégré, ni Firecrawl.** Ils n'ont pas la session recruteur.
 
-La skill `routage-lecture-web` fait préférer ces autres routes pour ne pas confisquer le poste.
-**Ici, Claude in Chrome prime sur cette matrice.** Il pilote par le protocole, sans prendre la
-souris ni le clavier. La contrepartie : travailler en arrière-plan autant que possible et ne
-réclamer l'onglet visible que pour la Phase 2.
+**Repli Claude in Chrome** (v9.6) si le serveur MCP Playwright manque : session ouverte dans
+le Chrome de Julien, `arriere-plan.js` injecté avant tout, onglet visible en Phase 2,
+téléchargements multiples autorisés, CV dans Downloads (les scripts s'y replient d'eux-mêmes
+quand le dossier du lot Playwright n'existe pas). Le détail est dans l'historique git de
+`SKILL.md` (v9.6).
 
 L'email n'apparaît **jamais** dans l'interface (« masqué pour raisons de sécurité »). Il ne
 s'obtient que par le CV téléchargé. Un candidat sans CV n'a donc pas d'email : c'est normal.
@@ -21,19 +34,19 @@ s'obtient que par le CV téléchargé. Un candidat sans CV n'a donc pas d'email 
 
 | Symptôme | Cause et geste |
 |---|---|
-| Retour vers la page de connexion en plein run | session expirée : s'arrêter, demander la reconnexion, reprendre au profil en cours |
-| Parcours à ~25 s par profil, sans erreur | onglet caché sans parades : réinjecter `scripts/arriere-plan.js` |
-| Modale qui ne s'ouvre pas, captures en timeout | onglet caché ou fenêtre minimisée : contrôler `document.hidden`, puis demander à l'utilisateur |
-| Un seul CV pour tout un lot | téléchargements multiples non autorisés dans Chrome |
-| `ft-journal.json` absent de Downloads après `__exporter()` | même cause (téléchargements bloqués) ; sinon relire le journal par la méthode ci-dessous |
+| Retour vers la page de connexion en plein run | session expirée (inactivité ou navigateur relancé) : relancer `ft-connexion.js`, Julien se reconnecte, puis `ft-extraction.js` reprend (le journal saute les profils déjà vus) |
+| `ERREUR : ecouteur de telechargements absent` | le navigateur Playwright a été relancé : relancer `ft-connexion.js` |
+| `erreurs` non vide dans le retour d'un tour | un CV n'a pas pu être enregistré : le noter, il sortira `non recu` à la revue |
+| `cv_enregistres` = 0 alors que `telecharges` > 0 | écouteur branché sur un autre onglet : relancer `ft-connexion.js` |
+| `playwright.js` refuse : fichiers d'un lot précédent | un lot n'a pas été nettoyé : `nettoyer-cv.sh` d'abord |
 | « Afficher le numéro » absent alors qu'un bloc contact existe | un scroll ou un rechargement de la section, puis conclure à l'absence de téléphone |
 | `ERREUR : … absent` dans un script Bash | poppler ou tesseract manquent : le signaler, ne pas continuer sans OCR |
 | `revue` montre beaucoup d'`incertain` | des CV manquent ou un fichier étranger s'est glissé : `nom-du-cv.sh` sur les CV du segment, puis corriger dans `choix.json` |
 
 ## Relire un long journal sans `__exporter()`
 
-La sortie du pont JavaScript est tronquée **en silence** vers 1 000 caractères. Injecter le
-journal dans la page puis le lire avec `get_page_text` (~10 000 caractères) :
+Repli Claude in Chrome seulement : la sortie de son pont JavaScript est tronquée **en silence**
+vers 1 000 caractères. Injecter le journal dans la page puis le lire avec `get_page_text` :
 
 ```js
 const a = document.createElement('article');

@@ -491,3 +491,31 @@ Phase 5 bis recopie desormais seulement les Id acceptes par `ecrire`.
   Notion -> Importe SalesHandy, miroir 28 modifiees, relu=280 attendu=280.
 • Decisions de Julien (29/09) : Infirmiere liberale dans la sequence ; profils sans prenom
   importes aussi (sans prenom ni nom, « Bonjour , » accepte).
+
+2026-10-04 — v10.0 : route Playwright, NocoDB abandonne.
+• Pourquoi : Claude in Chrome prenait l onglet visible en Phase 2 et dependait d une extension
+  qui se deconnecte ; Julien voulait garder sa souris et son Chrome.
+• Test du 04/10 sur le profil Playwright C:/Users/julien/.chrome-claude : premiere connexion
+  complete (code compris) -> cookie EnrolementEffectue (1 an). Relance du navigateur : retour
+  a la connexion (cookies de session JSESSIONID_CVRECHERCHE, idtkes), puis identifiant + mot
+  de passe SANS ecran de code (releve ecran par ecran, 55 s). navigator.webdriver = false.
+  Le « blocage OTP » du 17/06 date d avant l enrolement.
+• Session tombee une fois (17 h 24 -> 17 h 28 UTC), sans autre session France Travail ouverte ;
+  cause inconnue. Ce n est pas l inactivite : le meme soir, elle a tenu plus de 9 min sans
+  activite (20 h 33 -> 20 h 42, heure locale).
+• Essai de bout en bout v10.0 (rien ecrit dans Notion) : situer, preparer, ft-connexion,
+  recherche sauvegardee, ft-extraction (3 nouveaux, 15 deja en base sautes, 2 CV), OCR tour 1
+  (2 emails, 2 telephones), ft-fin, revue (2 CV par ordre, 0 incertain), nettoyer-cv.sh (code
+  0 apres correction du compte final).
+• Lot d essai de 5 profils, rien ecrit : extraction-profils.js tourne tel quel ; 3 CV recus
+  sans autorisation « telechargements multiples » ; fenetre reduite par CDP : page toujours
+  visible, 2 profils en 2 s (Chrome lance avec --disable-backgrounding-occluded-windows et
+  --disable-renderer-backgrounding). CV et email lisibles par pdftotext.
+• Pieges : browser_run_code_unsafe n a pas `require` et n accepte en filename que le dossier
+  de la session et .playwright-mcp/ -> playwright.js genere les ft-*.js ; le serveur MCP
+  recopie chaque telechargement en .playwright-mcp/Document.pdf (ecrase) -> nettoyer-cv.sh
+  le vide ; les CV sont enregistres par un ecouteur `download` sur le contexte, nommes comme
+  Chrome (Document.pdf, Document (1).pdf…) dans %LOCALAPPDATA%/france-travail-extraction/
+  telechargements.
+• NocoDB : demande de Julien du 04/10, plus utilise. nocodb.js et le miroir de notion.js
+  retires, jetons NocoDB retires de charger-secrets.sh. La table NocoDB n a pas ete touchee.
