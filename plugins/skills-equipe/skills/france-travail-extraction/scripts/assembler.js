@@ -34,6 +34,13 @@
 // transmet a la page, qui saute ces profils au lot suivant sans CV ni OCR. Seule l'empreinte
 // (SHA-256 tronque du « prenom nom » normalise) est gardee, 180 jours au plus ; jamais un nom,
 // et rien n'apparait dans Notion ni NocoDB. Un profil anonyme n'est jamais range.
+//
+// CV sur Google Drive (v9.4, demande de Julien du 04/10/2026) : « lot » copie le CV de chaque
+// profil garde dans le dossier Drive des CV, renomme « Prenom Nom AAAA-MM-JJ.pdf » (date
+// d'extraction, ASCII). Seuls les CV rattaches par nom ou par ordre partent : un CV incertain
+// n'a pas de nom sur, il reste hors de Drive. Dossier : --drive, sinon FT_CV_DRIVE, sinon
+// « G:/Mon Drive/01 ECOLE NATURO/CV France Travail » (Google Drive pour ordinateur).
+// --sans-drive saute cette etape. Un fichier deja present a l'identique n'est pas recopie.
 'use strict';
 const fs = require('fs');
 const path = require('path');
@@ -52,7 +59,8 @@ const args = process.argv.slice(2);
 const cmd = args.shift();
 const opt = {};
 const fichiers = [];
-const SANS_VALEUR = ['toutes-recherches'];
+const SANS_VALEUR = ['toutes-recherches', 'sans-drive'];
+const DRIVE_DEFAUT = 'G:/Mon Drive/01 ECOLE NATURO/CV France Travail';
 for (let i = 0; i < args.length; i++) {
   if (args[i].startsWith('--')) { const k = args[i].slice(2); opt[k] = SANS_VALEUR.includes(k) ? true : args[++i]; }
   else fichiers.push(args[i]);
@@ -195,6 +203,50 @@ function construire() {
   });
 }
 
+// ---- CV sur Google Drive -------------------------------------------------------------------
+// Le cv.tsv ne garde que le nom du fichier : il est dans le dossier de son tour
+// (ocr-par-tour.sh), ou encore dans Downloads (emails-depuis-cv.sh seul, petit lot).
+function cheminCv(cv) {
+  const dl = [path.join(os.homedir(), 'Downloads'), path.join(os.homedir(), 'Téléchargements')].find(d => fs.existsSync(d)) || '';
+  return [path.join(dl, '_cv-lot100', 'tour-' + cv.tour, 'Downloads', cv.fichier), path.join(dl, cv.fichier)].find(f => fs.existsSync(f));
+}
+
+// « Jean-Pierre », « DUPONT » -> « Jean-Pierre Dupont ». ASCII : pas d'accent dans un nom de fichier.
+const casse = s => (s || '').toLowerCase().replace(/(^|[\s'-])([a-z])/g, (m, a, b) => a + b.toUpperCase());
+const nomFichier = (prenom, nom, date) => {
+  const n = (casse(prenom) + ' ' + casse(nom)).normalize('NFD').replace(/[̀-ͯ]/g, '')
+    .replace(/[^A-Za-z0-9' -]+/g, ' ').replace(/\s+/g, ' ').trim();
+  return n ? n + ' ' + date + '.pdf' : '';
+};
+
+function deposerSurDrive(liste, date) {
+  const dossier = opt.drive || process.env.FT_CV_DRIVE || DRIVE_DEFAUT;
+  if (!fs.existsSync(path.dirname(dossier))) {
+    console.log('ATTENTION : CV non deposes sur Drive, ' + path.dirname(dossier) + ' introuvable (Google Drive pour ordinateur arrete ?). Relancer « lot » une fois Drive monte : rien n est ecrit deux fois.');
+    return;
+  }
+  fs.mkdirSync(dossier, { recursive: true });
+  let copies = 0, deja = 0;
+  const manques = [];
+  for (const { cv, Nom, Prenom } of liste) {
+    const src = cheminCv(cv);
+    // Sans prenom, le « Nom » est l'intitule du profil : pas un nom de personne.
+    const base = Prenom ? nomFichier(Prenom, Nom, date) : '';
+    if (!src || !base) { manques.push((Prenom + ' ' + Nom).trim() + (src ? ' (profil anonyme)' : ' (fichier ' + cv.fichier + ' introuvable)')); continue; }
+    const taille = fs.statSync(src).size;
+    let cible = path.join(dossier, base), k = 2, identique = false;
+    while (fs.existsSync(cible)) {
+      if (fs.statSync(cible).size === taille) { identique = true; break; }
+      cible = path.join(dossier, base.replace(/\.pdf$/, ' (' + k++ + ').pdf'));
+    }
+    if (identique) { deja++; continue; }
+    fs.copyFileSync(src, cible);
+    copies++;
+  }
+  console.log('CV deposes sur Drive : ' + copies + (deja ? ', deja presents : ' + deja : '') + ' -> ' + dossier);
+  if (manques.length) console.log('CV non deposes : ' + manques.join(' ; '));
+}
+
 // ---- Commandes -----------------------------------------------------------------------------
 if (cmd === 'revue') {
   const r = construire();
@@ -215,6 +267,7 @@ if (cmd === 'revue') {
   const parPag = new Map(r.map(x => [String(x.p.pag), x]));
   const inconnus = Object.keys(choix).filter(k => !parPag.has(k));
   if (inconnus.length) die('pag absents du journal : ' + inconnus.join(','));
+  const pourDrive = [];
   const lot = Object.entries(choix).map(([pag, v]) => {
     const x = parPag.get(pag);
     const surcharge = typeof v === 'string' ? { Fonction: v } : v;
@@ -229,11 +282,13 @@ if (cmd === 'revue') {
       ...surcharge,
     };
     Object.keys(o).forEach(k => { if (o[k] === undefined || o[k] === null || String(o[k]).trim() === '') delete o[k]; });
+    if (x.a.cv) pourDrive.push({ cv: x.a.cv, Nom: o.Nom, Prenom: o.Prenom || '' });
     return o;
   });
   fs.writeFileSync(opt.sortie, JSON.stringify(lot, null, 1));
   console.log('lot ecrit : ' + lot.length + ' fiche(s), dont ' + lot.filter(o => o.Email).length + ' avec email et ' +
     lot.filter(o => o.Telephone).length + ' avec telephone -> ' + opt.sortie);
+  if (!opt['sans-drive']) deposerSurDrive(pourDrive, opt.date);
 
   // Hors-cible : empreintes ajoutees ; un profil garde cette fois en est retire (choix corrige).
   const garde = new Set(Object.keys(choix));

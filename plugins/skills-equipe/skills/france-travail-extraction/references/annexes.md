@@ -70,3 +70,9 @@ Côté skill, depuis la v9.2 : les hors-cible ne sont jamais écrits. Seule une 
 180 jours au plus, pour ne pas retraiter la même personne. C'est une donnée pseudonymisée, pas
 anonyme : un nom connu se reteste contre la liste. La supprimer efface toute trace des
 hors-cible.
+
+Depuis la v9.4 : le CV de chaque candidat **retenu** est gardé dans le Google Drive de Julien,
+`Mon Drive/01 ECOLE NATURO/CV France Travail`, sous « Prénom Nom AAAA-MM-JJ.pdf ». Il fait
+partie de la base de l'École et suit les mêmes règles : jamais partagé hors de l'École,
+supprimé avec la fiche (sur demande, ou 24 mois après le dernier contact). Le CV d'un
+hors-cible n'y entre jamais.

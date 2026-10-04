@@ -5,7 +5,8 @@ description: >-
   base Notion « Leads France Travail » : nom, prénom, téléphone, email, fonction, commune.
   Pilote la session Chrome déjà connectée (2FA) via Claude in Chrome, lit l'email des CV par
   OCR, apparie CV et profils par script, déduplique et écrit dans Notion par son API publique,
-  puis aligne la table NocoDB du même nom en miroir. Extraction autorisée par la convention CVthèque signée
+  puis aligne la table NocoDB du même nom en miroir. Range les CV retenus, renommés, sur
+  Google Drive. Extraction autorisée par la convention CVthèque signée
   le 29/09/2026 (École de Naturopathie et Sophrologie). Activation MANUELLE uniquement, sur
   demande explicite : « /france-travail-extraction », « extrais des candidats France
   Travail », « lance un lot France Travail », « synchronise NocoDB avec les leads France
@@ -13,7 +14,7 @@ description: >-
   d'emploi est mentionné.
 compatibility: "Claude Code. Requiert Claude in Chrome (session recruteur déjà connectée), l'API publique Notion (variable NOTION_TOKEN_FT, connexion interne « Leads France Travail - API »), NocoDB pour le miroir (NOCODB_URL, NOCODB_TOKEN), l'API SalesHandy pour l'import dans la séquence (SALESHANDY_API_KEY), l'outil Bash avec node, poppler et tesseract. Le connecteur Notion MCP n'est plus utilisé."
 metadata:
-  version: '9.3'
+  version: '9.4'
   environment: 'Claude Code, rédigé pour Claude Sonnet 5.5 (fonctionne aussi sous Opus). Claude in Chrome pour la session recruteur, outil Bash pour les scripts fournis. Livrable = la base Notion « Leads France Travail », qui fait foi. NocoDB = miroir aligné en fin de run (references/synchro-notion.md).'
   journal: 'references/journal.md — mesures et incidents des runs réels (v2.0 à v9.3). À lire seulement pour comprendre ou contester une règle ; en cas de désaccord ce fichier-ci fait foi.'
 ---
@@ -30,8 +31,11 @@ d'élèves.
   qui tombait en `usage_limit_reached` en plein run (29/09/2026).
 - **NocoDB est un miroir**, aligné sur Notion en fin de run (`notion.js miroir-nocodb`) : on n'y
   écrit jamais directement. Détails : `references/synchro-notion.md`.
-- Pas de CSV, pas de tableur, rien sur le disque en dehors des fichiers de travail du lot, mis à
-  la corbeille à la fin (la file d'attente Notion, locale, se vide à la reprise).
+- **Les CV des candidats retenus vont sur Google Drive** (v9.4, demande de Julien du
+  04/10/2026) : `Mon Drive/01 ECOLE NATURO/CV France Travail`, renommés « Prénom Nom
+  AAAA-MM-JJ.pdf » (date d'extraction, sans accent). C'est `assembler.js lot` qui les dépose.
+- Pas de CSV, pas de tableur, rien d'autre sur le disque en dehors des fichiers de travail du
+  lot, mis à la corbeille à la fin (la file d'attente Notion, locale, se vide à la reprise).
 - **SalesHandy en bout de chaîne** (v9.3, demande de Julien du 29/09/2026) : `publier` importe
   les nouvelles fiches « A importer » avec email dans la séquence SalesHandy « Leads
   France Travail — reconversion (École Naturo) », étape 1. La séquence envoie ensuite ses e-mails
@@ -66,7 +70,7 @@ appeler les scripts par leur chemin complet. Fichiers de travail (`cv.tsv`, `cho
 | Travail en arrière-plan | `scripts/arriere-plan.js`, injecté avant tout le reste et après chaque rechargement |
 | Parcours des profils, export du journal | `scripts/extraction-profils.js`, puis `window.__run(n)` et `window.__exporter()` |
 | Email, téléphone et texte des CV | `scripts/ocr-par-tour.sh` (tour 0 au début du lot, puis après chaque tour) ; `scripts/emails-depuis-cv.sh` pour un petit lot |
-| Appariement CV → profil, construction du lot | `scripts/assembler.js revue` puis `lot` |
+| Appariement CV → profil, construction du lot, dépôt des CV sur Drive | `scripts/assembler.js revue` puis `lot` |
 | Profil anonyme, segment incertain | `scripts/nom-du-cv.sh <fichier.pdf>` |
 | Jetons Notion, NocoDB et SalesHandy | `scripts/charger-secrets.sh` (Phase 1, avant tout appel) |
 | Situation de la base ; dédup, écriture, relecture, import SalesHandy, miroir NocoDB | `scripts/notion.js situer` puis `publier` |
@@ -285,6 +289,15 @@ qu'il l'a écrite, puis les motifs après ` — ` (`pas de CV`, `CV non recu`, `
 `PDF illisible`, `email reconstruit`, `appariement incertain`, `profil anonyme`). Ce n'est pas une
 analyse du CV.
 
+Il **dépose les CV sur Google Drive** : une copie de chaque CV rattaché à un profil gardé, dans
+`G:/Mon Drive/01 ECOLE NATURO/CV France Travail` (Google Drive pour ordinateur ; `--drive` ou
+`FT_CV_DRIVE` pour un autre dossier), sous « Prénom Nom AAAA-MM-JJ.pdf ». Le nom vient de la
+fiche (corrigée par `choix.json` pour un anonyme identifié), la date de `--date`. Ne partent
+pas : un CV `incertain` (nom pas sûr) et un profil resté anonyme. Un fichier déjà là à
+l'identique n'est pas recopié ; un homonyme reçoit « (2) ». Sortie à lire : `CV deposes sur
+Drive : N`. `ATTENTION : CV non deposes` (Drive non monté) → le dire et relancer `lot` une fois
+Drive revenu, **avant** `nettoyer-cv.sh`, qui met les originaux à la corbeille.
+
 Il range aussi les **hors-cible** : chaque nouveau profil nommé absent de `choix.json` laisse son
 empreinte (SHA-256 tronqué du « prénom nom ») dans
 `%LOCALAPPDATA%/france-travail-extraction/ecartes.json`, 180 jours au plus. Jamais un nom en
@@ -358,8 +371,8 @@ Colonnes (ASCII, ce sont des identifiants de schéma) : `Nom` (MAJUSCULES, à d�
 `Fonction`, `Requete`, `Date extraction`, `Profil mis a jour`, `Statut` (`A importer` par défaut),
 `Note` (jamais vide).
 
-**Barrière :** `publier` a rendu le code 0 — ou 2 / 3 / 4 avec l'écart ou la file d'attente
-annoncés. **Ne pas annoncer que le lot est écrit sans la ligne `relu=N attendu=N`.**
+**Barrière :** `lot` a affiché `CV deposes sur Drive : N`, et `publier` a rendu le code 0 — ou
+2 / 3 / 4 avec l'écart ou la file d'attente annoncés. **Ne pas annoncer que le lot est écrit sans la ligne `relu=N attendu=N`.**
 
 ## Phase 6 — Vider, puis rendre compte
 
@@ -386,6 +399,7 @@ données de candidats (RGPD), et un `Document (n).pdf` resté là décale le lot
 - profils parcourus, retenus, écartés hors-cible, doublons ;
 - leads écrits, dont avec email et avec téléphone ;
 - le motif de chaque champ vide, regroupé par `Note` ;
+- les CV déposés sur Drive (nombre, et ceux qui n'y sont pas avec leur motif) ;
 - le résultat de l'import SalesHandy (importés, laissés « A importer » et pourquoi) ;
 - le résultat du miroir NocoDB (créées, modifiées, supprimées) et les statuts réalignés ;
 - en première ligne si elle existe : la file d'attente Notion et son nombre de fiches.
