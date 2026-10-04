@@ -334,6 +334,10 @@ const SH_KEY = process.env.SALESHANDY_API_KEY || '';
 const SH_SEQUENCE = process.env.SALESHANDY_SEQUENCE_FT || 'dlPyooE6zL';
 const SH_ETAPE = process.env.SALESHANDY_STEP_FT || '2AwrBNv3wQ';
 const SH_REQUETES = ['Formation naturopathie', 'Naturopathie', 'Reconversion bien-être', 'Infirmiere liberale'];
+// Profils animaliers (cible de la naturopathie animale, Julien 04/10/2026) : la sequence parle de
+// naturopathie humaine. Ils restent « A importer » tant qu'aucune sequence ne leur est destinee.
+// Reperes a la Fonction, que la Phase 4 redige (« Reconversion bien-etre animal », etc.).
+const SH_EXCLURE_FONCTION = /animal|animale|[ée]quin|pet.?sitt|palefreni|v[ée]t[ée]rinaire|f[ée]lin|canin/i;
 async function sh(method, p, body) {
   const r = await fetch('https://open-api.saleshandy.com/v1' + p, {
     method, headers: { 'x-api-key': SH_KEY, 'content-type': 'application/json' },
@@ -356,12 +360,14 @@ const versProspect = r => {
 async function saleshandy({ sec, tousNotion }) {
   tousNotion = tousNotion || await toutes();
   const attente = tousNotion.filter(r => r.Statut === 'A importer' && (r.Email || '').includes('@'));
-  const aImporter = attente.filter(r => SH_REQUETES.includes(r.Requete));
-  const hors = attente.length - aImporter.length;
+  const animaliers = attente.filter(r => SH_EXCLURE_FONCTION.test(r.Fonction || '')).length;
+  const aImporter = attente.filter(r => SH_REQUETES.includes(r.Requete) && !SH_EXCLURE_FONCTION.test(r.Fonction || ''));
+  const hors = attente.length - aImporter.length - animaliers;
   const parReq = {};
   aImporter.forEach(r => { parReq[r.Requete] = (parReq[r.Requete] || 0) + 1; });
   console.log('saleshandy : ' + aImporter.length + ' fiche(s) a importer' + (Object.keys(parReq).length ? ' (' + Object.entries(parReq).map(([k, n]) => k + ' ' + n).join(', ') + ')' : '') +
-    (hors ? ' ; ' + hors + ' laissee(s) « A importer » (requete hors sequence)' : ''));
+    (hors ? ' ; ' + hors + ' laissee(s) « A importer » (requete hors sequence)' : '') +
+    (animaliers ? ' ; ' + animaliers + ' laissee(s) « A importer » (profil animalier, pas de sequence dediee)' : ''));
   if (!aImporter.length) return { ok: true, importees: [] };
   if (sec) { console.log('saleshandy : simulation, rien importe'); return { ok: true, importees: [] }; }
   if (!SH_KEY) { console.log('SALESHANDY : SALESHANDY_API_KEY absente (charger-secrets.sh), import saute'); return { ok: false, importees: [] }; }

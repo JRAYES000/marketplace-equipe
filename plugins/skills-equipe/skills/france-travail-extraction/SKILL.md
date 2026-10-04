@@ -14,7 +14,7 @@ description: >-
   d'emploi est mentionné.
 compatibility: "Claude Code. Requiert Claude in Chrome (session recruteur déjà connectée), l'API publique Notion (variable NOTION_TOKEN_FT, connexion interne « Leads France Travail - API »), NocoDB pour le miroir (NOCODB_URL, NOCODB_TOKEN), l'API SalesHandy pour l'import dans la séquence (SALESHANDY_API_KEY), l'outil Bash avec node, poppler et tesseract. Le connecteur Notion MCP n'est plus utilisé."
 metadata:
-  version: '9.4'
+  version: '9.5'
   environment: 'Claude Code, rédigé pour Claude Sonnet 5.5 (fonctionne aussi sous Opus). Claude in Chrome pour la session recruteur, outil Bash pour les scripts fournis. Livrable = la base Notion « Leads France Travail », qui fait foi. NocoDB = miroir aligné en fin de run (references/synchro-notion.md).'
   journal: 'references/journal.md — mesures et incidents des runs réels (v2.0 à v9.3). À lire seulement pour comprendre ou contester une règle ; en cas de désaccord ce fichier-ci fait foi.'
 ---
@@ -159,9 +159,23 @@ Une seule lecture de Notion (mesuré le 29/09/2026 : 1,4 à 2,9 s pour 257 fiche
 
 ## Phase 2 — Ouvrir la recherche (onglet visible)
 
-**Cette phase, et elle seule, exige l'onglet au premier plan.** Sur un onglet caché, les clics du
-protocole de débogage n'atteignent pas la page. C'est **l'utilisateur** qui bascule : le lui
-demander.
+**Cette phase, et elle seule, exige un onglet visible** (`document.hidden === false`). Sur un
+onglet caché, les clics du protocole de débogage n'atteignent pas la page.
+
+**Montage qui évite de faire basculer Julien** (v9.5, mesuré le 04/10/2026 : onglet visible
+alors que sa fenêtre n'avait pas le focus). Chrome cache un onglet dans deux cas :
+- **ce n'est pas l'onglet actif de sa fenêtre.** Parade : une **fenêtre Chrome réservée** à
+  France Travail, dont l'onglet du groupe Claude reste l'onglet actif. L'extension ne sait pas
+  ouvrir de fenêtre : Julien fait glisser l'onglet hors de sa fenêtre, une fois ;
+- **sa fenêtre est réduite ou recouverte** (calcul d'occlusion de Windows). Parade : Chrome lancé
+  avec `--disable-features=CalculateNativeWinOcclusion`. Raccourcis porteurs : « Google Chrome »
+  sur le Bureau, « Google Chrome (France Travail) » dans le menu Démarrer de Julien. Contrôle :
+  `Get-CimInstance Win32_Process -Filter "Name='chrome.exe'"`, ligne de commande sans `--type=`.
+  Une fenêtre **réduite** reste figée, paramètre ou non.
+
+Si `document.hidden` vaut encore `true` : demander à Julien de basculer, et attendre. Jamais de
+remise au premier plan par Windows MCP ni par `SetForegroundWindow`. Relancer Chrome ferme la
+session France Travail (2FA à refaire) et les onglets de Julien : seulement avec son accord.
 
 1. **Injecter `scripts/arriere-plan.js`.** Il rend `parades installees : __pause=function
    rAF=patche`. À refaire après chaque rechargement.
@@ -173,7 +187,10 @@ demander.
    recherche » sur la ligne de la requête. Elle rappelle mot-clé **et** filtres : sauter 3 bis à 5,
    mais contrôler l'en-tête « N résultats pour : X » et les filtres affichés. Existantes :
    - « Formation naturopathie dispo immediate maj 3 mois » (29/09/2026) ;
-   - « naturopathe » (02/05/2026, filtres non vérifiés).
+   - « Reconversion bien-etre dispo immediate maj 3 mois » (04/10/2026).
+
+   « naturopathe » (02/05/2026) n'existait plus le 04/10/2026. Lancer une recherche recharge la
+   page : réinjecter `scripts/arriere-plan.js` ensuite.
 
    **Nouvelle requête** : après 3 bis à 5, « Enregistrez votre recherche », nom en ASCII sans `<`,
    **case d'abonnement décochée** (elle déclenche des e-mails d'alerte). Ajouter la ligne ici.
@@ -191,8 +208,11 @@ demander.
    `bash "<skill>/scripts/ocr-par-tour.sh" 0 "<tmp>/cv.tsv"`. Seuls les CV téléchargés ensuite
    seront pris : un `Document.pdf` personnel plus ancien ne bouge plus.
 
-**Barrière :** l'en-tête affiche la bonne requête, et le panneau du premier profil est ouvert (il
-contient « Profil mis à jour le »). L'utilisateur peut reprendre son écran : le dire.
+**Barrière :** l'en-tête affiche la bonne requête, et le panneau du premier profil est ouvert :
+un `div.modal-body` contient « Profil mis à jour le » et la modale affiche `1/N`. Chercher le
+texte dans tout `document.body` ne prouve rien : chaque carte de la liste le contient aussi
+(faux positif du 04/10/2026, clic d'ouverture perdu sur un onglet caché). L'utilisateur peut
+reprendre son écran : le dire.
 
 ## Phase 3 — Parcourir les profils (arrière-plan)
 
@@ -267,6 +287,13 @@ Downloads.
    - **Pertinence, obligatoire** : le métier visé, ses métiers adjacents, les projets de
      reconversion ou de formation vers ce métier. Écarter le reste (pour « infirmière
      libérale » : photographe, préparateur de commandes…). Un hors-cible ne s'écrit pas.
+   - **Bien-être animal : dans la cible**, quelle que soit la requête (Julien, 04/10/2026 :
+     l'École propose une formation de naturopathie animale). Reconversion vers le soin, le
+     bien-être ou la garde d'animaux : auxiliaire ou assistante vétérinaire, comportementaliste,
+     pet sitter, palefrenier, bien-être équin, éleveur. Sa **Fonction doit nommer l'animal**
+     (« Reconversion bien-être animal », « Aspirante auxiliaire vétérinaire », « Pet sitter en
+     reconversion », « Palefrenière… », « …équin », « …félin ») : `notion.js` s'en sert pour
+     tenir ces fiches hors de la séquence SalesHandy humaine (Phase 5).
    - **Fonction** : le titre en casse lisible, condensé à une trentaine de caractères
      (« Actuellement ASH - objectif Infirmière libérale » → « Aspirante infirmière libérale »).
    - **Profil anonyme** (intitulé à la place du nom) : `scripts/nom-du-cv.sh <fichier>` sur son
@@ -286,8 +313,14 @@ node "<skill>/scripts/notion.js" publier "<tmp>/lot.json"
 
 `assembler.js lot` remplit toutes les colonnes, dont la `Note` : présentation du candidat telle
 qu'il l'a écrite, puis les motifs après ` — ` (`pas de CV`, `CV non recu`, `email non trouve`,
-`PDF illisible`, `email reconstruit`, `appariement incertain`, `profil anonyme`). Ce n'est pas une
-analyse du CV.
+`PDF illisible`, `email reconstruit`, `appariement incertain`, `profil anonyme`,
+`commune lue dans le CV`, `commune non trouvee`, `telephone non trouve`). Ce n'est pas une
+analyse du CV. **Aucun champ vide sans motif** (Julien, 04/10/2026).
+
+**Commune** (v9.5) : celle du profil ; à défaut, un code postal du haut du CV validé par l'API
+Géo (`geo.api.gouv.fr`), retenu seulement si le nom officiel de la commune suit ce code dans le
+texte. Sinon vide, avec `commune non trouvee`. Mesuré le 04/10/2026 : 5 communes retrouvées sur
+9 manquantes, aucune fausse ; une règle par expression seule en rendait de fausses.
 
 Il **dépose les CV sur Google Drive** : une copie de chaque CV rattaché à un profil gardé, dans
 `G:/Mon Drive/01 ECOLE NATURO/CV France Travail` (Google Drive pour ordinateur ; `--drive` ou
@@ -341,6 +374,9 @@ miroir) ; un prospect déjà dans la séquence n'y est pas ajouté deux fois.
 ont un email et dont la requête figure dans `SH_REQUETES` de `notion.js` (Formation
 naturopathie, Naturopathie, Reconversion bien-être, Infirmière libérale — souvent en
 reconversion vers la naturopathie) — donc aussi celles d'un lot précédent restées en attente.
+**Sauf les profils animaliers** (Fonction reconnue par `SH_EXCLURE_FONCTION`) : la séquence parle
+de naturopathie humaine. Ils restent « A importer » tant qu'aucune séquence ne leur est destinée
+(`laissee(s) « A importer » (profil animalier…)` dans la sortie).
 Un profil sans prénom est importé sans prénom ni nom (son « Nom » est l'intitulé du profil) :
 le premier e-mail dira « Bonjour , », accepté par Julien le 29/09/2026. Champs envoyés :
 prénom, nom, email, téléphone, ville, fonction ;
