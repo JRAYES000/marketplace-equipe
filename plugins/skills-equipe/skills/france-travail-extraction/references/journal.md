@@ -531,3 +531,7 @@ Phase 5 bis recopie desormais seulement les Id acceptes par `ecrire`.
   (7 emails, 6 telephones). 6 anonymes : nom-du-cv.sh en identifie 4 deja en base (Crette x2,
   Pietri, Marceau ; Vitel par email). publier : 5 doublons retires, 5 ecrites, relu=5
   attendu=5, 2 importees dans SalesHandy. Nettoyage : 14 elements, 0 echec.
+
+2026-10-04 — v10.1 : profils animaliers dans la sequence SalesHandy commune (decision de Julien).
+• SH_EXCLURE_FONCTION retire de notion.js. `notion.js saleshandy` a importe les 8 fiches
+  animalieres restees « A importer » (toutes « Reconversion bien-etre ») : 8 importees, code 0.

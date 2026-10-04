@@ -14,7 +14,7 @@ description: >-
   mentionné.
 compatibility: "Claude Code. Requiert le serveur MCP Playwright avec un profil persistant (--user-data-dir, appareil enrôlé sur France Travail), l'API publique Notion (variable NOTION_TOKEN_FT, connexion interne « Leads France Travail - API »), l'API SalesHandy pour l'import dans la séquence (SALESHANDY_API_KEY), l'outil Bash avec node, poppler et tesseract. Ni Claude in Chrome, ni le connecteur Notion MCP, ni NocoDB."
 metadata:
-  version: '10.0'
+  version: '10.1'
   environment: 'Claude Code, rédigé pour Claude Sonnet 5.5 (fonctionne aussi sous Opus). Playwright MCP pour la session recruteur, outil Bash pour les scripts fournis. Livrable = la base Notion « Leads France Travail », seule base du skill.'
   journal: 'references/journal.md — mesures et incidents des runs réels (v2.0 à v10.0). À lire seulement pour comprendre ou contester une règle ; en cas de désaccord ce fichier-ci fait foi.'
 ---
@@ -289,10 +289,10 @@ pertinent est plus petit que la cible, le dire. **Ne jamais compléter avec du h
    - **Bien-être animal : dans la cible**, quelle que soit la requête (Julien, 04/10/2026 :
      l'École propose une formation de naturopathie animale). Reconversion vers le soin, le
      bien-être ou la garde d'animaux : auxiliaire ou assistante vétérinaire, comportementaliste,
-     pet sitter, palefrenier, bien-être équin, éleveur. Sa **Fonction doit nommer l'animal**
+     pet sitter, palefrenier, bien-être équin, éleveur. Sa **Fonction nomme l'animal**
      (« Reconversion bien-être animal », « Aspirante auxiliaire vétérinaire », « Pet sitter en
-     reconversion », « Palefrenière… », « …équin », « …félin ») : `notion.js` s'en sert pour
-     tenir ces fiches hors de la séquence SalesHandy humaine (Phase 5).
+     reconversion »…) : ces fiches entrent dans la même séquence SalesHandy que les autres
+     (Julien, 04/10/2026).
    - **Fonction** : le titre en casse lisible, condensé à une trentaine de caractères
      (« Actuellement ASH - objectif Infirmière libérale » → « Aspirante infirmière libérale »).
    - **Profil anonyme** (intitulé à la place du nom) : `scripts/nom-du-cv.sh <fichier>` sur son
@@ -370,9 +370,7 @@ prospect déjà dans la séquence n'y est pas ajouté deux fois.
 ont un email et dont la requête figure dans `SH_REQUETES` de `notion.js` (Formation
 naturopathie, Naturopathie, Reconversion bien-être, Infirmière libérale — souvent en
 reconversion vers la naturopathie) — donc aussi celles d'un lot précédent restées en attente.
-**Sauf les profils animaliers** (Fonction reconnue par `SH_EXCLURE_FONCTION`) : la séquence parle
-de naturopathie humaine. Ils restent « A importer » tant qu'aucune séquence ne leur est destinée
-(`laissee(s) « A importer » (profil animalier…)` dans la sortie).
+**Profils animaliers compris** (v10.1, Julien 04/10/2026 : une seule séquence pour tous).
 Un profil sans prénom est importé sans prénom ni nom (son « Nom » est l'intitulé du profil) :
 le premier e-mail dira « Bonjour , », accepté par Julien le 29/09/2026. Champs envoyés :
 prénom, nom, email, téléphone, fonction ;
