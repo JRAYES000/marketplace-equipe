@@ -399,7 +399,8 @@ données de candidats (RGPD), et un `Document (n).pdf` resté là décale le lot
 - profils parcourus, retenus, écartés hors-cible, doublons ;
 - leads écrits, dont avec email et avec téléphone ;
 - le motif de chaque champ vide, regroupé par `Note` ;
-- les CV déposés sur Drive (nombre, et ceux qui n'y sont pas avec leur motif) ;
+- les CV déposés sur Drive (nombre, et ceux qui n'y sont pas avec leur motif), avec le lien du
+  dossier (`https://drive.google.com/drive/folders/1SrIRCoTf3p5-1QOXgsM-uHAHe9jqaFm7`) ;
 - le résultat de l'import SalesHandy (importés, laissés « A importer » et pourquoi) ;
 - le résultat du miroir NocoDB (créées, modifiées, supprimées) et les statuts réalignés ;
 - en première ligne si elle existe : la file d'attente Notion et son nombre de fiches.
