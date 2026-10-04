@@ -10,7 +10,7 @@
 //       ecrit le lot au format de notion.js (publier).
 //
 // Option commune : --journal <ft-journal.json>. Par defaut, le plus recent
-// `ft-journal*.json` de Downloads (produit par `window.__exporter()`), refuse s'il a plus de
+// `ft-journal*.json` du dossier de telechargements du lot (Downloads en repli) (produit par `window.__exporter()`), refuse s'il a plus de
 // 2 h : un export bloque ferait sinon relire, sans le dire, le journal d'un lot precedent.
 // Seule la derniere recherche du journal est gardee (--toutes-recherches pour tout garder) :
 // deux recherches dans la meme page partagent les numeros de pagination.
@@ -33,7 +33,7 @@
 // l'empreinte de chaque nouveau profil nomme absent de choix.json. « notion.js situer » la
 // transmet a la page, qui saute ces profils au lot suivant sans CV ni OCR. Seule l'empreinte
 // (SHA-256 tronque du « prenom nom » normalise) est gardee, 180 jours au plus ; jamais un nom,
-// et rien n'apparait dans Notion ni NocoDB. Un profil anonyme n'est jamais range.
+// et rien n'apparait dans Notion. Un profil anonyme n'est jamais range.
 //
 // CV sur Google Drive (v9.4, demande de Julien du 04/10/2026) : « lot » copie le CV de chaque
 // profil garde dans le dossier Drive des CV, renomme « Prenom Nom AAAA-MM-JJ.pdf » (date
@@ -73,10 +73,17 @@ const chiffres = s => (s || '').replace(/\D/g, '').replace(/^33/, '0');
 const formatTel = s => { const d = chiffres(s); return d.length === 10 ? d.replace(/(..)(?!$)/g, '$1 ') : (s || ''); };
 
 // ---- Journal -------------------------------------------------------------------------------
+// v10.0 : dossier du lot rempli par l'ecouteur Playwright (playwright.js) d'abord, Downloads en repli.
+function dossiersDL() {
+  const ft = process.env.LOCALAPPDATA
+    ? path.join(process.env.LOCALAPPDATA, 'france-travail-extraction', 'telechargements')
+    : path.join(os.homedir(), '.local', 'state', 'france-travail-extraction', 'telechargements');
+  return [ft, path.join(os.homedir(), 'Downloads'), path.join(os.homedir(), 'Téléchargements')].filter(d => fs.existsSync(d));
+}
 function journal() {
   let f = opt.journal;
   if (!f) {
-    const dl = [path.join(os.homedir(), 'Downloads'), path.join(os.homedir(), 'Téléchargements')].find(d => fs.existsSync(d));
+    const dl = dossiersDL()[0];
     if (!dl) die('Downloads introuvable ; passer --journal <fichier>');
     const c = fs.readdirSync(dl).filter(n => /^ft-journal.*\.json$/i.test(n))
       .map(n => path.join(dl, n)).sort((a, b) => fs.statSync(b).mtimeMs - fs.statSync(a).mtimeMs);
@@ -207,7 +214,7 @@ function construire() {
 // Le cv.tsv ne garde que le nom du fichier : il est dans le dossier de son tour
 // (ocr-par-tour.sh), ou encore dans Downloads (emails-depuis-cv.sh seul, petit lot).
 function cheminCv(cv) {
-  const dl = [path.join(os.homedir(), 'Downloads'), path.join(os.homedir(), 'Téléchargements')].find(d => fs.existsSync(d)) || '';
+  const dl = dossiersDL()[0] || '';
   return [path.join(dl, '_cv-lot100', 'tour-' + cv.tour, 'Downloads', cv.fichier), path.join(dl, cv.fichier)].find(f => fs.existsSync(f));
 }
 

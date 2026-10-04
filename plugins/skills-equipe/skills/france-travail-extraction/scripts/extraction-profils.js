@@ -1,4 +1,8 @@
 // Script d'extraction v9.6 — un lot de profils France Travail Pro.
+// v10.0 (2026-10-04) : route Playwright. Injecte par ft-extraction.js (scripts/playwright.js), qui
+//   ouvre lui-meme le premier profil d'un vrai clic. Les points 1, 1 bis et la LIMITE CONNUE
+//   ci-dessous ne valent plus que pour le repli Claude in Chrome : Playwright ne bride pas les
+//   fenetres cachees et n'exige aucune autorisation de telechargements multiples.
 // v9.6 (2026-10-04) : plus aucune localisation lue (commune, adresse) : Julien n'en a pas besoin.
 // v9.2 (2026-09-29) : les hors-cible deja vus sont sautes comme les profils deja en base.
 //   `window.__connusBruts` peut etre l'objet { noms, ecartes } rendu par « notion.js situer » :
@@ -20,7 +24,7 @@
 //   journal en `ft-journal.json` : plus de transcription a la main, `assembler.js`
 //   le lit directement dans Downloads.
 // v5.3 (2026-09-29) : chaque profil journalise aussi `presentation`, le texte
-//   que le candidat ecrit sur son profil. Il alimente la Note NocoDB, qui ne
+//   que le candidat ecrit sur son profil. Il alimente la Note de la fiche Notion, qui ne
 //   doit plus jamais rester vide (deux fiches du 29/09 l'etaient).
 // v5.2 (2026-09-29) : dedoublonnage PENDANT le parcours. `window.__connus`
 //   (Set de cles « prenom nom » normalisees, construit depuis `window.__connusBruts`

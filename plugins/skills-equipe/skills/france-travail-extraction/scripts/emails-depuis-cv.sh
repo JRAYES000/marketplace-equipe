@@ -57,8 +57,16 @@ done
 # Le pack francais ameliore l OCR des accents ; eng suffit pour un email.
 if tesseract --list-langs 2>/dev/null | grep -qx "fra"; then LANGUE="fra+eng"; else LANGUE="eng"; fi
 
-# Le dossier Downloads change de nom d un poste a l autre.
-if   [ -d "$HOME/Downloads" ];        then SOURCE="$HOME/Downloads"
+# Ordre : dossier impose (FT_SOURCE, pose par ocr-par-tour.sh), dossier du lot Playwright,
+# puis Downloads, qui change de nom d un poste a l autre.
+# v10.0 : les CV arrivent dans le dossier du lot que remplit l'ecouteur Playwright (playwright.js),
+# plus dans Downloads. Downloads reste le repli quand ce dossier n'existe pas.
+if [ -n "${LOCALAPPDATA:-}" ]; then FT="$(cygpath -u "$LOCALAPPDATA" 2>/dev/null || printf '%s' "$LOCALAPPDATA")/france-travail-extraction/telechargements"
+else FT="$HOME/.local/state/france-travail-extraction/telechargements"
+fi
+if   [ -n "${FT_SOURCE:-}" ];         then SOURCE="$FT_SOURCE"
+elif [ -d "$FT" ];                  then SOURCE="$FT"
+elif [ -d "$HOME/Downloads" ];        then SOURCE="$HOME/Downloads"
 elif [ -d "$HOME/Téléchargements" ];  then SOURCE="$HOME/Téléchargements"
 else echo "ERREUR : dossier Downloads introuvable sous $HOME" >&2; exit 1
 fi

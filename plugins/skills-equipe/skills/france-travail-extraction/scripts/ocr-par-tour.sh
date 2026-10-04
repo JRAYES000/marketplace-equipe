@@ -18,7 +18,13 @@
 # (marqueur), et plus tout Document*.pdf des 4 dernieres heures ; accepte Telechargements.
 set -u
 SKILL="$(cd "$(dirname "$0")/.." && pwd)"
-if   [ -d "$HOME/Downloads" ];       then DL="$HOME/Downloads"
+# v10.0 : les CV arrivent dans le dossier du lot que remplit l'ecouteur Playwright (playwright.js),
+# plus dans Downloads. Downloads reste le repli quand ce dossier n'existe pas.
+if [ -n "${LOCALAPPDATA:-}" ]; then FT="$(cygpath -u "$LOCALAPPDATA" 2>/dev/null || printf '%s' "$LOCALAPPDATA")/france-travail-extraction/telechargements"
+else FT="$HOME/.local/state/france-travail-extraction/telechargements"
+fi
+if   [ -d "$FT" ];                 then DL="$FT"
+elif [ -d "$HOME/Downloads" ];       then DL="$HOME/Downloads"
 elif [ -d "$HOME/Téléchargements" ]; then DL="$HOME/Téléchargements"
 else echo "ERREUR : dossier Downloads introuvable sous $HOME" >&2; exit 1
 fi
@@ -56,5 +62,5 @@ if [ "${#cvs[@]}" -eq 0 ]; then echo "TOUR $TOUR : aucun CV neuf" >&2; exit 0; f
 mkdir -p "$BASE/Downloads"
 mv "${cvs[@]}" "$BASE/Downloads"/
 echo "=== TOUR $TOUR ===" >> "$SORTIE"
-HOME="$BASE" bash "$SKILL/scripts/emails-depuis-cv.sh" 600 "$SORTIE" >/dev/null 2>>"$SORTIE.err"
+FT_SOURCE="$BASE/Downloads" HOME="$BASE" bash "$SKILL/scripts/emails-depuis-cv.sh" 600 "$SORTIE" >/dev/null 2>>"$SORTIE.err"
 echo "TOUR $TOUR : ${#cvs[@]} CV isoles et analyses" >&2
