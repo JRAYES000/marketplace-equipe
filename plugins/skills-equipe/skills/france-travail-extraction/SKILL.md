@@ -2,7 +2,7 @@
 name: france-travail-extraction
 description: >-
   Extrait les profils candidats de France Travail Pro (espace recruteur, CVthèque) vers la
-  base Notion « Leads France Travail » : nom, prénom, téléphone, email, fonction, commune.
+  base Notion « Leads France Travail » : nom, prénom, téléphone, email, fonction.
   Pilote la session Chrome déjà connectée (2FA) via Claude in Chrome, lit l'email des CV par
   OCR, apparie CV et profils par script, déduplique et écrit dans Notion par son API publique,
   puis aligne la table NocoDB du même nom en miroir. Range les CV retenus, renommés, sur
@@ -14,7 +14,7 @@ description: >-
   d'emploi est mentionné.
 compatibility: "Claude Code. Requiert Claude in Chrome (session recruteur déjà connectée), l'API publique Notion (variable NOTION_TOKEN_FT, connexion interne « Leads France Travail - API »), NocoDB pour le miroir (NOCODB_URL, NOCODB_TOKEN), l'API SalesHandy pour l'import dans la séquence (SALESHANDY_API_KEY), l'outil Bash avec node, poppler et tesseract. Le connecteur Notion MCP n'est plus utilisé."
 metadata:
-  version: '9.5'
+  version: '9.6'
   environment: 'Claude Code, rédigé pour Claude Sonnet 5.5 (fonctionne aussi sous Opus). Claude in Chrome pour la session recruteur, outil Bash pour les scripts fournis. Livrable = la base Notion « Leads France Travail », qui fait foi. NocoDB = miroir aligné en fin de run (references/synchro-notion.md).'
   journal: 'references/journal.md — mesures et incidents des runs réels (v2.0 à v9.3). À lire seulement pour comprendre ou contester une règle ; en cas de désaccord ce fichier-ci fait foi.'
 ---
@@ -246,7 +246,7 @@ erreur : un parcours lent signifie « parades absentes », pas « site lent ».
    : X » et remet le journal à zéro (`reset` dans le retour ; l'ancien reste dans
    `window.__logArchive`). Si l'en-tête n'est pas lisible, appeler `window.__reset()` avant.
 
-Le script lit pour chaque profil nom, titre, présentation, commune, date de mise à jour, téléphone
+Le script lit pour chaque profil nom, titre, présentation, date de mise à jour, téléphone
 affiché ; il télécharge le CV s'il existe (avec son rang, `dlRang`) ; il ne clique « Afficher le
 numéro » que pour les profils sans CV.
 
@@ -277,7 +277,7 @@ Downloads.
 
    Il lit le `ft-journal*.json` le plus récent de Downloads, **refusé s'il a plus de 2 h** (export
    bloqué → vieux journal), et n'en garde que la dernière recherche. Une ligne par nouveau
-   profil : `pag | nom | titre | commune | CV | présentation`, puis les comptes. Le CV est rattaché **par nom** (le CV porte le nom, le téléphone ou un email au nom
+   profil : `pag | nom | titre | CV | présentation`, puis les comptes. Le CV est rattaché **par nom** (le CV porte le nom, le téléphone ou un email au nom
    du profil) ou **par ordre** (entre deux ancres, autant de CV que de profils). Sinon :
    `incertain` (email laissé vide) ou `non recu`. Les ancres retenues forment la plus longue
    suite cohérente : une ancre fausse (un CV qui cite un autre candidat) ne décale plus les
@@ -314,13 +314,13 @@ node "<skill>/scripts/notion.js" publier "<tmp>/lot.json"
 `assembler.js lot` remplit toutes les colonnes, dont la `Note` : présentation du candidat telle
 qu'il l'a écrite, puis les motifs après ` — ` (`pas de CV`, `CV non recu`, `email non trouve`,
 `PDF illisible`, `email reconstruit`, `appariement incertain`, `profil anonyme`,
-`commune lue dans le CV`, `commune non trouvee`, `telephone non trouve`). Ce n'est pas une
-analyse du CV. **Aucun champ vide sans motif** (Julien, 04/10/2026).
+`telephone non trouve`). Ce n'est pas une analyse du CV. **Aucun champ vide sans motif**
+(Julien, 04/10/2026).
 
-**Commune** (v9.5) : celle du profil ; à défaut, un code postal du haut du CV validé par l'API
-Géo (`geo.api.gouv.fr`), retenu seulement si le nom officiel de la commune suit ce code dans le
-texte. Sinon vide, avec `commune non trouvee`. Mesuré le 04/10/2026 : 5 communes retrouvées sur
-9 manquantes, aucune fausse ; une règle par expression seule en rendait de fausses.
+**Aucune localisation** (v9.6, Julien 04/10/2026 : il n'en a pas besoin). Ni commune, ni
+adresse, ni code postal : ni lus sur la page, ni tirés du CV, ni écrits dans Notion, NocoDB ou
+SalesHandy. `notion.js` refuse une colonne `Commune`. Le texte du CV (adresse comprise) ne sert
+qu'à trouver email, téléphone et nom, dans `cv.tsv`, mis à la corbeille en Phase 6.
 
 Il **dépose les CV sur Google Drive** : une copie de chaque CV rattaché à un profil gardé, dans
 `G:/Mon Drive/01 ECOLE NATURO/CV France Travail` (Google Drive pour ordinateur ; `--drive` ou
@@ -342,7 +342,7 @@ propre à chaque poste.
 
 1. reprend la file d'attente d'un lot précédent ;
 2. **retire les doublons** et les liste (`doublon retire : …`) : même email, même téléphone, ou
-   même nom + prénom + commune. Un profil **anonyme** (sans prénom) ne se compare que par email ou
+   même nom + prénom. Un profil **anonyme** (sans prénom) ne se compare que par email ou
    téléphone : son intitulé est partagé par d'autres (mesuré : un nouvel anonyme était retiré à
    tort en v9.0). Un profil déjà en base est un doublon quel que soit son `Statut`. Une même
    personne présente deux fois dans le lot ne s'écrit qu'une fois (`deux fois dans le lot`) ;
@@ -379,7 +379,7 @@ de naturopathie humaine. Ils restent « A importer » tant qu'aucune séquence n
 (`laissee(s) « A importer » (profil animalier…)` dans la sortie).
 Un profil sans prénom est importé sans prénom ni nom (son « Nom » est l'intitulé du profil) :
 le premier e-mail dira « Bonjour , », accepté par Julien le 29/09/2026. Champs envoyés :
-prénom, nom, email, téléphone, ville, fonction ;
+prénom, nom, email, téléphone, fonction ;
 tag `France Travail` ; vérification d'email SalesHandy activée (délivrabilité d'abord) ; un
 prospect déjà connu de SalesHandy garde ses champs (`addMissingFields`). Le script attend la fin
 de l'import (2 min au plus) et lit le rapport d'échec : un refusé reste « A importer ». Seuls les
@@ -403,7 +403,7 @@ lecture Notion tronquée viderait NocoDB).
   lui-même ce qui est déjà arrivé (doublons), et n'écrit que ce qui manque.
 
 Colonnes (ASCII, ce sont des identifiants de schéma) : `Nom` (MAJUSCULES, à défaut l'intitulé),
-`Prenom`, `Email` (du CV uniquement), `Telephone` (`06 XX XX XX XX`, CV d'abord), `Commune`,
+`Prenom`, `Email` (du CV uniquement), `Telephone` (`06 XX XX XX XX`, CV d'abord),
 `Fonction`, `Requete`, `Date extraction`, `Profil mis a jour`, `Statut` (`A importer` par défaut),
 `Note` (jamais vide).
 

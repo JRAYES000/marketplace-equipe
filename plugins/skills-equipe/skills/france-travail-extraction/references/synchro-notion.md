@@ -32,7 +32,7 @@ node "<skill>/scripts/notion.js" miroir-nocodb --sec   # simulation : comptes, s
 node "<skill>/scripts/notion.js" miroir-nocodb         # applique, puis relit
 ```
 
-- Appariement Notion ↔ NocoDB par email, sinon nom + prénom + commune + requête, **au
+- Appariement Notion ↔ NocoDB par email, sinon nom + prénom + requête (commune retirée en v9.6), **au
   multi-ensemble** (deux profils au même intitulé sont deux personnes). Entre profils anonymes
   du même intitulé, l'appariement est arbitraire : le miroir réécrit alors plusieurs champs,
   mais le contenu final de NocoDB est bien celui de Notion.

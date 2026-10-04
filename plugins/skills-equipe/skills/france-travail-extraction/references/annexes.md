@@ -38,7 +38,7 @@ journal dans la page puis le lire avec `get_page_text` (~10 000 caractères) :
 ```js
 const a = document.createElement('article');
 a.id = '__dump';
-a.textContent = window.__log.filter(r => !r.deja).map(r => [r.pag, r.nom, r.titre, r.maj, r.commune, r.tel, r.telecharge, r.dlRang, r.presentation].join('~')).join('\n');
+a.textContent = window.__log.filter(r => !r.deja).map(r => [r.pag, r.nom, r.titre, r.maj, r.tel, r.telecharge, r.dlRang, r.presentation].join('~')).join('\n');
 document.body.insertBefore(a, document.body.firstChild);
 ```
 

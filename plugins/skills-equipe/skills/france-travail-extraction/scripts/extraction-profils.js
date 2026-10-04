@@ -1,4 +1,5 @@
-// Script d'extraction v9.2 — un lot de profils France Travail Pro.
+// Script d'extraction v9.6 — un lot de profils France Travail Pro.
+// v9.6 (2026-10-04) : plus aucune localisation lue (commune, adresse) : Julien n'en a pas besoin.
 // v9.2 (2026-09-29) : les hors-cible deja vus sont sautes comme les profils deja en base.
 //   `window.__connusBruts` peut etre l'objet { noms, ecartes } rendu par « notion.js situer » :
 //   `ecartes` = empreintes SHA-256 tronquees (16 hex) de la cle « prenom nom », calculees ici
@@ -224,11 +225,7 @@ window.__corps = async (BATCH, BUDGET_MS) => {
     // Le repli ne lit que le haut du panneau : sous « Experiences », un numero est celui d'un employeur.
     const hautPanneau = t.split(/\n\s*Exp[ée]riences?\b/i)[0];
     const telTexte = (hautPanneau.match(/(?:\+33|0)[ .]?[1-9](?:[ .]?\d{2}){4}/) || [])[0] || '';
-    // Commune : d'abord apres « Adresse » ; a defaut, le premier « 12345 VILLE » du haut du panneau
-    // (jamais sous « Experiences » : ce serait la ville d'un employeur).
-    const RE_COMMUNE = /\b\d{5}\s+[A-ZÀ-Ü' -]+/;
-    const iAdr = t.search(/\nAdresse\b/);
-    const communeAdr = iAdr >= 0 ? ((t.slice(iAdr).match(RE_COMMUNE) || [''])[0]).trim() : '';
+    // Aucune localisation lue (v9.6, Julien 04/10/2026) : ni commune, ni adresse, ni code postal.
 
     const btnDL = q ? [...q.querySelectorAll('a,button')].find(e => /Télécharger/i.test(norm(e.textContent))) : null;
     let dl = false;
@@ -240,7 +237,6 @@ window.__corps = async (BATCH, BUDGET_MS) => {
       nom: L[0] || '',
       titre: L[1] || '',
       maj,
-      commune: communeAdr || ((hautPanneau.match(RE_COMMUNE) || [''])[0]).trim(),
       recherche: window.__recherche || null,
       tel: telChamp || telTexte,
       telSource: telChamp ? 'champ' : (telTexte ? 'texte' : ''),
