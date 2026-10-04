@@ -203,40 +203,6 @@ function construire() {
   });
 }
 
-// ---- Commune lue dans le CV ----------------------------------------------------------------
-// (v9.5, Julien 04/10/2026) Quand le profil ne donne pas de commune : un code postal du haut du
-// CV, valide par la liste officielle des communes (API Geo, geo.api.gouv.fr), et seulement si le
-// nom officiel suit vraiment ce code dans le texte. Une regle par expression seule rendait
-// « TULLE MARGOT QO » ou un bout d'email : une commune fausse serait une valeur inventee.
-// Format France Travail : « 69210 ST PIERRE LA PALUD » (majuscules, sans accent ni tiret).
-const formeFt = s => (s || '').normalize('NFD').replace(/[̀-ͯ]/g, '').toUpperCase()
-  .replace(/[^A-Z�]+/g, ' ').replace(/\bSAINTE\b/g, 'STE').replace(/\bSAINT\b/g, 'ST').trim();
-const communesParCp = new Map();
-function communesDu(cp) {
-  if (!communesParCp.has(cp)) {
-    let noms = [];
-    try {
-      const out = require('child_process').execFileSync('curl', ['-s', '--max-time', '10',
-        'https://geo.api.gouv.fr/communes?codePostal=' + cp + '&fields=nom&format=json'], { encoding: 'utf8' });
-      noms = JSON.parse(out).map(c => c.nom);
-    } catch {}
-    communesParCp.set(cp, noms);
-  }
-  return communesParCp.get(cp);
-}
-function communeDuCv(texte) {
-  const t = (texte || '').slice(0, 800);
-  for (const m of t.matchAll(/\b(\d{5})\b(?!\s*@)/g)) {
-    // Le texte OCR peut porter U+FFFD a la place d'une lettre accentuee : il vaut n'importe quelle lettre.
-    const apres = formeFt(t.slice(m.index + 5, m.index + 70)) + ' ';
-    const ok = communesDu(m[1]).map(formeFt)
-      .filter(n => n.length <= apres.length && [...n + ' '].every((ch, i) => ch === apres[i] || (apres[i] === '�' && /[A-Z]/.test(ch))))
-      .sort((a, b) => b.length - a.length)[0];
-    if (ok) return m[1] + ' ' + ok;
-  }
-  return '';
-}
-
 // ---- CV sur Google Drive -------------------------------------------------------------------
 // Le cv.tsv ne garde que le nom du fichier : il est dans le dossier de son tour
 // (ocr-par-tour.sh), ou encore dans Downloads (emails-depuis-cv.sh seul, petit lot).
@@ -284,10 +250,10 @@ function deposerSurDrive(liste, date) {
 // ---- Commandes -----------------------------------------------------------------------------
 if (cmd === 'revue') {
   const r = construire();
-  console.log('pag | nom | titre | commune | CV | presentation');
+  console.log('pag | nom | titre | CV | presentation');
   for (const x of r) {
     const cv = !x.p.aCV ? 'pas de CV' : x.a.cv ? (x.email || '(sans email)') + ' [' + x.a.mode + ' ' + x.a.cv.fichier + ']' : x.a.mode;
-    console.log([x.p.pag, x.p.nom, x.p.titre, x.p.commune, cv, (x.p.presentation || '').slice(0, 90)].join(' | '));
+    console.log([x.p.pag, x.p.nom, x.p.titre, cv, (x.p.presentation || '').slice(0, 90)].join(' | '));
   }
   const n = m => r.filter(x => x.a.mode === m).length;
   console.log('--- ' + r.length + ' nouveaux profils ; CV rattaches par nom ' + n('nom') + ', par ordre ' + n('ordre') +
@@ -310,12 +276,9 @@ if (cmd === 'revue') {
     // Identite retrouvee (nom-du-cv.sh) : le profil n'est plus anonyme.
     const motifs = surcharge.Prenom ? x.motifs.filter(m => m !== 'profil anonyme') : [...x.motifs];
     // Aucun champ vide sans motif (Julien, 04/10/2026).
-    let commune = x.p.commune;
-    if (!commune && x.a.cv) { commune = communeDuCv(x.a.cv.texte); if (commune) motifs.push('commune lue dans le CV'); }
-    if (!commune && !surcharge.Commune) motifs.push('commune non trouvee');
     if (!x.tel && !surcharge.Telephone) motifs.push('telephone non trouve');
     const o = {
-      Nom: x.p.Nom, Prenom: x.p.Prenom, Email: x.email, Telephone: x.tel, Commune: commune,
+      Nom: x.p.Nom, Prenom: x.p.Prenom, Email: x.email, Telephone: x.tel,
       Requete: opt.requete, 'Date extraction': opt.date, 'Profil mis a jour': x.p.maj,
       Note: motifs.length ? pres + ' — ' + motifs.join(', ') : pres,
       ...surcharge,

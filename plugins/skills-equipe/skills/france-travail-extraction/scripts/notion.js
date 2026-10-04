@@ -35,10 +35,10 @@ const NOTION_VERSION = '2022-06-28';
 const DELAI_MS = 30000; // par requete : sans lui, une connexion muette bloque ~5 min par essai
 const STATUTS = ['A importer', 'Importe SalesHandy', 'Ecarte'];
 // « Type de requete » est une formule Notion : jamais ecrite, jamais recopiee.
-const COLONNES = ['Nom', 'Prenom', 'Email', 'Telephone', 'Commune', 'Fonction', 'Requete',
+const COLONNES = ['Nom', 'Prenom', 'Email', 'Telephone', 'Fonction', 'Requete',
   'Date extraction', 'Profil mis a jour', 'Statut', 'Note'];
 const TYPES = { Nom: 'title', Prenom: 'rich_text', Email: 'email', Telephone: 'phone_number',
-  Commune: 'rich_text', Fonction: 'rich_text', Requete: 'rich_text', 'Date extraction': 'date',
+  Fonction: 'rich_text', Requete: 'rich_text', 'Date extraction': 'date',
   'Profil mis a jour': 'date', Statut: 'select', Note: 'rich_text' };
 const FILE = path.join(DOSSIER_FILE, 'notion-attente.json');
 const ECARTES = path.join(DOSSIER_FILE, 'ecartes.json');
@@ -128,10 +128,10 @@ async function toutes(filtre) {
 // ---- Identite et doublons ----------------------------------------------------------------------
 const norm = s => (s || '').normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().trim();
 const tel10 = s => { const d = (s || '').replace(/\D/g, '').replace(/^33/, '0'); return d.length === 10 ? d : ''; };
-// Nom + prenom + commune n'identifie une personne que si le prenom est connu : un profil anonyme
+// Nom + prenom n'identifie une personne que si le prenom est connu : un profil anonyme
 // porte un intitule (« Conseillere en naturopathie ») que d'autres partagent. Mesure du 29/09/2026 :
 // un nouvel anonyme etait classe doublon d'un ancien et retire du lot.
-const cleIdentite = r => norm(r.Prenom) ? [norm(r.Nom), norm(r.Prenom), norm(r.Commune)].join('|') : '';
+const cleIdentite = r => norm(r.Prenom) ? [norm(r.Nom), norm(r.Prenom)].join('|') : '';
 function doublons(lot, base) {
   const parEmail = new Map(), parTel = new Map(), parNom = new Map();
   for (const r of base) {
@@ -153,9 +153,9 @@ function doublons(lot, base) {
   });
   return out;
 }
-// Paires Notion <-> NocoDB (miroir, reprise) : email, puis nom + prenom + commune + requete, au
+// Paires Notion <-> NocoDB (miroir, reprise) : email, puis nom + prenom + requete, au
 // multi-ensemble. Deux fiches identiques restent deux personnes.
-const cleNom = r => [norm(r.Nom), norm(r.Prenom), norm(r.Commune), norm(r.Requete)].join('|');
+const cleNom = r => [norm(r.Nom), norm(r.Prenom), norm(r.Requete)].join('|');
 function apparier(A, B) {
   const prisA = new Set(), prisB = new Set(), paires = [];
   const passe = cle => {
@@ -352,8 +352,6 @@ const versProspect = r => {
   const o = { Email: r.Email.trim().toLowerCase() };
   if (norm(r.Prenom)) { o['First Name'] = r.Prenom; o['Last Name'] = r.Nom; }
   if (r.Telephone) o['Phone Number'] = r.Telephone;
-  const ville = (r.Commune || '').replace(/^\d{5}\s*/, '').trim();
-  if (ville) o.City = ville;
   if (r.Fonction) o['Job Title'] = r.Fonction;
   return o;
 };

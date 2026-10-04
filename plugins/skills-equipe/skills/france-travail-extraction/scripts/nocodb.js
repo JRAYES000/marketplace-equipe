@@ -16,7 +16,7 @@ require('./secrets-env');
 const URL_BASE = (process.env.NOCODB_URL || '').replace(/\/+$/, '');
 const TOKEN = process.env.NOCODB_TOKEN || '';
 const TABLE = process.env.NOCODB_TABLE_ID || 'mjhwgyhkrukdy5m';
-const COLONNES = ['Nom', 'Prenom', 'Email', 'Telephone', 'Commune', 'Fonction', 'Requete',
+const COLONNES = ['Nom', 'Prenom', 'Email', 'Telephone', 'Fonction', 'Requete',
   'Date extraction', 'Profil mis a jour', 'Statut', 'Note'];
 
 function die(msg) { console.error('ERREUR : ' + msg); process.exit(1); }
@@ -84,7 +84,7 @@ const cmd = process.argv[2];
     const notion = f.toLowerCase().endsWith('.json') ? JSON.parse(brut) : parseCSV(brut);
     if (!notion.length || !('Nom' in notion[0]) || !('Requete' in notion[0])) die('export Notion illisible : colonnes Nom et Requete attendues');
     const noco = await toutes();
-    const cleNom = r => [norm(r.Nom), norm(r.Prenom), norm(r.Commune), norm(r.Requete)].join('|');
+    const cleNom = r => [norm(r.Nom), norm(r.Prenom), norm(r.Requete)].join('|');
     const pris = new Set(), prisN = new Set();
     const passe = cle => {
       const idx = new Map();
