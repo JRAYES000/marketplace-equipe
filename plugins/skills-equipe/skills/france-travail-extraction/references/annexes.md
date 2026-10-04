@@ -35,6 +35,7 @@ s'obtient que par le CV téléchargé. Un candidat sans CV n'a donc pas d'email 
 | Symptôme | Cause et geste |
 |---|---|
 | Retour vers la page de connexion en plein run | session expirée (inactivité ou navigateur relancé) : relancer `ft-connexion.js`, Julien se reconnecte, puis `ft-extraction.js` reprend (le journal saute les profils déjà vus) |
+| `Connection closed` au premier CV, le serveur Playwright redémarre | **Chrome plante sur le profil** à chaque téléchargement (rapports dans `C:/Users/julien/.chrome-claude/Crashpad/reports`), et le serveur sort sur l'erreur. Vu le 04/10/2026 après un redémarrage de Claude Desktop, réglé en vidant l'historique de téléchargements du profil : `browser_close`, vérifier qu'aucun `chrome.exe` ne tourne sur `.chrome-claude`, copier `Default/History` en `.bak`, puis vider les tables `downloads`, `downloads_url_chains` et `downloads_slices` (sqlite3 en Python). Cause exacte non prouvée. La session France Travail a survécu au plantage : relancer `ft-connexion.js`, puis reprendre la recherche |
 | `ERREUR : ecouteur de telechargements absent` | le navigateur Playwright a été relancé : relancer `ft-connexion.js` |
 | `erreurs` non vide dans le retour d'un tour | un CV n'a pas pu être enregistré : le noter, il sortira `non recu` à la revue |
 | `cv_enregistres` = 0 alors que `telecharges` > 0 | écouteur branché sur un autre onglet : relancer `ft-connexion.js` |

@@ -519,3 +519,15 @@ Phase 5 bis recopie desormais seulement les Id acceptes par `ecrire`.
   telechargements.
 • NocoDB : demande de Julien du 04/10, plus utilise. nocodb.js et le miroir de notion.js
   retires, jetons NocoDB retires de charger-secrets.sh. La table NocoDB n a pas ete touchee.
+
+2026-10-04 (soir) — premier vrai lot v10.0, « Formation naturopathie », 10 nouveaux.
+• Incident : apres un redemarrage de Claude Desktop, chaque telechargement faisait planter
+  Chrome sur le profil .chrome-claude (3 rapports Crashpad), et le serveur MCP Playwright
+  sortait sur une promesse rejetee (TargetClosedError) : « Connection closed ». Reproduit hors
+  France Travail (blob sur example.com), absent avec un profil jetable. Regle en vidant les 7
+  entrees de l historique de telechargements (toutes « complete ») ; cause exacte non prouvee.
+  La session France Travail a survecu au plantage (Chrome restaure ses cookies de session).
+• Run : 57 profils parcourus en un tour de 29 s, 47 deja en base sautes, 10 nouveaux, 8 CV
+  (7 emails, 6 telephones). 6 anonymes : nom-du-cv.sh en identifie 4 deja en base (Crette x2,
+  Pietri, Marceau ; Vitel par email). publier : 5 doublons retires, 5 ecrites, relu=5
+  attendu=5, 2 importees dans SalesHandy. Nettoyage : 14 elements, 0 echec.
