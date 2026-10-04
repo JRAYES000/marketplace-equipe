@@ -110,7 +110,7 @@ const fichiers = {
     await page.goto('https://pro.francetravail.fr/recherche-profil/recherchessauvegardees');
   }
   await page.waitForLoadState('networkidle').catch(() => {});
-  const recherches = await page.locator('a').filter({ hasText: /maj d+ mois|dispo immediate/i }).allInnerTexts().catch(() => []);
+  const recherches = await page.locator('a').filter({ hasText: /maj \\d+ mois|dispo immediate/i }).allInnerTexts().catch(() => []);
   return { connecte: true, attente_s: attente, telechargements: ctx.__ftDir, recherches };
 }
 `,
