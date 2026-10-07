@@ -101,9 +101,12 @@ les mains vides.
 ## Comptes a surveiller
 
 `comptes_a_surveiller` est rempli : 10 influenceurs americains reels sur l'IA appliquee au
-business/PME/independants (`comptes-a-surveiller.txt` a la racine du paquet, liste unique
-partagee entre `julien-agency` et `julien-partners`). Detail et methode de verification :
-`references/comptes-a-surveiller-veille-20260914.md`.
+business/PME/independants, communs aux deux comptes (`comptes-a-surveiller.txt`). Detail et
+methode de verification : `references/comptes-a-surveiller-veille-20260914.md`.
+`julien-agency` a en plus 8 comptes francophones propres (theme organismes de formation),
+valides par Julien le 07/10/2026, abonnes dans `abonnes-comptes.json`. Une page d'entreprise
+ne convient pas : l'acteur Apify n'y renvoie pas `authorPublicIdentifier`, donc aucun score
+(page C-Campus retiree le 07/10/2026 pour cette raison).
 
 ## Variables d'environnement (`.env.example`)
 
