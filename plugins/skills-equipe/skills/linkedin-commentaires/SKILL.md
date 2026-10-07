@@ -29,6 +29,11 @@ aujourd'hui ».
    `reglages-comptes.json`, en choisissant l'un des quatre genres du brief -- `information_chiffree`,
    `desaccord_argumente`, `histoire_vecue`, `vraie_question` (`GENRES` dans
    `lib/valider-commentaire.js`) -- ce n'est pas une generation automatique en JS.
+   **Reponse a un commentaire recu** (sous un post de Julien, via Buffer Community) : declarer
+   le genre `reponse` (`GENRE_REPONSE`, ajoute le 07/10/2026), jamais l'un des quatre genres
+   ci-dessus. Memes controles de forme, plus `validerAucunePromesse` : refus de toute promesse
+   au nom de Julien (recontact ou message prive, rendez-vous, prix). Une reponse ne compte pas
+   dans le quota et ne s'inscrit ni au registre ni dans la base Notion "Commentaires".
 5. `lib/valider-commentaire.js` (`validerCommentaire`) **refuse** tout brouillon hors des regles
    de forme ou dont le genre declare ne correspond pas au contenu (voir "Garde-fous").
 6. `lib/publier-commentaire.js` (`publierCommentaire`) est le **seul** point d'appel qui publie
