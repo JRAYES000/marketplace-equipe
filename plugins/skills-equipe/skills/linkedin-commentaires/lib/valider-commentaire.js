@@ -27,6 +27,15 @@ const PHRASES_MIN = 2;
 const PHRASES_MAX = 4;
 
 const GENRES = ['information_chiffree', 'desaccord_argumente', 'histoire_vecue', 'vraie_question'];
+// Ajoute le 07/10/2026 : genre des REPONSES aux commentaires recus sous les
+// posts de Julien (Buffer Community), distinct des 4 genres du brief qui ne
+// concernent que les commentaires publies sous les posts des comptes cibles.
+// Avant, R1, R2 et R3 du 07/10 ont du etre declarees "desaccord_argumente"
+// pour passer, ce qui faussait le controle. Volontairement HORS de `GENRES` :
+// `GENRES` alimente la base Notion "Commentaires" (lib/notion.js), et une
+// reponse n'est ni un commentaire du jour, ni comptee dans le quota, ni
+// inscrite au registre.
+const GENRE_REPONSE = 'reponse';
 
 const REGEX_EMOJI = /\p{Extended_Pictographic}/gu;
 // Bug reel trouve par test adversarial le 22/09/2026 : un domaine nu sans "www." ni
@@ -294,9 +303,11 @@ function validerAffirmationExperience(texte, anecdoteSourcee) {
  * regle mecanique, assume comme limite.
  */
 function validerGenre(texte, genre) {
+  if (genre === GENRE_REPONSE) return;
   if (!GENRES.includes(genre)) {
     throw new Error(
-      `Commentaire refuse : genre "${genre}" inconnu. Attendu l'un de : ${GENRES.join(', ')}.`
+      `Commentaire refuse : genre "${genre}" inconnu. Attendu l'un de : ${GENRES.join(', ')}, ` +
+      `ou "${GENRE_REPONSE}" pour une reponse a un commentaire recu.`
     );
   }
 
@@ -318,9 +329,64 @@ function validerGenre(texte, genre) {
 }
 
 /**
+ * Ajoute le 07/10/2026, propre au genre "reponse" : une reponse publiee sous
+ * un post de Julien engage Julien lui-meme envers une personne nommee. Toute
+ * promesse faite en son nom (le recontacter, lui ecrire en prive, fixer un
+ * rendez-vous, annoncer un prix) est refusee, sans echappatoire. Incident
+ * reel : R1 du 07/10 promettait le lieu des ateliers « en message prive »,
+ * message jamais parti (Sylvain DRAUX : « je n'ai pas eu votre message
+ * prive »). R2 (« Je reviens vers vous ») est refusee pour la meme raison,
+ * meme si l'annonce emploie la formule : decision de Nomena du 07/10.
+ *
+ * Heuristique, pas une preuve (meme famille que les autres controles) :
+ * trois listes fermees, une par type de promesse. Faux positif assume sur un
+ * tour figure (« a tout prix ») : reformuler. Angle mort assume : une
+ * promesse tournee autrement (« vous aurez des nouvelles bientot »).
+ */
+const PROMESSES_RECONTACT = new RegExp(
+  `${FRONTIERE_AVANT}(` +
+    "je\\s+reviens\\s+vers|je\\s+reviendrai\\s+vers|nous\\s+revenons\\s+vers|nous\\s+reviendrons\\s+vers|" +
+    "on\\s+revient\\s+vers|on\\s+reviendra\\s+vers|" +
+    "je\\s+vous\\s+(?:re)?contacte(?:rai)?|je\\s+vous\\s+[eé]cri(?:s|rai)|je\\s+vous\\s+envoie|je\\s+vous\\s+enverrai|" +
+    "je\\s+vous\\s+rappelle(?:rai)?|je\\s+vous\\s+tiens\\s+au\\s+courant|je\\s+vous\\s+tiendrai|" +
+    "en\\s+message\\s+priv[eé]|par\\s+message\\s+priv[eé]|en\\s+priv[eé]|en\\s+mp|par\\s+mp|en\\s+dm|par\\s+dm|par\\s+mail|par\\s+e-?mail" +
+  `)${FRONTIERE_APRES}`,
+  'iu'
+);
+const PROMESSES_RENDEZ_VOUS = new RegExp(
+  `${FRONTIERE_AVANT}(` +
+    "rendez-vous|rdv|cr[eé]neau|visio|appel|appelons|on\\s+s'appelle|planifions|r[eé]servez" +
+  `)${FRONTIERE_APRES}`,
+  'iu'
+);
+const PROMESSES_PRIX = new RegExp(
+  `(€|${FRONTIERE_AVANT}(?:euros?|prix|tarifs?|remise|r[eé]duction|gratuite?s?|offerte?s?|tjm|ht)${FRONTIERE_APRES})`,
+  'iu'
+);
+
+function validerAucunePromesse(texte) {
+  const controles = [
+    [PROMESSES_RECONTACT, 'recontact ou message prive'],
+    [PROMESSES_RENDEZ_VOUS, 'rendez-vous'],
+    [PROMESSES_PRIX, 'prix'],
+  ];
+  for (const [regex, type] of controles) {
+    const trouve = texte.match(regex);
+    if (trouve) {
+      throw new Error(
+        `Reponse refusee : promesse au nom de Julien detectee (${type} : "${trouve[0]}"). ` +
+        'Une reponse ne promet ni recontact, ni rendez-vous, ni prix : cette decision revient a Julien.'
+      );
+    }
+  }
+}
+
+/**
  * Point d'entree unique. `genre` doit etre l'un des 4 genres du brief (un par
- * proposition, jamais melanges). Leve une erreur descriptive au premier
- * controle viole ; ne renvoie rien en cas de succes (silence = conforme).
+ * proposition, jamais melanges), ou "reponse" pour une reponse a un
+ * commentaire recu (memes controles de forme, plus `validerAucunePromesse`).
+ * Leve une erreur descriptive au premier controle viole ; ne renvoie rien en
+ * cas de succes (silence = conforme).
  */
 function validerCommentaire({ texte, genre, anecdoteSourcee = false }) {
   if (!texte || !texte.trim()) {
@@ -331,6 +397,7 @@ function validerCommentaire({ texte, genre, anecdoteSourcee = false }) {
   validerAffirmationExperience(texte, anecdoteSourcee);
   validerQuantificationVague(texte);
   validerAccents(texte);
+  if (genre === GENRE_REPONSE) validerAucunePromesse(texte);
 }
 
 module.exports = {
@@ -342,7 +409,9 @@ module.exports = {
   validerQuantificationVague,
   detecterQuantificationVagueNonSourcee,
   compterPhrases,
+  validerAucunePromesse,
   GENRES,
+  GENRE_REPONSE,
   PHRASES_MIN,
   PHRASES_MAX,
 };
