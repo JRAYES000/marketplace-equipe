@@ -91,8 +91,9 @@ doit etre revue avant de toucher au seuil de 4h lui-meme.
 
 ## Comptes cibles
 
-`comptes_cibles` est rempli dans `reglages-comptes.json` : 8 comptes pour julien-partners, 14
-pour julien-agency (8 profils initiaux + 6 complementaires ajoutes le 16/09/2026 -- voir
+`comptes_cibles` est rempli dans `reglages-comptes.json` : 8 comptes pour julien-partners, 16
+pour julien-agency (8 profils initiaux + 6 complementaires ajoutes le 16/09/2026 + Michel Diaz
+et Estelle Marocco valides par Julien le 07/10/2026 -- voir
 `references/comptes-cibles-proposition-20260914.md` puis
 `references/comptes-cibles-proposition-20260916-complement-agence.md`). **Critere corrige le
 16/09/2026** : ce qui qualifie un compte cible n'est plus "base en France" mais "audience

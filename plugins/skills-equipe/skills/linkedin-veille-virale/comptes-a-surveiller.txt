@@ -21,3 +21,19 @@ https://www.linkedin.com/in/sahilbloom/
 https://www.linkedin.com/in/jasonfeifer/
 https://www.linkedin.com/in/matt-wolfe-30841712/
 https://www.linkedin.com/in/amyporterfield/
+
+# --- Comptes propres a julien-agency (ajoutes le 07/10/2026) ---
+# Valides par Julien le 07/10/2026 (13 h 11 Paris). Theme Agency : organismes de
+# formation. Abonnes dans abonnes-comptes.json. Copies uniquement dans
+# comptes_a_surveiller de julien-agency (reglages-comptes.json), pas de julien-partners.
+# Page C-Campus retiree : l'acteur Apify ne renvoie pas d'identifiant d'auteur pour une
+# page d'entreprise, le score ne peut pas etre calcule.
+
+https://www.linkedin.com/in/willemsconsultant/
+https://www.linkedin.com/in/estelle-marocco-former-ne-suffit-plus/
+https://www.linkedin.com/in/micheldiaz/
+https://www.linkedin.com/in/clement-meslin/
+https://www.linkedin.com/in/gillesbabinet/
+https://www.linkedin.com/in/benoitraphael/
+https://www.linkedin.com/in/flavienchervet/
+https://www.linkedin.com/in/thomasgouritin/

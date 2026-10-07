@@ -14,7 +14,7 @@
       "https://www.linkedin.com/in/matt-wolfe-30841712/",
       "https://www.linkedin.com/in/amyporterfield/"
     ],
-    "_source_comptes_a_surveiller": "Liste unique partagee avec julien-agency (le brief demande une seule liste pour les comptes), choisie et verifiee le 14/09/2026 -- voir comptes-a-surveiller.txt et references/comptes-a-surveiller-veille-20260914.md.",
+    "_source_comptes_a_surveiller": "Liste commune avec les 10 premiers comptes de julien-agency, choisie et verifiee le 14/09/2026 -- voir comptes-a-surveiller.txt et references/comptes-a-surveiller-veille-20260914.md. Depuis le 07/10/2026, julien-agency a en plus 8 comptes francophones propres (voir sa note).",
     "ton": ["chaleureux", "professionnel", "facilitateur", "oriente-reseau"],
     "seuil_max_commentaires": 30
   },
@@ -31,9 +31,17 @@
       "https://www.linkedin.com/in/sahilbloom/",
       "https://www.linkedin.com/in/jasonfeifer/",
       "https://www.linkedin.com/in/matt-wolfe-30841712/",
-      "https://www.linkedin.com/in/amyporterfield/"
+      "https://www.linkedin.com/in/amyporterfield/",
+      "https://www.linkedin.com/in/willemsconsultant/",
+      "https://www.linkedin.com/in/estelle-marocco-former-ne-suffit-plus/",
+      "https://www.linkedin.com/in/micheldiaz/",
+      "https://www.linkedin.com/in/clement-meslin/",
+      "https://www.linkedin.com/in/gillesbabinet/",
+      "https://www.linkedin.com/in/benoitraphael/",
+      "https://www.linkedin.com/in/flavienchervet/",
+      "https://www.linkedin.com/in/thomasgouritin/"
     ],
-    "_source_comptes_a_surveiller": "Liste unique partagee avec julien-partners (le brief demande une seule liste pour les comptes), choisie et verifiee le 14/09/2026 -- voir comptes-a-surveiller.txt et references/comptes-a-surveiller-veille-20260914.md.",
+    "_source_comptes_a_surveiller": "Les 10 premiers : liste commune avec julien-partners, choisie et verifiee le 14/09/2026 (voir comptes-a-surveiller.txt et references/comptes-a-surveiller-veille-20260914.md). + 8 comptes francophones propres a julien-agency (theme : organismes de formation), VALIDES par Julien le 07/10/2026 a 13 h 11 Paris (proposition : livrables-Claude-Agency/linkedin/veille-comptes-agency-proposition-2026-10-07.md). Lecture par l'acteur Apify verifiee le 07/10/2026 a 12 h 36 UTC. Page C-Campus (https://www.linkedin.com/company/c-campus/) retiree : l'acteur renvoie ses posts mais sans authorPublicIdentifier, donc aucun score calculable (calculerScore renvoie null). thomasgouritin : moins regulier (1 post sur le mois au 07/10), en observation.",
     "ton": ["confiant", "direct", "pedagogue", "oriente-dirigeants"],
     "seuil_max_commentaires": 30
   }
