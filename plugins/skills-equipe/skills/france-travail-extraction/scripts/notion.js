@@ -10,6 +10,12 @@
 //                                                doublons sont retires et listes), ecriture,
 //                                                relecture, import SalesHandy
 //   node notion.js saleshandy [--sec]            import SalesHandy seul (fiches « A importer »)
+//   node notion.js saleshandy-verifier <AAAA-MM-JJ>
+//                                                relit la verification SalesHandy des fiches
+//                                                importees extraites ce jour-la (v10.3)
+//   node notion.js corriger-email <ancien> <nouveau>
+//                                                email mal lu : corrige la fiche Notion, la remet
+//                                                « A importer » et la reimporte dans l'etape 1 (v10.3)
 // Commandes de detail :
 //   node notion.js resume | connus | dedup <lot.json> | ecrire <lot.json> [--sec] | reprendre
 //   node notion.js verifier <AAAA-MM-JJ> <requete>
@@ -17,7 +23,8 @@
 //   node notion.js archiver-test <requete>       archive les fiches d'une requete « TEST-… »
 //
 // Codes de sortie : 0 ok ; 1 erreur ; 2 relecture fausse ou Note vide ; 3 fiches en file d'attente ;
-// 4 import SalesHandy en echec ou partiel (fiches Notion intactes, restees « A importer »).
+// 4 import SalesHandy en echec ou partiel (fiches Notion intactes, restees « A importer ») ;
+// 5 email(s) classe(s) bad ou risky par SalesHandy : a relire sur le CV (lignes « EMAIL A RELIRE »).
 // Environnement : NOTION_TOKEN_FT ; SALESHANDY_API_KEY
 // pour l'import. A defaut, lus dans
 // le fichier ecrit par charger-secrets.sh (secrets-env.js).
@@ -259,14 +266,67 @@ const SH_SEQUENCE = process.env.SALESHANDY_SEQUENCE_FT || 'dlPyooE6zL';
 const SH_ETAPE = process.env.SALESHANDY_STEP_FT || '2AwrBNv3wQ';
 const SH_REQUETES = ['Formation naturopathie', 'Naturopathie', 'Reconversion bien-être', 'Infirmiere liberale'];
 // Profils animaliers importes dans la meme sequence que les autres (Julien, 04/10/2026, v10.1).
+// Limite de debit (v10.3) : 20 appels par fenetre sur /v1/prospects (en-tetes x-ratelimit-*).
+// Fenetre epuisee : on attend sa fin avant l'appel suivant ; 429 : on attend retry-after.
+let shLibre = 0;
 async function sh(method, p, body) {
-  const r = await fetch('https://open-api.saleshandy.com/v1' + p, {
-    method, headers: { 'x-api-key': SH_KEY, 'content-type': 'application/json' },
-    body: body === undefined ? undefined : JSON.stringify(body), signal: AbortSignal.timeout(DELAI_MS),
-  });
-  const txt = await r.text();
-  if (!r.ok) throw new Error('SalesHandy ' + method + ' ' + p + ' -> HTTP ' + r.status + ' ' + txt.slice(0, 300));
-  return txt ? JSON.parse(txt) : {};
+  for (let essai = 1; ; essai++) {
+    if (shLibre > Date.now()) await pause(shLibre - Date.now());
+    const r = await fetch('https://open-api.saleshandy.com/v1' + p, {
+      method, headers: { 'x-api-key': SH_KEY, 'content-type': 'application/json' },
+      body: body === undefined ? undefined : JSON.stringify(body), signal: AbortSignal.timeout(DELAI_MS),
+    });
+    const reset = Date.parse(r.headers.get('x-ratelimit-reset') || '');
+    if (r.headers.get('x-ratelimit-remaining') === '0' && reset) shLibre = reset + 500;
+    const txt = await r.text();
+    if (r.status === 429 && essai < 6) {
+      const s = Number(r.headers.get('retry-after'));
+      shLibre = Date.now() + (s ? s * 1000 : reset ? Math.max(reset - Date.now(), 0) + 500 : 10000 * essai);
+      continue;
+    }
+    if (!r.ok) throw new Error('SalesHandy ' + method + ' ' + p.split('?')[0] + ' -> HTTP ' + r.status + ' ' + txt.slice(0, 300));
+    return txt ? JSON.parse(txt) : {};
+  }
+}
+
+// Verification des emails importes (v10.3). Le 08/10/2026, 4 emails mal lus sur ~200 ont ete
+// classes « bad » par SalesHandy : les prospects sont restes en « Waiting », jamais contactes, sans
+// alerte. Apres l'import, on relit verificationStatus (inProgress -> valid / bad / risky en moins
+// d'une minute) ; un « bad » ou « risky » est ecrit dans la Note Notion et liste en sortie.
+const SH_A_RELIRE = ['bad', 'risky'];
+async function statutVerification(email) {
+  const d = await sh('GET', '/prospects?search=' + encodeURIComponent(email));
+  const p = (Array.isArray(d.payload) ? d.payload : []).find(x => (x.email || '').toLowerCase() === email);
+  return p ? p.verificationStatus || '' : '';
+}
+async function verifierEmails(importees) {
+  const reste = new Map(importees.map(r => [r.Email.trim().toLowerCase(), r]));
+  const statuts = new Map();
+  const fin = Date.now() + 180000;
+  await pause(30000);
+  while (reste.size) {
+    for (const [email, r] of [...reste]) {
+      const st = await statutVerification(email);
+      if (st && st !== 'inProgress') { statuts.set(email, st); reste.delete(email); }
+      else statuts.set(email, st || 'introuvable');
+    }
+    if (!reste.size || Date.now() > fin) break;
+    await pause(20000);
+  }
+  const aRelire = importees.filter(r => SH_A_RELIRE.includes(statuts.get(r.Email.trim().toLowerCase())));
+  for (const r of aRelire) {
+    const st = statuts.get(r.Email.trim().toLowerCase());
+    const ajout = 'SalesHandy : email ' + st + ', prospect jamais contacte — relire l email sur le CV (notion.js corriger-email)';
+    r.Note = (r.Note || '').includes(ajout) ? r.Note : [r.Note, ajout].filter(Boolean).join(' — ');
+    await notion('PATCH', '/pages/' + r._page, { properties: versProprietes({ Note: r.Note }) });
+  }
+  const compte = {};
+  statuts.forEach(v => { compte[v] = (compte[v] || 0) + 1; });
+  console.log('verification SalesHandy : ' + Object.entries(compte).map(([k, n]) => k + ' ' + n).join(', ') +
+    (reste.size ? ' (' + reste.size + ' non tranche(s) apres 3 min, a revoir par « notion.js saleshandy-verifier »)' : ''));
+  aRelire.forEach(r => console.log('EMAIL A RELIRE (' + statuts.get(r.Email.trim().toLowerCase()) + ') : ' +
+    [r.Prenom, r.Nom].filter(Boolean).join(' ') + ' <' + r.Email + '> — Note Notion completee'));
+  return aRelire;
 }
 // Colonnes Notion -> champs SalesHandy (libelles exacts de list_fields).
 const versProspect = r => {
@@ -310,7 +370,8 @@ async function saleshandy({ sec, tousNotion }) {
   const importees = aImporter.filter(r => !refuses.has(r.Email.trim().toLowerCase()));
   for (const r of importees) { await notion('PATCH', '/pages/' + r._page, { properties: versProprietes({ Statut: 'Importe SalesHandy' }) }); r.Statut = 'Importe SalesHandy'; }
   console.log('saleshandy : ' + importees.length + ' importee(s) dans la sequence (etape 1), Statut Notion -> Importe SalesHandy');
-  return { ok: !refuses.size, importees };
+  const aRelire = importees.length ? await verifierEmails(importees) : [];
+  return { ok: !refuses.size, importees, aRelire };
 }
 
 // ---- Commandes ---------------------------------------------------------------------------------
@@ -363,8 +424,11 @@ const sec = drapeau('--sec');
     }
     // Un echec SalesHandy ne touche pas aux fiches Notion (code 4).
     if (!drapeau('--sans-saleshandy')) {
-      try { if (!(await saleshandy({ sec: false, tousNotion })).ok) code = code || 4; }
-      catch (e) { console.log('SALESHANDY : ' + e.message); code = code || 4; }
+      try {
+        const s = await saleshandy({ sec: false, tousNotion });
+        if (!s.ok) code = code || 4;
+        if ((s.aRelire || []).length) code = code || 5;
+      } catch (e) { console.log('SALESHANDY : ' + e.message); code = code || 4; }
     }
     process.exit(code);
   } else if (cmd === 'resume') {
@@ -407,8 +471,37 @@ const sec = drapeau('--sec');
   } else if (cmd === 'saleshandy') {
     const tousNotion = await toutes();
     let code = 0;
-    try { if (!(await saleshandy({ sec, tousNotion })).ok) code = 4; }
-    catch (e) { console.log('SALESHANDY : ' + e.message); code = 4; }
+    try {
+      const s = await saleshandy({ sec, tousNotion });
+      if (!s.ok) code = 4; else if ((s.aRelire || []).length) code = 5;
+    } catch (e) { console.log('SALESHANDY : ' + e.message); code = 4; }
+    process.exit(code);
+  } else if (cmd === 'saleshandy-verifier') {
+    const date = process.argv[3];
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(date || '')) die('usage : saleshandy-verifier <AAAA-MM-JJ> (date d extraction)');
+    if (!SH_KEY) die('SALESHANDY_API_KEY absente : lancer charger-secrets.sh');
+    const rows = (await toutes({ and: [{ property: 'Date extraction', date: { equals: date } },
+      { property: 'Statut', select: { equals: 'Importe SalesHandy' } }] })).filter(r => (r.Email || '').includes('@'));
+    console.log('fiches importees extraites le ' + date + ' : ' + rows.length);
+    const aRelire = rows.length ? await verifierEmails(rows) : [];
+    process.exit(aRelire.length ? 5 : 0);
+  } else if (cmd === 'corriger-email') {
+    // SalesHandy refuse de modifier l'email d'un prospect existant (« Field is not updatable ») :
+    // la correction passe par un nouvel import dans l'etape 1. L'ancien prospect, classe bad, reste
+    // dans la sequence sans jamais recevoir d'e-mail.
+    const [ancien, nouveau] = [process.argv[3], process.argv[4]].map(e => (e || '').trim().toLowerCase());
+    if (!ancien.includes('@') || !/^[^@\s]+@[^@\s]+\.[a-z]{2,}$/.test(nouveau)) die('usage : corriger-email <ancien> <nouveau>');
+    const rows = await toutes({ property: 'Email', email: { equals: ancien } });
+    if (rows.length !== 1) die(rows.length + ' fiche(s) Notion avec l email ' + ancien + ' (1 attendue)');
+    const r = rows[0];
+    const ajout = 'email corrige le ' + new Date().toISOString().slice(0, 10) + ' (ancien : ' + ancien + ')';
+    await notion('PATCH', '/pages/' + r._page, { properties: versProprietes({ Email: nouveau, Statut: 'A importer', Note: [r.Note, ajout].filter(Boolean).join(' — ') }) });
+    console.log('fiche ' + [r.Prenom, r.Nom].filter(Boolean).join(' ') + ' : email corrige, Statut -> A importer');
+    let code = 0;
+    try {
+      const s = await saleshandy({ sec, tousNotion: await toutes() });
+      if (!s.ok) code = 4; else if ((s.aRelire || []).length) code = 5;
+    } catch (e) { console.log('SALESHANDY : ' + e.message); code = 4; }
     process.exit(code);
   } else if (cmd === 'archiver-test') {
     const requete = process.argv[3] || '';

@@ -52,6 +52,7 @@ const path = require('path');
 const os = require('os');
 const crypto = require('crypto');
 const { DOSSIER } = require('./secrets-env');
+const { nettoyer, douteux } = require('./email-cv');
 const ECARTES = path.join(DOSSIER, 'ecartes.json');
 const DUREE_ECARTE_J = 180;
 // Meme normalisation que window.__cle dans extraction-profils.js : les deux doivent rester egales.
@@ -182,9 +183,11 @@ function apparier(profils, liste) {
 // emails-depuis-cv.sh garde le PREMIER email du CV, qui peut etre celui d'un employeur ou d'un
 // referent. Si un autre email du CV porte le nom ou le prenom du candidat, c'est lui qu'on prend.
 const RE_EMAIL = /[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}/g;
+// Marques posees par email-cv.js : [RECOLLE], [RECONSTRUIT].
+const sansMarques = e => (e || '').replace(/\s*\[[A-Z]+\]/g, '');
 function emailAuNom(p, cv) {
   if (p.anonyme) return '';
-  const tous = [...new Set([cv.email.replace(/\s*\[RECONSTRUIT\]/, ''), ...(cv.texte.match(RE_EMAIL) || [])].filter(Boolean))];
+  const tous = [...new Set([sansMarques(cv.email), ...(cv.texte.match(RE_EMAIL) || []).map(nettoyer)].filter(Boolean))];
   const cles = [norm(p.Nom), norm(p.Prenom.split(/[\s-]/)[0])].map(s => s.replace(/ /g, '')).filter(s => s.length >= 3);
   const porte = e => { const local = norm(e.split('@')[0]).replace(/ /g, ''); return cles.some(c => local.includes(c)); };
   if (tous.length < 2 || porte(tous[0])) return '';  // rien a choisir, ou le premier est deja le bon
@@ -206,9 +209,14 @@ function construire() {
       telCv = a.cv.tel;
       const auNom = emailAuNom(p, a.cv);
       if (auNom) email = auNom;
-      else if (/\[RECONSTRUIT\]/.test(a.cv.email)) { email = a.cv.email.replace(/\s*\[RECONSTRUIT\]/, ''); motifs.push('email reconstruit'); }
-      else email = a.cv.email;
+      else {
+        email = sansMarques(a.cv.email);
+        if (/\[RECONSTRUIT\]/.test(a.cv.email)) motifs.push('email reconstruit');
+        if (/\[RECOLLE\]/.test(a.cv.email)) motifs.push('email recolle sur deux morceaux (a relire sur le CV)');
+      }
       if (!email) motifs.push(a.cv.texte.trim() ? 'email non trouve' : 'PDF illisible');
+      // v10.3 : partie locale trop courte, sans rien du nom, ou « 1 » lu « l » (email-cv.js).
+      else motifs.push(...douteux(email, p, a.cv.texte));
     }
     if (p.anonyme) motifs.push('profil anonyme');
     return { p, a, email, tel: formatTel(telCv || p.tel || ''), motifs };
@@ -264,7 +272,9 @@ if (cmd === 'revue') {
   const r = construire();
   console.log('pag | nom | titre | CV | presentation');
   for (const x of r) {
-    const cv = !x.p.aCV ? 'pas de CV' : x.a.cv ? (x.email || '(sans email)') + ' [' + x.a.mode + ' ' + x.a.cv.fichier + ']' : x.a.mode;
+    const aRelire = x.motifs.filter(m => /^email (douteux|recolle|reconstruit)/.test(m));
+    const cv = (!x.p.aCV ? 'pas de CV' : x.a.cv ? (x.email || '(sans email)') + ' [' + x.a.mode + ' ' + x.a.cv.fichier + ']' : x.a.mode) +
+      (aRelire.length ? ' A RELIRE SUR LE CV : ' + aRelire.join(', ') : '');
     console.log([x.p.pag, x.p.nom, x.p.titre, cv, (x.p.presentation || '').slice(0, 90)].join(' | '));
   }
   const n = m => r.filter(x => x.a.mode === m).length;
@@ -286,7 +296,12 @@ if (cmd === 'revue') {
     if (!surcharge.Fonction) die('pag ' + pag + ' : Fonction manquante');
     const pres = (x.p.presentation || '').trim() || 'Pas de texte de presentation';
     // Identite retrouvee (nom-du-cv.sh) : le profil n'est plus anonyme.
-    const motifs = surcharge.Prenom ? x.motifs.filter(m => m !== 'profil anonyme') : [...x.motifs];
+    let motifs = surcharge.Prenom ? x.motifs.filter(m => m !== 'profil anonyme') : [...x.motifs];
+    // Email relu sur le CV et corrige par choix.json (v10.3) : les motifs de lecture tombent.
+    if (surcharge.Email && surcharge.Email !== x.email) {
+      motifs = motifs.filter(m => !/^email (douteux|recolle|reconstruit|non trouve)/.test(m));
+      motifs.push('email corrige a la main sur le CV');
+    }
     // Aucun champ vide sans motif (Julien, 04/10/2026).
     if (!x.tel && !surcharge.Telephone) motifs.push('telephone non trouve');
     const o = {

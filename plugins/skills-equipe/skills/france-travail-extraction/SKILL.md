@@ -14,9 +14,9 @@ description: >-
   mentionné.
 compatibility: "Claude Code. Requiert le serveur MCP Playwright avec un profil persistant (--user-data-dir, appareil enrôlé sur France Travail), l'API publique Notion (variable NOTION_TOKEN_FT, connexion interne « Leads France Travail - API »), l'API SalesHandy pour l'import dans la séquence (SALESHANDY_API_KEY), l'outil Bash avec node, poppler et tesseract. Ni Claude in Chrome, ni le connecteur Notion MCP, ni NocoDB."
 metadata:
-  version: '10.1'
+  version: '10.3'
   environment: 'Claude Code, rédigé pour Claude Sonnet 5.5 (fonctionne aussi sous Opus). Playwright MCP pour la session recruteur, outil Bash pour les scripts fournis. Livrable = la base Notion « Leads France Travail », seule base du skill.'
-  journal: 'references/journal.md — mesures et incidents des runs réels (v2.0 à v10.0). À lire seulement pour comprendre ou contester une règle ; en cas de désaccord ce fichier-ci fait foi.'
+  journal: 'references/journal.md — mesures et incidents des runs réels (v2.0 à v10.3). À lire seulement pour comprendre ou contester une règle ; en cas de désaccord ce fichier-ci fait foi.'
 ---
 
 # Extraction France Travail Pro → Notion
@@ -69,11 +69,12 @@ appeler les scripts par leur chemin complet. Fichiers de travail (`cv.tsv`, `cho
 | Fichiers Playwright du lot (connexion, parcours, export) | `scripts/playwright.js preparer` (fin de Phase 1) |
 | Connexion, recherche, parcours, téléchargement des CV | **Playwright MCP** : `browser_run_code_unsafe` avec `filename` = `<pw>/ft-*.js` ; `browser_snapshot`, `browser_click`, `browser_type` pour l'interface |
 | Parcours des profils (dans la page) | `scripts/extraction-profils.js`, injecté par `ft-extraction.js` |
-| Email, téléphone et texte des CV | `scripts/ocr-par-tour.sh` (tour 0 avant le premier CV, puis après chaque tour) ; `scripts/emails-depuis-cv.sh` pour un petit lot |
+| Email, téléphone et texte des CV | `scripts/ocr-par-tour.sh` (tour 0 avant le premier CV, puis après chaque tour) ; `scripts/emails-depuis-cv.sh` pour un petit lot ; tous deux lisent l'email par `scripts/email-cv.js` |
 | Appariement CV → profil, construction du lot, dépôt des CV sur Drive | `scripts/assembler.js revue` puis `lot` |
 | Profil anonyme, segment incertain | `scripts/nom-du-cv.sh <fichier.pdf>` |
 | Jetons Notion et SalesHandy | `scripts/charger-secrets.sh` (Phase 1, avant tout appel) |
-| Situation de la base ; dédup, écriture, relecture, import SalesHandy | `scripts/notion.js situer` puis `publier` |
+| Situation de la base ; dédup, écriture, relecture, import et vérification SalesHandy | `scripts/notion.js situer` puis `publier` |
+| Email `bad` ou `risky` dans SalesHandy | `scripts/notion.js corriger-email` (réimport dans l'étape 1) |
 | Fichiers du lot, une fois vérifié | `scripts/nettoyer-cv.sh` (corbeille) |
 
 Ne pas réécrire un script de mémoire, ne pas le remplacer par du code improvisé. Un script qui
@@ -267,6 +268,12 @@ pertinent est plus petit que la cible, le dire. **Ne jamais compléter avec du h
    Une ligne courte par CV, dans l'ordre réel de téléchargement : `rang fichier email
    téléphone`. `ERREUR : pdftotext absent` (ou tesseract) → le signaler et s'arrêter : sans OCR,
    presque aucun email ne sort, ce qui se lirait à tort comme un vivier pauvre.
+
+   L'email est lu par `scripts/email-cv.js` (v10.3, tests : `node --test
+   tests/email-cv.test.js`). Il **recolle** une partie locale coupée en fin de ligne (CV en deux
+   colonnes : « …VANDERMEU » puis « LEN@… ») ou séparée par une espace (« prenom. nom@… »), et le
+   marque `[RECOLLE]` ; il **retire** les caractères de tête parasites (`_`, `.`, `-` collés par
+   l'icône d'enveloppe). Il ne corrige jamais une lettre mal lue : il la signale (étape 2).
 2. **Revue** :
 
    ```bash
@@ -281,6 +288,12 @@ pertinent est plus petit que la cible, le dire. **Ne jamais compléter avec du h
    `incertain` (email laissé vide) ou `non recu`. Les ancres retenues forment la plus longue
    suite cohérente : une ancre fausse (un CV qui cite un autre candidat) ne décale plus les
    autres. Si le CV contient plusieurs emails, celui qui porte le nom du candidat l'emporte.
+
+   **Email douteux** (v10.3) : partie locale de moins de 3 caractères ; ou, quand le CV porte le
+   nom du candidat, partie locale qui ne partage rien avec son nom ou son prénom ; ou « l » collé
+   au nom en fin de partie locale (« 1 » lu « l »). Le motif part dans la `Note`. **Relire
+   l'email sur le CV** (page 1, à l'œil) avant `lot`, et corriger par `choix.json`
+   (`{"Fonction": "…", "Email": "…", "Accroche": "…"}`). Même chose pour `email recolle`.
 3. **Choisir.** Écrire `<tmp>/choix.json`, avec **seulement les profils gardés** :
    `{"<pag>": "<Fonction>", …}`.
    - **Pertinence, obligatoire** : le métier visé, ses métiers adjacents, les projets de
@@ -325,8 +338,8 @@ node "<skill>/scripts/notion.js" publier "<tmp>/lot.json"
 
 `assembler.js lot` remplit toutes les colonnes, dont la `Note` : présentation du candidat telle
 qu'il l'a écrite, puis les motifs après ` — ` (`pas de CV`, `CV non recu`, `email non trouve`,
-`PDF illisible`, `email reconstruit`, `appariement incertain`, `profil anonyme`,
-`telephone non trouve`). Ce n'est pas une analyse du CV. **Aucun champ vide sans motif**
+`PDF illisible`, `email reconstruit`, `email recolle sur deux morceaux`, `email douteux (…)`,
+`appariement incertain`, `profil anonyme`, `telephone non trouve`). Ce n'est pas une analyse du CV. **Aucun champ vide sans motif**
 (Julien, 04/10/2026).
 
 **Aucune localisation** (v9.6, Julien 04/10/2026 : il n'en a pas besoin). Ni commune, ni
@@ -361,7 +374,8 @@ chaque poste.
 3. crée les fiches une par une (~3 par seconde, réessais sur 429, 5xx et délai de 30 s) ;
 4. **relit** par date et requête : `relu=N attendu=N notes_vides=0` ;
 5. **importe dans SalesHandy** (ci-dessous) les fiches « A importer » avec email, et
-   les passe « Importe SalesHandy » dans Notion.
+   les passe « Importe SalesHandy » dans Notion ;
+6. **relit la vérification SalesHandy** de chaque email importé (v10.3, ci-dessous).
 
 `--sec` simule (validation + doublons) sans rien écrire ; `--sans-saleshandy` saute l'étape 5.
 Le script refuse une colonne inconnue, un `Nom` ou une `Requete` absents, une `Note` vide, et
@@ -377,6 +391,8 @@ quelques minutes, puis continuer le run. La reprise ne recrée jamais une fiche 
 `4` : **import SalesHandy en échec ou partiel** ; les fiches concernées restent « A importer » dans
 Notion, intactes. Le dire avec le message. `notion.js saleshandy` refait l'import seul ; un
 prospect déjà dans la séquence n'y est pas ajouté deux fois.
+`5` : **email classé `bad` ou `risky` par SalesHandy** (lignes `EMAIL A RELIRE`). Le prospect est
+dans la séquence mais n'en recevra rien. Relire l'email sur le CV, puis corriger (ci-dessous).
 
 **Import SalesHandy.** Séquence `dlPyooE6zL`, étape 1 `2AwrBNv3wQ` (URL
 `my.saleshandy.com/sequence/960252`). Sont importées toutes les fiches Notion « A importer » qui
@@ -394,6 +410,27 @@ de l'import (2 min au plus) et lit le rapport d'échec : un refusé reste « A i
 importés passent « Importe SalesHandy ». Une fois importé, un prospect reçoit les e-mails de la
 séquence : c'est irrattrapable, d'où la barrière de la Phase 4 sur la pertinence.
 
+**Vérification des emails** (v10.3). Le 08/10/2026, 4 emails mal lus sur ~200 ont été classés
+`bad` par SalesHandy : les prospects sont restés en « Waiting », jamais contactés, sans alerte.
+Après l'import, `notion.js` attend 30 s puis relit `verificationStatus` de chaque prospect
+importé (`GET /v1/prospects?search=<email>` ; `inProgress` passe à `valid`, `bad` ou `risky` en
+moins d'une minute ; 3 min au plus). Limite de débit respectée : 20 appels par fenêtre sur
+`/v1/prospects`, attente de la fenêtre suivante et de `retry-after` sur 429 (mesuré : 24 fiches
+en 2 min 30). Un `bad` ou `risky` est ajouté à la `Note` Notion et listé en sortie (code 5).
+`notion.js saleshandy-verifier <AAAA-MM-JJ>` refait cette relecture pour les fiches importées
+extraites ce jour-là (statuts restés `inProgress`, lot ancien).
+
+**Corriger un email.** SalesHandy refuse de modifier l'email d'un prospect existant (« Field is
+not updatable »). La correction passe par un réimport dans l'étape 1 :
+
+```bash
+node "<skill>/scripts/notion.js" corriger-email "<email faux>" "<email lu sur le CV>"
+```
+
+Il corrige la fiche Notion (ancien email gardé dans la `Note`), la remet « A importer », lance
+l'import SalesHandy et relit la vérification du nouvel email. L'ancien prospect `bad` reste dans
+la séquence, sans jamais recevoir d'e-mail : ne pas le supprimer.
+
 - **Jamais de fiche « Ecarte ».** Julien ne veut plus voir de personnes écartées : un hors-cible
   ne s'écrit pas, il laisse seulement son empreinte (ci-dessus).
 - **Écrire tous les candidats retenus, y compris sans email** : ils servent à la dédup du
@@ -407,7 +444,8 @@ Colonnes (ASCII, ce sont des identifiants de schéma) : `Nom` (MAJUSCULES, à d�
 `Note` (jamais vide), `Accroche` (obligatoire avec un email, Phase 4).
 
 **Barrière :** `lot` a affiché `CV deposes sur Drive : N`, et `publier` a rendu le code 0 — ou
-2 / 3 / 4 avec l'écart ou la file d'attente annoncés. **Ne pas annoncer que le lot est écrit sans la ligne `relu=N attendu=N`.**
+2 / 3 / 4 avec l'écart ou la file d'attente annoncés, ou 5 avec chaque email relu sur le CV et
+corrigé (ou laissé, s'il est bien celui du CV). **Ne pas annoncer que le lot est écrit sans la ligne `relu=N attendu=N`.**
 
 ## Phase 6 — Vider, puis rendre compte
 

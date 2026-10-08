@@ -30,7 +30,6 @@ set -u
 
 MINUTES="${1:-60}"
 SORTIE="${2:-}"
-RE_EMAIL='[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}'
 RE_TEL='(\+33|0)[ .]?[1-9]([ .]?[0-9]{2}){4}'
 
 # Sous Windows, winget installe poppler et tesseract HORS du PATH : les outils
@@ -71,6 +70,10 @@ elif [ -d "$HOME/Téléchargements" ];  then SOURCE="$HOME/Téléchargements"
 else echo "ERREUR : dossier Downloads introuvable sous $HOME" >&2; exit 1
 fi
 
+ICI="$(cd "$(dirname "$0")" && pwd)"
+LECTEUR="$(cygpath -m "$ICI/email-cv.js" 2>/dev/null || printf '%s' "$ICI/email-cv.js")"
+command -v node >/dev/null 2>&1 || { echo "ERREUR : node absent (lecture des emails, email-cv.js)" >&2; exit 1; }
+
 TRAVAIL=$(mktemp -d)
 trap 'rm -rf "$TRAVAIL"' EXIT
 
@@ -81,29 +84,14 @@ while IFS= read -r pdf; do
   base="$TRAVAIL/cv$n"
   cp "$pdf" "$base.pdf"
 
-# Trois passes sur un fichier texte, de la plus sure a la plus reconstruite.
-# Mesure le 2026-09-17 : les passes 2 et 3 recuperent 2 emails sur 9 que la
-# passe 1 laissait tomber, sur des pages par ailleurs parfaitement lisibles.
-# Elles s appliquent AUSSI a la couche texte : la coupure du domaine vient
-# parfois du PDF lui-meme, pas de l OCR.
+# Lecture de l email : email-cv.js (v10.3), teste par tests/email-cv.test.js. Trois passes, de la
+# plus sure a la plus reconstruite : tel quel (avec recollage d une partie locale coupee en fin de
+# ligne ou separee par une espace, marque [RECOLLE], et retrait des caracteres de tete parasites),
+# domaine coupe (« YAHO O.COM »), arobase lue comme un e (marque [RECONSTRUIT]). Les passes
+# s appliquent AUSSI a la couche texte : la coupure vient parfois du PDF lui-meme, pas de l OCR.
+# Le texte passe par stdin : un chemin /tmp/... donne a node sous Git Bash peut ne pas se resoudre.
 emails_du_fichier() {
-  local f="$1" e
-
-  # 1) tel quel
-  e=$(grep -ioE "$RE_EMAIL" "$f" 2>/dev/null | head -1)
-  [ -n "$e" ] && { printf '%s' "$e"; return; }
-
-  # 2) coupure parasite dans le domaine : "YAHO O.COM", "YAHO\nO.COM".
-  #    On aplatit les sauts de ligne, sinon sed ne voit jamais les deux moities.
-  e=$(tr '\r\n' '  ' < "$f" | sed -E 's/@([A-Za-z0-9.-]+)[ ]+([A-Za-z0-9.-]*\.[A-Za-z]{2,})/@\1\2/g' \
-      | grep -ioE "$RE_EMAIL" | head -1)
-  [ -n "$e" ] && { printf '%s' "$e"; return; }
-
-  # 3) arobase lue comme un e : mdurandegmail.com -> mdurand@gmail.com.
-  #    Reconstruction PROBABLE, jamais certaine : marquee pour etre signalee.
-  e=$(grep -ioE "[A-Za-z0-9._%+-]+e(gmail|yahoo|hotmail|outlook|orange|wanadoo|free|laposte|sfr|icloud)\.[A-Za-z]{2,}" "$f" 2>/dev/null \
-      | head -1 | sed -E 's/e(gmail|yahoo|hotmail|outlook|orange|wanadoo|free|laposte|sfr|icloud)\./@\1./I')
-  [ -n "$e" ] && printf '%s [RECONSTRUIT]' "$e"
+  [ -f "$1" ] && node "$LECTEUR" < "$1" 2>/dev/null
 }
 
   # 1) couche texte : instantane quand le CV en a une
