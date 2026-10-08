@@ -96,24 +96,31 @@ test('file Buffer : lecture, commentaires, UTC calculé, ligne invalide refusée
   assert.throws(() => lireFileBuffer('lundi 5 octobre'), /ne suit pas/);
 });
 
-test('vérification des créneaux : file Buffer seule, passé, jour, écart de 3 h', () => {
+test('vérification des créneaux : programmé, manquant, hors plan, conflit, passé, jour', () => {
   const plan = genererCalendrier(CONFIG).creneaux;
   const maintenant = new Date('2026-09-30T08:00:00Z');
-  assert.ok(verifierCreneaux(plan, { maintenant, buffer: [] }).every((r) => r.ok));
+  const file = (date, heure, compte = 'julien-partners') => ({ compte, instant: parisVersUtc(date, heure).toISOString() });
+  const toute = plan.map((c) => ({ compte: c.compte, instant: c.utc }));
+  const r0 = verifierCreneaux(plan, { maintenant, buffer: toute });
+  assert.ok(r0.creneaux.every((r) => r.ok), 'chaque créneau a son post dans la file : programmé');
+  assert.equal(r0.horsPlan.length, 0);
   assert.throws(() => verifierCreneaux(plan, {}), /heure de référence absente/);
 
   const p1 = plan.find((c) => c.id === 'P-sem1-jeu'); // jeudi 08/10 08:30 Paris
-  const file = (date, heure, compte = 'julien-partners') => [{ compte, instant: parisVersUtc(date, heure).toISOString() }];
-  assert.ok(verifierCreneaux(plan, { maintenant, buffer: file('2026-10-08', '13:00') }).find((r) => r.id === p1.id).ok, "4 h 30 d'écart : accepté");
-  const r = verifierCreneaux(plan, { maintenant, buffer: file('2026-10-08', '10:30') }).find((x) => x.id === p1.id);
-  assert.equal(r.ok, false);
-  assert.match(r.problemes[0], /file Buffer : post à 120 min/);
-  assert.match(verifierCreneaux(plan, { maintenant, buffer: file('2026-10-08', '08:30') }).find((x) => x.id === p1.id).problemes[0], /déjà pris dans la file Buffer/);
-  // un post Buffer d'un autre compte ne gêne pas
-  assert.ok(verifierCreneaux(plan, { maintenant, buffer: file('2026-10-08', '08:30', 'julien-agency') }).find((x) => x.id === p1.id).ok);
+  const sansP1 = toute.filter((b) => b.instant !== p1.utc || b.compte !== p1.compte);
+  const manque = verifierCreneaux(plan, { maintenant, buffer: sansP1 });
+  assert.match(manque.creneaux.find((x) => x.id === p1.id).problemes[0], /absent de la file Buffer \(manquant\)/);
 
-  const passe = verifierCreneaux(plan, { maintenant: new Date('2026-10-06T07:00:00Z') });
-  assert.match(passe.find((x) => x.id === 'P-sem1-mar').problemes.join(), /passé/);
-  const samedi = verifierCreneaux([{ ...p1, id: 'x', date: '2026-10-10', jour: 'sam', utc: '2026-10-10T06:30:00.000Z' }], { maintenant });
-  assert.match(samedi[0].problemes.join(), /jour non autorisé/);
+  const enTrop = verifierCreneaux(plan, { maintenant, buffer: [...toute, file('2026-10-08', '10:30')] });
+  assert.equal(enTrop.horsPlan.length, 1);
+  assert.match(enTrop.creneaux.find((x) => x.id === p1.id).problemes[0], /post hors calendrier à 120 min/);
+  // un post hors plan d'un autre compte ne gêne pas le créneau
+  assert.ok(verifierCreneaux(plan, { maintenant, buffer: [...toute, file('2026-10-08', '10:30', 'julien-agency')] }).creneaux.find((x) => x.id === p1.id).ok);
+
+  const passe = verifierCreneaux(plan, { maintenant: new Date('2026-10-06T07:00:00Z'), buffer: [] });
+  const mar = passe.creneaux.find((x) => x.id === 'P-sem1-mar');
+  assert.ok(mar.passe && mar.ok, "un créneau passé n'est pas contrôlé contre la file");
+  const samedi = verifierCreneaux([{ ...p1, id: 'x', date: '2026-10-10', jour: 'sam', utc: '2026-10-10T06:30:00.000Z' }], { maintenant, buffer: [file('2026-10-10', '08:30')] });
+  assert.match(samedi.creneaux[0].problemes.join(), /jour non autorisé/);
+  assert.ok(verifierCreneaux([{ ...p1, id: 'x', date: '2026-10-10', jour: 'sam', utc: '2026-10-10T06:30:00.000Z' }], { maintenant, buffer: [file('2026-10-10', '08:30')], jourAutorises: [0, 1, 2, 3, 4, 5, 6] }).creneaux[0].ok);
 });

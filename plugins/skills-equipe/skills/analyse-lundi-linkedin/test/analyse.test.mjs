@@ -113,6 +113,18 @@ test('avant le test : rapport de référence, sans verdict, avec la semaine éco
   assert.doesNotMatch(md, /Test des formats — /);
 });
 
+test('créneau « comparaison: false » : au calendrier, jamais dans les médianes', () => {
+  const plan = genererCalendrier(CONFIG);
+  plan.creneaux.forEach((c) => { if (c.compte === 'julien-agency') c.comparaison = false; });
+  const maintenant = new Date('2026-11-02T06:00:00Z');
+  const r = analyserTout({ plan, posts: simuler(plan, maintenant), maintenant });
+  assert.equal(r.manquants.length, 0);
+  assert.equal(r.horsPlan.length, 0);
+  const a = r.comptes.find((c) => c.compte === 'julien-agency');
+  assert.equal(a.murs, 0);
+  assert.equal(a.publies, 16);
+});
+
 test('lundi à venir (--date) : la semaine visée, lue avec les chiffres du moment', () => {
   const plan = genererCalendrier(CONFIG);
   const r = analyserTout({ plan, posts: [post('m', '2026-10-06T11:00:00Z', 'julien-agency', 80)], maintenant: new Date('2026-10-08T12:00:00Z'), jour: '2026-10-12' });

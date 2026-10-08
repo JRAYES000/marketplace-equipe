@@ -26,14 +26,25 @@ try {
 }
 const buffer = lireFileBuffer(readFileSync(fichierBuffer, 'utf8'));
 const ecart = Number(a.ecart || 3);
-const resultats = verifierCreneaux(plan.creneaux, { maintenant, ecartMinHeures: ecart, buffer });
+const JOURS = ['dim', 'lun', 'mar', 'mer', 'jeu', 'ven', 'sam'];
+const jourAutorises = (plan.meta.jours || ['mar', 'mer', 'jeu', 'ven']).map((j) => JOURS.indexOf(j));
+const { creneaux: resultats, horsPlan } = verifierCreneaux(plan.creneaux, { maintenant, ecartMinHeures: ecart, buffer, jourAutorises });
 
 console.log(`Heure serveur Buffer : ${maintenant.toISOString()} ; entrées de la file Buffer : ${buffer.length} (${fichierBuffer})`);
 let ko = 0;
+let passes = 0;
+const manquants = [];
 for (const r of resultats) {
   const c = plan.creneaux.find((x) => x.id === r.id);
+  if (r.passe) { passes++; if (r.ok) continue; }
   if (!r.ok) ko++;
-  console.log(`${r.ok ? 'OK ' : 'KO '} ${r.id.padEnd(14)} ${c.date} ${c.jour} ${c.heureParis} Paris = ${c.utc}${r.ok ? '' : ' :: ' + r.problemes.join(' | ')}`);
+  if (r.problemes.some((p) => p.startsWith('absent de la file'))) manquants.push(r.id);
+  console.log(`${r.ok ? 'OK ' : 'KO '} ${r.id.padEnd(22)} ${c.date} ${c.jour} ${c.heureParis} Paris ${c.compte}${r.ok ? ' (programmé)' : ' :: ' + r.problemes.join(' | ')}`);
 }
-console.log(`\n${resultats.length - ko}/${resultats.length} créneaux libres et sans conflit (écart minimum ${ecart} h entre deux posts d'un même compte).`);
-process.exit(ko ? 1 : 0);
+const aVenir = resultats.length - passes;
+console.log(`
+Créneaux : ${resultats.length} au calendrier, ${passes} passé(s) non contrôlé(s), ${aVenir} à venir.`);
+console.log(`Créneaux manquants (à venir, absents de la file) : ${manquants.length}${manquants.length ? ' → ' + manquants.join(', ') : ''}`);
+console.log(`Posts hors plan (dans la file, absents du calendrier) : ${horsPlan.length}${horsPlan.length ? ' → ' + horsPlan.map((b) => `${b.compte} ${b.instant}`).join(', ') : ''}`);
+console.log(`${resultats.filter((r) => !r.passe && r.ok).length}/${aVenir} créneaux à venir programmés et sans conflit (écart minimum ${ecart} h entre deux posts d'un même compte).`);
+process.exit(ko || horsPlan.length ? 1 : 0);

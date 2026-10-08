@@ -104,9 +104,7 @@ La routine Windows « LinkedIn - 5 Releve 48 h des annonces » (`linkedin/routin
 remplit ces colonnes chaque jour à 14:00 Paris ; si le lot dépasse le
 15/11/2026, prolonger sa date de fin dans `register-routines.ps1`.
 **Identification d'une annonce** (routine comme relevé à la main), les deux conditions à la fois :
-son intitulé exact (ligne 💼, ou ligne 2 de l'accroche, telle qu'elle est dans `NN.final.txt`) ET sa
-date et heure de publication prévues (± 1 h). Plusieurs posts correspondent, ou aucun : rien n'est
-écrit dans la ligne, « ALERTE : identification ambiguë » est noté avec les candidats trouvés.
+son intitulé exact (ligne 💼, ou ligne 2 de l'accroche, telle qu'elle est dans `NN.final.txt`) ET sa date de publication prévue (jour de Paris). Si deux posts du même jour correspondent, lire leur heure dans Publish > Sent du canal Claude Partners pour les départager ; si l'ambiguïté reste, ou si aucun post ne correspond : rien n'est écrit dans la ligne, « ALERTE : identification ambiguë » est noté avec les candidats trouvés (date, heure, début du texte).
 Un post absent de nos fichiers n'est jamais relevé : c'est un post de Julien.
 **Indicateurs : métriques Buffer uniquement** (Impressions, Réactions, Commentaires). Pas
 d'enregistrements ni d'envois : Julien, 08/10/2026 à 15:55 Paris, « Ces deux chiffres ne font partie

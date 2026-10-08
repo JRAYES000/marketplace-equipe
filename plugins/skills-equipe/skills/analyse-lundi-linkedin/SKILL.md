@@ -26,7 +26,7 @@ commentaires, taux d'engagement (« Eng. Rate » de Buffer).
 
 ## Où sont les choses
 
-- Scripts de cette skill : `scripts/` (dossier du clone `marketplace-equipe`). Tests : `npm test` (19 tests).
+- Scripts de cette skill : `scripts/` (dossier du clone `marketplace-equipe`). Tests : `npm test` (20 tests).
 - Données du test (dépôt privé des livrables) : `linkedin/test-formats-2026-10/` dans
   `livrables-Claude-Agency` (variable `LIVRABLES_DIR` pour un autre emplacement) :
   `PROTOCOLE.md`, `plan-config.json`, `calendrier.json`, `calendrier.md`, `file-attente-buffer.txt`,
