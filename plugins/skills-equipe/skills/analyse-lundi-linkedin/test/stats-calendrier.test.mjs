@@ -1,7 +1,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { comparerPaires, icRapportMedianes, mediane, pSigne, quantile } from '../scripts/lib/stats.mjs';
-import { GRILLE_A, apparierSujets, genererCalendrier, lireFileBuffer, parisVersUtc, utcVersParis, verifierCreneaux } from '../scripts/lib/calendrier.mjs';
+import { GRILLE_A, apparierDeplacements, apparierSujets, genererCalendrier, lireFileBuffer, parisVersUtc, utcVersParis, verifierCreneaux } from '../scripts/lib/calendrier.mjs';
 
 test('médiane et quantile', () => {
   assert.equal(mediane([3, 1, 2]), 2);
@@ -123,4 +123,17 @@ test('vérification des créneaux : programmé, manquant, hors plan, conflit, pa
   const samedi = verifierCreneaux([{ ...p1, id: 'x', date: '2026-10-10', jour: 'sam', utc: '2026-10-10T06:30:00.000Z' }], { maintenant, buffer: [file('2026-10-10', '08:30')] });
   assert.match(samedi.creneaux[0].problemes.join(), /jour non autorisé/);
   assert.ok(verifierCreneaux([{ ...p1, id: 'x', date: '2026-10-10', jour: 'sam', utc: '2026-10-10T06:30:00.000Z' }], { maintenant, buffer: [file('2026-10-10', '08:30')], jourAutorises: [0, 1, 2, 3, 4, 5, 6] }).creneaux[0].ok);
+});
+
+test('file Buffer : début du texte gardé ; déplacement reconnu par compte et début de texte', () => {
+  const f = lireFileBuffer('2026-10-14 13:00 julien-partners # T Exemple : une consultante IA envoie');
+  assert.equal(f[0].note, 'T Exemple : une consultante IA envoie');
+  const ancien = { id: 'P-10-06-1300', compte: 'julien-partners', date: '2026-10-06', heureParis: '13:00', debut: 'Exemple : une consultante IA envoie le même message' };
+  const autre = { id: 'P-10-07-0830', compte: 'julien-partners', date: '2026-10-07', heureParis: '08:30', debut: 'Un autre texte' };
+  const r = apparierDeplacements([ancien, autre], [...f, { compte: 'julien-agency', instant: 'x', note: 'T Exemple : une consultante IA envoie' }]);
+  assert.equal(r.deplaces.length, 1);
+  assert.equal(r.deplaces[0].ancien.id, 'P-10-06-1300');
+  assert.equal(r.deplaces[0].nouveau.instant, '2026-10-14T11:00:00.000Z');
+  assert.deepEqual(r.manquants.map((c) => c.id), ['P-10-07-0830']);
+  assert.equal(r.horsPlan.length, 1, 'même texte sur un autre compte : pas un déplacement');
 });

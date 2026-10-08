@@ -26,7 +26,7 @@ commentaires, taux d'engagement (« Eng. Rate » de Buffer).
 
 ## Où sont les choses
 
-- Scripts de cette skill : `scripts/` (dossier du clone `marketplace-equipe`). Tests : `npm test` (20 tests).
+- Scripts de cette skill : `scripts/` (dossier du clone `marketplace-equipe`). Tests : `npm test` (21 tests).
 - Données du test (dépôt privé des livrables) : `linkedin/test-formats-2026-10/` dans
   `livrables-Claude-Agency` (variable `LIVRABLES_DIR` pour un autre emplacement) :
   `PROTOCOLE.md`, `plan-config.json`, `calendrier.json`, `calendrier.md`, `file-attente-buffer.txt`,
@@ -49,7 +49,9 @@ commentaires, taux d'engagement (« Eng. Rate » de Buffer).
    Options : `--date AAAA-MM-JJ` (le lundi analysé), `--a-blanc` (affiche posts et chiffres par compte, n'écrit
    rien), `--sortie dossier`, `--plan calendrier.json`.
 4. **Contrôler le calendrier restant** : `node scripts/verifier-creneaux.mjs` — contre la seule file Buffer
-   (code de sortie 1 s'il reste un conflit). À refaire avant chaque programmation de la semaine.
+   (code de sortie 1 s'il reste un écart). Un créneau absent de la file est « manquant », un post de la file absent du
+   calendrier est « hors plan » ; même compte et même début de texte = « ALERTE déplacé », avec l'ancien et le nouveau
+   créneau. La routine 1 (contrôle quotidien Buffer) le lance chaque matin. Rien n'est jamais reprogrammé.
 5. Recopier dans la conversation : l'encadré « À retenir » du rapport, tel quel, les posts absents d'Insights
    (étape 2), puis les points qui demandent une décision de Julien. Ne rien ajouter que le rapport ne contienne.
 6. Mettre à jour `NOTES.md` (date, verdict, alertes), commiter en nommant les fichiers un par un.

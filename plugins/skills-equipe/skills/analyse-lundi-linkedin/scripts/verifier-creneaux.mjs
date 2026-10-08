@@ -6,7 +6,7 @@
 // Lecture seule. Code de sortie 1 s'il reste un conflit.
 import { readFileSync, existsSync } from 'node:fs';
 import { join } from 'node:path';
-import { lireFileBuffer, verifierCreneaux } from './lib/calendrier.mjs';
+import { apparierDeplacements, lireFileBuffer, utcVersParis, verifierCreneaux } from './lib/calendrier.mjs';
 import { DOSSIER_TEST, lireArguments } from './lib/chemins.mjs';
 import { lireHeureServeur } from './lib/heure.mjs';
 
@@ -42,9 +42,16 @@ for (const r of resultats) {
   console.log(`${r.ok ? 'OK ' : 'KO '} ${r.id.padEnd(22)} ${c.date} ${c.jour} ${c.heureParis} Paris ${c.compte}${r.ok ? ' (programmé)' : ' :: ' + r.problemes.join(' | ')}`);
 }
 const aVenir = resultats.length - passes;
+const paris = (iso) => { const p = utcVersParis(new Date(iso)); return `${p.jour} ${p.date} ${p.heure} Paris`; };
+const bilan = apparierDeplacements(manquants.map((id) => plan.creneaux.find((c) => c.id === id)), horsPlan);
 console.log(`
 Créneaux : ${resultats.length} au calendrier, ${passes} passé(s) non contrôlé(s), ${aVenir} à venir.`);
-console.log(`Créneaux manquants (à venir, absents de la file) : ${manquants.length}${manquants.length ? ' → ' + manquants.join(', ') : ''}`);
-console.log(`Posts hors plan (dans la file, absents du calendrier) : ${horsPlan.length}${horsPlan.length ? ' → ' + horsPlan.map((b) => `${b.compte} ${b.instant}`).join(', ') : ''}`);
+for (const d of bilan.deplaces) {
+  console.log(`ALERTE déplacé : ${d.ancien.compte} « ${d.ancien.debut} » : ancien créneau ${d.ancien.jour} ${d.ancien.date} ${d.ancien.heureParis} Paris → nouveau créneau ${paris(d.nouveau.instant)}`);
+}
+for (const c of bilan.manquants) console.log(`ALERTE manquant : ${c.compte} ${c.jour} ${c.date} ${c.heureParis} Paris « ${c.debut || 'texte inconnu'} » : absent de la file`);
+for (const b of bilan.horsPlan) console.log(`ALERTE hors plan : ${b.compte} ${paris(b.instant)} « ${b.note || 'texte inconnu'} » : absent du calendrier`);
+console.log(`Créneaux manquants (à venir, absents de la file) : ${manquants.length}, dont ${bilan.deplaces.length} déplacé(s)`);
+console.log(`Posts hors plan (dans la file, absents du calendrier) : ${horsPlan.length}, dont ${bilan.deplaces.length} déplacé(s)`);
 console.log(`${resultats.filter((r) => !r.passe && r.ok).length}/${aVenir} créneaux à venir programmés et sans conflit (écart minimum ${ecart} h entre deux posts d'un même compte).`);
 process.exit(ko || horsPlan.length ? 1 : 0);
