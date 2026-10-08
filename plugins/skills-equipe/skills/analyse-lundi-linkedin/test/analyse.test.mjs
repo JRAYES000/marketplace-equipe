@@ -1,16 +1,10 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { REGLES, apparier, decider, formatDe, normaliserPost } from '../scripts/lib/analyse.mjs';
-import { analyserTout, croiserBuffer, estWeekend, lireCsvBuffer } from '../scripts/lib/lundi.mjs';
+import { apparier, decider, resumer } from '../scripts/lib/analyse.mjs';
+import { analyserTout, estWeekend, fusionnerReleves, lireCsvBuffer } from '../scripts/lib/lundi.mjs';
 import { rendreRapport } from '../scripts/lib/rapport.mjs';
 import { genererCalendrier } from '../scripts/lib/calendrier.mjs';
-
-test('format réel : le PDF fait le carrousel, même typé « image »', () => {
-  assert.equal(formatDe({ mediaType: 'text', mediaItems: [] }), 'texte');
-  assert.equal(formatDe({ mediaType: 'image', mediaItems: [{ url: 'https://x/y.pdf' }] }), 'carrousel');
-  assert.equal(formatDe({ mediaType: 'image', mediaItems: [{ url: 'https://x/y.png' }] }), 'image');
-  assert.equal(formatDe({ mediaType: 'video', mediaItems: [{ url: 'https://x/y.mp4' }] }), 'video');
-});
+import { lireHeureServeur } from '../scripts/lib/heure.mjs';
 
 test('décision : incomplet, carrousel, texte, non concluant', () => {
   const paires = (n, f) => Array.from({ length: n }, (_, i) => f(i));
@@ -35,20 +29,27 @@ test('décision : incomplet, carrousel, texte, non concluant', () => {
   assert.equal(decider({ texte: Array(6).fill(0), carrousel: Array(6).fill(5), paires: [] }).verdict, 'non_concluant');
 });
 
-const brut = (id, publie, acc, imp, extra = {}) => ({
-  _id: id, publishedAt: publie, status: 'published', mediaType: 'text', mediaItems: [], isExternal: true,
-  platformPostUrl: `https://linkedin.example/${id}`, platforms: [{ accountId: acc }],
-  analytics: { impressions: imp, reach: imp / 2, likes: 1, comments: 0, shares: 0, clicks: 0, lastUpdated: '2026-10-05 06:00:00' },
-  ...extra,
+/** Post tel que lireCsvBuffer le rend. */
+const post = (id, publie, compte, imp, extra = {}) => ({
+  id, compte, publieLe: publie, format: 'texte', impressions: imp, reactions: 1, commentaires: 0,
+  tauxEngagement: 0.01, url: `https://linkedin.example/${id}`, releve: 'r.csv', ...extra,
 });
 
-test('rapprochement : tolérance de 20 minutes, un post sert une seule fois', () => {
-  const c = { id: 'c1', accountId: 'P', utc: '2026-10-06T06:30:00.000Z' };
-  const posts = [normaliserPost(brut('a', '2026-10-06T06:41:00Z', 'P', 10)), normaliserPost(brut('b', '2026-10-06T07:30:00Z', 'P', 10))];
+test('rapprochement : même compte, tolérance de 20 minutes, un post sert une seule fois', () => {
+  const c = { id: 'c1', compte: 'julien-partners', utc: '2026-10-06T06:30:00.000Z' };
+  const posts = [post('a', '2026-10-06T06:41:00Z', 'julien-partners', 10), post('b', '2026-10-06T07:30:00Z', 'julien-partners', 10), post('x', '2026-10-06T06:30:00Z', 'julien-agency', 10)];
   const r = apparier(posts, [c, { ...c, id: 'c2' }]);
   assert.equal(r.apparies.length, 1);
+  assert.equal(r.apparies[0].post.id, 'a');
   assert.equal(r.manquants.length, 1);
-  assert.equal(r.horsPlan.length, 1);
+  assert.equal(r.horsPlan.length, 2);
+});
+
+test('indicateurs : seulement impressions, réactions, commentaires et taux d\'engagement Buffer', () => {
+  const r = resumer([post('a', 'x', 'p', 100, { tauxEngagement: 0.02 }), post('b', 'x', 'p', 300, { tauxEngagement: null })]);
+  assert.deepEqual(Object.keys(r).sort(), ['commentaires', 'impressions', 'n', 'reactions', 'tauxEngagement']);
+  assert.equal(r.impressions.mediane, 200);
+  assert.equal(r.tauxEngagement, 0.02);
 });
 
 const CONFIG = {
@@ -63,15 +64,14 @@ const CONFIG = {
 function simuler(plan, jusqua) {
   return plan.creneaux.filter((c) => new Date(c.utc) <= jusqua).map((c, i) => {
     const base = 100 + (i % 5) * 7;
-    const item = c.format === 'carrousel' ? [{ url: 'https://x/doc.pdf' }] : [];
-    return brut(`${c.id}`, c.utc, c.accountId, c.format === 'carrousel' ? base * 2 : base, { mediaType: item.length ? 'image' : 'text', mediaItems: item });
+    return post(c.id, c.utc, c.compte, c.format === 'carrousel' ? base * 2 : base, { format: c.format });
   });
 }
 
 test('analyse complète : final, deux comptes concordants, carrousel retenu', () => {
   const plan = genererCalendrier(CONFIG);
   const maintenant = new Date('2026-11-02T06:00:00Z');
-  const r = analyserTout({ plan, analytics: simuler(plan, maintenant), apercu: { lastSync: 'x' }, maintenant });
+  const r = analyserTout({ plan, posts: simuler(plan, maintenant), maintenant, releves: ['releve-buffer-2026-11-02.csv'] });
   assert.equal(r.decisionFinale, true);
   assert.equal(r.echus, 32);
   assert.equal(r.apparies, 32);
@@ -82,18 +82,21 @@ test('analyse complète : final, deux comptes concordants, carrousel retenu', ()
   const md = rendreRapport(r);
   assert.match(md, /Décision finale/);
   assert.match(md, /## 3\. Test des formats — julien-partners/);
+  assert.match(md, /Source unique : Buffer Insights/);
+  assert.doesNotMatch(md, /Zernio|Portée/);
 });
 
 test('avant le test : rapport de référence, sans verdict, avec la semaine écoulée', () => {
   const plan = genererCalendrier(CONFIG);
   const maintenant = new Date('2026-10-05T06:00:00Z'); // lundi 05/10 08:00 Paris
   const posts = [
-    brut('s1', '2026-09-29T12:00:00Z', 'P', 300),
-    brut('s2', '2026-10-02T11:00:00Z', 'A', 90, { mediaType: 'image', mediaItems: [{ url: 'https://x/a.pdf' }] }),
-    brut('w1', '2026-10-04T10:00:00Z', 'A', 370), // dimanche
-    brut('trop-vieux', '2026-09-20T10:00:00Z', 'A', 50),
+    post('s1', '2026-09-29T12:00:00Z', 'julien-partners', 300),
+    post('s2', '2026-10-02T11:00:00Z', 'julien-agency', 90, { format: 'carrousel' }),
+    post('w1', '2026-10-04T10:00:00Z', 'julien-agency', 370), // dimanche
+    post('trop-vieux', '2026-09-20T10:00:00Z', 'julien-agency', 50),
+    post('futur', '2026-10-06T10:00:00Z', 'julien-agency', 50), // après l'heure de référence : ignoré
   ];
-  const r = analyserTout({ plan, analytics: posts, apercu: null, maintenant });
+  const r = analyserTout({ plan, posts, maintenant });
   assert.equal(r.echus, 0);
   assert.equal(r.decisionFinale, false);
   assert.equal(r.semaine.du, '2026-09-28');
@@ -110,29 +113,52 @@ test('avant le test : rapport de référence, sans verdict, avec la semaine éco
   assert.doesNotMatch(md, /Test des formats — /);
 });
 
-const CSV = [
-  'compte,date_paris,heure_paris,format,impressions,portee,reactions,commentaires,taux_eng_buffer_pct',
-  'julien-partners,2026-09-25,08:49,T,291,209,2,3,2',
-  'julien-partners,2026-09-22,08:00,T,199,124,2,0,1',
-  'julien-partners,2026-09-06,12:00,T,370,266,0,0,0',
-  'julien-agency,2026-09-21,08:13,I,,,0,0,',
-].join('\n');
-
-test('relevé Buffer : lecture, format inconnu et colonne absente refusés', () => {
-  const l = lireCsvBuffer(CSV);
-  assert.equal(l.length, 4);
-  assert.equal(l[0].format, 'texte');
-  assert.equal(l[3].impressions, null);
-  assert.throws(() => lireCsvBuffer(CSV.replace(',T,291', ',Z,291')), /format « Z » inconnu/);
-  assert.throws(() => lireCsvBuffer('compte,date_paris\nx,y'), /colonne/);
+test('lundi à venir (--date) : la semaine visée, lue avec les chiffres du moment', () => {
+  const plan = genererCalendrier(CONFIG);
+  const r = analyserTout({ plan, posts: [post('m', '2026-10-06T11:00:00Z', 'julien-agency', 80)], maintenant: new Date('2026-10-08T12:00:00Z'), jour: '2026-10-12' });
+  assert.equal(r.dateAnalyse, '2026-10-12');
+  assert.equal(r.semaine.du, '2026-10-05');
+  assert.equal(r.semaine.au, '2026-10-11');
+  assert.equal(r.semaine.comptes.find((c) => c.compte === 'julien-agency').n, 1);
 });
 
-test('relevé Buffer : le format de Zernio corrige l\'étiquette, référence semaine / week-end', () => {
-  const zernio = [normaliserPost(brut('z', '2026-09-25T06:49:00Z', 'P', 291, { mediaType: 'image', mediaItems: [{ url: 'https://x/d.pdf' }] }))];
-  const r = croiserBuffer(lireCsvBuffer(CSV), { P: 'julien-partners', A: 'julien-agency' }, zernio, { debut: '2026-10-05' }, 'f.csv');
-  assert.deepEqual(r.corrections.map((c) => [c.buffer, c.zernio]), [['texte', 'carrousel']]);
-  const semaine = r.reference.filter((x) => x.jours === 'semaine');
-  assert.deepEqual(semaine.map((x) => [x.format, x.n]).sort(), [['carrousel', 1], ['texte', 1]]);
-  assert.equal(r.reference.find((x) => x.jours === 'week-end').mediane, 370);
-  assert.equal(r.reference.some((x) => x.compte === 'julien-agency'), false, 'ligne sans mesure écartée');
+const CSV_V2 = [
+  'compte,publie_le,fuseau_affiche,format,impressions,reactions,commentaires,taux_eng_buffer_pct,id_buffer,lien',
+  'julien-partners,2026-09-17 18:00,Europe/Minsk,T,1096,7,8,1.37,6aaac562,https://www.linkedin.com/feed/update/urn:li:share:1/',
+  'julien-agency,2026-10-26 14:00,Europe/Minsk,C,,,,,,',
+].join('\n');
+const CSV_V1 = [
+  'compte,date_paris,heure_paris,format,impressions,portee,reactions,commentaires,taux_eng_buffer_pct',
+  'julien-partners,2026-09-17,17:00,T,900,600,5,6,1',
+  'julien-partners,2026-09-06,12:00,T,370,266,0,0,0',
+].join('\n');
+
+test('relevé Buffer : heure affichée (Minsk) convertie en UTC, mesure absente, erreurs nettes', () => {
+  const l = lireCsvBuffer(CSV_V2, 'v2.csv');
+  assert.equal(l.length, 2);
+  assert.equal(l[0].publieLe, '2026-09-17T15:00:00.000Z'); // 18:00 Minsk (UTC+3) = 17:00 Paris
+  assert.equal(l[0].tauxEngagement, 0.0137);
+  assert.equal(l[0].id, '6aaac562');
+  assert.equal(l[1].publieLe, '2026-10-26T11:00:00.000Z'); // Paris passé à l'heure d'hiver, Minsk non
+  assert.equal(l[1].format, 'carrousel');
+  assert.equal(l[1].impressions, null);
+  assert.throws(() => lireCsvBuffer(CSV_V2.replace(',T,1096', ',Z,1096')), /format « Z » inconnu/);
+  assert.throws(() => lireCsvBuffer(CSV_V2.replace('Europe/Minsk', 'Mars/Olympus')), /fuseau « Mars\/Olympus » inconnu/);
+  assert.throws(() => lireCsvBuffer(CSV_V2.replace('julien-partners', 'julien')), /compte « julien » inconnu/);
+  assert.throws(() => lireCsvBuffer('compte,format\nx,T'), /colonne/);
+});
+
+test('relevés fusionnés : ancien format accepté, le plus récent l\'emporte pour un même post', () => {
+  const fusion = fusionnerReleves([lireCsvBuffer(CSV_V1, 'ancien.csv'), lireCsvBuffer(CSV_V2, 'recent.csv')]);
+  assert.equal(fusion.length, 3);
+  const meme = fusion.find((p) => p.publieLe === '2026-09-17T15:00:00.000Z');
+  assert.equal(meme.impressions, 1096);
+  assert.equal(meme.releve, 'recent.csv');
+});
+
+test('heure de référence : en-tête Date du serveur Buffer, abandon au bout du délai', async () => {
+  const ok = await lireHeureServeur({ fetchFn: async () => ({ status: 200, headers: new Headers({ date: 'Thu, 08 Oct 2026 14:00:00 GMT' }) }) });
+  assert.equal(ok.toISOString(), '2026-10-08T14:00:00.000Z');
+  const lent = (url, { signal }) => new Promise((_, ko) => signal.addEventListener('abort', () => ko(signal.reason)));
+  await assert.rejects(lireHeureServeur({ fetchFn: lent, delaiMs: 50 }), /pas de réponse en 0.05 s/);
 });

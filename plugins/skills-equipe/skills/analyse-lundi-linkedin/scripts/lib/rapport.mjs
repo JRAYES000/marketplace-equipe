@@ -18,10 +18,10 @@ const LIBELLES = {
 };
 
 const LIGNE_FORMAT = (nom, r) =>
-  `| ${nom} | ${r.n} | **${n0(r.impressions.mediane)}** | ${n0(r.impressions.q1)} à ${n0(r.impressions.q3)} | ${n0(r.impressions.min)} / ${n0(r.impressions.max)} | ${n0(r.portee)} | ${n0(r.reactions)} | ${n0(r.commentaires)} | ${pct(r.tauxEngagement)} |`;
+  `| ${nom} | ${r.n} | **${n0(r.impressions.mediane)}** | ${n0(r.impressions.q1)} à ${n0(r.impressions.q3)} | ${n0(r.impressions.min)} / ${n0(r.impressions.max)} | ${n0(r.reactions)} | ${n0(r.commentaires)} | ${pct(r.tauxEngagement)} |`;
 const ENTETE_FORMAT = [
-  '| Format | Posts | Impressions médianes | Quartiles (Q1 à Q3) | Min / max | Portée médiane | Réactions méd. | Commentaires méd. | Engagement méd. |',
-  '|---|---|---|---|---|---|---|---|---|',
+  '| Format | Posts | Impressions médianes | Quartiles (Q1 à Q3) | Min / max | Réactions méd. | Commentaires méd. | Taux d’engagement méd. (Buffer) |',
+  '|---|---|---|---|---|---|---|---|',
 ];
 
 function tableSemaines(compte) {
@@ -33,9 +33,9 @@ function tableSemaines(compte) {
 }
 
 function tableDetail(compte) {
-  const l = ['| Créneau | Date | Format | Sujet | Mûr | Impressions | Portée | Réactions | Commentaires | Lien |', '|---|---|---|---|---|---|---|---|---|---|'];
+  const l = ['| Créneau | Date | Format | Sujet | Mûr | Impressions | Réactions | Commentaires | Taux d’engagement | Lien |', '|---|---|---|---|---|---|---|---|---|---|'];
   for (const d of compte.detail) {
-    l.push(`| ${d.id} | ${d.date} | ${d.format} | ${d.sujet} | ${d.mur ? 'oui' : 'non'} | ${n0(d.impressions)} | ${n0(d.portee)} | ${d.reactions} | ${d.commentaires} | ${d.url || '–'} |`);
+    l.push(`| ${d.id} | ${d.date} | ${d.format} | ${d.sujet} | ${d.mur ? 'oui' : 'non'} | ${n0(d.impressions)} | ${n0(d.reactions)} | ${n0(d.commentaires)} | ${pct(d.tauxEngagement)} | ${d.url || '–'} |`);
   }
   return l.join('\n');
 }
@@ -53,8 +53,8 @@ export function rendreRapport(r) {
   const L = [];
   L.push(`# Analyse du lundi ${r.dateAnalyse} — test des formats LinkedIn`);
   L.push('');
-  L.push(`Heure de référence : ${r.heureServeur} (heure du serveur Zernio, pas l'horloge de la machine) — ${parisLong(r.heureServeur)}. Dernière synchronisation LinkedIn côté Zernio : ${r.derniereSync || 'inconnue'}.`);
-  L.push(`Test : ${r.plan.debut} au ${r.plan.fin}, ${r.plan.semaines} semaines, jours ${r.plan.jours.join('/')}. Sources : Zernio (GET /v1/analytics)${r.buffer ? ` et relevé Buffer ${r.buffer.fichier}` : ''}.`);
+  L.push(`Heure de référence : ${r.heureServeur} (en-tête Date du serveur Buffer, pas l'horloge de la machine) — ${parisLong(r.heureServeur)}.`);
+  L.push(`Test : ${r.plan.debut} au ${r.plan.fin}, ${r.plan.semaines} semaines, jours ${r.plan.jours.join('/')}. Source unique : Buffer Insights (relevés ${r.releves.map((f) => f.split(/[\/]/).pop()).join(', ') || 'aucun'}). Indicateurs : impressions, réactions, commentaires, taux d’engagement (métriques Buffer, consigne de Julien du 08/10/2026).`);
   L.push('');
   L.push('## 1. À retenir');
   L.push('');
@@ -67,8 +67,7 @@ export function rendreRapport(r) {
   const alertes = [];
   if (r.manquants.length) alertes.push(`créneaux manquants : ${r.manquants.map((c) => c.id).join(', ')}`);
   if (r.anomalies.length) alertes.push(`anomalies de format : ${r.anomalies.length}`);
-  if (r.chiffresAnciens) alertes.push(`chiffres Zernio anciens (${r.chiffresAnciens})`);
-  if (r.buffer?.ecarts.length) alertes.push(`${r.buffer.ecarts.length} écart(s) Zernio / Buffer de plus de 15 %`);
+  if (r.sansMesure) alertes.push(`${r.sansMesure} post(s) relevé(s) sans impressions`);
   L.push(`- Alertes : ${alertes.length ? alertes.join(' ; ') : 'aucune'}.`);
   L.push('');
 
@@ -80,9 +79,9 @@ export function rendreRapport(r) {
     if (!c.posts.length) { L.push('Aucun post publié.'); L.push(''); continue; }
     L.push(`${c.n} post(s), dont ${c.recents} de moins de ${REGLES.maturiteHeures} h (chiffres encore incomplets).`);
     L.push('');
-    L.push('| Jour | Heure | Format | Mûr | Impressions | Portée | Réactions | Commentaires | Lien |');
+    L.push('| Jour | Heure (Paris) | Format | Mûr | Impressions | Réactions | Commentaires | Taux d’engagement | Lien |');
     L.push('|---|---|---|---|---|---|---|---|---|');
-    for (const p of c.posts) L.push(`| ${p.jour} ${p.date} | ${p.heure} | ${p.format} | ${p.mur ? 'oui' : 'non'} | ${n0(p.impressions)} | ${n0(p.portee)} | ${p.reactions} | ${p.commentaires} | ${p.url || '–'} |`);
+    for (const p of c.posts) L.push(`| ${p.jour} ${p.date} | ${p.heure} | ${p.format} | ${p.mur ? 'oui' : 'non'} | ${n0(p.impressions)} | ${n0(p.reactions)} | ${n0(p.commentaires)} | ${pct(p.tauxEngagement)} | ${p.url || '–'} |`);
     L.push('');
   }
 
@@ -111,11 +110,11 @@ export function rendreRapport(r) {
   L.push(`## ${num++}. Week-end (suivi à part, jamais dans les médianes du test)`);
   L.push('');
   if (!r.weekend.posts.length) {
-    L.push('Aucun post de week-end relevé par Zernio.');
+    L.push('Aucun post de week-end dans les relevés Buffer.');
   } else {
     L.push('| Compte | Jour | Heure | Format | Mûr | Impressions | Médiane semaine du compte | Réactions | Commentaires | Lien |');
     L.push('|---|---|---|---|---|---|---|---|---|---|');
-    for (const p of r.weekend.posts) L.push(`| ${p.compte} | ${p.jour} ${p.date} | ${p.heure} | ${p.format} | ${p.mur ? 'oui' : 'non'} | ${n0(p.impressions)} | ${n0(p.medianeSemaine)} | ${p.reactions} | ${p.commentaires} | ${p.url || '–'} |`);
+    for (const p of r.weekend.posts) L.push(`| ${p.compte} | ${p.jour} ${p.date} | ${p.heure} | ${p.format} | ${p.mur ? 'oui' : 'non'} | ${n0(p.impressions)} | ${n0(p.medianeSemaine)} | ${n0(p.reactions)} | ${n0(p.commentaires)} | ${p.url || '–'} |`);
   }
   L.push('');
   L.push('Trop peu de posts pour conclure : on les regarde un par un, sans en tirer de règle.');
@@ -123,21 +122,13 @@ export function rendreRapport(r) {
 
   L.push(`## ${num++}. Historique par format (jours de semaine, posts mûrs)`);
   L.push('');
-  L.push('Zernio (depuis ses premières données, le 25/09/2026) :');
+  L.push(`Buffer Insights, tous les posts relevés (${r.historique.du || '–'} au ${r.historique.au || '–'}) :`);
   L.push('');
-  for (const h of r.historiqueZernio) {
+  for (const h of r.historique.comptes) {
     L.push(`**${h.compte}**`);
     L.push('');
     if (!h.formats.length) { L.push('Aucun post.'); L.push(''); continue; }
     L.push(...ENTETE_FORMAT, ...h.formats.map((f) => LIGNE_FORMAT(f.format, f)));
-    L.push('');
-  }
-  if (r.buffer?.reference?.length) {
-    L.push('Buffer, avant le test (relevé, format corrigé d’après Zernio quand Zernio connaît le post) :');
-    L.push('');
-    L.push('| Compte | Format | Jours | Posts mesurés | Médiane d’impressions | Période |');
-    L.push('|---|---|---|---|---|---|');
-    for (const x of r.buffer.reference) L.push(`| ${x.compte} | ${x.format} | ${x.jours} | ${x.n} | ${n0(x.mediane)} | ${x.du} au ${x.au} |`);
     L.push('');
   }
 
@@ -166,20 +157,13 @@ export function rendreRapport(r) {
     for (const a of r.anomalies) L.push(`- **Anomalie de format** : ${a}.`);
     L.push('');
   }
-  if (r.buffer) {
-    L.push(`## ${num++}. Contrôle croisé avec le relevé Buffer`);
-    L.push('');
-    L.push(`Fichier : ${r.buffer.fichier} (${r.buffer.lignes} lignes). Posts du test comparés : ${r.buffer.compares}. Écart d'impressions supérieur à 15 % : ${r.buffer.ecarts.length}. Étiquettes de format corrigées d'après Zernio : ${r.buffer.corrections.length}.`);
-    for (const e of r.buffer.ecarts) L.push(`- ${e.id} : Zernio ${e.zernio}, Buffer ${e.buffer}.`);
-    for (const c of r.buffer.corrections) L.push(`- ${c.id} : Buffer « ${c.buffer} », Zernio « ${c.zernio} » (Zernio retenu).`);
-    L.push('');
-  }
   L.push(`## ${num++}. Limites de lecture`);
   L.push('');
   L.push(`- Peu de posts par format : une médiane sur 8 posts bouge beaucoup avec un seul post viral. La règle de décision exige donc trois signaux concordants (rapport, intervalle, paires de même sujet).`);
   L.push(`- Un post compte dans les médianes ${REGLES.maturiteHeures} h après sa publication ; avant, ses chiffres sont incomplets.`);
   L.push("- Le commentaire quotidien sous les posts d'autres comptes continue pendant le test ; il n'est pas neutralisé, il est constant.");
-  L.push('- Zernio synchronise LinkedIn une fois par jour : lire les chiffres du lundi matin, jamais ceux du jour même.');
+  L.push('- Buffer Insights se rafraîchit avec retard (« Refreshed … ago » sur le détail du post) : les chiffres de la veille sont encore incomplets.');
+  L.push('- Buffer Insights ne donne ni enregistrements ni envois par post : ils ne font pas partie des objectifs (Julien, 08/10/2026).');
   L.push('');
   return L.join('\n');
 }

@@ -1,79 +1,78 @@
-// Assemblage de l'analyse du lundi : plan + chiffres Zernio (+ relevé Buffer facultatif) → résultat.
+// Assemblage de l'analyse du lundi : plan + relevés Buffer Insights (source unique) → résultat.
 // Tout est calculé ici, en code. Le rendu (rapport.mjs) ne fait que mettre en forme.
-import { analyserCompte, anomaliesDeFormat, apparier, estMur, normaliserPost, resumer } from './analyse.mjs';
-import { ajouterJours, parisVersUtc, utcVersParis } from './calendrier.mjs';
+import { analyserCompte, anomaliesDeFormat, apparier, estMur, resumer } from './analyse.mjs';
+import { ajouterJours, heureLocaleVersUtc, parisVersUtc, utcVersParis } from './calendrier.mjs';
 import { mediane } from './stats.mjs';
 
-const FORMATS_BUFFER = { T: 'texte', C: 'carrousel', I: 'image', L: 'lien', S: 'slides', '?': 'inconnu' };
-const COLONNES_BUFFER = ['compte', 'date_paris', 'heure_paris', 'format', 'impressions', 'portee', 'reactions', 'commentaires'];
+const FORMATS_BUFFER = { T: 'texte', C: 'carrousel', I: 'image', L: 'lien', S: 'slides', V: 'video', '?': 'inconnu' };
+const COMPTES = ['julien-partners', 'julien-agency'];
+// Indicateurs fixés par Julien (NOTES.md, 03/10 et 08/10/2026) : impressions, réactions, commentaires,
+// taux d'engagement. Toute autre colonne du relevé (portée…) est ignorée.
+const COLONNES = ['compte', 'format', 'impressions', 'reactions', 'commentaires'];
 
-/** CSV du relevé Buffer (voir references/releve-buffer.md) → lignes typées, format en toutes lettres. */
-export function lireCsvBuffer(texte) {
+/**
+ * CSV d'un relevé Buffer Insights (voir references/releve-buffer.md) → posts prêts à analyser.
+ * Heure : `publie_le` + `fuseau_affiche` (l'heure telle que Buffer l'affiche, ex. Europe/Minsk),
+ * ou, pour les anciens relevés, `date_paris` + `heure_paris`. L'UTC est calculé ici, jamais à la main.
+ */
+export function lireCsvBuffer(texte, fichier = null) {
   const [entete, ...lignes] = texte.replace(/^﻿/, '').trim().split(/\r?\n/);
   const cols = entete.split(',');
-  const manquantes = COLONNES_BUFFER.filter((c) => !cols.includes(c));
-  if (manquantes.length) throw new Error(`Relevé Buffer : colonne(s) absente(s) : ${manquantes.join(', ')}`);
-  const nombre = (x) => (x === '' || x === undefined ? null : Number(x));
-  return lignes.filter(Boolean).map((l, n) => {
-    const v = Object.fromEntries(l.split(',').map((x, i) => [cols[i], x]));
-    if (!FORMATS_BUFFER[v.format]) throw new Error(`Relevé Buffer, ligne ${n + 2} : format « ${v.format} » inconnu (T, C, I, L, S ou ?).`);
+  const manquantes = COLONNES.filter((c) => !cols.includes(c));
+  const v2 = cols.includes('publie_le') && cols.includes('fuseau_affiche');
+  const v1 = cols.includes('date_paris') && cols.includes('heure_paris');
+  if (!v2 && !v1) manquantes.push('publie_le + fuseau_affiche (ou date_paris + heure_paris)');
+  if (manquantes.length) throw new Error(`Relevé Buffer${fichier ? ` ${fichier}` : ''} : colonne(s) absente(s) : ${manquantes.join(', ')}`);
+  const nombre = (x) => (x === '' || x === undefined ? null : Number(String(x).replace(/\s/g, '')));
+  return lignes.filter((l) => l.trim()).map((l, n) => {
+    const v = Object.fromEntries(l.split(',').map((x, i) => [cols[i], x.trim()]));
+    const ou = `Relevé Buffer${fichier ? ` ${fichier}` : ''}, ligne ${n + 2}`;
+    if (!COMPTES.includes(v.compte)) throw new Error(`${ou} : compte « ${v.compte} » inconnu (${COMPTES.join(' ou ')}).`);
+    if (!FORMATS_BUFFER[v.format]) throw new Error(`${ou} : format « ${v.format} » inconnu (${Object.keys(FORMATS_BUFFER).join(', ')}).`);
+    let instant;
+    if (v2) {
+      const m = (v.publie_le || '').match(/^(\d{4}-\d{2}-\d{2})\s+(\d{2}:\d{2})$/);
+      if (!m) throw new Error(`${ou} : publie_le « ${v.publie_le} » ne suit pas « AAAA-MM-JJ HH:MM ».`);
+      try {
+        instant = heureLocaleVersUtc(m[1], m[2], v.fuseau_affiche);
+      } catch {
+        throw new Error(`${ou} : fuseau « ${v.fuseau_affiche} » inconnu (nom IANA attendu, ex. Europe/Minsk).`);
+      }
+    } else {
+      instant = parisVersUtc(v.date_paris, v.heure_paris);
+    }
+    const taux = nombre(v.taux_eng_buffer_pct);
+    const paris = utcVersParis(instant);
     return {
-      compte: v.compte, date: v.date_paris, heure: v.heure_paris, format: FORMATS_BUFFER[v.format],
-      impressions: nombre(v.impressions), portee: nombre(v.portee),
-      reactions: nombre(v.reactions), commentaires: nombre(v.commentaires),
+      id: v.id_buffer || `${v.compte} ${paris.date} ${paris.heure}`,
+      compte: v.compte,
+      publieLe: instant.toISOString(),
+      format: FORMATS_BUFFER[v.format],
+      impressions: nombre(v.impressions),
+      reactions: nombre(v.reactions),
+      commentaires: nombre(v.commentaires),
+      tauxEngagement: taux === null ? null : taux / 100,
+      url: v.lien || null,
+      releve: fichier,
     };
   });
+}
+
+/**
+ * Plusieurs relevés → une seule liste. Un même post (même compte, même minute de publication)
+ * garde les chiffres du relevé le plus récent : passer les listes du plus ancien au plus récent.
+ */
+export function fusionnerReleves(listes) {
+  const parCle = new Map();
+  for (const posts of listes) for (const p of posts) parCle.set(`${p.compte}|${p.publieLe.slice(0, 16)}`, p);
+  return [...parCle.values()].sort((a, b) => a.publieLe.localeCompare(b.publieLe));
 }
 
 /** 0 = dimanche … 6 = samedi, pour une date « AAAA-MM-JJ ». */
 const numeroJour = (date) => new Date(`${date}T12:00:00Z`).getUTCDay();
 export const estWeekend = (date) => [0, 6].includes(numeroJour(date));
 
-/**
- * Compare le relevé Buffer aux posts Zernio, puis en tire la référence d'avant le test.
- * Quand Zernio connaît le post (même compte, heure à 30 min près), son format fait foi :
- * c'est lui qui voit le PDF d'un carrousel, l'étiquette saisie à la main peut se tromper.
- */
-export function croiserBuffer(lignes, comptesParId, postsZernio, plan, fichier) {
-  const trouver = (l) => {
-    const t = parisVersUtc(l.date, l.heure).getTime();
-    return postsZernio.find((z) => comptesParId[z.accountId] === l.compte && Math.abs(new Date(z.publieLe).getTime() - t) <= 30 * 60000);
-  };
-  const corrections = [];
-  const corrigees = lignes.map((l) => {
-    const z = trouver(l);
-    if (z && z.format !== l.format) {
-      corrections.push({ id: `${l.compte} ${l.date} ${l.heure}`, buffer: l.format, zernio: z.format });
-      return { ...l, format: z.format };
-    }
-    return l;
-  });
-  const ecarts = [];
-  let compares = 0;
-  for (const l of corrigees) {
-    if (l.date < plan.debut || l.impressions === null) continue;
-    const z = trouver(l);
-    if (!z || z.impressions === null) continue;
-    compares++;
-    const d = Math.abs(z.impressions - l.impressions);
-    if (d >= 15 && d / Math.max(z.impressions, l.impressions) > 0.15) ecarts.push({ id: `${l.compte} ${l.date} ${l.heure}`, zernio: z.impressions, buffer: l.impressions });
-  }
-  const groupes = new Map();
-  for (const l of corrigees) {
-    if (l.date >= plan.debut || l.impressions === null) continue;
-    const cle = [l.compte, l.format, estWeekend(l.date) ? 'week-end' : 'semaine'].join('|');
-    if (!groupes.has(cle)) groupes.set(cle, []);
-    groupes.get(cle).push(l);
-  }
-  const reference = [...groupes.entries()].map(([cle, ls]) => {
-    const [compte, format, jours] = cle.split('|');
-    const dates = ls.map((l) => l.date).sort();
-    return { compte, format, jours, n: ls.length, mediane: mediane(ls.map((l) => l.impressions)), du: dates[0], au: dates[dates.length - 1] };
-  }).sort((a, b) => a.compte.localeCompare(b.compte) || a.jours.localeCompare(b.jours) || b.n - a.n);
-  return { fichier, lignes: lignes.length, compares, corrections, ecarts, reference };
-}
-
-const parCompte = (posts, comptes) => Object.fromEntries(Object.entries(comptes).map(([nom, c]) => [nom, posts.filter((p) => p.accountId === c.accountId)]));
+const parCompte = (posts, comptes) => Object.fromEntries(Object.keys(comptes).map((nom) => [nom, posts.filter((p) => p.compte === nom)]));
 
 /** Chiffres par format d'un lot de posts déjà mûrs (tous formats présents, pas seulement texte et carrousel). */
 function parFormat(posts) {
@@ -82,17 +81,17 @@ function parFormat(posts) {
 }
 
 /**
- * @param plan            calendrier.json ({ meta, creneaux })
- * @param analytics       posts de GET /v1/analytics (bruts)
- * @param maintenant      instant de référence (heure serveur Zernio)
+ * @param plan        calendrier.json ({ meta, creneaux })
+ * @param posts       posts des relevés Buffer Insights (lireCsvBuffer puis fusionnerReleves)
+ * @param maintenant  instant de référence (heure du serveur Buffer)
+ * @param jour        lundi analysé (AAAA-MM-JJ), par défaut le jour de Paris de `maintenant`
+ * @param releves     fichiers lus, du plus ancien au plus récent (pour le rapport)
  */
-export function analyserTout({ plan, analytics, apercu, maintenant, bufferLignes = null, bufferFichier = null, regles }) {
+export function analyserTout({ plan, posts, maintenant, jour = null, releves = [], regles }) {
   const now = new Date(maintenant);
-  const tous = analytics.map(normaliserPost).filter((p) => p.publieLe);
+  const tous = posts.filter((p) => p.publieLe && new Date(p.publieLe) <= now);
   const comptes = plan.meta.comptes;
-  const comptesParId = Object.fromEntries(Object.entries(comptes).map(([k, v]) => [v.accountId, k]));
-  const nomCompte = (p) => comptesParId[p.accountId] || p.accountId;
-  const jourAnalyse = utcVersParis(now).date;
+  const jourAnalyse = jour || utcVersParis(now).date; // « --date » d'un lundi à venir : semaine visée, chiffres du moment
   const parisDe = (p) => utcVersParis(new Date(p.publieLe));
 
   // 1. Le test : créneaux échus, rapprochés des posts publiés dans la fenêtre. Le week-end n'y entre jamais.
@@ -108,9 +107,6 @@ export function analyserTout({ plan, analytics, apercu, maintenant, bufferLignes
   const horsPlanSemaine = horsPlan.filter((p) => !estWeekend(parisDe(p).date));
   const analyses = Object.keys(comptes).map((c) => analyserCompte(apparies, c, now, regles));
   const finale = jourAnalyse > plan.meta.fin;
-  const releves = apparies.map((a) => a.post.releveLe).filter(Boolean).sort();
-  const plusAncien = releves[0];
-  const ageH = plusAncien ? (now.getTime() - new Date(plusAncien.replace(' ', 'T') + 'Z').getTime()) / 3600000 : null;
 
   // 2. La semaine écoulée : les 7 jours pleins avant le jour de l'analyse, tous formats.
   const debutSemaine = ajouterJours(jourAnalyse, -7);
@@ -118,29 +114,38 @@ export function analyserTout({ plan, analytics, apercu, maintenant, bufferLignes
     const d = parisDe(p).date;
     return d >= debutSemaine && d < jourAnalyse;
   });
+  const ligne = (p) => ({
+    date: parisDe(p).date, heure: parisDe(p).heure, jour: parisDe(p).jour, format: p.format,
+    impressions: p.impressions, reactions: p.reactions, commentaires: p.commentaires, tauxEngagement: p.tauxEngagement,
+    mur: estMur(p, now, regles?.maturiteHeures), url: p.url,
+  });
   const semaine = {
     du: debutSemaine,
     au: ajouterJours(jourAnalyse, -1),
-    comptes: Object.entries(parCompte(postsSemaine, comptes)).map(([compte, posts]) => ({
+    comptes: Object.entries(parCompte(postsSemaine, comptes)).map(([compte, ps]) => ({
       compte,
-      n: posts.length,
-      recents: posts.filter((p) => !estMur(p, now, regles?.maturiteHeures)).length,
-      formats: parFormat(posts),
-      posts: posts.map((p) => ({ date: parisDe(p).date, heure: parisDe(p).heure, jour: parisDe(p).jour, format: p.format, impressions: p.impressions, portee: p.portee, reactions: p.reactions, commentaires: p.commentaires, mur: estMur(p, now, regles?.maturiteHeures), url: p.url })),
+      n: ps.length,
+      recents: ps.filter((p) => !estMur(p, now, regles?.maturiteHeures)).length,
+      formats: parFormat(ps),
+      posts: ps.map(ligne),
     })),
   };
 
-  // 3. Ce que Zernio a vu, par format, jours de semaine et posts mûrs (référence continue, hors week-end).
+  // 3. Historique par format : tous les posts relevés, jours de semaine, posts mûrs (hors week-end).
   const murs = tous.filter((p) => estMur(p, now, regles?.maturiteHeures));
-  const zernioSemaine = murs.filter((p) => !estWeekend(parisDe(p).date));
-  const historiqueZernio = Object.entries(parCompte(zernioSemaine, comptes)).map(([compte, posts]) => ({ compte, formats: parFormat(posts) }));
+  const mursSemaine = murs.filter((p) => !estWeekend(parisDe(p).date));
+  const dates = tous.map((p) => parisDe(p).date).sort();
+  const historique = {
+    du: dates[0] || null,
+    au: dates[dates.length - 1] || null,
+    comptes: Object.entries(parCompte(mursSemaine, comptes)).map(([compte, ps]) => ({ compte, formats: parFormat(ps) })),
+  };
 
   // 4. Le week-end, à part : jamais dans les médianes du test.
   const weekend = {
     posts: tous.filter((p) => estWeekend(parisDe(p).date)).map((p) => ({
-      compte: nomCompte(p), date: parisDe(p).date, heure: parisDe(p).heure, jour: parisDe(p).jour, format: p.format,
-      impressions: p.impressions, reactions: p.reactions, commentaires: p.commentaires, mur: estMur(p, now, regles?.maturiteHeures), url: p.url,
-      medianeSemaine: mediane(zernioSemaine.filter((z) => z.accountId === p.accountId).map((z) => z.impressions)),
+      compte: p.compte, ...ligne(p),
+      medianeSemaine: mediane(mursSemaine.filter((z) => z.compte === p.compte).map((z) => z.impressions)),
     })),
     dansLeTest: weekendTest.length,
   };
@@ -153,7 +158,7 @@ export function analyserTout({ plan, analytics, apercu, maintenant, bufferLignes
     dateAnalyse: jourAnalyse,
     heureServeur: now.toISOString(),
     plan: plan.meta,
-    derniereSync: apercu?.lastSync || null,
+    releves,
     decisionFinale: finale,
     total: plan.creneaux.length,
     echus: creneaux.length,
@@ -161,12 +166,11 @@ export function analyserTout({ plan, analytics, apercu, maintenant, bufferLignes
     manquants,
     horsPlan: horsPlanSemaine,
     anomalies: anomaliesDeFormat(apparies),
-    chiffresAnciens: ageH !== null && ageH > 36 ? `le relevé le plus ancien date de ${Math.round(ageH)} h (${plusAncien} UTC)` : null,
+    sansMesure: tous.filter((p) => p.impressions === null).length,
     comptes: analyses,
     synthese,
     semaine,
-    historiqueZernio,
+    historique,
     weekend,
-    buffer: bufferLignes ? croiserBuffer(bufferLignes, comptesParId, tous, plan.meta, bufferFichier) : null,
   };
 }
