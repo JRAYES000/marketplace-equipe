@@ -100,7 +100,8 @@ export function decider({ texte, carrousel, paires, planifies }, regles = REGLES
 /** Analyse complète d'un compte à partir des paires (créneau, post) déjà rapprochées. */
 export function analyserCompte(apparies, compte, maintenant, regles = REGLES) {
   const siens = apparies.filter((a) => a.creneau.compte === compte);
-  const murs = siens.filter((a) => estMur(a.post, maintenant, regles.maturiteHeures));
+  // Annonces, week-end, posts « hors comparaison » : au calendrier (donc ni manquants ni hors plan), jamais dans les médianes.
+  const murs = siens.filter((a) => a.creneau.comparaison !== false && estMur(a.post, maintenant, regles.maturiteHeures));
   const parFormat = (f) => murs.filter((a) => a.creneau.format === f).map((a) => a.post);
   const texte = parFormat('texte');
   const carrousel = parFormat('carrousel');

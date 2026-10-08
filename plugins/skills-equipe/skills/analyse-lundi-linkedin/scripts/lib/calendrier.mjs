@@ -164,14 +164,20 @@ export function genererCalendrier(config) {
 }
 
 /**
- * Contrôle de chaque créneau contre la file Buffer (seule référence des posts programmés).
- * `buffer` : [{ compte, instant }]. Un créneau est en conflit si un autre post du même compte
- * tombe à moins de `ecartMinHeures`, dans la file ou dans le plan lui-même.
+ * Contrôle du calendrier contre la file Buffer (seule référence des posts programmés).
+ * `buffer` : [{ compte, instant }]. Un créneau à venir est « programmé » quand la file a un post du même
+ * compte à la même heure (± `toleranceMinutes`) ; sinon il est manquant. Les créneaux passés ne sont pas
+ * contrôlés (le relevé Insights les couvre). Les posts à venir de la file absents du calendrier sont
+ * « hors plan ». Un conflit = deux posts d'un même compte à moins de `ecartMinHeures`.
+ * @returns {{ creneaux: [{ id, ok, passe, problemes }], horsPlan: [{ compte, instant }] }}
  */
-export function verifierCreneaux(creneaux, { maintenant, ecartMinHeures = 4, buffer = [], jourAutorises = [2, 3, 4, 5] } = {}) {
+export function verifierCreneaux(creneaux, { maintenant, ecartMinHeures = 4, buffer = [], jourAutorises = [2, 3, 4, 5], toleranceMinutes = 1 } = {}) {
   if (!maintenant) throw new Error("verifierCreneaux : heure de référence absente (jamais l'horloge de la machine).");
+  const now = new Date(maintenant).getTime();
   const ms = ecartMinHeures * 3600000;
-  return creneaux.map((c) => {
+  const tol = toleranceMinutes * 60000;
+  const utilises = new Set();
+  const resultats = creneaux.map((c) => {
     const problemes = [];
     const t = new Date(c.utc).getTime();
     const retour = utcVersParis(new Date(c.utc));
@@ -179,19 +185,26 @@ export function verifierCreneaux(creneaux, { maintenant, ecartMinHeures = 4, buf
       problemes.push(`aller-retour UTC/Paris incohérent (${retour.date} ${retour.heure})`);
     }
     if (!jourAutorises.includes(jourSemaine(c.date))) problemes.push(`jour non autorisé (${c.jour})`);
-    if (t <= new Date(maintenant).getTime()) problemes.push('créneau dans le passé');
-    for (const b of buffer) {
-      if (b.compte !== c.compte) continue;
-      const dt = Math.abs(new Date(b.instant).getTime() - t);
-      if (dt === 0) problemes.push('déjà pris dans la file Buffer');
-      else if (dt < ms) problemes.push(`file Buffer : post à ${Math.round(dt / 60000)} min`);
-    }
+    if (t <= now) return { id: c.id, passe: true, problemes };
+    const i = buffer.findIndex((b, k) => !utilises.has(k) && b.compte === c.compte && Math.abs(new Date(b.instant).getTime() - t) <= tol);
+    if (i < 0) problemes.push('absent de la file Buffer (manquant)');
+    else utilises.add(i);
     for (const autre of creneaux) {
       if (autre.id === c.id || autre.compte !== c.compte) continue;
       if (Math.abs(new Date(autre.utc).getTime() - t) < ms) problemes.push(`trop proche du créneau ${autre.id}`);
     }
-    return { id: c.id, ok: problemes.length === 0, problemes };
+    return { id: c.id, passe: false, problemes };
   });
+  const horsPlan = buffer.filter((b, k) => !utilises.has(k) && new Date(b.instant).getTime() > now);
+  for (const b of horsPlan) {
+    for (const r of resultats) {
+      const c = creneaux.find((x) => x.id === r.id);
+      if (r.passe || c.compte !== b.compte) continue;
+      const dt = Math.abs(new Date(b.instant).getTime() - new Date(c.utc).getTime());
+      if (dt < ms) r.problemes.push(`file Buffer : post hors calendrier à ${Math.round(dt / 60000)} min`);
+    }
+  }
+  return { creneaux: resultats.map((r) => ({ ...r, ok: r.problemes.length === 0 })), horsPlan };
 }
 
 /**
