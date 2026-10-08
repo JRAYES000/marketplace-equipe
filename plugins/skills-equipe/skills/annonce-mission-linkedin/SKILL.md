@@ -103,6 +103,11 @@ Paris), colonnes impressions, réactions, commentaires, enregistrements, envois,
 La routine Windows « LinkedIn - 5 Releve 48 h des annonces » (`linkedin/routines/5-releve-48h-annonces.md`)
 remplit impressions, réactions et commentaires chaque jour à 14:00 Paris ; si le lot dépasse le
 15/11/2026, prolonger sa date de fin dans `register-routines.ps1`.
+**Identification d'une annonce** (routine comme relevé à la main), les deux conditions à la fois :
+son intitulé exact (ligne 💼, ou ligne 2 de l'accroche, telle qu'elle est dans `NN.final.txt`) ET sa
+date et heure de publication prévues (± 1 h). Plusieurs posts correspondent, ou aucun : rien n'est
+écrit dans la ligne, « ALERTE : identification ambiguë » est noté avec les candidats trouvés.
+Un post absent de nos fichiers n'est jamais relevé : c'est un post de Julien.
 **Enregistrements et envois : seulement dans les statistiques LinkedIn de Julien (capture qu'il
 envoie), jamais dans Buffer** (Buffer ne les donne pas par post, constaté le 08/10/2026). En
 attendant la capture : « non fourni », jamais 0.
