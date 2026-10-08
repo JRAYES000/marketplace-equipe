@@ -109,8 +109,9 @@ date et heure de publication prévues (± 1 h). Plusieurs posts correspondent, o
 écrit dans la ligne, « ALERTE : identification ambiguë » est noté avec les candidats trouvés.
 Un post absent de nos fichiers n'est jamais relevé : c'est un post de Julien.
 **Enregistrements et envois : seulement dans les statistiques LinkedIn de Julien (capture qu'il
-envoie), jamais dans Buffer** (Buffer ne les donne pas par post, constaté le 08/10/2026). En
-attendant la capture : « non fourni », jamais 0.
+envoie), jamais dans Buffer** : par post, Buffer ne donne que réactions, commentaires, taux
+d'engagement, impressions et portée, sur les deux comptes (vérifié le 08/10/2026, offre Essentials) ;
+son total « Shares » est celui du canal, pas d'un post. En attendant la capture : « non fourni », jamais 0.
 
 ## Fin
 
