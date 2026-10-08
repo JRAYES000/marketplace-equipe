@@ -14,9 +14,9 @@ description: >-
   mentionné.
 compatibility: "Claude Code. Requiert le serveur MCP Playwright avec un profil persistant (--user-data-dir, appareil enrôlé sur France Travail), l'API publique Notion (variable NOTION_TOKEN_FT, connexion interne « Leads France Travail - API »), l'API SalesHandy pour l'import dans la séquence (SALESHANDY_API_KEY), l'outil Bash avec node, poppler et tesseract. Ni Claude in Chrome, ni le connecteur Notion MCP, ni NocoDB."
 metadata:
-  version: '10.5'
+  version: '10.6'
   environment: 'Claude Code, rédigé pour Claude Sonnet 5.5 (fonctionne aussi sous Opus). Playwright MCP pour la session recruteur, outil Bash pour les scripts fournis. Livrable = la base Notion « Leads France Travail », seule base du skill.'
-  journal: 'references/journal.md — mesures et incidents des runs réels (v2.0 à v10.5). À lire seulement pour comprendre ou contester une règle ; en cas de désaccord ce fichier-ci fait foi.'
+  journal: 'references/journal.md — mesures et incidents des runs réels (v2.0 à v10.6). À lire seulement pour comprendre ou contester une règle ; en cas de désaccord ce fichier-ci fait foi.'
 ---
 
 # Extraction France Travail Pro → Notion
@@ -167,8 +167,9 @@ quatre chemins `ft-*.js`.
 
 ## Phase 2 — Connexion et recherche
 
-**Le navigateur Playwright n'est pas le Chrome de Julien.** Profil à part
-(`C:/Users/julien/.chrome-claude`), fenêtre à part. Ses cookies de session meurent avec lui, et
+**Le navigateur Playwright n'est pas le Chrome de Julien.** C'est le Chromium de Playwright
+(`--browser chromium`, v10.6), figé avec le paquet MCP : les mises à jour du Chrome de Julien ne
+le touchent plus. Profil à part (`C:/Users/julien/.chromium-claude`), fenêtre à part. Ses cookies de session meurent avec lui, et
 il se relance à chaque session Claude : **Julien se reconnecte à chaque run**, avec son
 identifiant et son mot de passe seulement. L'appareil est enrôlé (cookie `EnrolementEffectue`,
 un an) : aucun code n'est demandé. Sur un poste neuf, la toute première connexion demande le

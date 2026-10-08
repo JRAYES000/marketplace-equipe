@@ -21,6 +21,17 @@ Mesuré le 04/10/2026 sur le profil Playwright `C:/Users/julien/.chrome-claude` 
   touchée : les clics passent par le protocole.
 - **Pas le navigateur intégré, ni Firecrawl.** Ils n'ont pas la session recruteur.
 
+**Chromium de Playwright, pas Chrome** (v10.6, 08/10/2026). Le serveur MCP est lancé avec
+`--browser chromium --user-data-dir C:/Users/julien/.chromium-claude` (dans `~/.claude.json`).
+`chromium` y devient le canal `chrome-for-testing` : le binaire de `ms-playwright/chromium-<rev>`,
+qui ne change qu'avec le paquet `@playwright/mcp` (épinglé). Avant, `--browser chrome` suivait
+les mises à jour du Chrome de Julien, et Chrome 154 a planté à chaque téléchargement sur
+l'ancien profil `.chrome-claude` (gardé, inutilisé). Si le paquet MCP est mis à jour, réinstaller
+son navigateur : `node node_modules/playwright/cli.js install chromium` dans
+`C:/Users/julien/Claude/Tools/playwright-mcp`. Le nouveau profil demande l'enrôlement une fois
+(code 2FA) à sa première connexion. `playwright.js preparer` purge l'historique des téléchargements du profil à chaque
+lot (variable `FT_PROFIL_PLAYWRIGHT` pour un autre profil).
+
 **Repli Claude in Chrome** (v9.6) si le serveur MCP Playwright manque : session ouverte dans
 le Chrome de Julien, `arriere-plan.js` injecté avant tout, onglet visible en Phase 2,
 téléchargements multiples autorisés, CV dans Downloads (les scripts s'y replient d'eux-mêmes

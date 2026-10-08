@@ -586,3 +586,17 @@ Phase 5 bis recopie desormais seulement les Id acceptes par `ecrire`.
 • Mesure : les 40 fiches du 08/10 ont recu leur heure de creation Notion ; relecture Notion
   start=2026-10-08T16:22:00.000+03:00 ; « verifier 2026-10-08 Formation naturopathie » rend
   compte=28 avant comme apres.
+
+2026-10-08 — v10.6 : Playwright sur son propre Chromium, purge automatique (decision de Julien).
+• Serveur MCP passe de --browser chrome (Chrome 154.0.8037.98 du poste, mis a jour avec celui de
+  Julien) a --browser chromium (canal chrome-for-testing, ms-playwright/chromium-1246,
+  154.0.8037.0, fige avec @playwright/mcp 0.0.82), profil neuf C:/Users/julien/.chromium-claude.
+  Sauvegarde de la config : ~/.claude.json.bak-20261008-chromium. Ancien profil garde.
+• Mesure : 5 telechargements successifs sur le nouveau profil, aucun plantage.
+• playwright.js preparer purge downloads, downloads_url_chains et downloads_slices du profil
+  (node:sqlite, Node 24) ; teste : 5 puis 7 lignes purgees, reste 0. Navigateur ouvert :
+  l'historique non encore ecrit sur disque n'est pas touche, la purge se fait au lot suivant.
+• Heure ajoutee aux 325 fiches qui n'avaient que le jour (17/09 : 146, 29/09 : 144, 04/10 : 35),
+  a partir de l'heure de creation de la page Notion ; toutes creees le jour de leur extraction,
+  aucune laissee de cote. Les 365 fiches portent l'heure ; situer et verifier rendent les memes
+  comptes (verifier 2026-09-29 Formation naturopathie : 104).
