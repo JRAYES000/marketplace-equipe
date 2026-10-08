@@ -600,3 +600,9 @@ Phase 5 bis recopie desormais seulement les Id acceptes par `ecrire`.
   a partir de l'heure de creation de la page Notion ; toutes creees le jour de leur extraction,
   aucune laissee de cote. Les 365 fiches portent l'heure ; situer et verifier rendent les memes
   comptes (verifier 2026-09-29 Formation naturopathie : 104).
+
+2026-10-08 — v10.6.1 : profil Chromium exclusif.
+• Essai a blanc de la routine lot-france-travail-bihebdo : « Browser is already in use for
+  C:/Users/julien/.chromium-claude ». La session du lot manuel gardait sa fenetre Chromium ouverte.
+  Second essai, fenetre fermee : tous les outils passent. Regle ajoutee aux Replis (annexes.md) :
+  fermer le navigateur en fin de lot.
