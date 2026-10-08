@@ -553,3 +553,7 @@ Phase 5 bis recopie desormais seulement les Id acceptes par `ecrire`.
   /v1/prospects) respectee.
 • Mesure : saleshandy-verifier sur les lots du 04/10 (24 fiches, 2 min 30, aucune 429 remontee)
   et du 08/10 (10 fiches) : tous « valid ».
+• Septembre, meme commande : 17/09, 92 fiches -> valid 91, skip 1 ; 29/09, 78 fiches -> valid 74,
+  skip 3, risky 1. Le seul risky est une adresse info@ sur le domaine de la candidate, identique
+  a celle publiee sur son site : juste, pas de correction (risky = domaine que SalesHandy ne peut
+  pas confirmer). Aucun « bad » en septembre hors des 4 deja corriges.
