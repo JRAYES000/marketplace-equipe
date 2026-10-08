@@ -11,10 +11,10 @@ export const GRILLE_A = ['TCTC', 'CTCT', 'TTCC', 'CCTT'];
 
 const inverser = (ligne) => [...ligne].map((c) => (c === 'T' ? 'C' : 'T')).join('');
 
-/** Décalage de Paris par rapport à l'UTC, en minutes, à un instant donné. */
-function decalageParisMinutes(instant) {
+/** Décalage d'un fuseau (Paris par défaut) par rapport à l'UTC, en minutes, à un instant donné. */
+function decalageMinutes(instant, fuseau = 'Europe/Paris') {
   const morceau = new Intl.DateTimeFormat('en-US', {
-    timeZone: 'Europe/Paris',
+    timeZone: fuseau,
     timeZoneName: 'longOffset',
   })
     .formatToParts(instant)
@@ -24,15 +24,21 @@ function decalageParisMinutes(instant) {
   return (m[1] === '-' ? -1 : 1) * (Number(m[2]) * 60 + Number(m[3]));
 }
 
-/** « 2026-10-06 », « 08:30 » (heure de Paris) → Date UTC. */
-export function parisVersUtc(date, heure) {
+/**
+ * « 2026-10-06 », « 08:30 » lus dans un fuseau donné (nom IANA, ex. « Europe/Minsk » affiché par Buffer)
+ * → Date UTC. Intl fait le calcul, changement d'heure compris.
+ */
+export function heureLocaleVersUtc(date, heure, fuseau) {
   const [a, mo, j] = date.split('-').map(Number);
   const [h, mi] = heure.split(':').map(Number);
   const naif = Date.UTC(a, mo - 1, j, h, mi);
-  let instant = new Date(naif - decalageParisMinutes(new Date(naif)) * 60000);
-  instant = new Date(naif - decalageParisMinutes(instant) * 60000); // 2e passage : autour du changement d'heure
+  let instant = new Date(naif - decalageMinutes(new Date(naif), fuseau) * 60000);
+  instant = new Date(naif - decalageMinutes(instant, fuseau) * 60000); // 2e passage : autour du changement d'heure
   return instant;
 }
+
+/** « 2026-10-06 », « 08:30 » (heure de Paris) → Date UTC. */
+export const parisVersUtc = (date, heure) => heureLocaleVersUtc(date, heure, 'Europe/Paris');
 
 /** Date UTC → { date, heure, jour } en heure de Paris. */
 export function utcVersParis(instant) {
@@ -158,11 +164,12 @@ export function genererCalendrier(config) {
 }
 
 /**
- * Contrôle de chaque créneau contre les posts Zernio (tous statuts) et, si fournie, la file Buffer.
- * `posts` : [{ id, accountId, instant (ISO UTC), statut }]. `buffer` : [{ compte, instant }].
- * Un créneau est en conflit si un autre post du même compte tombe à moins de `ecartMinHeures`.
+ * Contrôle de chaque créneau contre la file Buffer (seule référence des posts programmés).
+ * `buffer` : [{ compte, instant }]. Un créneau est en conflit si un autre post du même compte
+ * tombe à moins de `ecartMinHeures`, dans la file ou dans le plan lui-même.
  */
-export function verifierCreneaux(creneaux, posts, { maintenant = new Date(), ecartMinHeures = 4, buffer = [], jourAutorises = [2, 3, 4, 5] } = {}) {
+export function verifierCreneaux(creneaux, { maintenant, ecartMinHeures = 4, buffer = [], jourAutorises = [2, 3, 4, 5] } = {}) {
+  if (!maintenant) throw new Error("verifierCreneaux : heure de référence absente (jamais l'horloge de la machine).");
   const ms = ecartMinHeures * 3600000;
   return creneaux.map((c) => {
     const problemes = [];
@@ -173,16 +180,11 @@ export function verifierCreneaux(creneaux, posts, { maintenant = new Date(), eca
     }
     if (!jourAutorises.includes(jourSemaine(c.date))) problemes.push(`jour non autorisé (${c.jour})`);
     if (t <= new Date(maintenant).getTime()) problemes.push('créneau dans le passé');
-    for (const p of posts) {
-      if (p.accountId !== c.accountId) continue;
-      const dt = Math.abs(new Date(p.instant).getTime() - t);
-      if (dt === 0) problemes.push(`déjà pris dans Zernio (post ${p.id}, ${p.statut})`);
-      else if (dt < ms) problemes.push(`post Zernio ${p.id} à ${Math.round(dt / 60000)} min (${p.statut})`);
-    }
     for (const b of buffer) {
       if (b.compte !== c.compte) continue;
       const dt = Math.abs(new Date(b.instant).getTime() - t);
-      if (dt < ms) problemes.push(`file Buffer : post à ${Math.round(dt / 60000)} min`);
+      if (dt === 0) problemes.push('déjà pris dans la file Buffer');
+      else if (dt < ms) problemes.push(`file Buffer : post à ${Math.round(dt / 60000)} min`);
     }
     for (const autre of creneaux) {
       if (autre.id === c.id || autre.compte !== c.compte) continue;

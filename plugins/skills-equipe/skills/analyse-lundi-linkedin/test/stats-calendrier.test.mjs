@@ -96,30 +96,24 @@ test('file Buffer : lecture, commentaires, UTC calculé, ligne invalide refusée
   assert.throws(() => lireFileBuffer('lundi 5 octobre'), /ne suit pas/);
 });
 
-test('vérification des créneaux : conflits Zernio, Buffer, passé, jour, écart de 3 h', () => {
+test('vérification des créneaux : file Buffer seule, passé, jour, écart de 3 h', () => {
   const plan = genererCalendrier(CONFIG).creneaux;
   const maintenant = new Date('2026-09-30T08:00:00Z');
-  const libre = verifierCreneaux(plan, [], { maintenant, buffer: [] });
-  assert.ok(libre.every((r) => r.ok));
+  assert.ok(verifierCreneaux(plan, { maintenant, buffer: [] }).every((r) => r.ok));
+  assert.throws(() => verifierCreneaux(plan, {}), /heure de référence absente/);
 
   const p1 = plan.find((c) => c.id === 'P-sem1-jeu'); // jeudi 08/10 08:30 Paris
-  const buffer = [{ compte: 'julien-partners', instant: parisVersUtc('2026-10-08', '13:00').toISOString() }];
-  assert.ok(verifierCreneaux(plan, [], { maintenant, buffer }).find((r) => r.id === p1.id).ok, '4 h 30 d\'écart : accepté');
-  const tropProche = [{ compte: 'julien-partners', instant: parisVersUtc('2026-10-08', '10:30').toISOString() }];
-  const r = verifierCreneaux(plan, [], { maintenant, buffer: tropProche }).find((x) => x.id === p1.id);
+  const file = (date, heure, compte = 'julien-partners') => [{ compte, instant: parisVersUtc(date, heure).toISOString() }];
+  assert.ok(verifierCreneaux(plan, { maintenant, buffer: file('2026-10-08', '13:00') }).find((r) => r.id === p1.id).ok, "4 h 30 d'écart : accepté");
+  const r = verifierCreneaux(plan, { maintenant, buffer: file('2026-10-08', '10:30') }).find((x) => x.id === p1.id);
   assert.equal(r.ok, false);
   assert.match(r.problemes[0], /file Buffer : post à 120 min/);
+  assert.match(verifierCreneaux(plan, { maintenant, buffer: file('2026-10-08', '08:30') }).find((x) => x.id === p1.id).problemes[0], /déjà pris dans la file Buffer/);
   // un post Buffer d'un autre compte ne gêne pas
-  assert.ok(verifierCreneaux(plan, [], { maintenant, buffer: [{ compte: 'julien-agency', instant: p1.utc }] }).find((x) => x.id === p1.id).ok);
+  assert.ok(verifierCreneaux(plan, { maintenant, buffer: file('2026-10-08', '08:30', 'julien-agency') }).find((x) => x.id === p1.id).ok);
 
-  const pris = verifierCreneaux(plan, [{ id: 'z1', accountId: 'P', instant: p1.utc, statut: 'scheduled' }], { maintenant });
-  assert.match(pris.find((x) => x.id === p1.id).problemes[0], /déjà pris dans Zernio/);
-  const proche = verifierCreneaux(plan, [{ id: 'z2', accountId: 'P', instant: '2026-10-08T08:00:00Z', statut: 'scheduled' }], { maintenant });
-  assert.match(proche.find((x) => x.id === p1.id).problemes[0], /à 90 min/);
-  assert.ok(verifierCreneaux(plan, [{ id: 'z3', accountId: 'A', instant: p1.utc, statut: 'scheduled' }], { maintenant }).find((x) => x.id === p1.id).ok);
-
-  const passe = verifierCreneaux(plan, [], { maintenant: new Date('2026-10-06T07:00:00Z') });
+  const passe = verifierCreneaux(plan, { maintenant: new Date('2026-10-06T07:00:00Z') });
   assert.match(passe.find((x) => x.id === 'P-sem1-mar').problemes.join(), /passé/);
-  const samedi = verifierCreneaux([{ ...p1, id: 'x', date: '2026-10-10', jour: 'sam', utc: '2026-10-10T06:30:00.000Z' }], [], { maintenant });
+  const samedi = verifierCreneaux([{ ...p1, id: 'x', date: '2026-10-10', jour: 'sam', utc: '2026-10-10T06:30:00.000Z' }], { maintenant });
   assert.match(samedi[0].problemes.join(), /jour non autorisé/);
 });

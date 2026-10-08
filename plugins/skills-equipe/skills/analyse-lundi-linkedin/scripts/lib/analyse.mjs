@@ -13,44 +13,6 @@ export const REGLES = {
   defautSiNonConcluant: 'texte',
 };
 
-/**
- * Format réel d'un post d'après ce que Zernio a relevé sur LinkedIn.
- * Un carrousel arrive typé « image » avec un PDF en pièce jointe : c'est le PDF qui le distingue.
- */
-export function formatDe(p) {
-  const items = p.mediaItems || [];
-  if (p.mediaType === 'text' || (!p.mediaType && items.length === 0)) return 'texte';
-  if (items.some((m) => /\.pdf(\?|$)/i.test(m.url || ''))) return 'carrousel';
-  if (p.mediaType === 'video') return 'video';
-  if (p.mediaType === 'image') return 'image';
-  return p.mediaType || 'autre';
-}
-
-/** Post de l'API analytics → ligne de travail. */
-export function normaliserPost(p) {
-  const a = p.analytics || {};
-  const pf = (p.platforms || [])[0] || {};
-  const accountId = typeof pf.accountId === 'object' ? pf.accountId?._id : pf.accountId;
-  return {
-    id: p._id,
-    idZernio: p.latePostId || null,
-    accountId,
-    publieLe: p.publishedAt,
-    prevuLe: p.scheduledFor,
-    impressions: a.impressions ?? null,
-    portee: a.reach ?? null,
-    reactions: a.likes ?? 0,
-    commentaires: a.comments ?? 0,
-    partages: a.shares ?? 0,
-    clics: a.clicks ?? 0,
-    mediaType: p.mediaType || null,
-    format: formatDe(p),
-    externe: p.isExternal === true,
-    url: p.platformPostUrl || pf.platformPostUrl || null,
-    releveLe: a.lastUpdated || null,
-  };
-}
-
 /** Rapproche chaque créneau du plan d'un post publié (même compte, heure à ±tolérance). */
 export function apparier(posts, creneaux, { toleranceMinutes = REGLES.toleranceMinutes } = {}) {
   const tol = toleranceMinutes * 60000;
@@ -62,7 +24,7 @@ export function apparier(posts, creneaux, { toleranceMinutes = REGLES.toleranceM
     let ecart = Infinity;
     for (const i of libres) {
       const p = posts[i];
-      if (p.accountId !== c.accountId) continue;
+      if (p.compte !== c.compte) continue;
       const e = Math.abs(new Date(p.publieLe).getTime() - new Date(c.utc).getTime());
       if (e <= tol && e < ecart) { meilleur = i; ecart = e; }
     }
@@ -80,7 +42,7 @@ export function apparier(posts, creneaux, { toleranceMinutes = REGLES.toleranceM
 export function anomaliesDeFormat(apparies) {
   const anomalies = [];
   for (const { creneau, post } of apparies) {
-    if (creneau.format !== post.format) anomalies.push(`${creneau.id} : prévu ${creneau.format}, publié ${post.format}`);
+    if (post.format !== 'inconnu' && creneau.format !== post.format) anomalies.push(`${creneau.id} : prévu ${creneau.format}, publié ${post.format}`);
   }
   return anomalies;
 }
@@ -88,10 +50,7 @@ export function anomaliesDeFormat(apparies) {
 export const estMur = (post, maintenant, heures = REGLES.maturiteHeures) =>
   (new Date(maintenant).getTime() - new Date(post.publieLe).getTime()) / 3600000 >= heures;
 
-/** (réactions + commentaires + partages) / impressions ; null si aucune impression. */
-export const tauxEngagement = (p) => (p.impressions > 0 ? (p.reactions + p.commentaires + p.partages) / p.impressions : null);
-
-/** Chiffres d'un lot de posts (un format, un compte). */
+/** Chiffres d'un lot de posts (un format, un compte) : les seuls indicateurs fixés par Julien. */
 export function resumer(posts) {
   const imp = posts.map((p) => p.impressions).filter(Number.isFinite);
   return {
@@ -100,11 +59,9 @@ export function resumer(posts) {
       mediane: mediane(imp), q1: quantile(imp, 0.25), q3: quantile(imp, 0.75),
       min: imp.length ? Math.min(...imp) : null, max: imp.length ? Math.max(...imp) : null,
     },
-    portee: mediane(posts.map((p) => p.portee)),
     reactions: mediane(posts.map((p) => p.reactions)),
     commentaires: mediane(posts.map((p) => p.commentaires)),
-    clics: mediane(posts.map((p) => p.clics)),
-    tauxEngagement: mediane(posts.map(tauxEngagement).filter((x) => x !== null)),
+    tauxEngagement: mediane(posts.map((p) => p.tauxEngagement)),
   };
 }
 
@@ -179,8 +136,8 @@ export function analyserCompte(apparies, compte, maintenant, regles = REGLES) {
     semaines,
     detail: siens.map((a) => ({
       id: a.creneau.id, date: a.creneau.date, format: a.creneau.format, sujet: a.creneau.sujet,
-      mur: estMur(a.post, maintenant, regles.maturiteHeures), impressions: a.post.impressions, portee: a.post.portee,
-      reactions: a.post.reactions, commentaires: a.post.commentaires, url: a.post.url, releveLe: a.post.releveLe,
+      mur: estMur(a.post, maintenant, regles.maturiteHeures), impressions: a.post.impressions,
+      reactions: a.post.reactions, commentaires: a.post.commentaires, tauxEngagement: a.post.tauxEngagement, url: a.post.url,
     })),
   };
 }
