@@ -14,9 +14,9 @@ description: >-
   mentionné.
 compatibility: "Claude Code. Requiert le serveur MCP Playwright avec un profil persistant (--user-data-dir, appareil enrôlé sur France Travail), l'API publique Notion (variable NOTION_TOKEN_FT, connexion interne « Leads France Travail - API »), l'API SalesHandy pour l'import dans la séquence (SALESHANDY_API_KEY), l'outil Bash avec node, poppler et tesseract. Ni Claude in Chrome, ni le connecteur Notion MCP, ni NocoDB."
 metadata:
-  version: '10.3'
+  version: '10.4'
   environment: 'Claude Code, rédigé pour Claude Sonnet 5.5 (fonctionne aussi sous Opus). Playwright MCP pour la session recruteur, outil Bash pour les scripts fournis. Livrable = la base Notion « Leads France Travail », seule base du skill.'
-  journal: 'references/journal.md — mesures et incidents des runs réels (v2.0 à v10.3). À lire seulement pour comprendre ou contester une règle ; en cas de désaccord ce fichier-ci fait foi.'
+  journal: 'references/journal.md — mesures et incidents des runs réels (v2.0 à v10.4). À lire seulement pour comprendre ou contester une règle ; en cas de désaccord ce fichier-ci fait foi.'
 ---
 
 # Extraction France Travail Pro → Notion

@@ -557,3 +557,22 @@ Phase 5 bis recopie desormais seulement les Id acceptes par `ecrire`.
   skip 3, risky 1. Le seul risky est une adresse info@ sur le domaine de la candidate, identique
   a celle publiee sur son site : juste, pas de correction (risky = domaine que SalesHandy ne peut
   pas confirmer). Aucun « bad » en septembre hors des 4 deja corriges.
+
+2026-10-08 — v10.4 : fausse ancre d'appariement, et Chrome qui replante au telechargement.
+• Lot « Formation naturopathie » de 50 nouveaux profils, 35 CV. Revue : 7 profils « non recu »
+  alors que les 35 CV etaient arrives dans l'ordre exact du journal (dlRang 0 a 34). Cause :
+  confirme() cherchait le nom dans la partie locale de l'email par sous-chaine ; « marin »
+  (Amelie MARIN) etait trouve dans « 0619155518marinecrette » (CV de Marine CRETTE, deja en base),
+  et cette fausse ancre rejetait les 7 premiers CV du segment. Le CV de Marine CRETTE serait parti
+  sur Drive sous le nom d'Amelie MARIN.
+• Correctif (assembler.js) : le nom doit former un mot entier dans la partie locale, ou y etre
+  accompagne du prenom. Revue relancee : 35 CV rattaches (8 par nom, 27 par ordre), 0 incertain,
+  0 non recu.
+• Chrome (Playwright) plantait a chaque telechargement : meme incident que le 04/10, meme cure
+  (historique des telechargements du profil vide). La premiere purge a ete annulee par un
+  History-journal laisse par un plantage : voir annexes.md, Replis. 6 plantages avant de relire
+  ce repli, deja documente : le lire des le premier « Connection closed ».
+• Constat de choix : 13 des 50 « nouveaux » etaient des profils anonymes de candidats deja en
+  base (identifies par leur CV) ; 1 « CV » etait une brochure d'ecole, son email ecarte.
+• Resultat : 26 retenus, 5 doublons retires par publier, 21 fiches ecrites (relu=28 attendu=28),
+  8 importees dans SalesHandy, 8 « valid ».
