@@ -34,11 +34,12 @@ const NOTION_VERSION = '2022-06-28';
 const DELAI_MS = 30000; // par requete : sans lui, une connexion muette bloque ~5 min par essai
 const STATUTS = ['A importer', 'Importe SalesHandy', 'Ecarte'];
 // « Type de requete » est une formule Notion : jamais ecrite, jamais recopiee.
+// Accroche (v10.2) : phrase tiree de la Note, envoyee a SalesHandy ({{Accroche}} du premier e-mail).
 const COLONNES = ['Nom', 'Prenom', 'Email', 'Telephone', 'Fonction', 'Requete',
-  'Date extraction', 'Profil mis a jour', 'Statut', 'Note'];
+  'Date extraction', 'Profil mis a jour', 'Statut', 'Note', 'Accroche'];
 const TYPES = { Nom: 'title', Prenom: 'rich_text', Email: 'email', Telephone: 'phone_number',
   Fonction: 'rich_text', Requete: 'rich_text', 'Date extraction': 'date',
-  'Profil mis a jour': 'date', Statut: 'select', Note: 'rich_text' };
+  'Profil mis a jour': 'date', Statut: 'select', Note: 'rich_text', Accroche: 'rich_text' };
 const FILE = path.join(DOSSIER_FILE, 'notion-attente.json');
 const ECARTES = path.join(DOSSIER_FILE, 'ecartes.json');
 
@@ -273,6 +274,8 @@ const versProspect = r => {
   if (norm(r.Prenom)) { o['First Name'] = r.Prenom; o['Last Name'] = r.Nom; }
   if (r.Telephone) o['Phone Number'] = r.Telephone;
   if (r.Fonction) o['Job Title'] = r.Fonction;
+  // Sans Accroche, SalesHandy met son texte de repli (champ « Accroche », reglages des champs).
+  if (r.Accroche) o.Accroche = r.Accroche;
   return o;
 };
 async function saleshandy({ sec, tousNotion }) {
