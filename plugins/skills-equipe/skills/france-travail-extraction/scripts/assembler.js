@@ -144,8 +144,14 @@ function confirme(p, cv) {
   const nom = norm(p.Nom), pre = norm(p.Prenom.split(/[\s-]/)[0]);
   if (nom.trim().length >= 3 && t.includes(nom) && t.includes(pre)) return true;
   if (p.tel && cv.tel && chiffres(p.tel) === chiffres(cv.tel)) return true;
-  const local = norm((cv.email.split('@')[0] || '').replace(/[._-]/g, ' '));
-  return nom.trim().length >= 4 && local.replace(/ /g, '').includes(nom.trim().replace(/ /g, ''));
+  // Nom dans la partie locale de l'email : mot entier, ou accompagne du prenom. Sinon « marin »
+  // ancrait le CV de « marine.crette@ » sur Amelie MARIN et decalait 7 profils (08/10/2026).
+  const local = norm((cv.email.split('@')[0] || '').replace(/[._-]/g, ' ')).replace(/ /g, '');
+  const n = nom.trim().replace(/ /g, ''), i = local.indexOf(n);
+  if (n.length < 4 || i < 0) return false;
+  const lettre = c => /[a-z]/.test(c || '');
+  if (!lettre(local[i - 1]) && !lettre(local[i + n.length])) return true;
+  return pre.trim().length >= 3 && local.includes(pre.trim());
 }
 
 function apparier(profils, liste) {
