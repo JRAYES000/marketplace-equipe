@@ -208,13 +208,39 @@ export function verifierCreneaux(creneaux, { maintenant, ecartMinHeures = 4, buf
 }
 
 /**
- * File Buffer relevée à la main (une ligne par post : « AAAA-MM-JJ HH:MM compte », heure de Paris)
- * → [{ compte, instant }] avec l'UTC calculé ici, jamais à la main. Les lignes vides et « # » sont ignorées.
+ * File Buffer relevée à la main (une ligne par post : « AAAA-MM-JJ HH:MM compte # format début du texte »,
+ * heure de Paris) → [{ compte, instant, note? }] avec l'UTC calculé ici, jamais à la main.
+ * Les lignes vides et « # » sont ignorées ; le texte après « # » devient `note`.
  */
 export function lireFileBuffer(texte) {
   return texte.split(/\r?\n/).map((l) => l.trim()).filter((l) => l && !l.startsWith('#')).map((l, n) => {
-    const m = l.match(/^(\d{4}-\d{2}-\d{2})\s+(\d{2}:\d{2})\s+(\S+)/);
+    const m = l.match(/^(\d{4}-\d{2}-\d{2})\s+(\d{2}:\d{2})\s+(\S+)(?:\s+#\s*(.*))?/);
     if (!m) throw new Error(`File Buffer, ligne ${n + 1} : « ${l} » ne suit pas « AAAA-MM-JJ HH:MM compte ».`);
-    return { compte: m[3], instant: parisVersUtc(m[1], m[2]).toISOString() };
+    const entree = { compte: m[3], instant: parisVersUtc(m[1], m[2]).toISOString() };
+    if (m[4]) entree.note = m[4].trim();
+    return entree;
   });
+}
+
+/** Début de texte comparable : sans la lettre de format, sans casse ni espaces multiples, 30 caractères. */
+const cleTexte = (t) => (t || '').replace(/^[TICLSV?]\s+/, '').toLowerCase().replace(/\s+/g, ' ').trim().slice(0, 30);
+
+/**
+ * Rapproche les créneaux manquants (au calendrier, absents de la file) des posts hors plan (dans la file,
+ * absents du calendrier) : même compte et même début de texte = post déplacé.
+ * @param manquants  créneaux du calendrier ({ id, compte, date, heureParis, debut })
+ * @param horsPlan   entrées de la file ({ compte, instant, note })
+ */
+export function apparierDeplacements(manquants, horsPlan) {
+  const libres = new Set(horsPlan.map((_, i) => i));
+  const deplaces = [];
+  const restants = [];
+  for (const c of manquants) {
+    const cle = cleTexte(c.debut);
+    const i = cle ? [...libres].find((k) => horsPlan[k].compte === c.compte && cleTexte(horsPlan[k].note) === cle) : undefined;
+    if (i === undefined) { restants.push(c); continue; }
+    libres.delete(i);
+    deplaces.push({ ancien: c, nouveau: horsPlan[i] });
+  }
+  return { deplaces, manquants: restants, horsPlan: [...libres].map((k) => horsPlan[k]) };
 }

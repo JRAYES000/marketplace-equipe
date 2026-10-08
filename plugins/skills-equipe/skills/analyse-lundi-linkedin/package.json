@@ -1,7 +1,7 @@
 {
   "name": "analyse-lundi-linkedin",
   "private": true,
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "Analyse hebdomadaire des posts LinkedIn de Julien (deux comptes) et test des formats texte / carrousel : calculs en code, rapport de forme constante",
   "type": "module",
   "scripts": {
