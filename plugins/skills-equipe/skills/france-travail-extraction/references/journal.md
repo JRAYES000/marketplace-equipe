@@ -576,3 +576,13 @@ Phase 5 bis recopie desormais seulement les Id acceptes par `ecrire`.
   base (identifies par leur CV) ; 1 « CV » etait une brochure d'ecole, son email ecarte.
 • Resultat : 26 retenus, 5 doublons retires par publier, 21 fiches ecrites (relu=28 attendu=28),
   8 importees dans SalesHandy, 8 « valid ».
+
+2026-10-08 — v10.5 : heure d'extraction dans Notion (demande de Julien).
+• assembler.js lot ecrit « Date extraction » avec l'heure locale et son decalage
+  (2026-10-08T16:22:00+03:00) quand --date est le jour meme ; --heure HH:MM sinon ; jour seul
+  si ni l'un ni l'autre. Le nom des CV sur Drive garde le jour seul.
+• notion.js : les filtres Notion « date equals » sont remplaces par un filtre local au jour
+  (heure locale du poste), pour qu'une fiche avec heure et une fiche sans heure se comparent pareil.
+• Mesure : les 40 fiches du 08/10 ont recu leur heure de creation Notion ; relecture Notion
+  start=2026-10-08T16:22:00.000+03:00 ; « verifier 2026-10-08 Formation naturopathie » rend
+  compte=28 avant comme apres.
