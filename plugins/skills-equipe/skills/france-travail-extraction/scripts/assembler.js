@@ -19,6 +19,11 @@
 //   { "12": "Aspirante naturopathe", "15": { "Fonction": "Sophrologue", "Nom": "DURAND", "Prenom": "Anne" } }
 // La valeur est la Fonction condensee, ou un objet qui peut aussi corriger une
 // colonne (profil anonyme identifie par nom-du-cv.sh, par exemple).
+// Accroche (v10.2, Julien 08/10/2026) : une phrase ecrite par l'agent a partir de la Note du
+// candidat, reprise telle quelle dans le premier e-mail SalesHandy ({{Accroche}}). Obligatoire
+// pour tout profil garde qui a un email : la valeur devient alors un objet,
+//   { "18": { "Fonction": "Masseuse bien-etre", "Accroche": "Vous ecrivez vouloir ..." } }
+// Une ligne, 200 caracteres au plus, finie par un point. Regles d'ecriture : SKILL.md, Phase 4.
 //
 // Appariement CV -> profil :
 //   1. ancres : un CV qui contient le NOM et le prenom d'un profil du lot, son
@@ -291,6 +296,11 @@ if (cmd === 'revue') {
       ...surcharge,
     };
     Object.keys(o).forEach(k => { if (o[k] === undefined || o[k] === null || String(o[k]).trim() === '') delete o[k]; });
+    if (o.Accroche) {
+      o.Accroche = String(o.Accroche).replace(/\s+/g, ' ').trim();
+      if (o.Accroche.length > 200) die('pag ' + pag + ' : Accroche de ' + o.Accroche.length + ' caracteres (200 au plus)');
+      if (!/[.!?]$/.test(o.Accroche)) die('pag ' + pag + ' : Accroche sans point final');
+    } else if (o.Email) die('pag ' + pag + ' : Accroche manquante alors que le profil a un email (SKILL.md, Phase 4)');
     if (x.a.cv) pourDrive.push({ cv: x.a.cv, Nom: o.Nom, Prenom: o.Prenom || '' });
     return o;
   });

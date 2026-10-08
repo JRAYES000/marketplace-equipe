@@ -295,6 +295,19 @@ pertinent est plus petit que la cible, le dire. **Ne jamais compléter avec du h
      (Julien, 04/10/2026).
    - **Fonction** : le titre en casse lisible, condensé à une trentaine de caractères
      (« Actuellement ASH - objectif Infirmière libérale » → « Aspirante infirmière libérale »).
+   - **Accroche**, obligatoire pour tout profil gardé qui a un email (v10.2, Julien 08/10/2026).
+     La valeur devient alors un objet : `{"Fonction": "…", "Accroche": "…"}`. Le premier
+     e-mail SalesHandy l'insère telle quelle (`{{Accroche}}`), juste après la Fonction citée
+     entre guillemets. Une phrase de 200 caractères au plus, au vouvoiement, finie par un point.
+     Elle reprend ce que le candidat écrit dans sa présentation (la `Note`) :
+     « Vous écrivez vouloir quitter le commerce, après dix ans de management, pour les soins et
+     le bien-être. »
+     Jamais d'info sensible, même si le candidat l'écrit : santé, épreuve personnelle, âge,
+     situation familiale, handicap. Pas de flatterie, pas de promesse, pas d'allégation santé,
+     rien qui ne soit pas dans la Note. Note trop pauvre (« sérieuse et motivée ») : partir de
+     la Fonction (« Vous vous orientez vers le massage bien-être. »). `assembler.js lot` refuse
+     un profil avec email sans Accroche, une Accroche trop longue ou sans point final.
+     Sans Accroche (profil importé avant la v10.2), SalesHandy insère le texte de repli du champ.
    - **Profil anonyme** (intitulé à la place du nom) : `scripts/nom-du-cv.sh <fichier>` sur son
      CV avant de le classer inexploitable ; identité trouvée → `{"Fonction": "…", "Nom": "…",
      "Prenom": "…"}`.
@@ -373,7 +386,8 @@ reconversion vers la naturopathie) — donc aussi celles d'un lot précédent re
 **Profils animaliers compris** (v10.1, Julien 04/10/2026 : une seule séquence pour tous).
 Un profil sans prénom est importé sans prénom ni nom (son « Nom » est l'intitulé du profil) :
 le premier e-mail dira « Bonjour , », accepté par Julien le 29/09/2026. Champs envoyés :
-prénom, nom, email, téléphone, fonction ;
+prénom, nom, email, téléphone, fonction, accroche (champ SalesHandy `Accroche`, texte de
+repli « Votre projet de reconversion a retenu mon attention. ») ;
 tag `France Travail` ; vérification d'email SalesHandy activée (délivrabilité d'abord) ; un
 prospect déjà connu de SalesHandy garde ses champs (`addMissingFields`). Le script attend la fin
 de l'import (2 min au plus) et lit le rapport d'échec : un refusé reste « A importer ». Seuls les
@@ -390,7 +404,7 @@ séquence : c'est irrattrapable, d'où la barrière de la Phase 4 sur la pertine
 Colonnes (ASCII, ce sont des identifiants de schéma) : `Nom` (MAJUSCULES, à défaut l'intitulé),
 `Prenom`, `Email` (du CV uniquement), `Telephone` (`06 XX XX XX XX`, CV d'abord),
 `Fonction`, `Requete`, `Date extraction`, `Profil mis a jour`, `Statut` (`A importer` par défaut),
-`Note` (jamais vide).
+`Note` (jamais vide), `Accroche` (obligatoire avec un email, Phase 4).
 
 **Barrière :** `lot` a affiché `CV deposes sur Drive : N`, et `publier` a rendu le code 0 — ou
 2 / 3 / 4 avec l'écart ou la file d'attente annoncés. **Ne pas annoncer que le lot est écrit sans la ligne `relu=N attendu=N`.**
