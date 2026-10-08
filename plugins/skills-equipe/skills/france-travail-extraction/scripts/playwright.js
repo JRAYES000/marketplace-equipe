@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// Prepare la route Playwright d'un lot (v10.0, 2026-10-04).
+// Prepare la route Playwright d'un lot (v10.0, 2026-10-04 ; purge de l'historique v10.6).
 //
 // Usage : node playwright.js preparer <connus.json> <cible>
 //
@@ -40,7 +40,31 @@ const dl = path.join(racine, 'telechargements');
 const restes = fs.existsSync(dl) ? fs.readdirSync(dl).filter(n => /^(Document.*\.pdf|ft-journal.*\.json)$/i.test(n)) : [];
 if (restes.length) die(restes.length + ' fichier(s) d un lot precedent dans ' + dl + ' : lancer nettoyer-cv.sh avant un nouveau lot');
 fs.mkdirSync(dl, { recursive: true });
-const DIR = JSON.stringify(dl.split(path.sep).join('/') + '/');
+
+// Purge de l'historique des telechargements du profil Playwright (v10.6). Chrome 154 plantait a
+// chaque telechargement une fois cet historique rempli (04/10 et 08/10/2026, annexes.md, Replis).
+// Il ne sert a rien ici. Navigateur ouvert (base verrouillee) : purge reportee, sans bloquer le lot.
+// SQLite rejoue un History-journal laisse par un plantage a l'ouverture, avant la purge : c'est
+// ce journal qui avait annule la premiere purge a la main le 08/10.
+const PROFIL = process.env.FT_PROFIL_PLAYWRIGHT || path.join(os.homedir(), '.chromium-claude');
+const HISTORY = path.join(PROFIL, 'Default', 'History');
+if (fs.existsSync(HISTORY)) {
+  try {
+    const { DatabaseSync } = require('node:sqlite');
+    const db = new DatabaseSync(HISTORY);
+    db.exec('PRAGMA busy_timeout = 0');
+    const n = db.prepare('SELECT COUNT(*) AS n FROM downloads').get().n;
+    if (n) {
+      db.exec('BEGIN; DELETE FROM downloads; DELETE FROM downloads_url_chains; DELETE FROM downloads_slices; COMMIT; VACUUM;');
+      const reste = db.prepare('SELECT COUNT(*) AS n FROM downloads').get().n;
+      console.log('historique des telechargements du profil Playwright : ' + n + ' ligne(s) purgee(s), reste ' + reste);
+    }
+    db.close();
+  } catch (e) {
+    console.log('historique des telechargements non purge (' + e.message.split('\n')[0] + ') : navigateur Playwright ouvert ? Le lot continue');
+  }
+}
+const DIR =JSON.stringify(dl.split(path.sep).join('/') + '/');
 
 const sortie = path.join(process.cwd(), '.playwright-mcp');
 fs.mkdirSync(sortie, { recursive: true });
