@@ -99,16 +99,18 @@ programmées et pourquoi, le lien GitHub du lot vérifié. Aucun texte à trou ;
 
 Ajouter dans `NOTES.md` le tableau « Relevé à 48 h des annonces (Buffer Insights) » : une ligne
 par annonce avec « Publication prévue » et « Relevé à faire le » (publication + 48 h, heure de
-Paris), colonnes « Impressions », « Réactions », « Commentaires », « Lien LinkedIn ».
+Paris), colonnes « Impressions », « Réactions », « Commentaires », « Taux d'engagement », « Abonnés (canal) »,
+« Lien LinkedIn ».
 La routine Windows « LinkedIn - 5 Releve 48 h des annonces » (`linkedin/routines/5-releve-48h-annonces.md`)
 remplit ces colonnes chaque jour à 14:00 Paris ; si le lot dépasse le
 15/11/2026, prolonger sa date de fin dans `register-routines.ps1`.
 **Identification d'une annonce** (routine comme relevé à la main), les deux conditions à la fois :
 son intitulé exact (ligne 💼, ou ligne 2 de l'accroche, telle qu'elle est dans `NN.final.txt`) ET sa date de publication prévue (jour de Paris). Si deux posts du même jour correspondent, lire leur heure dans Publish > Sent du canal Claude Partners pour les départager ; si l'ambiguïté reste, ou si aucun post ne correspond : rien n'est écrit dans la ligne, « ALERTE : identification ambiguë » est noté avec les candidats trouvés (date, heure, début du texte).
 Un post absent de nos fichiers n'est jamais relevé : c'est un post de Julien.
-**Indicateurs : métriques Buffer uniquement** (Impressions, Réactions, Commentaires). Pas
-d'enregistrements ni d'envois : Julien, 08/10/2026 à 15:55 Paris, « Ces deux chiffres ne font partie
-d'aucun des objectifs que je vous ai fixés. » Ne pas les demander, ne pas créer leurs colonnes.
+**Indicateurs : les métriques Buffer fixées par Julien, et elles seules** : impressions, réactions,
+commentaires, taux d'engagement (« Eng. Rate » du tableau Insights), abonnés (« Total Followers » du canal
+au moment du relevé). Julien, 08/10/2026 à 15:55 Paris : « Vos objectifs reposent uniquement sur les
+métriques de Buffer. » Aucun autre chiffre n'est demandé ni relevé.
 
 ## Fin
 
