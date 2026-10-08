@@ -535,3 +535,21 @@ Phase 5 bis recopie desormais seulement les Id acceptes par `ecrire`.
 2026-10-04 — v10.1 : profils animaliers dans la sequence SalesHandy commune (decision de Julien).
 • SH_EXCLURE_FONCTION retire de notion.js. `notion.js saleshandy` a importe les 8 fiches
   animalieres restees « A importer » (toutes « Reconversion bien-etre ») : 8 importees, code 0.
+
+2026-10-08 — v10.3 : emails mal lus, prospects SalesHandy bloques sans alerte.
+• Constat : 4 emails sur ~200 extraits des CV etaient faux. SalesHandy les a classes « bad » ;
+  les prospects sont restes en « Waiting » dans la sequence, jamais contactes, sans aucune
+  alerte. Defauts : (1) CV en deux colonnes, partie locale coupee en fin de ligne, seul le
+  morceau avec @ garde (2 caracteres) ; (2) CV photo, debut de l email perdu et « 1 » lu « l » ;
+  (3) caractere « _ » colle par l icone d enveloppe ; (4) lettres mal lues en tete de partie
+  locale. Les 4 ont ete corriges a la main et reimportes (SalesHandy refuse de modifier l email
+  d un prospect existant : « Field is not updatable »).
+• Correctifs : lecture d email deplacee dans scripts/email-cv.js (teste, tests/ avec fichiers
+  fictifs) : recollage d une partie locale coupee, retrait des caracteres de tete non
+  alphanumeriques ; assembler.js signale « email douteux » (partie locale < 3 caracteres, rien
+  du nom alors que le CV le porte, « l » colle au nom). notion.js relit verificationStatus
+  apres l import, ecrit bad/risky dans la Note et le liste (code 5) ; commandes
+  saleshandy-verifier et corriger-email ; limite de debit SalesHandy (20 appels par fenetre sur
+  /v1/prospects) respectee.
+• Mesure : saleshandy-verifier sur les lots du 04/10 (24 fiches, 2 min 30, aucune 429 remontee)
+  et du 08/10 (10 fiches) : tous « valid ».
