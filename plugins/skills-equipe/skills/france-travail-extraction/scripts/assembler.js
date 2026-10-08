@@ -290,6 +290,16 @@ if (cmd === 'revue') {
 } else if (cmd === 'lot') {
   for (const k of ['choix', 'requete', 'date', 'sortie']) if (!opt[k]) die('--' + k + ' manquant');
   if (!/^\d{4}-\d{2}-\d{2}$/.test(opt.date)) die('--date au format AAAA-MM-JJ');
+  if (opt.heure && !/^\d{2}:\d{2}$/.test(opt.heure)) die('--heure au format HH:MM');
+  // « Date extraction » avec l'heure (v10.5, Julien 08/10/2026), en heure locale et avec son
+  // decalage : 2026-10-08T16:20:00+03:00. Heure du `lot` si --date est aujourd'hui, --heure sinon ;
+  // sans l'une ni l'autre, le jour seul (lot rejoue un autre jour, heure inconnue).
+  const maintenant = new Date(), deux = n => String(n).padStart(2, '0');
+  const jourLocal = maintenant.getFullYear() + '-' + deux(maintenant.getMonth() + 1) + '-' + deux(maintenant.getDate());
+  const heure = opt.heure || (opt.date === jourLocal ? deux(maintenant.getHours()) + ':' + deux(maintenant.getMinutes()) : '');
+  const dec = -maintenant.getTimezoneOffset();
+  const dateExtraction = heure ? opt.date + 'T' + heure + ':00' + (dec >= 0 ? '+' : '-') +
+    deux(Math.floor(Math.abs(dec) / 60)) + ':' + deux(Math.abs(dec) % 60) : opt.date;
   const choix = JSON.parse(fs.readFileSync(opt.choix, 'utf8'));
   const r = construire();
   const parPag = new Map(r.map(x => [String(x.p.pag), x]));
@@ -312,7 +322,7 @@ if (cmd === 'revue') {
     if (!x.tel && !surcharge.Telephone) motifs.push('telephone non trouve');
     const o = {
       Nom: x.p.Nom, Prenom: x.p.Prenom, Email: x.email, Telephone: x.tel,
-      Requete: opt.requete, 'Date extraction': opt.date, 'Profil mis a jour': x.p.maj,
+      Requete: opt.requete, 'Date extraction': dateExtraction, 'Profil mis a jour': x.p.maj,
       Note: motifs.length ? pres + ' — ' + motifs.join(', ') : pres,
       ...surcharge,
     };

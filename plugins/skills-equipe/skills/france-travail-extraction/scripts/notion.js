@@ -84,6 +84,15 @@ async function notion(method, p, body) {
 }
 
 const texte = arr => (arr || []).map(t => t.plain_text).join('');
+// « Date extraction » porte l'heure depuis la v10.5 (2026-10-08T16:20:00+03:00) ; les fiches plus
+// anciennes n'ont que le jour. Le script ne compare que des jours, en heure locale du poste.
+const deux = n => String(n).padStart(2, '0');
+const jourLocal = s => {
+  if (!/T/.test(s || '')) return String(s || '').slice(0, 10);
+  const d = new Date(s);
+  return d.getFullYear() + '-' + deux(d.getMonth() + 1) + '-' + deux(d.getDate());
+};
+const AVEC_HEURE = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}(:\d{2})?([+-]\d{2}:\d{2}|Z)$/;
 function lirePage(pg) {
   const o = { _page: pg.id };
   for (const k of COLONNES) {
@@ -95,7 +104,7 @@ function lirePage(pg) {
     else if (v.type === 'email') x = v.email || '';
     else if (v.type === 'phone_number') x = v.phone_number || '';
     else if (v.type === 'select') x = v.select ? v.select.name : '';
-    else if (v.type === 'date') x = v.date ? v.date.start.slice(0, 10) : '';
+    else if (v.type === 'date') x = v.date ? jourLocal(v.date.start) : '';
     o[k] = x;
   }
   return o;
@@ -113,7 +122,7 @@ function versProprietes(c) {
     else if (t === 'email') p[k] = { email: v };
     else if (t === 'phone_number') p[k] = { phone_number: v };
     else if (t === 'select') p[k] = { select: { name: v } };
-    else if (t === 'date') p[k] = { date: { start: v.slice(0, 10) } };
+    else if (t === 'date') p[k] = { date: { start: AVEC_HEURE.test(v) ? v : v.slice(0, 10) } };
   }
   return p;
 }
@@ -411,11 +420,12 @@ const sec = drapeau('--sec');
     if (r.enAttente) code = 3;
     // Relecture par (date, requete) : attendu = ce que la base avait deja + ce qui vient d'etre cree.
     const groupes = new Map();
-    nouveaux.slice(0, r.crees).forEach(x => { const k = String(x['Date extraction'] || '').slice(0, 10) + '\u0000' + x.Requete; groupes.set(k, (groupes.get(k) || 0) + 1); });
+    nouveaux.slice(0, r.crees).forEach(x => { const k = jourLocal(x['Date extraction']) + '\u0000' + x.Requete; groupes.set(k, (groupes.get(k) || 0) + 1); });
     for (const [k, n] of groupes) {
       const [date, requete] = k.split('\u0000');
       const parRequete = { property: 'Requete', rich_text: { equals: requete } };
-      const relus = await toutes(date ? { and: [{ property: 'Date extraction', date: { equals: date } }, parRequete] } : parRequete);
+      // Jour filtre ici, pas par Notion : une fiche avec heure et une fiche sans heure se comparent pareil.
+      const relus = (await toutes(parRequete)).filter(x => !date || x['Date extraction'] === date);
       const vides = relus.filter(x => !x.Note || !x.Note.trim()).length;
       // Sans date, le filtre ramene toute la requete : pas de compte attendu fiable.
       const attendu = date ? base.filter(b => b['Date extraction'] === date && b.Requete === requete).length + n : null;
@@ -455,9 +465,8 @@ const sec = drapeau('--sec');
   } else if (cmd === 'verifier') {
     const [date, requete] = [process.argv[3], process.argv[4]];
     if (!date || !requete) die('usage : verifier <AAAA-MM-JJ> <requete>');
-    const rows = await toutes({ and: [
-      { property: 'Date extraction', date: { equals: date } },
-      { property: 'Requete', rich_text: { equals: requete } }] });
+    const rows = (await toutes({ property: 'Requete', rich_text: { equals: requete } }))
+      .filter(r => r['Date extraction'] === date);
     const vides = rows.filter(r => !r.Note || !r.Note.trim());
     console.log('compte=' + rows.length + ' notes_vides=' + vides.length + ' file_attente=' + lireFile().length);
     vides.forEach(r => console.log('NOTE VIDE : ' + r.Prenom + ' ' + r.Nom));
@@ -480,8 +489,8 @@ const sec = drapeau('--sec');
     const date = process.argv[3];
     if (!/^\d{4}-\d{2}-\d{2}$/.test(date || '')) die('usage : saleshandy-verifier <AAAA-MM-JJ> (date d extraction)');
     if (!SH_KEY) die('SALESHANDY_API_KEY absente : lancer charger-secrets.sh');
-    const rows = (await toutes({ and: [{ property: 'Date extraction', date: { equals: date } },
-      { property: 'Statut', select: { equals: 'Importe SalesHandy' } }] })).filter(r => (r.Email || '').includes('@'));
+    const rows = (await toutes({ property: 'Statut', select: { equals: 'Importe SalesHandy' } }))
+      .filter(r => r['Date extraction'] === date && (r.Email || '').includes('@'));
     console.log('fiches importees extraites le ' + date + ' : ' + rows.length);
     const aRelire = rows.length ? await verifierEmails(rows) : [];
     process.exit(aRelire.length ? 5 : 0);
