@@ -118,7 +118,8 @@ const fichiers = {
   }
   ctx.__ftN = 0; ctx.__ftEnCours = []; ctx.__ftErreurs = [];
   await page.goto('https://pro.francetravail.fr/recherche-profil/recherchessauvegardees');
-  const connecte = () => /^https:\\/\\/pro\\.francetravail\\.fr\\/recherche-profil/.test(page.url());
+  // entreprise.francetravail.fr renvoie vers pro (308, mesure le 12/10/2026) ; /auth/ = callback OAuth, pas encore connecte.
+  const connecte = () => /^https:\\/\\/(pro|entreprise)\\.francetravail\\.fr\\/recherche-profil(?!\\/auth\\/)/.test(page.url());
   let attente = 0;
   if (!connecte()) {
     // Fenetre rendue visible pour que Julien tape son mot de passe ; jamais de focus force.

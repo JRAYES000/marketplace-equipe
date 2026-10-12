@@ -48,12 +48,17 @@ if [ -f "$DEBUT" ]; then
   echo "fenetre : depuis le debut du lot ($(date -r "$DEBUT" '+%H:%M'))"
 else
   REPERE=""; FENETRE=(-mmin -"$MIN")
-  echo "fenetre : $MIN dernieres minutes (pas de marqueur de debut de lot : un PDF personnel recent serait pris)"
+  echo "fenetre : $MIN dernieres minutes (pas de marqueur de debut de lot)"
 fi
 
 cibles=()
-while IFS= read -r f; do [ -n "$f" ] && cibles+=("$f"); done \
-  < <(find "$DL" -maxdepth 1 -type f \( -name 'Document*.pdf' -o -name 'ft-journal*.json' \) "${FENETRE[@]}")
+# v10.1 : sans marqueur, Downloads n'est pas balaye : un PDF personnel recent y partirait.
+if [ -n "$REPERE" ] || [ "$DL" = "$FT" ]; then
+  while IFS= read -r f; do [ -n "$f" ] && cibles+=("$f"); done \
+    < <(find "$DL" -maxdepth 1 -type f \( -name 'Document*.pdf' -o -name 'ft-journal*.json' \) "${FENETRE[@]}")
+else
+  echo "Downloads epargne (pas de marqueur) : seuls les fichiers nommes et _cv-lot100 partent"
+fi
 for f in "$@"; do [ -e "$f" ] && cibles+=("$f"); done
 [ -d "$DL/_cv-lot100" ] && cibles+=("$DL/_cv-lot100")
 if [ "$DL" = "$FT" ]; then
@@ -96,7 +101,7 @@ if [ "${#cibles[@]}" -gt 0 ]; then
   esac
 fi
 
-reste=$( [ -d "$DL" ] || { echo 0; exit 0; }; find "$DL" -maxdepth 1 -type f \( -name 'Document*.pdf' -o -name 'ft-journal*.json' \) "${FENETRE[@]}" | wc -l)
+reste=$( [ -d "$DL" ] && { [ -n "$REPERE" ] || [ "$DL" = "$FT" ]; } || { echo 0; exit 0; };find "$DL" -maxdepth 1 -type f \( -name 'Document*.pdf' -o -name 'ft-journal*.json' \) "${FENETRE[@]}" | wc -l)
 [ -n "$REPERE" ] && rm -f "$REPERE"
 
 if [ -n "${LOCALAPPDATA:-}" ]; then SEC="$(cygpath -u "$LOCALAPPDATA" 2>/dev/null || printf '%s' "$LOCALAPPDATA")/france-travail-extraction/secrets.env"
