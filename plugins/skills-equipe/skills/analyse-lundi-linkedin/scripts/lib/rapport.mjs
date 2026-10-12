@@ -15,7 +15,43 @@ const LIBELLES = {
   texte: 'Le texte fait mieux : format retenu.',
   non_concluant: `Différence non démontrée. Par défaut, on garde le format le moins coûteux (${REGLES.defautSiNonConcluant}), sauf décision contraire de Julien.`,
   incomplet: 'Pas assez de posts mûrs pour conclure : lecture provisoire.',
+  image: 'L’image fait mieux que le texte sur les trois mesures : format retenu (indication, à valider par Julien).',
+  provisoire: 'Test en cours : lecture provisoire, aucun format n’est retenu ni abandonné avant la fin du test.',
 };
+const LIBELLES_FORMATS = {
+  ...LIBELLES,
+  carrousel: 'Le carrousel fait mieux que le texte sur les trois mesures : indication seulement (4 carrousels par compte au plus).',
+  non_concluant: 'Non concluant : le texte reste le format par défaut (le moins coûteux), sauf décision contraire de Julien.',
+};
+const libelle = (r, verdict) => (r.methode === 'formats' ? LIBELLES_FORMATS : LIBELLES)[verdict];
+
+const ENTETE_FORMATS_OCTOBRE = [
+  '| Format | Posts mûrs | Taux d’engagement médian (calculé) | Min / max du taux | Impressions médianes | Réactions méd. | Commentaires méd. | Posts à zéro |',
+  '|---|---|---|---|---|---|---|---|',
+];
+const LIGNE_FORMAT_OCTOBRE = (nom, f) =>
+  `| ${nom} | ${f.n} | **${pct(f.taux.mediane)}** | ${pct(f.taux.min)} / ${pct(f.taux.max)} | ${n0(f.impressions.mediane)} | ${n0(f.reactions)} | ${n0(f.commentaires)} | ${f.aZero} sur ${f.n} |`;
+
+function sectionFormats(c, r) {
+  const L = [];
+  const d = c.decision;
+  L.push(`${c.publies} posts du plan publiés, dont ${c.comparaison} de comparaison : ${c.murs} mûrs, ${c.trop_recents} trop récents. Les posts « hors comparaison » ne comptent pas.`);
+  L.push('');
+  L.push(...ENTETE_FORMATS_OCTOBRE, ...['texte', 'image', 'carrousel'].map((f) => LIGNE_FORMAT_OCTOBRE(f, c.formats[f])));
+  L.push('');
+  L.push(`**Verdict : ${libelle(r, d.verdict)}**`);
+  L.push('');
+  for (const x of d.raisons) L.push(`- ${x}`);
+  if (!r.decisionFinale) L.push(`- Indication à ce jour : ${d.indication.length ? `${d.indication.join(', ')} devant le texte sur les trois mesures` : 'aucun format devant le texte sur les trois mesures'}.`);
+  L.push('');
+  L.push('Par semaine (posts de comparaison mûrs, n / taux médian / impressions médianes) :');
+  L.push('');
+  L.push('| Semaine | Texte | Image | Carrousel |', '|---|---|---|---|');
+  const cel = (f) => `${f.n} / ${pct(f.taux.mediane)} / ${n0(f.impressions.mediane)}`;
+  for (const s of c.semaines) L.push(`| ${s.semaine} | ${cel(s.texte)} | ${cel(s.image)} | ${cel(s.carrousel)} |`);
+  L.push('');
+  return L;
+}
 
 const LIGNE_FORMAT = (nom, r) =>
   `| ${nom} | ${r.n} | **${n0(r.impressions.mediane)}** | ${n0(r.impressions.q1)} à ${n0(r.impressions.q3)} | ${n0(r.impressions.min)} / ${n0(r.impressions.max)} | ${n0(r.reactions)} | ${n0(r.commentaires)} | ${pct(r.tauxEngagement)} |`;
@@ -33,6 +69,13 @@ function tableSemaines(compte) {
 }
 
 function tableDetail(compte) {
+  if (compte.methode === 'formats') {
+    const l = ['| Créneau | Date | Format | Comparaison | Mûr | Impressions | Réactions | Commentaires | Taux d’engagement (Buffer) | Lien |', '|---|---|---|---|---|---|---|---|---|---|'];
+    for (const d of compte.detail) {
+      l.push(`| ${d.id} | ${d.date} | ${d.format} | ${d.comparaison ? 'oui' : 'non'} | ${d.mur ? 'oui' : 'non'} | ${n0(d.impressions)} | ${n0(d.reactions)} | ${n0(d.commentaires)} | ${pct(d.tauxEngagement)} | ${d.url || '–'} |`);
+    }
+    return l.join('\n');
+  }
   const l = ['| Créneau | Date | Format | Sujet | Mûr | Impressions | Réactions | Commentaires | Taux d’engagement | Lien |', '|---|---|---|---|---|---|---|---|---|---|'];
   for (const d of compte.detail) {
     l.push(`| ${d.id} | ${d.date} | ${d.format} | ${d.sujet} | ${d.mur ? 'oui' : 'non'} | ${n0(d.impressions)} | ${n0(d.reactions)} | ${n0(d.commentaires)} | ${pct(d.tauxEngagement)} | ${d.url || '–'} |`);
@@ -45,7 +88,7 @@ function resumeSynthese(r) {
   if (r.echus === 0) return 'Le test n’a pas commencé : cette analyse sert de référence de départ.';
   const parCompte = r.comptes.map((c) => `${c.compte} : ${c.decision.verdict}`).join(' ; ');
   if (r.synthese === 'divergent') return `${final ? 'Décision finale' : 'Lecture provisoire'} : les deux comptes ne concluent pas pareil (${parCompte}). Décision par compte, à valider par Julien.`;
-  return `${final ? 'Décision finale' : 'Lecture provisoire'} : ${LIBELLES[r.synthese].replace(/\.$/, '')} (${parCompte}).`;
+  return `${final ? 'Décision finale' : 'Lecture provisoire'} : ${libelle(r, r.synthese).replace(/\.$/, '')} (${parCompte}).`;
 }
 
 /** `r` = résultat de analyserTout (voir analyse-lundi.mjs). */
@@ -91,6 +134,7 @@ export function rendreRapport(r) {
       const d = c.decision;
       L.push(`## ${num++}. Test des formats — ${c.compte}`);
       L.push('');
+      if (c.methode === 'formats') { L.push(...sectionFormats(c, r)); continue; }
       L.push(`${c.publies} posts du plan publiés, ${c.murs} mûrs, ${c.trop_recents} trop récents.`);
       L.push('');
       L.push(...ENTETE_FORMAT, LIGNE_FORMAT('Texte', c.texte), LIGNE_FORMAT('Carrousel', c.carrousel));
@@ -159,7 +203,12 @@ export function rendreRapport(r) {
   }
   L.push(`## ${num++}. Limites de lecture`);
   L.push('');
-  L.push(`- Peu de posts par format : une médiane sur 8 posts bouge beaucoup avec un seul post viral. La règle de décision exige donc trois signaux concordants (rapport, intervalle, paires de même sujet).`);
+  if (r.methode === 'formats') {
+    L.push('- Méthode : `methode-comparaison.md` (05/10/2026). Un format ne bat le texte que si son taux d’engagement médian, ses impressions médianes et sa part de posts à zéro sont tous meilleurs. Taux calculé ici : (réactions + commentaires) / impressions.');
+    L.push('- Peu de posts : au plus 4 carrousels, 8 images et 8 textes de comparaison par compte. Un résultat carrousel reste une indication, jamais un fait établi.');
+  } else {
+    L.push(`- Peu de posts par format : une médiane sur 8 posts bouge beaucoup avec un seul post viral. La règle de décision exige donc trois signaux concordants (rapport, intervalle, paires de même sujet).`);
+  }
   L.push(`- Un post compte dans les médianes ${REGLES.maturiteHeures} h après sa publication ; avant, ses chiffres sont incomplets.`);
   L.push("- Le commentaire quotidien sous les posts d'autres comptes continue pendant le test ; il n'est pas neutralisé, il est constant.");
   L.push('- Buffer Insights se rafraîchit avec retard (« Refreshed … ago » sur le détail du post) : les chiffres de la veille sont encore incomplets.');

@@ -142,3 +142,85 @@ export function analyserCompte(apparies, compte, maintenant, regles = REGLES) {
     })),
   };
 }
+
+// ---------------------------------------------------------------------------------------------------------------
+// Méthode du test d'octobre 2026 (linkedin/test-formats-2026-10/methode-comparaison.md, 05/10/2026) : texte, image
+// et carrousel, comparés sur les seuls créneaux « comparaison ». Indicateur principal : le taux d'engagement
+// (réactions + commentaires) / impressions, calculé ici ; impressions médianes et part de posts à zéro pour départager.
+// Remplace, pour ce test, la règle à trois signaux de `decider` (protocole du 30/09).
+export const FORMATS_OCTOBRE = ['texte', 'image', 'carrousel'];
+
+/** (réactions + commentaires) / impressions ; null sans impressions. */
+export const tauxCalcule = (p) =>
+  Number.isFinite(p.impressions) && p.impressions > 0 ? ((p.reactions || 0) + (p.commentaires || 0)) / p.impressions : null;
+
+/** `resumer` + taux calculé (médiane, min, max) et posts à zéro (ni réaction ni commentaire). */
+export function resumerFormat(posts) {
+  const taux = posts.map(tauxCalcule).filter(Number.isFinite);
+  const aZero = posts.filter((p) => (p.reactions || 0) + (p.commentaires || 0) === 0).length;
+  return {
+    ...resumer(posts),
+    taux: { mediane: mediane(taux), min: taux.length ? Math.min(...taux) : null, max: taux.length ? Math.max(...taux) : null, n: taux.length },
+    aZero,
+    partZero: posts.length ? aZero / posts.length : null,
+  };
+}
+
+/**
+ * Lecture prudente (méthode, § « Calcul final ») : un format bat le texte seulement si son taux médian, ses
+ * impressions médianes ET sa part de posts à zéro sont meilleurs. Avant la fin du test : « provisoire ».
+ * @param formats { texte, image, carrousel } issus de resumerFormat
+ */
+export function deciderFormats(formats, { final = false } = {}) {
+  const t = formats.texte;
+  const raisons = [];
+  const ecarts = {};
+  const gagnants = [];
+  for (const f of FORMATS_OCTOBRE.filter((x) => x !== 'texte')) {
+    const x = formats[f];
+    if (!x.taux.n || !t.taux.n) {
+      ecarts[f] = null;
+      raisons.push(`${f} : comparaison impossible (${x.taux.n} ${f} et ${t.taux.n} texte avec impressions)`);
+      continue;
+    }
+    ecarts[f] = x.taux.mediane - t.taux.mediane;
+    const taux = x.taux.mediane > t.taux.mediane;
+    const imp = x.impressions.mediane > t.impressions.mediane;
+    const zero = x.partZero < t.partZero;
+    raisons.push(`${f} contre texte : taux médian ${taux ? 'meilleur' : 'pas meilleur'} (écart ${(ecarts[f] * 100).toFixed(2).replace('.', ',')} point(s)), impressions médianes ${imp ? 'meilleures' : 'pas meilleures'}, part de posts à zéro ${zero ? 'plus faible' : 'pas plus faible'}`);
+    if (taux && imp && zero) gagnants.push(f);
+  }
+  gagnants.sort((a, b) => ecarts[b] - ecarts[a]);
+  const verdict = !final ? 'provisoire' : gagnants.length ? gagnants[0] : 'non_concluant';
+  return { verdict, indication: gagnants, ecarts, raisons, defaut: 'texte' };
+}
+
+/** Analyse d'un compte selon la méthode d'octobre (créneaux « comparaison » mûrs, trois formats). */
+export function analyserCompteFormats(apparies, compte, maintenant, regles = REGLES, { final = false } = {}) {
+  const siens = apparies.filter((a) => a.creneau.compte === compte);
+  const comparaison = siens.filter((a) => a.creneau.comparaison !== false);
+  const murs = comparaison.filter((a) => estMur(a.post, maintenant, regles.maturiteHeures));
+  const parFormat = (lot, f) => resumerFormat(lot.filter((a) => a.creneau.format === f).map((a) => a.post));
+  const formats = Object.fromEntries(FORMATS_OCTOBRE.map((f) => [f, parFormat(murs, f)]));
+  const semaines = [...new Set(siens.map((a) => a.creneau.semaine))].sort().map((s) => {
+    const lot = murs.filter((a) => a.creneau.semaine === s);
+    return { semaine: s, ...Object.fromEntries(FORMATS_OCTOBRE.map((f) => [f, parFormat(lot, f)])) };
+  });
+  return {
+    compte,
+    methode: 'formats',
+    publies: siens.length,
+    comparaison: comparaison.length,
+    murs: murs.length,
+    trop_recents: comparaison.length - murs.length,
+    formats,
+    decision: deciderFormats(formats, { final }),
+    semaines,
+    detail: siens.map((a) => ({
+      id: a.creneau.id, date: a.creneau.date, format: a.creneau.format, sujet: a.creneau.sujet,
+      comparaison: a.creneau.comparaison !== false,
+      mur: estMur(a.post, maintenant, regles.maturiteHeures), impressions: a.post.impressions,
+      reactions: a.post.reactions, commentaires: a.post.commentaires, tauxEngagement: a.post.tauxEngagement, url: a.post.url,
+    })),
+  };
+}

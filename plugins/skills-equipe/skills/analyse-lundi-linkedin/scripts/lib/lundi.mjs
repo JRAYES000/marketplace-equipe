@@ -1,6 +1,6 @@
 // Assemblage de l'analyse du lundi : plan + relevés Buffer Insights (source unique) → résultat.
 // Tout est calculé ici, en code. Le rendu (rapport.mjs) ne fait que mettre en forme.
-import { analyserCompte, anomaliesDeFormat, apparier, estMur, resumer } from './analyse.mjs';
+import { analyserCompte, analyserCompteFormats, anomaliesDeFormat, apparier, estMur, resumer } from './analyse.mjs';
 import { ajouterJours, heureLocaleVersUtc, parisVersUtc, utcVersParis } from './calendrier.mjs';
 import { mediane } from './stats.mjs';
 
@@ -53,20 +53,48 @@ export function lireCsvBuffer(texte, fichier = null) {
       commentaires: nombre(v.commentaires),
       tauxEngagement: taux === null ? null : taux / 100,
       url: v.lien || null,
+      idBuffer: v.id_buffer || null,
       releve: fichier,
     };
   });
 }
 
 /**
- * Plusieurs relevés → une seule liste. Un même post (même compte, même minute de publication)
- * garde les chiffres du relevé le plus récent : passer les listes du plus ancien au plus récent.
+ * Plusieurs relevés → une seule liste ; passer les listes du plus ancien au plus récent.
+ * Un même post garde les chiffres du relevé le plus récent. Identité d'un post : son identifiant Buffer
+ * (`id_buffer`), donc deux posts publiés à la même minute restent deux lignes. Sans identifiant (anciens
+ * relevés) : même compte, même minute et même rang dans le relevé. Un post identifié remplace la ligne
+ * sans identifiant d'un relevé plus ancien à la même minute.
  */
 export function fusionnerReleves(listes) {
   const parCle = new Map();
-  for (const posts of listes) for (const p of posts) parCle.set(`${p.compte}|${p.publieLe.slice(0, 16)}`, p);
+  const minute = (p) => `${p.compte}|${p.publieLe.slice(0, 16)}`;
+  for (const posts of listes) {
+    const rangs = new Map();
+    for (const p of posts) {
+      if (p.idBuffer) {
+        const sansId = [...parCle.keys()].find((k) => k.startsWith(`m|${minute(p)}|`));
+        if (sansId) parCle.delete(sansId);
+        parCle.set(`id|${p.idBuffer}`, p);
+        continue;
+      }
+      const rang = rangs.get(minute(p)) || 0;
+      rangs.set(minute(p), rang + 1);
+      const identifies = [...parCle.entries()].filter(([k, q]) => k.startsWith('id|') && minute(q) === minute(p));
+      if (identifies.length === 1 && rang === 0) parCle.set(identifies[0][0], p);
+      else parCle.set(`m|${minute(p)}|${rang}`, p);
+    }
+  }
   return [...parCle.values()].sort((a, b) => a.publieLe.localeCompare(b.publieLe));
 }
+
+/**
+ * Méthode du plan : « formats » (texte, image et carrousel, methode-comparaison.md du 05/10/2026) dès que le
+ * calendrier a des créneaux image de comparaison, ou « protocole » (texte / carrousel, PROTOCOLE.md du 30/09).
+ * `meta.methode` dans calendrier.json l'impose.
+ */
+export const methodeDuPlan = (plan) =>
+  plan.meta.methode || (plan.creneaux.some((c) => c.format === 'image' && c.comparaison !== false) ? 'formats' : 'protocole');
 
 /** 0 = dimanche … 6 = samedi, pour une date « AAAA-MM-JJ ». */
 const numeroJour = (date) => new Date(`${date}T12:00:00Z`).getUTCDay();
@@ -105,8 +133,11 @@ export function analyserTout({ plan, posts, maintenant, jour = null, releves = [
   const { apparies, manquants, horsPlan } = apparier(dansFenetre, creneaux);
   const weekendTest = horsPlan.filter((p) => estWeekend(parisDe(p).date));
   const horsPlanSemaine = horsPlan.filter((p) => !estWeekend(parisDe(p).date));
-  const analyses = Object.keys(comptes).map((c) => analyserCompte(apparies, c, now, regles));
   const finale = jourAnalyse > plan.meta.fin;
+  const methode = methodeDuPlan(plan);
+  const analyses = Object.keys(comptes).map((c) => (methode === 'formats'
+    ? analyserCompteFormats(apparies, c, now, regles, { final: finale })
+    : analyserCompte(apparies, c, now, regles)));
 
   // 2. La semaine écoulée : les 7 jours pleins avant le jour de l'analyse, tous formats.
   const debutSemaine = ajouterJours(jourAnalyse, -7);
@@ -157,6 +188,7 @@ export function analyserTout({ plan, posts, maintenant, jour = null, releves = [
   return {
     dateAnalyse: jourAnalyse,
     heureServeur: now.toISOString(),
+    methode,
     plan: plan.meta,
     releves,
     decisionFinale: finale,

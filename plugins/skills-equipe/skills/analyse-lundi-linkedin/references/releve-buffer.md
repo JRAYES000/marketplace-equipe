@@ -24,11 +24,13 @@ julien-partners,2026-10-05 14:00,Europe/Minsk,T,114843,277,165,0.38,6aaac5b46140
   pas par post). Une mesure absente reste vide.
 - `taux_eng_buffer_pct` : la colonne « Eng. Rate » du **tableau** (deux décimales, sans « % ») ; le détail du post
   l'arrondit à l'entier.
-- `id_buffer` (l'identifiant de l'adresse `/posts/<id>`) et `lien` (bouton « Go to post ») : facultatifs.
+- `id_buffer` (l'identifiant de l'adresse `/posts/<id>`) : **à relever**, c'est lui qui distingue deux posts publiés à la même
+  minute. `lien` (bouton « Go to post ») : facultatif.
 - Les anciens relevés (`date_paris,heure_paris`, en heure de Paris) restent lisibles.
 
-L'analyse lit **tous** les relevés du dossier, du plus ancien au plus récent : pour un même post (même compte,
-même minute), le relevé le plus récent l'emporte. On n'écrase jamais un ancien fichier, on en crée un nouveau daté.
+L'analyse lit **tous** les relevés du dossier, du plus ancien au plus récent : pour un même post (même `id_buffer` ;
+sans identifiant, même compte et même minute), le relevé le plus récent l'emporte. Deux posts publiés à la même
+minute restent deux lignes s'ils ont chacun leur `id_buffer` : le relever pour chaque ligne. On n'écrase jamais un ancien fichier, on en crée un nouveau daté.
 
 ### Méthode (Chrome connecté à Buffer, onglet neuf)
 

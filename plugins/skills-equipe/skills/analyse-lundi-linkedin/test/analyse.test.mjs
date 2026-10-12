@@ -168,6 +168,63 @@ test('relevés fusionnés : ancien format accepté, le plus récent l\'emporte p
   assert.equal(meme.releve, 'recent.csv');
 });
 
+test('relevés fusionnés : deux posts à la même minute restent deux lignes (identifiant Buffer)', () => {
+  const csv = [
+    'compte,publie_le,fuseau_affiche,format,impressions,reactions,commentaires,taux_eng_buffer_pct,id_buffer,lien',
+    'julien-agency,2026-10-08 09:06,UTC,T,307,0,0,0,id-a,',
+    'julien-agency,2026-10-08 09:06,UTC,T,271,0,0,0,id-b,',
+  ].join('\n');
+  const fusion = fusionnerReleves([lireCsvBuffer(csv, 'r1.csv')]);
+  assert.equal(fusion.length, 2);
+  assert.deepEqual(fusion.map((p) => p.impressions).sort(), [271, 307]);
+  // relevé suivant : chaque post garde son identité et prend ses nouveaux chiffres
+  const fusion2 = fusionnerReleves([lireCsvBuffer(csv, 'r1.csv'), lireCsvBuffer(csv.replace(',307,', ',400,'), 'r2.csv')]);
+  assert.deepEqual(fusion2.map((p) => p.impressions).sort(), [271, 400]);
+  // sans identifiant non plus, deux posts d'un même relevé à la même minute ne se fusionnent pas
+  const sansId = csv.replace(/,id-[ab],/g, ',,');
+  assert.equal(fusionnerReleves([lireCsvBuffer(sansId)]).length, 2);
+});
+
+/** Plan d'octobre : une semaine, texte / image / carrousel de comparaison et un texte hors comparaison. */
+function planOctobre(formats) {
+  const creneaux = formats.map((format, i) => {
+    const date = `2026-10-${String(6 + i).padStart(2, '0')}`;
+    return { id: `A-${i}`, compte: 'julien-agency', semaine: 1, date, heureParis: '13:00', utc: `${date}T11:00:00.000Z`, format, sujet: null, comparaison: true };
+  });
+  creneaux.push({ id: 'A-hors', compte: 'julien-agency', semaine: 1, date: '2026-10-06', heureParis: '17:30', utc: '2026-10-06T15:30:00.000Z', format: 'texte', sujet: null, comparaison: false });
+  return { meta: { debut: '2026-10-05', fin: '2026-10-11', semaines: 1, jours: ['mar', 'mer', 'jeu', 'ven'], comptes: { 'julien-agency': {} } }, creneaux };
+}
+const publier = (plan, chiffres) => plan.creneaux.map((c) => post(c.id, c.utc, c.compte, chiffres[c.id][0], { format: c.format, reactions: chiffres[c.id][1], commentaires: 0 }));
+
+test('méthode d\'octobre : texte, image et carrousel, taux calculé, hors comparaison exclus', () => {
+  const plan = planOctobre(['texte', 'image', 'carrousel', 'texte']);
+  const chiffres = { 'A-0': [200, 0], 'A-1': [400, 4], 'A-2': [100, 0], 'A-3': [100, 0], 'A-hors': [9999, 50] };
+  const posts = publier(plan, chiffres);
+  plan.meta.fin = '2026-11-01'; // test en cours au 12/10
+  const encours = analyserTout({ plan, posts, maintenant: new Date('2026-10-12T06:00:00Z'), jour: '2026-10-12' });
+  assert.equal(encours.methode, 'formats');
+  const a = encours.comptes[0];
+  assert.equal(a.publies, 5);
+  assert.equal(a.comparaison, 4);
+  assert.equal(a.formats.texte.n, 2);
+  assert.equal(a.formats.image.taux.mediane, 0.01);
+  assert.equal(a.formats.texte.impressions.mediane, 150); // le texte hors comparaison (9 999) n'y est pas
+  assert.equal(a.decision.verdict, 'provisoire');
+  assert.deepEqual(a.decision.indication, ['image']);
+  assert.equal(encours.anomalies.length, 0);
+  const md = rendreRapport(encours);
+  assert.match(md, /Test en cours : lecture provisoire/);
+  assert.match(md, /\| image \| 1 \| \*\*1,0 %\*\*/);
+
+  plan.meta.fin = '2026-10-11'; // test terminé la veille
+  const fin = analyserTout({ plan, posts, maintenant: new Date('2026-10-12T06:00:00Z'), jour: '2026-10-12', releves: [] });
+  assert.equal(fin.decisionFinale, true);
+  assert.equal(fin.comptes[0].decision.verdict, 'image');
+  // image meilleure en taux mais pas en impressions : non concluant
+  const autre = publier(plan, { ...chiffres, 'A-1': [100, 4] });
+  assert.equal(analyserTout({ plan, posts: autre, maintenant: new Date('2026-10-12T06:00:00Z'), jour: '2026-10-12' }).comptes[0].decision.verdict, 'non_concluant');
+});
+
 test('heure de référence : en-tête Date du serveur Buffer, abandon au bout du délai', async () => {
   const ok = await lireHeureServeur({ fetchFn: async () => ({ status: 200, headers: new Headers({ date: 'Thu, 08 Oct 2026 14:00:00 GMT' }) }) });
   assert.equal(ok.toISOString(), '2026-10-08T14:00:00.000Z');
