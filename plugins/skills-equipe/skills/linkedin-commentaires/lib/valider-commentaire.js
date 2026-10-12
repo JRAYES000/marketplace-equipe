@@ -334,8 +334,8 @@ function validerGenre(texte, genre) {
  * promesse faite en son nom (le recontacter, lui ecrire en prive, fixer un
  * rendez-vous, annoncer un prix) est refusee, sans echappatoire. Incident
  * reel : R1 du 07/10 promettait le lieu des ateliers « en message prive »,
- * message jamais parti (un candidat : « je n'ai pas eu votre message
- * prive »). R2 (« Je reviens vers vous ») est refusee pour la meme raison,
+ * message jamais parti (le commentateur l'a signale). R2 (« Je reviens vers
+ * vous ») est refusee pour la meme raison,
  * meme si l'annonce emploie la formule : decision de Nomena du 07/10.
  *
  * Heuristique, pas une preuve (meme famille que les autres controles) :

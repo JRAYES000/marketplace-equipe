@@ -3,7 +3,7 @@
 // Genre "reponse" (ajoute le 07/10/2026) : reponses aux commentaires recus
 // sous les posts de Julien. Textes reels R1, R2, R3 du 07/10/2026, tels que
 // publies (livrables-Claude-Agency, linkedin/2026-10-07/apres-midi.md et
-// NOTES.md). Decision de Nomena du 07/10 : R3 passe, R1 et R2 sont refusees
+// NOTES.md), R1 anonymisee le 12/10/2026. Decision de Nomena du 07/10 : R3 passe, R1 et R2 sont refusees
 // parce qu'elles promettent un recontact au nom de Julien.
 
 const test = require('node:test');
@@ -21,7 +21,7 @@ test('genre "reponse" : R3 (Florent Argoullon) passe', () => {
   assert.doesNotThrow(() => validerCommentaire({ texte: R3, genre: 'reponse' }));
 });
 
-test('genre "reponse" : R1 (un candidat) refusee, promesse de message prive', () => {
+test('genre "reponse" : R1 refusee, promesse de message prive', () => {
   assert.throws(
     () => validerCommentaire({ texte: R1, genre: 'reponse' }),
     /promesse au nom de Julien detectee \(recontact ou message prive : "en message privé"\)/
