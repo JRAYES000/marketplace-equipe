@@ -26,7 +26,7 @@ commentaires, taux d'engagement (« Eng. Rate » de Buffer).
 
 ## Où sont les choses
 
-- Scripts de cette skill : `scripts/` (dossier du clone `marketplace-equipe`). Tests : `npm test` (23 tests).
+- Scripts de cette skill : `scripts/` (dossier du clone `marketplace-equipe`). Tests : `npm test` (25 tests).
 - Données du test (dépôt privé des livrables) : `linkedin/test-formats-2026-10/` dans
   `livrables-Claude-Agency` (variable `LIVRABLES_DIR` pour un autre emplacement) :
   `methode-comparaison.md` (méthode en vigueur), `PROTOCOLE.md` (30/09, remplacé), `plan-config.json`, `calendrier.json`, `calendrier.md`, `file-attente-buffer.txt`,
@@ -56,6 +56,27 @@ commentaires, taux d'engagement (« Eng. Rate » de Buffer).
 5. Recopier dans la conversation : l'encadré « À retenir » du rapport, tel quel, les posts absents d'Insights
    (étape 2), puis les points qui demandent une décision de Julien. Ne rien ajouter que le rapport ne contienne.
 6. Mettre à jour `NOTES.md` (date, verdict, alertes), commiter en nommant les fichiers un par un.
+
+## Point d'objectif de Julien (mail du 14/10/2026) : mercredi 28/10/2026
+
+Objectif : **médiane des impressions de Claude Agency au-dessus de 500** sur les posts publiés du 15 au
+28/10 (heure de Paris), **avec moins de posts**, comparée à 163 (chiffre de Julien, 07-12/10).
+
+1. `git pull` dans les deux dépôts ; relevé Buffer Insights complet du canal Agency (étape 2 ci-dessus,
+   toutes les pages, `id_buffer` par ligne) dans un nouveau `releve-buffer-2026-10-28.csv`, contrôlé contre
+   Publish > Sent.
+2. `node scripts/objectif-julien.mjs` (défauts : `--compte julien-agency --du 2026-10-15 --au 2026-10-28
+   --seuil 500 --reference 163`). Il fusionne tous les relevés, lit l'heure du serveur Buffer, et écrit
+   `analyses/2026-10-28-objectif-julien-julien-agency.md` (et `.json`).
+3. **Le verdict porte sur les seuls posts mûrs (48 h)** : le 28/10, les posts des 27 et 28/10 sont listés
+   mais hors verdict. Le refaire le **vendredi 30/10 après 13 h Paris** pour un chiffre complet, et le dire.
+4. Recopier « À retenir » tel quel, plus le nombre de posts de la période contre celui de la période de
+   référence (12 posts Agency publiés du 07 au 12/10 d'après le relevé du 12/10 : c'est le « moins de posts »).
+
+**Écart sur la référence, constaté le 14/10/2026** : avec les relevés du dépôt, la commande donne une
+médiane de **183,5** (12 posts) pour Agency du 07 au 12/10, pas 163
+(`node scripts/objectif-julien.mjs --du 2026-10-07 --au 2026-10-12 --a-blanc`). 163 reste la référence de
+Julien ; le rapport du 28/10 cite les deux chiffres sans trancher.
 
 ## Sources et chiffres relevés
 

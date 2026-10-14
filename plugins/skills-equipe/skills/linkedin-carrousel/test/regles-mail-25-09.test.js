@@ -66,7 +66,7 @@ test('validerDiapos refuse un anglicisme dans le titre/texte d\'une diapo', () =
 });
 
 test('validerEtConvertirPost refuse un anglicisme, y compris a l\'interieur d\'un passage en gras', () => {
-  const brouillon = 'Votre **process** est-il vraiment efficace ? 🚀\n\nUn constat simple. 📌\n\nclaudeagency.fr #recrutement';
+  const brouillon = 'Votre **process** est-il vraiment efficace ? 🚀\n\nUn constat simple. 📌\n\nLien en commentaire. #recrutement';
   assert.throws(() => validerEtConvertirPost(brouillon), /anglicisme/);
 });
 

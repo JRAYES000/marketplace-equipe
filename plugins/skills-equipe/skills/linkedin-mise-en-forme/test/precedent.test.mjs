@@ -201,7 +201,7 @@ test("CLI : sans post precedent (compte inconnu) -> un AVERTISSEMENT, le critere
   const r = lancer("verif", join(racine, "2026-10-03", "brouillon.txt"), "--dossier", racine);
   assert.match(r.stdout, /AVERTISSEMENT : compte inconnu/);
   assert.doesNotMatch(r.stdout, /schema different/);
-  assert.match(r.stdout, /14\/14 criteres passes/);
+  assert.match(r.stdout, /15\/15 criteres passes/);
   assert.equal(r.status, 0, r.stdout);
 });
 
@@ -234,7 +234,9 @@ test("CLI : les 5 derniers posts du compte sont compares (le 6e non) ; un schema
   assert.match(r.stdout, /ECHEC variete sur les 5 derniers posts\s+5 posts compares : schema identique au post n°3/);
   assert.doesNotMatch(r.stdout, /n°6/);
   assert.equal(r.status, 1);
-  poser("2026-10-01", "a7.final.txt", POST("Un recrutement trop lent coute cher.", "claudeagency.fr", "gras sept")); // (affirmation, 1 bloc, lien) : nouveau dans la fenetre
+  // Depuis le 14/10/2026 (regles de Julien) : plus de lien dans le corps (regle 5), et un post court
+  // apres trois longs (regle 3) ; deux titres en gras = 2 blocs, schema nouveau dans la fenetre.
+  poser("2026-10-01", "a7.final.txt", "Un recrutement trop lent coute cher.\n\n**Le constat**\n\nLe candidat signe ailleurs.\n\n**La suite**\n\nOn rappelle le jour meme, sans attendre.");
   const ok = lancer("verif", join(racine, "2026-10-01", "a7.final.txt"), "--dossier", racine);
   assert.match(ok.stdout, /OK\s+variete sur les 5 derniers posts/);
   assert.match(ok.stdout, /Posts compares \(5\)/);

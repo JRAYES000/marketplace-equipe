@@ -80,7 +80,8 @@ const LONGUEUR_MIN = 60;
 const LONGUEUR_MAX = 700;
 const LIGNES_MAX = 5;
 const FENETRE_ACCROCHE = 140;
-const EMOJIS_MIN = 3;
+// Regle 3 de Julien (14/10/2026) : les emojis ne sont plus obligatoires (avant : 3 au minimum).
+const EMOJIS_MIN = 0;
 const EMOJIS_MAX = 6;
 const HASHTAGS_MAX = 2;
 
@@ -181,13 +182,9 @@ function convertirGras(brouillon) {
     return convertirEnGrasUnicode(segment);
   });
 
-  if (!trouve) {
-    throw new Error(
-      'Post refuse : aucun passage en gras (**...**) trouve dans le brouillon. ' +
-      'Un post sans aucun gras est refuse par le brief -- ajoutez au moins un passage.'
-    );
-  }
-
+  // Regle 3 de Julien (14/10/2026, « on casse le moule ») : le gras n'est plus obligatoire.
+  // `trouve` reste calcule pour la lisibilite, il ne declenche plus de refus.
+  void trouve;
   return texteConverti;
 }
 
@@ -286,13 +283,13 @@ function validerNombreLignes(texte) {
   }
 }
 
+// Regle 3 de Julien (14/10/2026) : l'accroche est libre (question, chiffre, situation, position).
+// L'ancienne exigence d'un « ? » dans les 140 premiers caracteres est abandonnee ; reste le refus
+// d'une accroche vide.
 function validerAccroche(texte) {
   const fenetre = texte.slice(0, FENETRE_ACCROCHE);
-  if (!fenetre.includes('?')) {
-    throw new Error(
-      `Post refuse : aucun point d'interrogation dans les ${FENETRE_ACCROCHE} premiers ` +
-      `caracteres ("${fenetre.trim()}"). L'accroche doit poser une question, pas donner la reponse.`
-    );
+  if (!fenetre.trim()) {
+    throw new Error('Post refuse : accroche vide.');
   }
 }
 
@@ -338,6 +335,15 @@ const INTERDITS = [
   // Mot de 5 lettres ou plus tout en majuscules (evite les faux positifs sur
   // des sigles courts legitimes comme IA, PME, RH, SARL).
   { regex: /\b[A-ZÀ-Ý]{5,}\b/, motif: 'mot ecrit tout en majuscules' },
+  // Regles de Julien du 14/10/2026 (source unique des motifs : linkedin-mise-en-forme/scripts/
+  // regles-julien.mjs ; reprises ici car ce fichier CommonJS ne peut pas importer ce module ESM
+  // sans exiger Node 22.12 ou plus). `ascii` : lues aussi sur le texte ramene en ASCII, pour
+  // qu'un passage deja converti en gras Unicode n'y echappe pas.
+  { regex: /\binvent(?:e|é|ee|ée|es|és|ees|ées|er)(?![a-zà-ÿ])/i, motif: 'regle 2 : exemple invente', ascii: true },
+  { regex: /\bma\s+position\b/i, motif: 'regle 3 : « Ma position »', ascii: true },
+  { regex: /\bje\s+prends\s+position\b/i, motif: 'regle 3 : « Je prends position »', ascii: true },
+  { regex: /https?:\/\/\S+|\bwww\.\S+|\b[a-z0-9-]+\.(?:fr|com|io|ai|net|org|eu|co|app|ly|gl)\b/i, motif: 'regle 5 : lien dans le corps (il va en commentaire)', ascii: true },
+  { regex: /ne\s+(?:constitue|donne|remplace|vaut)\s+(?:pas|en\s+aucun\s+cas)\s+(?:un\s+|une\s+)?(?:avis|conseil|audit|diagnostic)/i, motif: 'regle 5 : precaution', ascii: true },
 ];
 
 // Bug reel trouve par test adversarial le 22/09/2026 : "commentez\s+oui" et "partagez\s+si"
@@ -367,8 +373,9 @@ function validerInterdits(texte) {
       );
     }
   }
-  for (const { regex, motif } of INTERDITS) {
-    const correspondance = texte.match(regex);
+  const ascii = versAscii(texte);
+  for (const { regex, motif, ascii: enAscii } of INTERDITS) {
+    const correspondance = texte.match(regex) || (enAscii ? ascii.match(regex) : null);
     if (correspondance) {
       throw new Error(`Post refuse : formulation interdite detectee (${motif}) -- "${correspondance[0]}".`);
     }

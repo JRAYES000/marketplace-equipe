@@ -552,8 +552,17 @@ fourchette 1300-1900 caracteres de `linkedin-mise-en-forme` -- cette derniere va
 TEXTE (le contenu principal du post), pas pour la legende courte qui accompagne un document deja
 porteur du contenu reel. `LONGUEUR_MIN`/`LONGUEUR_MAX` de ce fichier (60-700 caracteres, ramene le
 25/09/2026 depuis 1300-1900) et la nouvelle `LIGNES_MAX` (5) sont des bornes de bon sens pour cette
-legende courte, pas une reprise de la fourchette de `linkedin-mise-en-forme`. Le gras et les
-emojis restent obligatoires (memes regles que ci-dessous).
+legende courte, pas une reprise de la fourchette de `linkedin-mise-en-forme` (fourchette elle-meme
+abandonnee le 14/10/2026).
+
+**Regles de Julien du 14/10/2026 (elles priment, detail dans `linkedin-mise-en-forme`, regle 0)** :
+2 posts par jour et par compte au plus ; le carrousel part d'un fait reel (mission, chiffre, cas
+client non nomme), sans aucun exemple invente, **ni dans la legende ni dans les diapos** ; pas de
+moule (le gras, les emojis et l'accroche en question ne sont **plus obligatoires**) ; sujet absent
+du compte depuis 30 jours et pas le meme jour sur l'autre compte ; lien en commentaire, aucune
+precaution ; le client vise s'arreterait-il de defiler ? Avant de programmer :
+`linkedin-mise-en-forme/scripts/controle-avant-publication.mjs` (regles 1, 2, 4, 5). Les diapos ne
+sont pas lues par ce script : relire chaque diapo contre la regle 2 avant le rendu.
 
 Brouillon redige avec le gras en `**etoiles**` ; `node generer-post.js <brouillon> [sortie]`
 convertit et refuse (code de sortie 1) :
@@ -563,16 +572,19 @@ convertit et refuse (code de sortie 1) :
   (`lib/valider-orthographe.js`), meme ECRIT SANS son accent, est desormais refuse aussi -- pas
   seulement un accent deja present. Voir "Accents manquants" ci-dessous et
   `test/adversarial-25-09.test.js`.
-- Aucun gras du tout -> refus.
-- Emojis hors de [3, 6] (elargi depuis [3, 5] le 18/09/2026, retour de Julien), au milieu d'une
-  phrase, ou deux consecutifs -> refus.
+- Aucun gras : **accepte depuis le 14/10/2026** (regle 3 de Julien ; avant : refus).
+- Plus de 6 emojis (aucun n'est impose depuis le 14/10/2026 ; avant : 3 au minimum), au milieu
+  d'une phrase, ou deux consecutifs -> refus.
 - Hors de 60-700 caracteres -> refus (ramene le 25/09/2026 depuis 1300-1900 -- voir "5 lignes
   maximum" ci-dessus).
 - Plus de 5 lignes de texte non vides -> refus (`LIGNES_MAX`, ajoute le 25/09/2026).
-- Accroche sans "?" dans les 140 premiers caracteres -> refus.
+- Accroche vide -> refus. L'accroche est **libre depuis le 14/10/2026** (regle 3 ; avant : un « ? »
+  exige dans les 140 premiers caracteres).
 - Plus de 2 mots-dieses, ou places ailleurs qu'en toute fin -> refus.
 - Formulations interdites (demande d'engagement, tiret long, "ce n'est pas X c'est Y", "ravi de
-  vous annoncer", "taguez quelqu'un", critique de LinkedIn, MAJUSCULES) -> refus.
+  vous annoncer", "taguez quelqu'un", critique de LinkedIn, MAJUSCULES ; depuis le 14/10/2026 :
+  « invente », « Ma position », « Je prends position », lien dans le corps, precaution du type
+  « ne remplace pas un audit », en clair comme en gras Unicode) -> refus.
 - Chiffre sans `(source : ...)` attache -> refus -- un nombre en toutes lettres ("sept") n'est
   jamais concerne, seule une suite de chiffres l'est. **Affine le 21/09/2026** (demande de Nomena, post
   de veille Allie K. Miller) : la source collee n'est exigee que pour un chiffre-PREUVE (pourcentage,

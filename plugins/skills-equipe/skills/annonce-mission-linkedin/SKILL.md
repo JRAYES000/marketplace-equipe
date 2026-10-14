@@ -21,6 +21,15 @@ Sans cette confirmation écrite (mail archivé, cité dans le README du lot) : r
 **Trois accords distincts de l'utilisateur, dans la conversation en cours** : textes, images,
 programmation. Rien n'est programmé avant le troisième. Aucun mail n'est envoyé par outil.
 
+## Règles de Julien du 14/10/2026 (elles priment ; détail : `linkedin-mise-en-forme`, règle 0)
+
+Une annonce est un post : elle compte dans les **2 posts par jour et par compte au maximum** (un
+jour à 13:00 avec annonce garde au plus un autre post) ; son sujet (la mission) s'inscrit dans
+`linkedin/sujets.csv` (« annonce : <mission> ») et ne tombe pas le même jour qu'un post d'Agency sur
+le même thème ; **le lien de la fiche va en premier commentaire, jamais dans le texte** ; aucune
+précaution. La mission réelle est le fait réel de la règle 2. Avant de programmer :
+`linkedin-mise-en-forme/scripts/controle-avant-publication.mjs`.
+
 ## 1. Lire le document de Julien
 
 - Le .docx est joint à son mail. Extraire le texte par script, pas à la main.
@@ -47,8 +56,10 @@ programmation. Rien n'est programmé avant le troisième. Aucun mail n'est envoy
   démarrage, environnement, lien. Contrôle par script contre le .docx : 0 écart attendu.
 - **Textes fixes, identiques dans toutes les annonces** : la phrase d'envoi
   « Vous pensez à quelqu'un en lisant ça ? Envoyez-lui ce post. » et l'appel à candidater
-  du document de Julien (avec le lien dans le texte).
-- Deux fichiers par annonce : `NN.md` (relecture) et `NN.final.txt` (gras Unicode, à coller).
+  du document de Julien, **sans le lien** : le texte dit « le lien est en commentaire » et le lien
+  part en premier commentaire (règle 5 du 14/10/2026, qui remplace « avec le lien dans le texte »).
+- Deux fichiers par annonce : `NN.md` (relecture), `NN.final.txt` (gras Unicode, à coller) et
+  `NN.commentaire.txt` (le lien seul, à coller en premier commentaire).
 - `verif-post.mjs` sur chaque annonce, comparée à celle qui la précède dans le planning : schéma
   toujours différent. L'échec « aucun chiffre sans source » sur le TJM est un faux positif connu.
 - Passe `humanizer` si la skill existe sur le poste ; sinon le dire.
@@ -67,7 +78,9 @@ programmation. Rien n'est programmé avant le troisième. Aucun mail n'est envoy
 - **Buffer gratuit = 10 posts programmés au maximum** : compter les créneaux libres avant le
   planning, et programmer en vagues si besoin (vérifier l'offre du compte avant de compter).
 - Relire la file Buffer en direct avant de fixer les dates (pas un relevé de la veille).
-- Un post texte qui occupe le 13:00 passe à 17:30 le même jour ; **jamais décalé au week-end**.
+- Un post texte qui occupe le 13:00 passe à 17:30 le même jour **seulement si ce jour reste à
+  2 posts au plus** (règle 1 du 14/10/2026) ; sinon il passe au prochain jour ouvré qui a de la
+  place, ou il est retiré. **Jamais décalé au week-end**.
 - **Ne jamais déplacer un post de Julien** : tout post de la file absent de nos fichiers est à lui.
   Si son post prend le créneau, l'annonce attend une décision de l'utilisateur.
 - Les annonces sont hors du test des formats. Mettre à jour `linkedin/test-formats-2026-10/suivi-posts-*.csv`.
@@ -75,8 +88,8 @@ programmation. Rien n'est programmé avant le troisième. Aucun mail n'est envoy
 ## 6. Tester une annonce avec image, puis programmer le reste
 
 - Programmer d'abord **une seule** annonce avec image, puis la relire dans la file : heure
-  « (Europe/Paris) », image présente, lien dans le texte, premier commentaire vide.
-  Si l'aperçu du lien a remplacé l'image : « Replace link preview with media ».
+  « (Europe/Paris) », image présente, **aucun lien dans le texte, lien de la fiche dans le premier
+  commentaire** (règle 5 du 14/10/2026 ; avant : lien dans le texte, premier commentaire vide).
 - Seulement ensuite, programmer les autres, canal Claude Partners (`6aa87ac6ea19ca0bde439e7f`) :
   texte collé par évènement `paste` (la frappe au clavier n'entre pas dans l'éditeur), empreinte
   comparée au `.final.txt`, aperçu de lien vide retiré sur les annonces sans image, date relue sur
@@ -86,7 +99,8 @@ programmation. Rien n'est programmé avant le troisième. Aucun mail n'est envoy
 ## 7. Relire la file
 
 Recharger la page, relire **toute** la file (20 posts par chargement, défiler) : chaque annonce à
-son créneau, image ou non selon le planning, lien présent, posts décalés à 17:30. Noter le compteur.
+son créneau, image ou non selon le planning, lien en premier commentaire, jamais 3 posts le même
+jour sur le compte, posts décalés à 17:30. Noter le compteur.
 
 ## 8. Mail du planning à Julien
 

@@ -11,6 +11,17 @@ demande explicite.
 **Phrase de lancement** : « fais la veille du jour », « cherche un post a recycler pour
 julien-agency ».
 
+## Regles de Julien du 14/10/2026 -- elles priment (detail : linkedin-mise-en-forme, regle 0)
+
+Un post de veille est un post comme les autres : 2 par jour et par compte au plus, sujet absent du
+compte depuis 30 jours et pas le meme jour sur l'autre compte (registre `linkedin/sujets.csv`), lien
+en commentaire, aucune precaution, et le client vise doit s'arreter de defiler. **Regle 2 appliquee
+a la veille** : le post viral d'un autre compte donne l'idee, jamais le fait. Le post recycle part
+d'un fait reel de Julien (mission, chiffre, cas client non nomme) ; sans fait reel a y accrocher, on
+ne le redige pas, et aucun cas n'est fabrique pour l'illustrer. Le pont `lib/valider-mise-en-forme.js`
+applique deja les regles 2, 3 (formules) et 5 via `verifierTexte` ; avant de programmer, passer
+`linkedin-mise-en-forme/scripts/controle-avant-publication.mjs` (regles 1, 2, 4, 5).
+
 ## Regles d'ecriture -- linkedin-mise-en-forme, source de verite (rebranche le 22/09/2026)
 
 Cette skill redige des posts LinkedIn a publier (pas des commentaires) : elle applique donc les

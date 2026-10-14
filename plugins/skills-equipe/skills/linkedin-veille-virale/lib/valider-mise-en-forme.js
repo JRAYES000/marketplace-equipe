@@ -43,9 +43,9 @@ function chargerLib() {
 async function convertirGras(brouillon) {
   const { enGras, ACCENTUE } = await chargerLib();
   const REGEX_GRAS = /\*\*(.+?)\*\*/g;
-  let trouve = false;
-  const texteConverti = brouillon.replace(REGEX_GRAS, (_correspondance, segment) => {
-    trouve = true;
+  // Regle 3 de Julien (14/10/2026, « on casse le moule ») : un post sans gras est permis ; l'ancien
+  // refus « aucun passage en gras » est abandonne.
+  return brouillon.replace(REGEX_GRAS, (_correspondance, segment) => {
     if (ACCENTUE.test(segment)) {
       throw new Error(
         `Post refuse : le passage en gras "${segment}" contient un accent -- les lettres ` +
@@ -55,13 +55,6 @@ async function convertirGras(brouillon) {
     }
     return enGras(segment);
   });
-  if (!trouve) {
-    throw new Error(
-      'Post refuse : aucun passage en gras (**...**) trouve dans le brouillon. ' +
-      'Un post sans aucun gras est refuse par le brief -- ajoutez au moins un passage.'
-    );
-  }
-  return texteConverti;
 }
 
 /**

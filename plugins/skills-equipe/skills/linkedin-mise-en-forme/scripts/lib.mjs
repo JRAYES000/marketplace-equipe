@@ -20,6 +20,10 @@
 
 import { readFileSync } from "node:fs";
 import { createRequire } from "node:module";
+// Regles de Julien du 14/10/2026 sur le texte seul (2 « invente », 3 formules du moule, 5 lien et
+// precautions). Dependance circulaire voulue et sans risque : regles-julien.mjs n'appelle versAscii
+// (declaration de fonction, donc hissee) qu'a l'execution, jamais au chargement.
+import { controlerTexte } from "./regles-julien.mjs";
 
 // Liste d'anglicismes PARTAGEE avec linkedin-carrousel (ajoutee le 29/09/2026, apres un
 // "process" passe dans le post A1 du 28/09) : on importe la fonction et la liste du
@@ -268,7 +272,7 @@ const SOURCES_VAGUES = [
   /^\s*(certaines?|diverses?)\s+sources?\s*$/i,
   /^\s*internet\s*$/i,
 ];
-function versAscii(fragment) {
+export function versAscii(fragment) {
   // Gras Unicode (les deux polices, voir SANS_SERIF/SERIF plus haut) -> ASCII, pour lire
   // "𝟳𝟵 𝗮𝗻𝘀" (Sans-Serif) ou "𝟳𝟵 𝐚𝐧𝐬" (Serif) comme "79 ans".
   return [...fragment].map((c) => {
@@ -428,10 +432,18 @@ const debutDuPost = (corps) => cleTexte(lignesDe(corps)[0]).split(" ").slice(0, 
  *   - debut : les trois premiers mots de l'accroche sont les memes ;
  *   - fin : derniere ligne identique mot pour mot (hors lien, hors ligne Source) ;
  *   - gras : une phrase en gras (2 mots minimum) deja utilisee.
- * Un meme TYPE d'accroche ou de fin repete sur plusieurs posts n'est pas refuse : il n'y a que trois
- * types, l'exiger rendrait la regle intenable (finir sur une vraie question est une consigne
- * permanente). Retourne [{ type, rang, detail }], [] si tout est varie.
+ * Ajouts du 14/10/2026 (regle 3 de Julien, « on casse le moule ») :
+ *   - longueur : meme tranche (court < 700, moyen 700-1500, long > 1500 caracteres) que les 3 derniers ;
+ *   - question finale : le brouillon et les 2 derniers posts finissent tous par une question.
+ * La question finale n'est plus une consigne permanente (abandonnee le 14/10/2026) : une fin en
+ * question reste permise, une fin en question systematique ne l'est plus.
+ * Retourne [{ type, rang, detail }], [] si tout est varie.
  */
+// Tranche de longueur, pour la variete (regle 3 de Julien, 14/10/2026).
+export function trancheLongueur(corps) {
+  const n = [...corps.replace(/\*\*/g, "")].length;
+  return n < 700 ? "court" : n <= 1500 ? "moyen" : "long";
+}
 export function varieteSur(corps, precedents = []) {
   const moi = schemaPost(corps);
   const debut = debutDuPost(corps);
@@ -454,10 +466,19 @@ export function varieteSur(corps, precedents = []) {
       if (gras.has(g)) violations.push({ type: "gras", rang, detail: `meme phrase en gras que le post n°${rang} (« ${g} »)` });
     }
   });
+  const recents = precedents.slice(0, 3);
+  const tranche = trancheLongueur(corps);
+  if (recents.length === 3 && recents.every((t) => trancheLongueur(t) === tranche)) {
+    violations.push({ type: "longueur", rang: 3, detail: `meme tranche de longueur (${tranche}) que les 3 derniers posts` });
+  }
+  if (moi.fin === "question" && precedents.length >= 2 && precedents.slice(0, 2).every((t) => schemaPost(t).fin === "question")) {
+    violations.push({ type: "question finale", rang: 2, detail: "troisieme post de suite fini par une question" });
+  }
   return violations;
 }
 
 const dire = (bon, nom, detail) => ({ bon, nom, detail });
+
 
 /**
  * Mesure les criteres de forme sur le corps deja extrait (frontmatter retire). Fonction
@@ -486,8 +507,12 @@ export function verifierTexte(corps, { precedent, precedents } = {}) {
   const motsAccroche = accroche.trim().split(/\s+/).filter(Boolean);
   resultats.push(dire(motsAccroche.length >= 3, "accroche non degeneree (3 mots mini)", `${motsAccroche.length} mot(s)`));
 
+  // Regle 3 de Julien (14/10/2026) : longueurs variees. La fourchette 1300-1900 (09/09) est
+  // abandonnee : elle donnait des posts tous de la meme taille. Reste le plafond de saisie de
+  // LinkedIn (3 000 caracteres, valeur non revérifiee le 14/10/2026) ; la variete de longueur se
+  // mesure contre les posts precedents (varieteSur).
   const nu = [...corps.replace(/\*\*/g, "")].length;
-  resultats.push(dire(nu >= 1300 && nu <= 1900, "longueur 1300-1900", `${nu} caracteres`));
+  resultats.push(dire(nu > 0 && nu <= 3000, "longueur <= 3000 (longueur libre)", `${nu} caracteres, tranche ${trancheLongueur(corps)}`));
 
   // Deux formes acceptees pour compter un gras : le markdown, et le gras Unicode deja
   // converti -- dans l'une ou l'autre police (voir UNICODE_GRAS plus haut). Depuis le
@@ -595,6 +620,13 @@ export function verifierTexte(corps, { precedent, precedents } = {}) {
       `${recents.length} post${recents.length > 1 ? "s" : ""} compares` + (violations.length ? ` : ${violations.map((v) => v.detail).join(" ; ")}` : " : aucune repetition")
     ));
   }
+
+  const julien = controlerTexte(corps);
+  resultats.push(dire(
+    julien.length === 0,
+    "regles de Julien 14/10 (2, 3, 5)",
+    julien.length ? julien.map((c) => `regle ${c.regle} ${c.motif} : « ${c.preuve.slice(0, 80)} »`).join(" ; ") : "aucun exemple invente, ni « Ma position », ni lien, ni precaution"
+  ));
 
   const passes = resultats.filter((r) => r.bon).length;
   return { resultats, passes, total: resultats.length };

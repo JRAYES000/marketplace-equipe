@@ -22,7 +22,7 @@ Rarement pour le salaire. Dans ce carrousel, **trois signes** qui trahissent un 
 
 **Passez a l'action** : réservez votre audit gratuit de trente minutes. 👉
 
-claudeagency.fr #recrutement #rh`;
+Lien en commentaire. #recrutement #rh`;
 
 test('accepte le brouillon conforme et renvoie un texte converti en gras unicode', () => {
   const resultat = validerEtConvertirPost(BROUILLON_CONFORME);
@@ -65,9 +65,10 @@ test('n\'accuse pas a tort un mot sans equivalent accentue en francais (anglicis
   assert.doesNotThrow(() => convertirGras(brouillon));
 });
 
-test('refuse un post sans aucun gras', () => {
+// Regle 3 de Julien (14/10/2026) : le gras n'est plus obligatoire.
+test('accepte un post sans aucun gras (regle 3 du 14/10/2026)', () => {
   const sansGras = BROUILLON_CONFORME.replace(/\*\*/g, '');
-  assert.throws(() => validerEtConvertirPost(sansGras), /aucun passage en gras/);
+  assert.doesNotThrow(() => validerEtConvertirPost(sansGras));
 });
 
 test('refuse deux emojis colles -- cas demande', () => {
@@ -83,9 +84,10 @@ test('refuse un emoji au milieu d\'une phrase', () => {
   assert.throws(() => validerEtConvertirPost(brouillon), /au milieu d'une phrase/);
 });
 
-test('refuse hors de la fourchette 3-6 emojis (0 emoji)', () => {
+// Regle 3 de Julien (14/10/2026) : les emojis ne sont plus obligatoires ; 6 reste le plafond.
+test('accepte 0 emoji (regle 3 du 14/10/2026)', () => {
   const brouillon = BROUILLON_CONFORME.replace('🧭', '').replace('📅', '').replace('👉', '');
-  assert.throws(() => validerEtConvertirPost(brouillon), /0 emoji\(s\) trouve\(s\)/);
+  assert.doesNotThrow(() => validerEtConvertirPost(brouillon));
 });
 
 test('refuse un post de moins de 60 caracteres -- cas demande', () => {
@@ -117,12 +119,24 @@ test('une ligne blanche entre deux paragraphes ne compte pas comme une ligne', (
   assert.doesNotThrow(() => validerEtConvertirPost(BROUILLON_CONFORME));
 });
 
-test('refuse une accroche sans point d\'interrogation dans les 140 premiers caracteres', () => {
+// Regle 3 de Julien (14/10/2026) : l'accroche est libre, la question n'est plus imposee.
+test('accepte une accroche sans point d\'interrogation (regle 3 du 14/10/2026)', () => {
   const brouillon = BROUILLON_CONFORME.replace(
     "Pourquoi vos meilleurs candidats disparaissent-ils avant l'offre ? 🧭",
     "Vos meilleurs candidats disparaissent avant l'offre, presque toujours en silence. 🧭"
   );
-  assert.throws(() => validerEtConvertirPost(brouillon), /aucun point d'interrogation/);
+  assert.doesNotThrow(() => validerEtConvertirPost(brouillon));
+});
+
+// Regles 2, 3 et 5 de Julien (14/10/2026) : exemple invente, « Ma position », lien dans le corps,
+// precaution -- en clair comme deja converties en gras Unicode.
+test('refuse exemple invente, « Ma position », lien et precaution (regles du 14/10/2026)', () => {
+  const avec = (ligne) => BROUILLON_CONFORME.replace('Rarement pour le salaire.', `Rarement pour le salaire. ${ligne}`);
+  assert.throws(() => validerEtConvertirPost(avec('Exemple inventé pour illustrer.')), /regle 2/);
+  assert.throws(() => validerEtConvertirPost(avec('Un cas **invente** de bout en bout.')), /regle 2/);
+  assert.throws(() => validerEtConvertirPost(avec('Ma position : on garde le texte.')), /regle 3/);
+  assert.throws(() => validerEtConvertirPost(avec('Voir https://lnkd.in/abc.')), /regle 5/);
+  assert.throws(() => validerEtConvertirPost(avec('Cette liste ne remplace pas un audit.')), /regle 5/);
 });
 
 test('refuse plus de 2 hashtags en fin de post', () => {
@@ -195,8 +209,8 @@ test('n\'accuse pas a tort l\'annee ecrite a l\'interieur de sa propre citation'
  */
 const AJOUT_ANECDOTE = "Une aidante familiale de 79 ans a suivi l'atelier pendant 4 semaines avec 12 personnes en salle, le 17/09/2026.";
 const AVEC_LIGNE_SOURCE = (b) => b.replace(
-  '\n\nclaudeagency.fr #recrutement #rh',
-  "\n\nSource : post LinkedIn d'Allie K. Miller, 17/09/2026.\n\nclaudeagency.fr #recrutement #rh"
+  '\n\nLien en commentaire. #recrutement #rh',
+  "\n\nSource : post LinkedIn d'Allie K. Miller, 17/09/2026.\n\nLien en commentaire. #recrutement #rh"
 );
 
 test('chiffre-anecdote (age, duree, nombre de personnes, date) sans source collee mais avec ligne Source finale : passe', () => {
@@ -234,6 +248,6 @@ test('"N personnes" dans une phrase de sondage reste une donnee d\'etude : refus
 test('une ligne Source finale vague ("Source : une etude") ne dispense de rien', () => {
   const brouillon = BROUILLON_CONFORME
     .replace('Rarement pour le salaire.', AJOUT_ANECDOTE)
-    .replace('\n\nclaudeagency.fr #recrutement #rh', '\n\nSource : une etude\n\nclaudeagency.fr #recrutement #rh');
+    .replace('\n\nLien en commentaire. #recrutement #rh', '\n\nSource : une etude\n\nLien en commentaire. #recrutement #rh');
   assert.throws(() => validerEtConvertirPost(brouillon), /n'a pas de source attachee/);
 });

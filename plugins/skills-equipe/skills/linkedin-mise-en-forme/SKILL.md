@@ -1,12 +1,13 @@
 ---
 name: linkedin-mise-en-forme
 description: >-
-  Regles de forme obligatoires pour tout post LinkedIn de Julien, compte Claude
-  Agency comme compte Claude Partners : accroche libre (question, position,
-  chiffre ou situation) qui donne envie de cliquer sur « ... plus », 1 a 4 blocs
-  avec ou sans titre, fin libre, 1 ou 2 passages en gras au maximum, niveau de
-  lecture d'un enfant de 13 ans, tournures interdites, jamais deux posts de suite
-  avec le meme schema, passe humanizer. Se combine avec contenu-linkedin (QUOI
+  Regles obligatoires pour tout post LinkedIn de Julien (Claude Agency, Claude
+  Partners), dont ses 6 regles du 14/10/2026 controlees par script avant
+  publication (2 posts par jour au plus, un fait reel sans exemple invente,
+  moule casse, sujet non repete sur 30 jours, lien en commentaire, client qui
+  arrete de defiler) : accroche qui fait cliquer « ... plus », 1 a 4 blocs, fin
+  et longueur variees, 2 gras au plus, lecture a 13 ans, tournures interdites,
+  schema varie, passe humanizer. Se combine avec contenu-linkedin (QUOI
   ecrire) : celle-ci definit COMMENT. Declencher des qu'il s'agit d'ecrire,
   reecrire, relire ou auditer un post LinkedIn, un brouillon dans sortants/ ou
   une accroche. Triggers : « ecris un post LinkedIn », « relis ce post », « mets
@@ -22,6 +23,47 @@ Regles de forme decidees par Julien le 2026-09-18, **assouplies et completees le
 1 ou 2 passages, trois tournures interdites de plus, et une regle de variete. Elles
 s'appliquent aux **deux comptes**, Claude Agency et Claude Partners, au meme niveau.
 Ce qui n'a pas change : le controle des accents (regle 2) et des anglicismes.
+
+## 0. Les 6 regles de Julien du 14/10/2026 — elles priment sur tout le reste
+
+Mail de Julien du 14/10/2026, transmis par Nomena. Objectif : au 28/10, mediane des impressions
+de Claude Agency au-dessus de 500, **avec moins de posts**. Une regle plus ancienne de ce fichier,
+d'une autre skill ou d'un calendrier qui les contredit ne s'applique plus.
+
+1. **Deux posts par jour et par compte, au maximum** (annonces de mission et posts de Julien compris).
+2. **Chaque post part d'un fait reel** : une mission, un chiffre, un cas client non nomme. Plus
+   aucun exemple invente, et plus jamais la mention « exemple invente pour l'illustration ». Pas
+   de fait reel sous la main : on ne publie pas, on le demande a Julien.
+3. **On casse le moule** : pas de « Ma position » ni de « Je prends position » systematique, pas de
+   question finale automatique, des longueurs, des formes et des accroches variees.
+4. **Un sujet ne revient pas sur le meme compte avant un mois**, et jamais le meme jour sur les deux
+   comptes. Le sujet s'inscrit dans le registre `linkedin/sujets.csv` des livrables avant la
+   programmation (libelle court, reutilise tel quel s'il existe deja).
+5. **Le lien va en commentaire, jamais dans le post.** Aucune precaution du type « ce texte ne
+   donne pas un avis juridique » ou « cette liste ne remplace pas un audit ».
+6. **Avant de publier : le client vise s'arreterait-il de faire defiler pour lire ?** Si ce n'est
+   pas un oui franc, on ne publie pas. Aucun code ne le juge : on ecrit la reponse, en une phrase,
+   a cote du brouillon.
+
+**Controle avant publication (regles 1, 2, 4 et 5, plus les formules de la 3)** : obligatoire avant
+de programmer un post, sortie brute montree avec le brouillon.
+
+```bash
+node "<dossier de la skill>/scripts/controle-avant-publication.mjs" --brouillon "C:/.../linkedin/2026-11-03/a50.final.txt" --date 2026-11-03 --heure 13:00 --sujet "libelle du sujet" --maintenant <UTC du serveur Buffer>
+```
+
+Il lit la file Buffer relevee (`file-attente-buffer.txt`, routine 1), retrouve le texte complet de
+chaque post dans les `.final.txt`, et refuse (code 1, une ligne `ALERTE regle N` par constat, avec
+la phrase en cause) : un jour a 3 posts sur un compte, « invente » ou un cas ouvert par
+« Exemple : », « Ma position », un lien ou une precaution dans le corps, un sujet deja traite sur le
+compte depuis moins de 30 jours ou le meme jour sur l'autre compte. Un brouillon sans sujet etiquete
+est refuse. Sans `--brouillon`, il controle toute la file. Le coeur est dans
+`scripts/regles-julien.mjs` (fonctions pures, `test/regles-julien.test.mjs`). `verif-post.mjs`
+reprend les regles 2, 3 (formules) et 5 sur le texte seul (critere « regles de Julien 14/10 »).
+
+**Limite** : un sujet ne se reconnait pas par code. Sans etiquette, le script ne compare que les
+mots porteurs du debut des posts et signale un sujet « probablement repete, a confirmer » ; c'est
+un indice, pas une preuve. L'etiquette du registre fait foi.
 
 ## Ordre de travail
 
@@ -42,6 +84,8 @@ quelle -- rediger le fond a la main, sans le charger.
    `contenu-linkedin`.
 5. Passer le script de controle avant de deposer le brouillon : il retrouve seul le
    **post precedent du meme compte** (regle 7).
+6. Avant de programmer : inscrire le sujet dans `linkedin/sujets.csv`, passer
+   `controle-avant-publication.mjs` (regle 0) et ecrire la reponse a la question de la regle 6.
 
 ## 1. L'accroche : libre, mais elle fait cliquer
 
@@ -181,9 +225,14 @@ posts », n°1 = le plus recent). Il refuse, en nommant le post en cause :
   ligne `Source` ne compte pas) ;
 - une **meme phrase en gras** (deux mots au moins), en markdown comme en gras Unicode.
 
-Un meme *type* d'accroche ou de fin sur plusieurs posts reste permis : il n'y a que trois types,
-et finir sur une vraie question est une consigne permanente. Pour passer : changer de debut
-d'accroche, de derniere phrase ou de phrase en gras, ou varier le schema.
+Un meme *type* d'accroche ou de fin sur plusieurs posts reste permis : il n'y a que trois types.
+Pour passer : changer de debut d'accroche, de derniere phrase ou de phrase en gras, ou varier le schema.
+
+**Ajouts du 14/10/2026 (regle 0.3, « on casse le moule »)** : la question finale n'est plus une
+consigne permanente (l'ancienne phrase « finir sur une vraie question est une consigne permanente »
+est retiree). Le script refuse aussi un **troisieme post de suite fini par une question**, et un post
+dans la **meme tranche de longueur** (court < 700, moyen 700-1 500, long > 1 500 caracteres) que les
+3 derniers posts du compte.
 
 **Le post precedent se trouve tout seul** (30/09/2026, `scripts/precedent.mjs`). Le compte se
 deduit du nom du brouillon (`a<N>.final.txt` = julien-agency, `p<N>.final.txt` =
@@ -211,9 +260,9 @@ accepte), `--compte <compte>`, `--dossier <dossier>` (sinon la variable
 ## Guardrails — avant depot dans sortants/
 
 Les criteres de `contenu-linkedin`, plus les suivants. Le script en mesure
-quatorze (quinze quand un post precedent est trouve, seize quand il en trouve plusieurs, regle 7 ; les criteres 2 et 4 comptent
+quinze (seize quand un post precedent est trouve, dix-sept quand il en trouve plusieurs, regle 7 ; les criteres 2 et 4 comptent
 double, le gras accentue et l'accent manquant dans le gras sont deux mesures
-distinctes) ; seul le niveau de lecture se relit :
+distinctes ; le quinzieme est « regles de Julien 14/10 », regle 0) ; seul le niveau de lecture se relit :
 
 ```bash
 node "<dossier de la skill>/scripts/verif-post.mjs" verif "C:/chemin/vers/a8.final.txt"
@@ -226,10 +275,10 @@ node "<dossier de la skill>/scripts/verif-post.mjs" verif "C:/chemin/vers/a8.fin
 3. **4 titres de bloc en gras au maximum** ; un post sans titre est valide.
 4. **6 emojis au maximum**, tous en tete de ligne ; aucun n'est impose.
 5. Aucune phrase de plus de 20 mots ; aucun terme technique non explique.
-6. **Longueur du corps entre 1 300 et 1 900 caracteres**, pied compris — la
-   fourchette la plus engageante, mesuree le 09/09 sur le corpus de van der
-   Blom. Une version anterieure de ce fichier disait 900-1 300 : c'est elle qui
-   tirait les posts vers le bas, elle est abandonnee.
+6. **Longueur libre, jusqu'a 3 000 caracteres** (plafond de saisie de LinkedIn, valeur non
+   revérifiee le 14/10/2026). La fourchette 1 300-1 900 (09/09) est **abandonnee le 14/10/2026**
+   (regle 0.3 de Julien) : la file du 14/10 alignait tous ses posts texte entre 1 311 et
+   1 544 caracteres. La variete de longueur se mesure dans la regle 7.
 7. **Aucune formulation interdite** — banque reprise telle quelle de
    `linkedin-carrousel/lib/valider-post.js` (meme retour de Julien du
    10/09/2026) : demande d'engagement (« commentez OUI », « partagez si... »),
@@ -314,9 +363,9 @@ finissant par "?" passe le critere — le controle est mecanique (un point
 d'interrogation dans les 140 premiers caracteres), il ne restreint aucune
 langue et n'a jamais pretendu le faire.
 
-**Bornes de longueur verifiees exactement le 22/09/2026** : 1 300 et 1 900
-caracteres sont tous deux INCLUS (`nu >= 1300 && nu <= 1900`), 1 299 et 1 901
-sont refuses. Comportement voulu, desormais verrouille par un test.
+**Borne de longueur verifiee exactement le 14/10/2026** : 3 000 caracteres passe, 3 001 est
+refuse (`nu > 0 && nu <= 3000`), verrouille par un test. L'ancienne fourchette 1 300-1 900 et ses
+bornes du 22/09 sont abandonnees (regle 0.3).
 
 **Le brouillon se donne sous l'une ou l'autre forme** : le markdown `**ainsi**`
 d'un brouillon de `sortants/`, ou le texte deja converti en gras Unicode quand on
@@ -326,10 +375,10 @@ caracteres se compte **en points de code** : une lettre en gras Unicode occupe
 deux unites UTF-16, et une mesure naive refusait une accroche de 110 signes en
 la comptant 193.
 
-**Le lien vers le site part dans le corps du post**, jamais en premier
-commentaire : consigne de Julien du 03/09, reaffirmee le 09/09 en connaissance
-du cout mesure (un lien externe coute de 18,8 % a 60 % de portee). Ne pas
-proposer de le retirer, et ne pas le compter comme un defaut de forme.
+**Le lien va en premier commentaire, jamais dans le corps du post** (regle 0.5 de Julien,
+14/10/2026). Cette regle **remplace** la consigne du 03/09, reaffirmee le 09/09, qui mettait le lien
+dans le corps. Le script refuse une URL, un lien `lnkd.in` ou un domaine nu (`claudeagency.fr/...`)
+dans le corps. Dans le post, on peut annoncer « le lien est en commentaire ».
 
 ## Ce que cette skill ne fait pas
 

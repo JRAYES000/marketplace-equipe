@@ -39,12 +39,13 @@ const CONFORME = [
   "Les trois signes utiles tiennent en une phrase, et dix minutes suffisent pour les corriger.",
 ].join("\n");
 
+const NOM_LONGUEUR = "longueur <= 3000 (longueur libre)";
 const critere = (corps, nom, opts) => verifierTexte(corps, opts).resultats.find((x) => x.nom === nom);
 
-test("fixture conforme : 14/14 criteres passes", () => {
+test("fixture conforme : 15/15 criteres passes (regles de Julien du 14/10 comprises)", () => {
   const { resultats, passes, total } = verifierTexte(CONFORME);
-  assert.equal(total, 14);
-  assert.equal(passes, 14, resultats.filter((r) => !r.bon).map((r) => `${r.nom}: ${r.detail}`).join("; "));
+  assert.equal(total, 15);
+  assert.equal(passes, 15, resultats.filter((r) => !r.bon).map((r) => `${r.nom}: ${r.detail}`).join("; "));
 });
 
 test("enGras fabrique du Sans-Serif Bold, jamais l'autre police -- verifie par point de code", () => {
@@ -99,11 +100,12 @@ test("accroche degeneree (un seul mot) refusee -- ne mesure pas la force du hook
   assert.equal(r.detail, "2 mot(s)");
 });
 
-test("longueur hors fourchette 1300-1900 refusee", () => {
-  const corpsCourt = "**Et si ce post etait trop court pour convaincre qui que ce soit ?**\n\nTrop court.";
-  const { resultats } = verifierTexte(corpsCourt);
-  const r = resultats.find((x) => x.nom === "longueur 1300-1900");
-  assert.equal(r.bon, false);
+// Regle 3 de Julien (14/10/2026) : la fourchette 1300-1900 est abandonnee, la longueur est libre
+// jusqu'au plafond de 3 000 caracteres ; un post court passe.
+test("longueur libre : un post court passe, au-dela de 3000 caracteres refuse", () => {
+  const corpsCourt = "**Et si ce post etait court ?**\n\nCourt, et voulu.";
+  assert.equal(critere(corpsCourt, NOM_LONGUEUR).bon, true);
+  assert.equal(critere(CONFORME + "\n\n" + "x".repeat(3000), NOM_LONGUEUR).bon, false);
 });
 
 // Consigne du 29/09/2026 : 1 ou 2 phrases importantes en gras par post au maximum
@@ -314,23 +316,12 @@ test("un mot en gras n'est jamais confondu avec un chiffre", () => {
   assert.equal(r.bon, true, r.detail);
 });
 
-// Bornes exactes de la fourchette de longueur -- jamais testees explicitement avant
-// l'audit adversarial du 22/09/2026. Le code (`nu >= 1300 && nu <= 1900`) inclut les deux
-// bornes ; verifie ici caractere pres, pas approxime.
-test("la fourchette de longueur inclut ses deux bornes (1300 et 1900 passent, 1299 et 1901 refusent)", () => {
-  const auBout = (n) => {
-    const codepoints = [...CONFORME];
-    let corps = codepoints.slice(0, Math.min(n + 20, codepoints.length)).join("");
-    let nu = [...corps.replace(/\*\*/g, "")].length;
-    while (nu < n) { corps += "x"; nu++; }
-    while (nu > n) { corps = corps.slice(0, -1); nu = [...corps.replace(/\*\*/g, "")].length; }
-    return corps;
-  };
-  const attendu = { 1299: false, 1300: true, 1900: true, 1901: false };
-  for (const [n, ok] of Object.entries(attendu)) {
-    const corps = auBout(Number(n));
-    const { resultats } = verifierTexte(corps);
-    const r = resultats.find((x) => x.nom === "longueur 1300-1900");
+// Borne exacte du plafond de longueur (14/10/2026, la fourchette 1300-1900 est abandonnee) :
+// 3000 passe, 3001 refuse, verifie au caractere pres.
+test("le plafond de longueur inclut sa borne (3000 passe, 3001 refuse)", () => {
+  const auBout = (n) => CONFORME + "x".repeat(n - [...CONFORME.replace(/\*\*/g, "")].length);
+  for (const [n, ok] of [[3000, true], [3001, false]]) {
+    const r = critere(auBout(n), NOM_LONGUEUR);
     assert.equal(r.bon, ok, `attendu a ${n} caracteres : ${ok}, obtenu : ${r.bon} (${r.detail})`);
   }
 });
@@ -492,7 +483,7 @@ test("verifierTexte avec le post precedent : refuse un schema identique, accepte
   const autre = critere(CONFORME, "schema different du post precedent", { precedent: POST_A });
   assert.equal(autre.bon, true, autre.detail);
   assert.equal(verifierTexte(CONFORME).resultats.some((x) => x.nom === "schema different du post precedent"), false);
-  assert.equal(verifierTexte(CONFORME, { precedent: CONFORME }).total, 15);
+  assert.equal(verifierTexte(CONFORME, { precedent: CONFORME }).total, 16);
 });
 
 // Critere 15 (29/09/2026) : anglicismes, liste PARTAGEE avec linkedin-carrousel.
@@ -634,6 +625,9 @@ const distinct = (id, { accroche, fin, gras } = {}) => {
     "",
     `Un **${gras ?? `point cle numero ${id}`}** change la suite. Le reste du texte est propre au post ${id}.`,
     "",
+    // Depuis le 14/10/2026, trois posts de suite dans la meme tranche de longueur sont refuses :
+    // « deux » est rallonge (tranche « moyen ») pour que les cinq posts de reference restent varies.
+    ...(id === "deux" ? [Array.from({ length: 20 }, (_, k) => `Le detail ${k} reste propre a ce post.`).join(" "), ""] : []),
     fin ?? FINS[f](id),
   ].join("\n");
 };

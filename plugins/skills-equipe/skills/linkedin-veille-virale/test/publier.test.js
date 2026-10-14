@@ -17,26 +17,26 @@ const { publierPost } = require('../lib/publier');
  * peut apparaitre que si le garde-fou avait laisse passer le texte.
  */
 
-test('publierPost refuse un commentary sans gras avant tout appel reseau', async () => {
+// Depuis le 14/10/2026 (regles de Julien) : ni le gras ni une longueur de 1300-1900 ne sont plus
+// exiges ; un exemple invente (regle 2) ou un lien dans le corps (regle 5) sont refuses, toujours
+// avant tout appel reseau.
+test('publierPost refuse un exemple invente avant tout appel reseau (regle 2 du 14/10/2026)', async () => {
   await assert.rejects(
     () => publierPost({
       authorUrn: 'urn:li:person:test',
-      commentary: 'Un texte sans aucun gras, sans hook, sans emoji.',
+      commentary: 'Un texte sans aucun gras.\n\nExemple inventé pour l\'illustration : un organisme hésite.',
     }),
-    /aucun passage en gras/
+    /regle 2/
   );
 });
 
-// Depuis le 30/09/2026 l'accroche n'est plus forcement une question (consigne de Julien du
-// 29/09) : ce texte, qui ouvre par une affirmation, n'est donc plus refuse pour sa forme mais
-// parce qu'il est bien trop court.
-test('publierPost refuse un commentary trop court, meme avec un gras et une accroche libre', async () => {
+test('publierPost refuse un lien dans le corps avant tout appel reseau (regle 5 du 14/10/2026)', async () => {
   await assert.rejects(
     () => publierPost({
       authorUrn: 'urn:li:person:test',
-      commentary: 'Une affirmation qui ouvre le post sans jamais poser de question. **Un point cle** ressort quand meme du texte. 🚀',
+      commentary: 'Une affirmation qui ouvre le post. **Un point cle** ressort du texte.\n\nLe lien : claudeagency.fr/diagnostic',
     }),
-    /longueur 1300-1900/
+    /regle 5/
   );
 });
 
