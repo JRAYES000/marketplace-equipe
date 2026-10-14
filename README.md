@@ -59,25 +59,6 @@ La colonne *Skill* ci-dessous abrège au nom court pour tenir dans le tableau ; 
 
 > **Une nouvelle skill n'apparaît pas ?** Les mises à jour ne sont pas instantanées. Va dans **Réglages → Capacités → Plugins**, et rafraîchis (ou désinstalle puis réinstalle `skills-equipe`). Redémarrer Claude Desktop aide aussi.
 
-## 🧱 Les mods (à installer un par un)
-
-Un mod change ce que tu vois dans Claude Code : une ligne d'info sous le prompt, des boutons au-dessus, une question avant une action. Il marche dans l'app desktop (onglet Code) et dans le terminal.
-
-**Attention : un mod s'active tout seul dès qu'il est installé.** C'est pour ça qu'ils ne sont pas dans `skills-equipe` : tu choisis lesquels tu veux. Pour en retirer un, désinstalle-le.
-
-**Dans l'app desktop (onglet Code)** : clique sur le bouton **+** à côté de la zone de saisie, puis **Plugins** → **Add plugin**. Choisis le mod dans la liste et installe-le. Pour le désactiver ou le désinstaller plus tard : **+** → **Plugins** → **Manage plugins**. Ça ne marche pas dans une session cloud.
-
-Le mod n'apparaît pas dans la liste ? C'est que `marketplace-equipe` n'est pas encore connue de Claude Code sur ton ordinateur. Copie cette phrase à Claude, dans l'onglet Code : *« Ajoute dans mon fichier ~/.claude/settings.json, rubrique extraKnownMarketplaces, la marketplace marketplace-equipe avec la source git https://github.com/JRAYES000/marketplace-equipe.git, sans rien toucher d'autre. »* Ferme complètement l'app, rouvre-la, et refais **Add plugin**.
-
-**Dans le terminal** : tape `/plugin install next-steps@marketplace-equipe` (remplace `next-steps` par le nom du mod voulu).
-
-Le mod apparaît à la prochaine conversation.
-
-| Mod | Version | Dernière mise à jour | Ce qu'il fait |
-|---|---|---|---|
-| `next-steps` | 0.4.0 | 03/10/2026 | À la fin de chaque réponse, trois idées de « prochaine étape » s'affichent au-dessus du prompt. Un clic (ou la touche 1, 2 ou 3) l'envoie à Claude. Tu peux aussi taper « 1 et 3 » dans le prompt : Claude reçoit les deux étapes, dans l'ordre. **Ignorer** les fait disparaître. `/next-steps off` le coupe, `/next-steps on` le remet. Rien n'est proposé quand Claude vient de te poser une question, ni après une commande (`/handoff`, une skill…) ou un compactage. Chaque suggestion consomme un peu de ton quota. |
-| `cache-keeper` | 0.6.0 | 03/10/2026 | Une rangée de jauges colorées au-dessus du prompt (vert ça va, orange attention, rouge il faut agir) : combien de minutes il reste avant que Claude « oublie » la conversation en mémoire rapide (le cache), la taille de la conversation avec une météo (☀ dégagé, ☁ nuageux, ☂ averses, ☇ orage, ↯ compacter bientôt), une mini-courbe des 12 derniers échanges et ce que le dernier a ajouté, ton quota de la session de 5 h et de la semaine, avec le temps avant leur remise à zéro. La durée de la mémoire rapide (1 h ou 5 min) est mesurée pour de vrai : elle tombe à 5 min quand un quota est dépassé. Quand la mémoire est presque ou déjà vidée, la jauge dit combien de texte le prochain message devra relire. Si tu envoies un message alors qu'elle est vidée et que la conversation est longue, il est mis de côté : **Compacter puis envoyer**, **Envoyer quand même** ou **Annuler**. Une notification te prévient aussi si la mémoire a été vidée sans raison apparente. À droite, deux boutons : **Compact** résume la conversation pour libérer de la place (un message « Compactage en cours… » s’affiche pendant l’opération) ; **Handoff** fait écrire à Claude un document de passation (il faut la skill `/handoff`) ; une fois prêt, **Clear et reprendre** vide la conversation et repart de ce document. 5 minutes avant l'oubli, un bandeau propose **Garder au chaud** (relance la mémoire), **Compacter** ou **Ignorer**. `/cache` affiche l'état. |
-
 ## ⭐ Les modules à installer toi-même
 
 Ceux-là ne sont pas dans notre paquet : ils appartiennent à Anthropic ou à d'autres gens, qui les mettent à jour de leur côté. Installe ceux qui servent à **ton** travail, pas tous.
