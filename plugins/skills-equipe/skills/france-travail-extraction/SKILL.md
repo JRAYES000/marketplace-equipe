@@ -403,7 +403,7 @@ dans la séquence mais n'en recevra rien. Relire l'email sur le CV, puis corrige
 `my.saleshandy.com/sequence/960252`). Sont importées toutes les fiches Notion « A importer » qui
 ont un email et dont la requête figure dans `SH_REQUETES` de `notion.js` (Formation
 naturopathie, Naturopathie, Reconversion bien-être, Infirmière libérale — souvent en
-reconversion vers la naturopathie) — donc aussi celles d'un lot précédent restées en attente.
+reconversion vers la naturopathie, Naturopathie animale, Bien-être animal) — donc aussi celles d'un lot précédent restées en attente.
 **Profils animaliers compris** (v10.1, Julien 04/10/2026 : une seule séquence pour tous).
 Un profil sans prénom est importé sans prénom ni nom (son « Nom » est l'intitulé du profil) :
 le premier e-mail dira « Bonjour , », accepté par Julien le 29/09/2026. Champs envoyés :

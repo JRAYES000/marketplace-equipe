@@ -273,7 +273,8 @@ const lireEcartes = () => { try { return JSON.parse(fs.readFileSync(ECARTES, 'ut
 const SH_KEY = process.env.SALESHANDY_API_KEY || '';
 const SH_SEQUENCE = process.env.SALESHANDY_SEQUENCE_FT || 'dlPyooE6zL';
 const SH_ETAPE = process.env.SALESHANDY_STEP_FT || '2AwrBNv3wQ';
-const SH_REQUETES = ['Formation naturopathie', 'Naturopathie', 'Reconversion bien-être', 'Infirmiere liberale'];
+const SH_REQUETES = ['Formation naturopathie', 'Naturopathie', 'Reconversion bien-être', 'Infirmiere liberale',
+  'Naturopathie animale', 'Bien-être animal'];
 // Profils animaliers importes dans la meme sequence que les autres (Julien, 04/10/2026, v10.1).
 // Limite de debit (v10.3) : 20 appels par fenetre sur /v1/prospects (en-tetes x-ratelimit-*).
 // Fenetre epuisee : on attend sa fin avant l'appel suivant ; 429 : on attend retry-after.
