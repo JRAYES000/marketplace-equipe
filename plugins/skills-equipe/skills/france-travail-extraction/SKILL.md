@@ -178,7 +178,8 @@ code une fois.
 1. **Prévenir Julien**, en une ligne : « Connecte-toi à France Travail dans la fenêtre Chrome de
    Playwright (« Connexion entreprise… ») : identifiant et mot de passe, pas de code. » En routine
    (Julien absent du fil), par `scripts/notifier.ps1 -Alarme`, **après** `preparer` : sonnerie en
-   boucle jusqu'au clic, bouton Chromium qui clignote dans la barre des tâches. Le simple rappel a
+   boucle jusqu'au clic, bouton Chromium qui clignote dans la barre des tâches. Dès `connecte: true`,
+   `notifier.ps1 -Effacer` coupe la sonnerie. Le simple rappel a
    été manqué le 15/10/2026.
 2. **`browser_run_code_unsafe`, `filename` = `<pw>/ft-connexion.js`.** Il branche l'écouteur de
    téléchargements, ouvre les recherches sauvegardées, rend la fenêtre visible si la connexion

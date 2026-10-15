@@ -4,9 +4,14 @@
 # -Alarme : sonnerie en boucle jusqu au clic, puis fenetre Chromium de Playwright mise au premier
 # plan (ou son bouton de barre des taches qui clignote). Pour l appel a se connecter : le simple
 # rappel a ete manque le 15/10/2026.
+# L alarme sonne jusqu au clic, meme apres connexion : -Effacer la coupe des que ft-connexion.js
+# rend connecte: true (retire tous les toasts du lot).
 # Usage : powershell.exe -NoProfile -ExecutionPolicy Bypass -File notifier.ps1 -Titre T -Texte X [-Alarme]
-param([string]$Titre, [string]$Texte, [switch]$Alarme)
+#         powershell.exe -NoProfile -ExecutionPolicy Bypass -File notifier.ps1 -Effacer
+param([string]$Titre, [string]$Texte, [switch]$Alarme, [switch]$Effacer)
 [Windows.UI.Notifications.ToastNotificationManager, Windows.UI.Notifications, ContentType = WindowsRuntime] > $null
+$app = '{1AC14E77-02E7-4E5D-B744-2EB1AE5198B7}\WindowsPowerShell\v1.0\powershell.exe'
+if ($Effacer) { [Windows.UI.Notifications.ToastNotificationManager]::History.Clear($app); "toasts effaces"; exit 0 }
 [Windows.Data.Xml.Dom.XmlDocument, Windows.Data.Xml.Dom.XmlDocument, ContentType = WindowsRuntime] > $null
 $x = New-Object Windows.Data.Xml.Dom.XmlDocument
 $e = [Security.SecurityElement]
@@ -16,7 +21,6 @@ if ($Alarme) {
   $audio = "<audio src='ms-winsoundevent:Notification.Looping.Alarm2' loop='true'/>"
 }
 $x.LoadXml("<toast scenario='$scenario'><visual><binding template='ToastGeneric'><text>$($e::Escape($Titre))</text><text>$($e::Escape($Texte))</text></binding></visual>$audio<actions><action content='OK' arguments='ok'/></actions></toast>")
-$app = '{1AC14E77-02E7-4E5D-B744-2EB1AE5198B7}\WindowsPowerShell\v1.0\powershell.exe'
 [Windows.UI.Notifications.ToastNotificationManager]::CreateToastNotifier($app).Show([Windows.UI.Notifications.ToastNotification]::new($x))
 "toast envoye"
 if (-not $Alarme) { exit 0 }
