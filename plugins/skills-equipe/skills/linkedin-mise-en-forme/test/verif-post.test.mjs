@@ -692,3 +692,19 @@ test("verifierTexte avec `precedents` : critere 16 nomme, le rang 1 nourrit auss
   const seul = verifierTexte(distinct("six"), { precedent: CINQ[0] });
   assert.equal(seul.resultats.some((x) => x.nom === NOM_VARIETE), false, "un seul precedent donne a la main : ancien critere seulement");
 });
+
+// Noms propres a chiffre (Nomena, 16/10/2026) : « OPCO 2i » exempte du critere « aucun chiffre
+// sans source » par la liste de noms-propres-autorises.txt, la chaine exacte seulement.
+test("noms propres autorises : seule la chaine exacte est exemptee", () => {
+  const nom = "aucun chiffre sans source";
+  const opco = "Une phrase d'accroche assez longue pour le test.\n\nOPCO 2i ecrit que les OPCO sont assujettis.";
+  assert.equal(verifierTexte(opco).resultats.find((x) => x.nom === nom).bon, false, "sans liste : le 2 est refuse");
+  assert.equal(verifierTexte(opco, { nomsPropres: ["OPCO 2i"] }).resultats.find((x) => x.nom === nom).bon, true);
+  const autour = "Une phrase d'accroche assez longue pour le test.\n\nOPCO 2i compte 40 dossiers.";
+  const r = verifierTexte(autour, { nomsPropres: ["OPCO 2i"] }).resultats.find((x) => x.nom === nom);
+  assert.equal(r.bon, false, "le chiffre a cote du nom reste controle");
+  assert.match(r.detail, /"40" sans source/);
+  assert.doesNotMatch(r.detail, /"2" sans source/);
+  const voisin = "Une phrase d'accroche assez longue pour le test.\n\nOPCO 23 ecrit que les OPCO sont assujettis.";
+  assert.equal(verifierTexte(voisin, { nomsPropres: ["OPCO 2i"] }).resultats.find((x) => x.nom === nom).bon, false, "OPCO 23 n'est pas OPCO 2i");
+});

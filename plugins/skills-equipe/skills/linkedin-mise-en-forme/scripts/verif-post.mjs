@@ -25,16 +25,20 @@
 //             --dossier <dossier>    dossier des livrables (sinon LIVRABLES_LINKEDIN_DIR, sinon
 //                                    ~/OneDrive/Documents/GitHub/livrables-Claude-Agency/linkedin)
 //             --sans-precedent       ne mesure pas la regle de variete
+//             --noms-propres <fichier>  noms propres a chiffre exemptes du critere « aucun
+//                                    chiffre sans source » (sinon <LIVRABLES_LINKEDIN_DIR ou
+//                                    dossier par defaut ci-dessus>/noms-propres-autorises.txt)
 //   (un second chemin positionnel reste accepte comme --precedent, comme avant le 30/09)
 //
 // Le brouillon se donne en markdown (**ainsi**) ou deja converti en gras Unicode : les
 // deux formes comptent. Chemins en C:/... — node ne resout pas la forme /c/Users/...
 import { readFileSync, existsSync } from "node:fs";
-import { basename } from "node:path";
-import { enGras, ACCENTUE, verifierTexte } from "./lib.mjs";
+import { basename, join } from "node:path";
+import { homedir } from "node:os";
+import { enGras, ACCENTUE, verifierTexte, lireNomsPropres } from "./lib.mjs";
 import { lireCorpsFichier, resoudrePrecedent } from "./precedent.mjs";
 
-const OPTIONS_AVEC_VALEUR = ["--precedent", "--compte", "--dossier"];
+const OPTIONS_AVEC_VALEUR = ["--precedent", "--compte", "--dossier", "--noms-propres"];
 const brut = process.argv.slice(2);
 const options = {};
 const positionnels = [];
@@ -97,7 +101,13 @@ if (aLaMain) {
   else console.log(`AVERTISSEMENT : ${r.avertissement}`);
 }
 
-const { resultats, passes, total } = verifierTexte(corps, precedent !== undefined ? { precedent, precedents } : {});
+// Liste des noms propres a chiffre (« OPCO 2i ») : fichier des livrables, independant de
+// --dossier (qui peut pointer vers une copie des posts precedents).
+const fichierNoms = options["noms-propres"] || join(process.env.LIVRABLES_LINKEDIN_DIR || join(homedir(), "OneDrive", "Documents", "GitHub", "livrables-Claude-Agency", "linkedin"), "noms-propres-autorises.txt");
+const nomsPropres = lireNomsPropres(fichierNoms);
+console.log(`Noms propres autorises (${nomsPropres.length}) : ${nomsPropres.length ? nomsPropres.join(", ") : "aucun"} -- ${existsSync(fichierNoms) ? fichierNoms : "fichier absent : " + fichierNoms}`);
+
+const { resultats, passes, total } = verifierTexte(corps, { ...(precedent !== undefined ? { precedent, precedents } : {}), nomsPropres });
 for (const r of resultats) console.log(`${r.bon ? "OK   " : "ECHEC"} ${r.nom.padEnd(38)} ${r.detail}`);
 console.log(`\n${passes}/${total} criteres passes`);
 process.exit(passes === total ? 0 : 1);

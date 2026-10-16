@@ -315,12 +315,38 @@ function estDetailAnecdote(texte, correspondance) {
 // aussi les LETTRES, construites pour le comptage du gras) faisait matcher des mots entiers
 // ("offres", "en") comme des "chiffres". Plages chiffres seules, distinctes des plages gras.
 const PLAGE_CHIFFRES = "\\u{1D7CE}-\\u{1D7D7}\\u{1D7EC}-\\u{1D7F5}";
-function chiffresSansSource(texte) {
+
+// Noms propres qui contiennent un chiffre (« OPCO 2i ») : demande de Nomena du 16/10/2026,
+// pour ne plus tordre un post (« OPCO 2i (source : ...) ») afin de passer ce critere. Liste
+// lue dans un fichier separe des livrables (linkedin/noms-propres-autorises.txt) : une entree
+// par ligne, les lignes « # » sont des commentaires (la source de chaque entree). Un fichier
+// absent donne une liste vide : le critere reste aussi strict qu'avant.
+export function lireNomsPropres(chemin) {
+  let brut;
+  try { brut = readFileSync(chemin, "utf8"); } catch { return []; }
+  return brut.replace(/^﻿/, "").split(/\r?\n/).map((l) => l.trim()).filter((l) => l && !l.startsWith("#"));
+}
+// Plages [debut, fin[ de chaque occurrence EXACTE (casse comprise) d'un nom autorise. Un chiffre
+// n'est exempte que s'il tient entierement dans une plage : les chiffres autour du nom
+// (« OPCO 2i, 40 % ») restent controles, et « OPCO 23 » n'est pas « OPCO 2i ».
+function plagesNomsPropres(texte, nomsPropres) {
+  const plages = [];
+  for (const nom of nomsPropres) {
+    for (let i = texte.indexOf(nom); i !== -1; i = texte.indexOf(nom, i + 1)) plages.push([i, i + nom.length]);
+  }
+  return plages;
+}
+
+function chiffresSansSource(texte, nomsPropres = []) {
   const REGEX_CHIFFRE = new RegExp(`[\\d${PLAGE_CHIFFRES}]+`, "gu");
   const sourceFinale = contientLigneSourceFinale(texte);
+  const plages = plagesNomsPropres(texte, nomsPropres);
   const fautifs = [];
   let correspondance;
   while ((correspondance = REGEX_CHIFFRE.exec(texte)) !== null) {
+    const debut = correspondance.index;
+    const fin = debut + correspondance[0].length;
+    if (plages.some(([a, b]) => a <= debut && fin <= b)) continue;
     const debutFenetre = Math.max(0, correspondance.index - 80);
     const finFenetre = correspondance.index + correspondance[0].length + 60;
     const fenetre = texte.slice(debutFenetre, finFenetre);
@@ -488,7 +514,7 @@ const dire = (bon, nom, detail) => ({ bon, nom, detail });
  * compte, du plus recent au plus ancien (5 au plus) ; le premier tient lieu de `precedent`, et le
  * critere "variete sur les 5 derniers posts" s'ajoute. Retourne { resultats, passes, total }.
  */
-export function verifierTexte(corps, { precedent, precedents } = {}) {
+export function verifierTexte(corps, { precedent, precedents, nomsPropres = [] } = {}) {
   const lignes = corps.split("\n");
   const resultats = [];
 
@@ -579,7 +605,7 @@ export function verifierTexte(corps, { precedent, precedents } = {}) {
   // critere, un chiffre-preuve invente ("40% des recruteurs...") passait les douze
   // criteres existants sans encombre -- rien ici ne verifiait le sourcage, contrairement
   // a linkedin-carrousel qui le fait depuis le 15/09/2026.
-  const chiffresFautifs = chiffresSansSource(corps);
+  const chiffresFautifs = chiffresSansSource(corps, nomsPropres);
   resultats.push(dire(
     chiffresFautifs.length === 0,
     "aucun chiffre sans source",

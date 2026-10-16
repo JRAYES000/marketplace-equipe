@@ -315,7 +315,10 @@ node "<dossier de la skill>/scripts/verif-post.mjs" verif "C:/chemin/vers/a8.fin
     `linkedin-carrousel/lib/valider-post.js` (`validerChiffreSource`, meme
     fenetre de 80 caracteres avant / 60 apres, meme exemption pour un detail
     d'anecdote couvert par une ligne finale `Source : ...`, meme liste fermee
-    de sources trop vagues). Ajoutee le 22/09/2026, trouvee par un test
+    de sources trop vagues). **Noms propres a chiffre (16/10/2026)** : la chaine exacte d'un nom
+    de `linkedin/noms-propres-autorises.txt` des livrables (« OPCO 2i ») est exemptee, une
+    entree par ligne avec sa source en commentaire ; option `--noms-propres <fichier>`. Les
+    chiffres autour du nom restent controles. Ajoutee le 22/09/2026, trouvee par un test
     adversarial : un chiffre-preuve invente ("40% des recruteurs...") passait
     les douze criteres precedents sans encombre, rien ici ne verifiait le
     sourcage. Bug reel trouve PENDANT ce portage : la premiere version
