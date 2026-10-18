@@ -50,8 +50,20 @@ précaution. La mission réelle est le fait réel de la règle 2. Avant de progr
 - Appliquer les constats de `sortants/annonces-missions/etude/corps.md` (chiffres et écarts
   succès / flops : les lire dans ce fichier, ne pas les recopier ici) : phrase « pourquoi cette
   mission vaut le coup », écriture en « je », rémunération chiffrée.
-- **TJM dans la ligne 1**, jamais en gras (règle du lot v4 : les 10 annonces l'ont en ligne 1).
-  La ligne 2 dit qui je cherche, la durée et le lieu.
+- **Accroche (décision de Julien du 18/10/2026, remplace la règle v4 « TJM jamais en gras »)** :
+  ligne 1 = `💼 Mission freelance IA : <intitulé>, <durée>, <lieu>. <TJM> € HT/jour.`, avec le
+  **TJM seul en gras**, fabriqué par `verif-post.mjs gras "800 € HT/jour."` (un seul passage,
+  le « € » reste maigre). Deux-points après « IA », jamais de tiret long (refusé par le script).
+  La ligne 2 dit l'enjeu concret du client en une phrase (« Un organisme de formation veut
+  industrialiser la création de ses modules »), pas « je cherche ».
+- **Pourquoi** (Buffer, relevé du 18/10/2026, posts Partners publiés depuis plus de 48 h, médiane
+  des impressions) : format 💼 avec TJM en gras **2 926** (n = 9, dont les 5 meilleurs posts du
+  compte), format v4 « 450 € HT par jour pour… » sans gras **1 477** (n = 3). Biais connu : les 9
+  annonces 💼 affichaient toutes 800 €, les v4 de 320 à 600 €. Refaire la mesure au prochain lot.
+- Le reste du corps prend jusqu'à 3 autres passages en gras (règle 2 de `linkedin-mise-en-forme`,
+  4 au plus) : la phrase « pourquoi cette mission vaut le coup », un titre de bloc.
+- Le préfixe « Mission freelance IA » et le TJM en gras ne comptent pas dans la règle de variété ;
+  l'intitulé, si : deux annonces ne commencent jamais par le même intitulé.
 - **Les FAITS sont recopiés mot pour mot** du document de Julien : TJM, durée, lieu, rythme,
   démarrage, environnement, lien. Contrôle par script contre le .docx : 0 écart attendu.
 - **Textes fixes, identiques dans toutes les annonces** : la phrase d'envoi

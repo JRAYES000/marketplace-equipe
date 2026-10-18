@@ -19,7 +19,7 @@ const enGrasSerif = (s) => [...s].map((c) => {
 // Fixture "conforme" : construite pour ce test, pas un vrai post publie -- passe
 // mecaniquement tous les criteres. Sert de reference : toute regression sur un critere
 // existant doit d'abord casser ce test-la. Depuis le 30/09/2026 : accroche libre (ici une
-// question, mais rien ne l'impose), titres de bloc sans gras ni emoji impose, 2 gras au maximum.
+// question, mais rien ne l'impose), titres de bloc sans gras ni emoji impose, 4 gras au maximum (18/10/2026).
 const CONFORME = [
   "Et si votre processus de recrutement faisait fuir vos meilleurs candidats sans que vous le voyiez ?",
   "",
@@ -42,10 +42,10 @@ const CONFORME = [
 const NOM_LONGUEUR = "longueur <= 3000 (longueur libre)";
 const critere = (corps, nom, opts) => verifierTexte(corps, opts).resultats.find((x) => x.nom === nom);
 
-test("fixture conforme : 15/15 criteres passes (regles de Julien du 14/10 comprises)", () => {
+test("fixture conforme : 16/16 criteres passes (regles de Julien du 14/10 et accroche du 18/10 comprises)", () => {
   const { resultats, passes, total } = verifierTexte(CONFORME);
-  assert.equal(total, 15);
-  assert.equal(passes, 15, resultats.filter((r) => !r.bon).map((r) => `${r.nom}: ${r.detail}`).join("; "));
+  assert.equal(total, 16);
+  assert.equal(passes, 16, resultats.filter((r) => !r.bon).map((r) => `${r.nom}: ${r.detail}`).join("; "));
 });
 
 test("enGras fabrique du Sans-Serif Bold, jamais l'autre police -- verifie par point de code", () => {
@@ -59,7 +59,7 @@ test("enGras fabrique du Sans-Serif Bold, jamais l'autre police -- verifie par p
   // comme un gras existant, dans la BONNE police.
   const corps = CONFORME.replace("**processus trop lent**", enGras("processus trop lent"));
   const { resultats } = verifierTexte(corps);
-  const gras = resultats.find((x) => x.nom === "gras : 2 passages au maximum");
+  const gras = resultats.find((x) => x.nom === "gras : 4 passages au maximum");
   assert.equal(gras.bon, true);
   assert.equal(gras.detail, "2 trouve(s)", "le gras converti est bien compte, comme le markdown");
   assert.equal(resultats.find((x) => x.nom === "gras dans la bonne police (Sans-Serif Bold)").bon, true);
@@ -108,24 +108,40 @@ test("longueur libre : un post court passe, au-dela de 3000 caracteres refuse", 
   assert.equal(critere(CONFORME + "\n\n" + "x".repeat(3000), NOM_LONGUEUR).bon, false);
 });
 
-// Consigne du 29/09/2026 : 1 ou 2 phrases importantes en gras par post au maximum
-// (remplace "au moins huit").
-test("plus de 2 passages en gras refuse, 1 ou 2 acceptes", () => {
-  const troisGras = CONFORME.replace("dix minutes suffisent", "**dix minutes suffisent**");
-  const r = critere(troisGras, "gras : 2 passages au maximum");
+// Consigne du 18/10/2026 : 4 passages en gras au maximum (29/09 : 2 ; avant : au moins huit).
+test("plus de 4 passages en gras refuse, 1 a 4 acceptes", () => {
+  const quatreGras = CONFORME
+    .replace("dix minutes suffisent", "**dix minutes suffisent**")
+    .replace("On repond sous deux jours.", "**On repond sous deux jours.**");
+  assert.equal(critere(quatreGras, "gras : 4 passages au maximum").bon, true);
+  const cinqGras = quatreGras.replace("On explique chaque etape.", "**On explique chaque etape.**");
+  const r = critere(cinqGras, "gras : 4 passages au maximum");
   assert.equal(r.bon, false);
-  assert.equal(r.detail, "3 trouve(s)");
+  assert.equal(r.detail, "5 trouve(s)");
   const unGras = CONFORME.replace("**silence total suivant l'entretien**", "silence total suivant l'entretien");
-  assert.equal(critere(unGras, "gras : 2 passages au maximum").bon, true);
-  assert.equal(critere(CONFORME, "gras : 2 passages au maximum").bon, true);
+  assert.equal(critere(unGras, "gras : 4 passages au maximum").bon, true);
+  assert.equal(critere(CONFORME, "gras : 4 passages au maximum").bon, true);
 });
 
-test("plus de 2 passages en gras refuse aussi quand le gras est deja converti en Unicode", () => {
+test("plus de 4 passages en gras refuse aussi quand le gras est deja converti en Unicode", () => {
   const corps = CONFORME
     .replace("**processus trop lent**", enGras("processus trop lent"))
     .replace("**silence total suivant l'entretien**", enGras("silence total suivant l'entretien"))
-    .replace("dix minutes suffisent", enGras("dix minutes suffisent"));
-  assert.equal(critere(corps, "gras : 2 passages au maximum").bon, false);
+    .replace("dix minutes suffisent", enGras("dix minutes suffisent"))
+    .replace("On repond sous deux jours.", enGras("On repond sous deux jours."))
+    .replace("On explique chaque etape.", enGras("On explique chaque etape."));
+  assert.equal(critere(corps, "gras : 4 passages au maximum").bon, false);
+});
+
+// 18/10/2026 : accroche jamais entierement en gras ; le TJM seul en gras reste permis.
+test("accroche entierement en gras refusee, gras partiel accepte", () => {
+  const NOM = "accroche pas entierement en gras";
+  const ligne1 = "Et si votre processus de recrutement faisait fuir vos meilleurs candidats sans que vous le voyiez ?";
+  assert.equal(critere(CONFORME, NOM).bon, true);
+  assert.equal(critere(CONFORME.replace(ligne1, "**" + ligne1 + "**"), NOM).bon, false);
+  assert.equal(critere(CONFORME.replace(ligne1, enGras(ligne1)), NOM).bon, false);
+  const annonce = "\u{1F4BC} Mission freelance IA, Portail B2B, 6 mois, remote. " + enGras("800 EUR HT/jour.");
+  assert.equal(critere(CONFORME.replace(ligne1, annonce), NOM).bon, true);
 });
 
 test("un gras accentue est refuse", () => {
@@ -147,7 +163,7 @@ test("un gras dans l'autre police (Mathematical Bold avec empattement) est reper
   const segmentSerif = enGrasSerif("deux briques");
   const corps = CONFORME.replace("**processus trop lent**", segmentSerif);
   const { resultats } = verifierTexte(corps);
-  const gras = resultats.find((x) => x.nom === "gras : 2 passages au maximum");
+  const gras = resultats.find((x) => x.nom === "gras : 4 passages au maximum");
   const accent = resultats.find((x) => x.nom === "aucun gras accentue");
   const police = resultats.find((x) => x.nom === "gras dans la bonne police (Sans-Serif Bold)");
   assert.equal(gras.bon, true, "le gras serif compte bien comme un gras existant");
@@ -272,7 +288,7 @@ test("une apostrophe de texte courant, hors de tout gras, ne compte jamais comme
     "coute des candidats avant meme l'offre, qu'il s'agisse d'un stage ou d'un poste"
   );
   const { resultats } = verifierTexte(corps);
-  const r = resultats.find((x) => x.nom === "gras : 2 passages au maximum");
+  const r = resultats.find((x) => x.nom === "gras : 4 passages au maximum");
   assert.equal(r.detail, "2 trouve(s)", "les apostrophes de texte courant ajoutees ne doivent pas faire monter le compte");
 });
 
@@ -483,7 +499,7 @@ test("verifierTexte avec le post precedent : refuse un schema identique, accepte
   const autre = critere(CONFORME, "schema different du post precedent", { precedent: POST_A });
   assert.equal(autre.bon, true, autre.detail);
   assert.equal(verifierTexte(CONFORME).resultats.some((x) => x.nom === "schema different du post precedent"), false);
-  assert.equal(verifierTexte(CONFORME, { precedent: CONFORME }).total, 16);
+  assert.equal(verifierTexte(CONFORME, { precedent: CONFORME }).total, 17);
 });
 
 // Critere 15 (29/09/2026) : anglicismes, liste PARTAGEE avec linkedin-carrousel.
@@ -707,4 +723,22 @@ test("noms propres autorises : seule la chaine exacte est exemptee", () => {
   assert.doesNotMatch(r.detail, /"2" sans source/);
   const voisin = "Une phrase d'accroche assez longue pour le test.\n\nOPCO 23 ecrit que les OPCO sont assujettis.";
   assert.equal(verifierTexte(voisin, { nomsPropres: ["OPCO 2i"] }).resultats.find((x) => x.nom === nom).bon, false, "OPCO 23 n'est pas OPCO 2i");
+});
+
+// 18/10/2026 : format des annonces de mission (« 💼 Mission freelance IA : intitule ... 800 € HT/jour. »).
+test("annonce 💼 : TJM en gras = un seul passage, prefixe et TJM ne bloquent pas la variete", () => {
+  const annonce = (intitule, fin) => [
+    "\u{1F4BC} Mission freelance IA : " + intitule + ", 4 mois, Nice. " + enGras("800 € HT/jour."),
+    "Un groupe traite des centaines de dossiers.",
+    "",
+    fin,
+  ].join("\n");
+  const a = annonce("Analyse de dossiers immobiliers", "Le lien est en commentaire.");
+  const b = annonce("Portail de support B2B", "Vous pensez a quelqu'un ?");
+  assert.equal(critere(a, "gras : 4 passages au maximum").detail, "1 trouve(s)");
+  assert.equal(critere(a, "aucun gras accentue").bon, true);
+  assert.equal(critere(a, "accroche pas entierement en gras").bon, true);
+  assert.deepEqual(varieteSur(b, [a]).filter((v) => v.type === "debut" || v.type === "gras"), []);
+  const memeIntitule = annonce("Analyse de dossiers immobiliers", "Autre fin.");
+  assert.equal(varieteSur(memeIntitule, [a]).some((v) => v.type === "debut"), true);
 });

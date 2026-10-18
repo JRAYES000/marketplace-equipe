@@ -213,8 +213,10 @@ export const enGras = (s) => [...s].map((c) => {
 }).join("");
 
 // Ce que le gras ne sait rendre dans AUCUNE des deux polices : tout ce qui n'est ni
-// ASCII, ni ponctuation courante, ni espace. Les accents en font partie.
-export const ACCENTUE = /[^\x00-\x7F«»…’—\s]/u;
+// ASCII, ni ponctuation courante, ni espace. Les accents en font partie. Le symbole « € »
+// (18/10/2026) n'est pas un accent : il reste maigre, comme « — », sans casser le mot
+// (« 800 € HT/jour », TJM des annonces de mission).
+export const ACCENTUE = /[^\x00-\x7F«»…’—€\s]/u;
 // Un emoji = un pictogramme suivi, ou non, du selecteur de variante U+FE0F. Corrige le
 // 03/10/2026 : la classe contenait U+FE0F comme un caractere a part, donc un coeur avec
 // selecteur comptait pour deux emojis, et U+231A-231B / U+23E9-23FA (sablier, reveil...)
@@ -236,7 +238,9 @@ export const EMOJI_G = new RegExp(EMOJI.source, "gu");
 // accentuee n'est ajoutee).
 const PLAGE_SANS_SERIF = "\\u{1D5D4}-\\u{1D607}\\u{1D7EC}-\\u{1D7F5}";
 const PLAGE_SERIF = "\\u{1D400}-\\u{1D433}\\u{1D7CE}-\\u{1D7D7}";
-const PONCTUATION_RUN = "'’";
+// 18/10/2026 : « / » et « € » aussi, pour qu'un TJM en gras (« 800 € HT/jour ») compte pour un
+// seul passage et non deux ou trois.
+const PONCTUATION_RUN = "'’/€";
 export const UNICODE_GRAS = new RegExp(`[${PLAGE_SANS_SERIF}${PLAGE_SERIF}${PONCTUATION_RUN}\\u0020]+`, "gu");
 // Sert a REPERER un usage de l'AUTRE police (serif), non conforme a la regle de Julien.
 export const UNICODE_GRAS_SERIF = new RegExp(`[${PLAGE_SERIF}]`, "u");
@@ -448,7 +452,12 @@ const segmentsGras = (corps) => [...corps.matchAll(/\*\*(.+?)\*\*/g)].map((m) =>
 const cleTexte = (s) => versAscii(s).normalize("NFD").replace(/\p{M}/gu, "").toLowerCase().replace(/[^a-z0-9]+/g, " ").trim();
 const NB_MOTS_DEBUT = 3;
 const NB_MOTS_GRAS_MIN = 2;
-const debutDuPost = (corps) => cleTexte(lignesDe(corps)[0]).split(" ").slice(0, NB_MOTS_DEBUT).join(" ");
+// 18/10/2026 : le prefixe fixe des annonces (« 💼 Mission freelance IA ») ne compte pas dans le
+// debut compare ; la variete se mesure sur l'intitule qui suit.
+const PREFIXE_ANNONCE = /^mission freelance ia /;
+const debutDuPost = (corps) => cleTexte(lignesDe(corps)[0]).replace(PREFIXE_ANNONCE, "").split(" ").slice(0, NB_MOTS_DEBUT).join(" ");
+// 18/10/2026 : un TJM en gras (« 800 € HT/jour ») peut revenir d'une annonce a l'autre.
+const EST_TJM = /^\d+( \d+)? (eur )?ht (par )?jour$/;
 
 /**
  * Regle de variete etendue (30/09/2026) : le brouillon est compare a chacun des derniers posts du
@@ -475,7 +484,7 @@ export function varieteSur(corps, precedents = []) {
   const debut = debutDuPost(corps);
   const fin = finDuPost(corps);
   const cleFin = EST_LIEN.test(fin) ? "" : cleTexte(fin);
-  const gras = new Set(segmentsGras(corps).map(cleTexte).filter((g) => g.split(" ").length >= NB_MOTS_GRAS_MIN));
+  const gras = new Set(segmentsGras(corps).map(cleTexte).filter((g) => g.split(" ").length >= NB_MOTS_GRAS_MIN && !EST_TJM.test(g)));
   const violations = [];
   precedents.forEach((texte, i) => {
     const rang = i + 1;
@@ -542,9 +551,18 @@ export function verifierTexte(corps, { precedent, precedents, nomsPropres = [] }
 
   // Deux formes acceptees pour compter un gras : le markdown, et le gras Unicode deja
   // converti -- dans l'une ou l'autre police (voir UNICODE_GRAS plus haut). Depuis le
-  // 30/09/2026 : 2 passages au maximum par post (avant : au moins huit).
+  // 18/10/2026 : 4 passages au maximum par post (30/09 : 2 ; avant : au moins huit). Mesure
+  // Buffer du 18/10 sur les posts Partners : les 5 meilleurs mettent le TJM en gras.
   const gras = segmentsGras(corps);
-  resultats.push(dire(gras.length <= 2, "gras : 2 passages au maximum", `${gras.length} trouve(s)`));
+  resultats.push(dire(gras.length <= 4, "gras : 4 passages au maximum", `${gras.length} trouve(s)`));
+
+  // 18/10/2026 : l'accroche n'est jamais entierement en gras. Mesure Buffer du 18/10 : les 13
+  // posts Partners a question tout en gras font 391 impressions de mediane, contre 2 926 pour
+  // les annonces qui ne mettent en gras que le TJM. Un gras partiel (chiffre, TJM) reste permis.
+  const { ascii: asciiAccroche, gras: masqueAccroche } = ligneAvecGras(lignes[0]);
+  const lettresAccroche = [...asciiAccroche].flatMap((c, i) => (/[A-Za-z0-9]/.test(c) ? [masqueAccroche[i]] : []));
+  const accrocheToutGras = lettresAccroche.length > 0 && lettresAccroche.every(Boolean);
+  resultats.push(dire(!accrocheToutGras, "accroche pas entierement en gras", accrocheToutGras ? "toute la ligne 1 est en gras" : "gras partiel ou absent"));
   const fautifs = gras.filter((g) => ACCENTUE.test(g.replace(EMOJI_G, "").replace(UNICODE_GRAS, "")));
   resultats.push(dire(fautifs.length === 0, "aucun gras accentue", fautifs.length ? fautifs.join(" | ") : "tous sans accent"));
 

@@ -6,7 +6,8 @@ description: >-
   publication (2 posts par jour au plus, un fait reel sans exemple invente,
   moule casse, sujet non repete sur 30 jours, lien en commentaire, client qui
   arrete de defiler) : accroche qui fait cliquer « ... plus », 1 a 4 blocs, fin
-  et longueur variees, 2 gras au plus, lecture a 13 ans, tournures interdites,
+  et longueur variees, 4 gras au plus (jamais toute l'accroche), accroches
+  mesurees sur Buffer, lecture a 13 ans, tournures interdites,
   schema varie, passe humanizer. Se combine avec contenu-linkedin (QUOI
   ecrire) : celle-ci definit COMMENT. Declencher des qu'il s'agit d'ecrire,
   reecrire, relire ou auditer un post LinkedIn, un brouillon dans sortants/ ou
@@ -19,8 +20,9 @@ description: >-
 # LinkedIn — mise en forme
 
 Regles de forme decidees par Julien le 2026-09-18, **assouplies et completees le
-2026-09-29** (mail de 22h08) : accroche libre, 1 a 4 blocs, fin libre, gras reduit a
-1 ou 2 passages, trois tournures interdites de plus, et une regle de variete. Elles
+2026-09-29** (mail de 22h08) : accroche libre, 1 a 4 blocs, fin libre, trois tournures
+interdites de plus, et une regle de variete. **Le 18/10/2026**, Julien remonte le gras a
+4 passages et fait mesurer les accroches sur Buffer (regles 1 et 2). Elles
 s'appliquent aux **deux comptes**, Claude Agency et Claude Partners, au meme niveau.
 Ce qui n'a pas change : le controle des accents (regle 2) et des anglicismes.
 
@@ -106,8 +108,41 @@ Contraintes qui restent :
 - **L'accroche n'enonce pas la reponse.** Le hook ouvre, le corps referme.
 - Trois mots au moins : le script n'attrape que l'accroche vide ou reduite a un
   fragment. Si elle donne envie de cliquer, c'est a l'oeil qu'on le juge.
+- **Jamais toute l'accroche en gras** (18/10/2026, critere du script). Le gras de la
+  ligne 1 se pose sur le chiffre ou le TJM, pas sur la phrase entiere.
 
-## 2. Gras : 1 ou 2 phrases importantes, sans accent
+### Ce qui marche et ce qui ne marche pas (mesure Buffer du 18/10/2026)
+
+Les 62 posts Claude Partners publies depuis plus de 48 h, relus dans Buffer le 18/10/2026
+(impressions, mediane). Ce sont des correlations sur de petits groupes, pas des preuves :
+les recits en « je » datent tous de debut septembre, quand le compte etait plus petit, et les
+annonces 💼 affichent toutes 800 €. Refaire la mesure avant de citer ces chiffres ailleurs.
+
+| Accroche (ligne 1) | n | Impressions |
+|---|---|---|
+| `💼 Mission freelance IA — intitule, duree, lieu.` + **TJM en gras** | 9 | **2 926** |
+| Annonce qui ouvre sur « 450 € HT par jour pour… », TJM pas en gras | 3 | 1 477 |
+| Interpelle le lecteur par son metier (« Developpeur, vous… », « Vous etes consultant IA… ») | 2 | 1 130 |
+| Autre question concrete (tarif, mission, paiement) | 16 | 338 |
+| Question entierement en gras | 13 | 391 |
+| « Et si… ? » | 4 | **170** |
+| Ouvre sur « Exemple : » ou un cas invente | 4 | 169 |
+
+A faire :
+
+- **Un chiffre concret en ligne 1**, en gras : TJM, duree, nombre. 9 des 10 meilleurs posts du compte en
+  ont un, et 7 de ces 9 le mettent en gras.
+- **Nommer le lecteur** (son metier, sa situation) avant de lui parler.
+- **Une prise de position nette** (« Je ne recrute pas un freelance IA qui ne sait jamais dire
+  non. », 1 027) bat une question ouverte.
+
+A eviter :
+
+- « Et si… ? » et les questions abstraites sur l'IA : 105 a 391 impressions.
+- Une accroche entierement en gras : elle ne fait pas mieux qu'une accroche sans gras.
+- Un cas ouvert par « Exemple : » (deja interdit par la regle 0.2).
+
+## 2. Gras : 1 a 4 passages importants, sans accent
 
 LinkedIn n'a pas d'editeur riche : le gras se fabrique avec les caracteres
 Unicode Mathematical Sans-Serif Bold. **Ce bloc ne contient aucune lettre
@@ -121,12 +156,19 @@ pas — pas le passer en gras quand meme.
 
     "La verite mesuree"  ->  reformuler en  "Trois mois pour rien"
 
-**1 ou 2 passages en gras par post, 2 au maximum** (Julien, 2026-09-29, remplace
-« au moins huit ») : la phrase qui porte la lecon, le chiffre qui frappe. Un titre de
-bloc en gras compte dans ces deux passages. Le script refuse un troisieme.
+**1 a 4 passages en gras par post, 4 au maximum** (Julien, 18/10/2026 ; avant : 2 au
+maximum depuis le 29/09, et au moins huit avant). Un post qui n'a aucun gras se lit mal
+dans le fil : en mettre au moins un. Dans l'ordre :
+
+1. **Le chiffre qui frappe** : TJM, duree, montant, resultat. Dans une annonce, le TJM de la
+   ligne 1 est toujours en gras.
+2. **La phrase qui porte la lecon**, une seule.
+3. **Un ou deux titres de bloc**, s'il y en a. Ils comptent dans les 4.
+
+Le script refuse un cinquieme passage, ainsi qu'une ligne 1 entierement en gras.
 
 Ce qui ne se met **pas** en gras : un paragraphe entier (ce n'est plus un accent,
-c'est du bruit), et des mots isoles disperses sans rapport entre eux.
+c'est du bruit), toute l'accroche, et des mots isoles disperses sans rapport entre eux.
 
 Jamais a la main, toujours par le script (le mapping fait 62 caracteres, une
 erreur ne se voit pas a la relecture) :
@@ -145,7 +187,7 @@ Un post se lit en un coup d'oeil ou ne se lit pas. Il compte **1, 2, 3 ou 4 bloc
 (Julien, 2026-09-29).
 
 - Un titre, s'il y en a un, est **court** et sur sa propre ligne. Il peut etre en
-  gras (sans accent, et il compte dans les 2 passages de la regle 2) ou en texte
+  gras (sans accent, et il compte dans les 4 passages de la regle 2) ou en texte
   simple.
 - **Aucun titre ni emoji n'est impose** : plus de « 👉 ⚡ ✅ » obligatoires. Un post
   d'un seul bloc, sans titre, est valide.
@@ -260,9 +302,10 @@ accepte), `--compte <compte>`, `--dossier <dossier>` (sinon la variable
 ## Guardrails — avant depot dans sortants/
 
 Les criteres de `contenu-linkedin`, plus les suivants. Le script en mesure
-quinze (seize quand un post precedent est trouve, dix-sept quand il en trouve plusieurs, regle 7 ; les criteres 2 et 4 comptent
+seize (dix-sept quand un post precedent est trouve, dix-huit quand il en trouve plusieurs, regle 7 ; les criteres 2 et 4 comptent
 double, le gras accentue et l'accent manquant dans le gras sont deux mesures
-distinctes ; le quinzieme est « regles de Julien 14/10 », regle 0) ; seul le niveau de lecture se relit :
+distinctes ; le quinzieme est « regles de Julien 14/10 », regle 0 ; le seizieme, « accroche pas
+entierement en gras », date du 18/10/2026) ; seul le niveau de lecture se relit :
 
 ```bash
 node "<dossier de la skill>/scripts/verif-post.mjs" verif "C:/chemin/vers/a8.final.txt"
@@ -270,8 +313,8 @@ node "<dossier de la skill>/scripts/verif-post.mjs" verif "C:/chemin/vers/a8.fin
 
 1. L'accroche tient en **140 caracteres**, sans autre contrainte de forme (revu le
    29/09 : elle ne doit plus finir par un point d'interrogation).
-2. **2 passages en gras au maximum**, aucun caractere accentue dedans, tous
-   dans la **bonne police** (voir plus bas).
+2. **4 passages en gras au maximum** (18/10/2026), jamais toute la ligne 1, aucun
+   caractere accentue dedans, tous dans la **bonne police** (voir plus bas).
 3. **4 titres de bloc en gras au maximum** ; un post sans titre est valide.
 4. **6 emojis au maximum**, tous en tete de ligne ; aucun n'est impose.
 5. Aucune phrase de plus de 20 mots ; aucun terme technique non explique.
@@ -352,7 +395,7 @@ Mathematical Bold avec empattement — ex. Double-Struck, Fullwidth, Fraktur) n'
 NI compte comme un gras existant, NI signale comme une police fautive : il
 disparait silencieusement du calcul, comme s'il n'existait pas. Verifie avec un
 segment en Double-Struck (`𝕡𝕣𝕠𝕔𝕖𝕤𝕤 𝕥𝕣𝕠𝕡 𝕝𝕖𝕟𝕥`) : le critere 2 continue de passer
-tant que les AUTRES segments ne depassent pas le plafond de deux, sans jamais signaler
+tant que les AUTRES segments ne depassent pas le plafond de quatre, sans jamais signaler
 que ce segment-la ne rendra pas en gras sur LinkedIn. Pas corrige : il existe
 plus d'une dizaine de styles Unicode "alphanumeriques stylises" (Double-Struck,
 Fullwidth, Fraktur, Script, Sans Italic, Monospace...) — en couvrir un troisieme

@@ -201,7 +201,7 @@ test("CLI : sans post precedent (compte inconnu) -> un AVERTISSEMENT, le critere
   const r = lancer("verif", join(racine, "2026-10-03", "brouillon.txt"), "--dossier", racine);
   assert.match(r.stdout, /AVERTISSEMENT : compte inconnu/);
   assert.doesNotMatch(r.stdout, /schema different/);
-  assert.match(r.stdout, /15\/15 criteres passes/);
+  assert.match(r.stdout, /16\/16 criteres passes/);
   assert.equal(r.status, 0, r.stdout);
 });
 
