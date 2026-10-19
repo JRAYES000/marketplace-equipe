@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { enGras, verifierTexte, motsAccentManquantCorps, schemaPost, memeSchema, varieteSur } from "../scripts/lib.mjs";
+import { enGras, verifierTexte, motsAccentManquantCorps, schemaPost, memeSchema, varieteSur, typeAccroche } from "../scripts/lib.mjs";
 
 // Fabrique du Mathematical Bold AVEC empattement (bases documentees dans lib.mjs,
 // SERIF) -- sert uniquement a construire des fixtures de test pour la mauvaise police,
@@ -741,4 +741,40 @@ test("annonce 💼 : TJM en gras = un seul passage, prefixe et TJM ne bloquent p
   assert.deepEqual(varieteSur(b, [a]).filter((v) => v.type === "debut" || v.type === "gras"), []);
   const memeIntitule = annonce("Analyse de dossiers immobiliers", "Autre fin.");
   assert.equal(varieteSur(memeIntitule, [a]).some((v) => v.type === "debut"), true);
+});
+
+// Types d'accroche (19/10/2026) : six types calcules, premier qui convient. « situation » n'est pas
+// calcule (decision du 19/10/2026) ; les quantites dites en lettres comptent comme « chiffre ».
+test("typeAccroche : question, citation, echeance, chiffre, annonce, affirmation", () => {
+  assert.equal(typeAccroche("Votre offre cite-t-elle la version en vigueur ?"), "question");
+  assert.equal(typeAccroche("« Faut-il un outil ? »"), "question", "question prime sur citation");
+  assert.equal(typeAccroche("« une réduction des prestations » : c'est prévu pour France Travail."), "citation");
+  assert.equal(typeAccroche("La déclaration de septembre est due le 31/10/2026, un samedi."), "echeance");
+  assert.equal(typeAccroche("Le dossier est à rendre au plus tard le 5 novembre 2026."), "echeance");
+  assert.equal(typeAccroche("Jusqu'au 31/10/2026, le Cybermois propose un agenda d'actions de cybersécurité pour les TPE et PME."), "echeance");
+  assert.equal(typeAccroche("350 millions d'euros (source : projet de loi n° 3210, déposé le 01/10/2026)."), "chiffre", "une date sans mot d'echeance reste un chiffre");
+  assert.equal(typeAccroche("Une facture de 1/2 journée peut se payer en retard."), "chiffre");
+  assert.equal(typeAccroche("Anthropic a sorti un Claude Haiku bien moins cher que le précédent."), "annonce");
+  assert.equal(typeAccroche("Une plateforme gratuite : le ministère du Travail les annonce."), "annonce");
+  assert.equal(typeAccroche("Le ministère lance une plateforme gratuite pour se former à l'IA."), "annonce");
+  assert.equal(typeAccroche("Une annonce qui liste des missions ne dit pas pourquoi le poste existe."), "affirmation", "annonce employee comme nom");
+  assert.equal(typeAccroche("Un dirigeant qui n'utilise jamais l'IA ne peut pas piloter un projet IA."), "affirmation");
+});
+test("typeAccroche : « situation » n'est plus calcule, deux phrases d'ouverture restent une affirmation", () => {
+  assert.equal(typeAccroche("Un client demande un peu plus que prévu. Voici comment dire non."), "affirmation");
+  assert.equal(typeAccroche("Une entreprise adhérente d'Atlas reçoit la facture de sa formation. Jusqu'en septembre, Atlas l'aurait souvent payée."), "affirmation");
+});
+test("typeAccroche : une quantite dite en lettres compte comme « chiffre »", () => {
+  assert.equal(typeAccroche("Plus de la moitié des dirigeants de TPE-PME craignent de perdre ou de se faire pirater des données."), "chiffre", "accroche d'AG4");
+  assert.equal(typeAccroche("La moitié des TPE n'ont jamais testé leur sauvegarde."), "chiffre");
+  assert.equal(typeAccroche("Un dirigeant sur trois ne sait pas où sont ses données."), "chiffre");
+  assert.equal(typeAccroche("Deux entreprises sur cinq ont subi un incident."), "chiffre");
+  assert.equal(typeAccroche("Un sur trois ne sait pas où sont ses données."), "chiffre");
+  assert.equal(typeAccroche("Un sur le mur ne compte pas."), "affirmation", "sans nombre en lettres apres « sur »");
+  assert.equal(typeAccroche("La majorité des organismes de formation n'ont pas de règle d'usage de l'IA."), "chiffre");
+  assert.equal(typeAccroche("La plupart des stagiaires utilisent déjà l'IA."), "chiffre");
+});
+test("schemaPost : l'accroche porte le type calcule, la fin garde trois types", () => {
+  assert.deepEqual(schemaPost("« une réduction » : c'est prévu.\n\nTexte.\n\nSource : Insee, 2026"), { accroche: "citation", blocs: 1, fin: "affirmation" });
+  assert.deepEqual(schemaPost("Plus de la moitié des dirigeants le craignent.\n\nTexte.\n\nVoila."), { accroche: "chiffre", blocs: 1, fin: "affirmation" });
 });

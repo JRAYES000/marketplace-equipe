@@ -422,9 +422,35 @@ function titresDeBloc(lignes) {
 // Schema d'un post : type d'accroche, nombre de blocs, type de fin. Sert a la regle du
 // 30/09/2026 : jamais deux posts de suite sur un compte avec la meme accroche, le meme nombre
 // de blocs et la meme fin. "Meme accroche" se lit comme meme TYPE d'accroche (question,
-// chiffre, affirmation) : deux textes mot pour mot identiques ne posent pas la question.
+// citation, echeance, chiffre, annonce, affirmation) : deux textes mot pour mot
+// identiques ne posent pas la question.
 const clairLigne = (l) => versAscii(l).replace(/\*\*/g, "").trim();
 const typeDeLigne = (l) => (/\?["»)\s]*$/.test(l) ? "question" : /\d/.test(l) ? "chiffre" : "affirmation");
+
+// Type d'accroche, 6 types actifs (19/10/2026, controle de la 1re ligne seulement). Premier qui
+// convient : question (la ligne finit par « ? ») ; citation (la ligne s'ouvre sur un guillemet) ;
+// echeance (une date ET un mot d'echeance : « due le 31/10 », « jusqu'au 31/10/2026 ») ; chiffre
+// (un chiffre, ou une quantite dite en lettres : « plus de la moitie », « un sur trois »,
+// « un dirigeant sur trois », « la majorite », « la plupart ») ; annonce (un verbe d'annonce a un sujet qui annonce : « a sorti »,
+// « les annonce », « lance une ») ; affirmation (le reste). Un mot d'annonce employe comme nom
+// (« Une annonce qui... ») n'en est pas un. « situation » n'est PAS calcule : DEUX_PHRASES ne
+// correspond jamais (decision du 19/10/2026 : 5 bons classements sur 12) ; reste une etiquette a
+// l'oeil dans controle-formes.py des livrables.
+const MOIS = "janvier|fevrier|février|mars|avril|mai|juin|juillet|aout|août|septembre|octobre|novembre|decembre|décembre";
+const DATE_ACCROCHE = new RegExp(`\\d{1,2}\\s?/\\s?\\d{1,2}(?:\\s?/\\s?\\d{2,4})?|\\d{1,2}(?:er)?\\s+(?:${MOIS})`, "iu");
+const MOT_ECHEANCE = /(?<![\p{L}])(?:dues?|dus|doit|doivent|au plus tard|avant le|jusqu['’]au|date limite|[ée]ch[ée]ance|dernier jour|d['’]ici le)(?![\p{L}])/iu;
+const VERBE_ANNONCE = /(?<![\p{L}])(?:(?:a|ont)\s+(?:annonc[ée]|lanc[ée]|publi[ée]|sorti|r[ée][ée]crit|d[ée]voil[ée])|(?:les|nous|vous)\s+annonce(?:nt)?|annonce(?:nt)?\s+(?:que|qu['’]|un|une|des|la|le|les)|(?:lance|publie|d[ée]voile|ouvre)(?:nt)?\s+(?:un|une|des|le|la|les|son|sa|ses|leur|leurs))(?![\p{L}])/iu;
+const NOMBRE_LETTRES = "un|une|deux|trois|quatre|cinq|six|sept|huit|neuf|dix|onze|douze|quinze|vingt|trente|cent";
+const QUANTITE_LETTRES = new RegExp(`(?<![\\p{L}])(?:la\\s+moiti[ée]|la\\s+majorit[ée]|la\\s+plupart|(?:${NOMBRE_LETTRES})(?:\\s+\\p{L}+){0,2}\\s+sur\\s+(?:${NOMBRE_LETTRES}))(?![\\p{L}])`, "iu");
+const DEUX_PHRASES = /(?!)/u;
+export const typeAccroche = (l) => (
+  /\?["»)\s]*$/.test(l) ? "question"
+    : /^\s*[«"“]/.test(l) ? "citation"
+      : DATE_ACCROCHE.test(l) && MOT_ECHEANCE.test(l) ? "echeance"
+        : /\d/.test(l) || QUANTITE_LETTRES.test(l) ? "chiffre"
+          : VERBE_ANNONCE.test(l) ? "annonce"
+            : DEUX_PHRASES.test(l) ? "situation"
+              : "affirmation");
 const EST_LIEN = /https?:\/\/|claudeagency\.fr|claudepartners/i;
 const lignesDe = (corps) => corps.replace(/\r\n/g, "\n").trim().split("\n");
 // Derniere ligne "utile" : ni Source, ni hashtags, ni URL seule. C'est la fin au sens de la regle.
@@ -436,7 +462,7 @@ export function schemaPost(corps) {
   const lignes = lignesDe(corps);
   const fin = finDuPost(corps);
   return {
-    accroche: typeDeLigne(clairLigne(lignes[0])),
+    accroche: typeAccroche(clairLigne(lignes[0])),
     blocs: Math.max(1, titresDeBloc(lignes).length),
     fin: EST_LIEN.test(fin) ? "lien" : typeDeLigne(fin),
   };

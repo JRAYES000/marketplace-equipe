@@ -267,7 +267,7 @@ posts », n°1 = le plus recent). Il refuse, en nommant le post en cause :
   ligne `Source` ne compte pas) ;
 - une **meme phrase en gras** (deux mots au moins), en markdown comme en gras Unicode.
 
-Un meme *type* d'accroche ou de fin sur plusieurs posts reste permis : il n'y a que trois types.
+Un meme *type* d'accroche ou de fin sur plusieurs posts reste permis. L'accroche se classe en six types calcules, premier qui convient : question (la ligne finit par « ? »), citation (elle s'ouvre sur un guillemet), echeance (une date et un mot d'echeance : « due le 31/10 », « jusqu'au 31/10/2026 »), chiffre (un chiffre, ou une quantite dite en lettres : « plus de la moitie », « un sur trois », « la majorite », « la plupart »), annonce (« a sorti », « les annonce », « lance une ») et affirmation (le reste). « Situation » n'est pas calculee (5 bons classements sur 12, decision du 19/10/2026). La fin garde trois types (question, chiffre, affirmation).
 Pour passer : changer de debut d'accroche, de derniere phrase ou de phrase en gras, ou varier le schema.
 
 **Ajouts du 14/10/2026 (regle 0.3, « on casse le moule »)** : la question finale n'est plus une
