@@ -25,6 +25,9 @@
 //             --dossier <dossier>    dossier des livrables (sinon LIVRABLES_LINKEDIN_DIR, sinon
 //                                    ~/OneDrive/Documents/GitHub/livrables-Claude-Agency/linkedin)
 //             --sans-precedent       ne mesure pas la regle de variete
+//             --offre <url>             exception « offre » : les chiffres de la page d'offre citee ne demandent
+//                                    pas de « (source : ...) » ; exige la ligne « Page d'offre : <url> » dans le
+//                                    .md voisin du brouillon (voir controlerOffre)
 //             --noms-propres <fichier>  noms propres a chiffre exemptes du critere « aucun
 //                                    chiffre sans source » (sinon <LIVRABLES_LINKEDIN_DIR ou
 //                                    dossier par defaut ci-dessus>/noms-propres-autorises.txt)
@@ -35,10 +38,10 @@
 import { readFileSync, existsSync } from "node:fs";
 import { basename, join } from "node:path";
 import { homedir } from "node:os";
-import { enGras, ACCENTUE, verifierTexte, lireNomsPropres } from "./lib.mjs";
+import { enGras, ACCENTUE, verifierTexte, lireNomsPropres, controlerOffre } from "./lib.mjs";
 import { lireCorpsFichier, resoudrePrecedent } from "./precedent.mjs";
 
-const OPTIONS_AVEC_VALEUR = ["--precedent", "--compte", "--dossier", "--noms-propres"];
+const OPTIONS_AVEC_VALEUR = ["--precedent", "--compte", "--dossier", "--noms-propres", "--offre"];
 const brut = process.argv.slice(2);
 const options = {};
 const positionnels = [];
@@ -79,6 +82,20 @@ function cleZernio() {
   return undefined;
 }
 
+// Exception « offre » (21/10/2026) : --offre <url de la page d'offre> n'est accordee que si le .md voisin du
+// brouillon (meme nom, .final.txt -> .md) contient la ligne « Page d'offre : <url> » et que l'URL est une page
+// de claudeagency.fr. Un post sans cette ligne, ou sans --offre, garde le critere « aucun chiffre sans source ».
+let offre;
+if (options.offre) {
+  const refus = controlerOffre(arg, options.offre);
+  if (refus) {
+    console.error(`REFUSE : exception « offre » non applicable : ${refus}`);
+    process.exit(1);
+  }
+  offre = options.offre;
+  console.log(`Exception « offre » accordee : page ${offre}`);
+}
+
 const corps = lireCorpsFichier(arg);
 
 let precedent;
@@ -107,7 +124,7 @@ const fichierNoms = options["noms-propres"] || join(process.env.LIVRABLES_LINKED
 const nomsPropres = lireNomsPropres(fichierNoms);
 console.log(`Noms propres autorises (${nomsPropres.length}) : ${nomsPropres.length ? nomsPropres.join(", ") : "aucun"} -- ${existsSync(fichierNoms) ? fichierNoms : "fichier absent : " + fichierNoms}`);
 
-const { resultats, passes, total } = verifierTexte(corps, { ...(precedent !== undefined ? { precedent, precedents } : {}), nomsPropres });
+const { resultats, passes, total } = verifierTexte(corps, { ...(precedent !== undefined ? { precedent, precedents } : {}), nomsPropres, ...(offre ? { offre } : {}) });
 for (const r of resultats) console.log(`${r.bon ? "OK   " : "ECHEC"} ${r.nom.padEnd(38)} ${r.detail}`);
 console.log(`\n${passes}/${total} criteres passes`);
 process.exit(passes === total ? 0 : 1);

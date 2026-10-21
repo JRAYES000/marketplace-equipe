@@ -369,6 +369,14 @@ node "<dossier de la skill>/scripts/verif-post.mjs" verif "C:/chemin/vers/a8.fin
     les lettres) pour reperer un "chiffre", ce qui faisait matcher des mots
     entiers en gras ("offres", "en") comme des chiffres — corrige avec une
     plage chiffres-seuls dediee.
+    **Exception « offre » (21/10/2026, demande de Nomena)** : un post qui presente une offre de claudeagency.fr
+    (diagnostic, Baromètre, semaine offerte) cite les chiffres de SA page sans « (source : ... ) », puisque l'offre
+    est la nôtre. Elle ne s'obtient que par `--offre <url de la page>` ET si le `.md` voisin du brouillon
+    (`nom.final.txt` -> `nom.md`) contient la ligne exacte `Page d'offre : <url>` : sans l'option, sans cette
+    ligne ou avec une URL hors `https://claudeagency.fr/`, elle est refusée (code 1, rien n'est mesuré). Seul le
+    critère « aucun chiffre sans source » change ; les 39 posts déjà écrits donnent la même sortie avant et après.
+    Le code ne vérifie pas que le chiffre vient bien de la page : la relecture de la page reste dans le `.md`.
+
 11. **Aucun anglicisme** — « process » au lieu de « processus », « deadline »,
     « feedback », « workflow », etc. Ajoute le 29/09/2026 apres le post A1 du
     28/09, publie avec « process ». Le controle n'est PAS une seconde liste : il

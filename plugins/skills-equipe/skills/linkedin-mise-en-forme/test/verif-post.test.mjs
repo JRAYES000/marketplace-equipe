@@ -778,3 +778,60 @@ test("schemaPost : l'accroche porte le type calcule, la fin garde trois types", 
   assert.deepEqual(schemaPost("« une réduction » : c'est prévu.\n\nTexte.\n\nSource : Insee, 2026"), { accroche: "citation", blocs: 1, fin: "affirmation" });
   assert.deepEqual(schemaPost("Plus de la moitié des dirigeants le craignent.\n\nTexte.\n\nVoila."), { accroche: "chiffre", blocs: 1, fin: "affirmation" });
 });
+// --- Exception « offre » (21/10/2026) : les chiffres de la page d'une offre de claudeagency.fr se citent sans
+// « (source : ... ) » seulement si le .md du post nomme la page. Elle ne doit s'appliquer a aucun autre post.
+import { spawnSync } from "node:child_process";
+import { mkdtempSync, writeFileSync, readFileSync as lire } from "node:fs";
+import { tmpdir } from "node:os";
+import { join as joindre } from "node:path";
+import { controlerOffre } from "../scripts/lib.mjs";
+
+const PAGE = "https://claudeagency.fr/diagnostic/";
+const POST_OFFRE = "Le diagnostic gratuit tient en 4 questions et 2 minutes.\n\nVotre action : choisir votre priorite. Le lien est en commentaire.\n";
+const verifCli = (fichier, ...args) => spawnSync(process.execPath, [new URL("../scripts/verif-post.mjs", import.meta.url).pathname.replace(/^\/([A-Za-z]:)/, "$1"), "verif", fichier, "--sans-precedent", "--noms-propres", fichier + ".absent", ...args], { encoding: "utf8" });
+const poser = (md) => {
+  const d = mkdtempSync(joindre(tmpdir(), "offre-"));
+  writeFileSync(joindre(d, "offre-x.final.txt"), POST_OFFRE);
+  if (md !== undefined) writeFileSync(joindre(d, "offre-x.md"), md);
+  return joindre(d, "offre-x.final.txt");
+};
+const critereChiffres = (sortie) => sortie.split("\n").find((l) => l.includes("aucun chiffre sans source")) || "";
+
+test("offre : sans l'option, les chiffres sans source restent refuses (critere inchange)", () => {
+  const r = verifierTexte(POST_OFFRE);
+  assert.equal(r.resultats.find((x) => x.nom === "aucun chiffre sans source").bon, false);
+});
+
+test("offre : avec l'option dans verifierTexte, seul ce critere change", () => {
+  const sans = verifierTexte(POST_OFFRE);
+  const avec = verifierTexte(POST_OFFRE, { offre: PAGE });
+  assert.equal(avec.resultats.find((x) => x.nom === "aucun chiffre sans source").bon, true);
+  const autres = (r) => r.resultats.filter((x) => x.nom !== "aucun chiffre sans source").map((x) => [x.nom, x.bon, x.detail]);
+  assert.deepEqual(autres(avec), autres(sans));
+});
+
+test("offre : controlerOffre refuse une URL hors claudeagency.fr, un nom sans .final.txt, un .md absent, un .md sans la ligne ou avec une autre page", () => {
+  assert.match(controlerOffre(poser("Page d'offre : " + PAGE + "\n"), "https://exemple.fr/diagnostic/"), /claudeagency\.fr/);
+  assert.match(controlerOffre("C:/x/post.txt", PAGE), /final\.txt/);
+  assert.match(controlerOffre(poser(undefined), PAGE), /absent/);
+  assert.match(controlerOffre(poser("Statut : brouillon\n"), PAGE), /ne contient pas la ligne/);
+  assert.match(controlerOffre(poser("Page d'offre : https://claudeagency.fr/semaine-offerte/\n"), PAGE), /ne contient pas la ligne/);
+  assert.match(controlerOffre(poser("page d'offre : " + PAGE + " (a verifier)\n"), PAGE), /ne contient pas la ligne/);
+  assert.equal(controlerOffre(poser("# Titre\r\nPage d'offre : " + PAGE + "\r\n"), PAGE), null);
+});
+
+test("offre : en ligne de commande, accordee avec la ligne du .md, refusee sans elle", () => {
+  const accorde = verifCli(poser("Page d'offre : " + PAGE + "\n"), "--offre", PAGE);
+  assert.match(accorde.stdout, /Exception « offre » accordee/);
+  assert.match(critereChiffres(accorde.stdout), /^OK/);
+  const refuse = verifCli(poser("Statut : brouillon\n"), "--offre", PAGE);
+  assert.equal(refuse.status, 1);
+  assert.match(refuse.stderr, /REFUSE : exception « offre » non applicable/);
+  assert.equal(refuse.stdout.includes("criteres passes"), false);
+});
+
+test("offre : sans --offre, meme avec la ligne dans le .md, l'exception ne s'applique pas", () => {
+  const r = verifCli(poser("Page d'offre : " + PAGE + "\n"));
+  assert.match(critereChiffres(r.stdout), /^ECHEC/);
+  assert.equal(r.stdout.includes("Exception « offre »"), false);
+});

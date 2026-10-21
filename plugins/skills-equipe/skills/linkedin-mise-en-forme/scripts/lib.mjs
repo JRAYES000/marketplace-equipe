@@ -18,7 +18,7 @@
 // voir POLICES ci-dessous, trouve le 22/09/2026 en verifiant les 3 posts de veille deja
 // publies (Bernard Marr 18/09, Andrew Ng 21/09) contre les 9 criteres d'origine.
 
-import { readFileSync } from "node:fs";
+import { readFileSync, existsSync } from "node:fs";
 import { createRequire } from "node:module";
 // Regles de Julien du 14/10/2026 sur le texte seul (2 « invente », 3 formules du moule, 5 lien et
 // precautions). Dependance circulaire voulue et sans risque : regles-julien.mjs n'appelle versAscii
@@ -549,7 +549,7 @@ const dire = (bon, nom, detail) => ({ bon, nom, detail });
  * compte, du plus recent au plus ancien (5 au plus) ; le premier tient lieu de `precedent`, et le
  * critere "variete sur les 5 derniers posts" s'ajoute. Retourne { resultats, passes, total }.
  */
-export function verifierTexte(corps, { precedent, precedents, nomsPropres = [] } = {}) {
+export function verifierTexte(corps, { precedent, precedents, nomsPropres = [], offre } = {}) {
   const lignes = corps.split("\n");
   const resultats = [];
 
@@ -649,11 +649,15 @@ export function verifierTexte(corps, { precedent, precedents, nomsPropres = [] }
   // critere, un chiffre-preuve invente ("40% des recruteurs...") passait les douze
   // criteres existants sans encombre -- rien ici ne verifiait le sourcage, contrairement
   // a linkedin-carrousel qui le fait depuis le 15/09/2026.
-  const chiffresFautifs = chiffresSansSource(corps, nomsPropres);
+  // Exception « offre » (21/10/2026, demande de Nomena) : un post qui presente une offre de claudeagency.fr
+  // peut citer sans « (source : ...) » les chiffres de SA page d'offre. `offre` n'est jamais passe par
+  // verifierTexte lui-meme : verif-post.mjs ne le renseigne qu'apres avoir controle que le .md du post
+  // nomme la page (ligne « Page d'offre : <url> »). Sans `offre`, le critere est inchange.
+  const chiffresFautifs = offre ? [] : chiffresSansSource(corps, nomsPropres);
   resultats.push(dire(
     chiffresFautifs.length === 0,
     "aucun chiffre sans source",
-    chiffresFautifs.length ? chiffresFautifs.join(" ; ") : "aucun chiffre, ou tous sources"
+    offre ? `exemption offre : chiffres de la page ${offre} (a relire dans le .md)` : chiffresFautifs.length ? chiffresFautifs.join(" ; ") : "aucun chiffre, ou tous sources"
   ));
 
   // Nouveau critere (29/09/2026) : aucun anglicisme de la liste fermee de
@@ -700,4 +704,18 @@ export function verifierTexte(corps, { precedent, precedents, nomsPropres = [] }
 
   const passes = resultats.filter((r) => r.bon).length;
   return { resultats, passes, total: resultats.length };
+}
+
+// Exception « offre » (21/10/2026) : --offre <url> de verif-post.mjs n'est accordee que si le .md voisin du
+// brouillon (nom.final.txt -> nom.md) contient la ligne « Page d'offre : <url> » et que l'URL est une page de
+// claudeagency.fr. Renvoie null si accordee, sinon la raison du refus. Un post sans cette ligne garde le
+// critere « aucun chiffre sans source » tel quel.
+export function controlerOffre(brouillon, url) {
+  if (!/^https:\/\/claudeagency\.fr\/[^\s]+$/.test(url)) return `l'URL d'offre doit etre une page de https://claudeagency.fr/ (recu : ${url})`;
+  if (!/\.final\.txt$/.test(brouillon)) return "le brouillon doit s'appeler <nom>.final.txt (le .md voisin porte la ligne « Page d'offre »)";
+  const md = brouillon.replace(/\.final\.txt$/, ".md");
+  if (!existsSync(md)) return `fichier absent : ${md}`;
+  const ligne = `Page d'offre : ${url}`;
+  if (!readFileSync(md, "utf8").split(/\r?\n/).some((l) => l.trim() === ligne)) return `${md} ne contient pas la ligne « ${ligne} »`;
+  return null;
 }
