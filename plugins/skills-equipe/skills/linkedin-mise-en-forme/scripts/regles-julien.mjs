@@ -141,3 +141,53 @@ export function controlerFile(posts, { historique = [] } = {}) {
   }
   return constats;
 }
+
+// ---- Formules de fin repetees entre les DEUX comptes (Nomena, 22/10/2026) ------------------
+// Une meme ouverture de derniere phrase (« Dix minutes, aujourd'hui ») sur deux posts voisins est
+// un constat bloquant, meme d'un compte a l'autre. « Voisins » = parmi les `fenetre` (10) posts
+// consecutifs, publies (historique) ou programmes, tous comptes confondus, ordonnes par date et heure.
+// Ouverture = les 3 premiers mots normalises de la derniere phrase du corps ; une ligne « Source : »,
+// de hashtags ou reduite a un lien ne compte pas comme derniere phrase. Un post dont on n'a que le
+// debut (post de Julien sans fichier) n'est pas controle.
+export const FENETRE_FINS = 10;
+export const MOTS_OUVERTURE_FIN = 3;
+const mots3 = (t, nbMots) => normaliser(t).replace(/[^a-z0-9' ]/g, " ").replace(/'/g, " ").split(/\s+/).filter(Boolean).slice(0, nbMots);
+// Deux cles : l'ouverture du dernier paragraphe (« Dix minutes, aujourd'hui : ... » ouvre un paragraphe qui
+// peut contenir une seconde phrase) et celle de la derniere phrase. Un constat si l'une des deux se retrouve.
+export function ouvertureFin(texte, nbMots = MOTS_OUVERTURE_FIN) {
+  const lignes = texte.replace(/\r\n/g, "\n").split("\n").map((l) => l.trim()).filter((l) => l && !/^source\s*:/i.test(normaliser(l)) && !/^(?:#\S+\s*)+$/.test(l) && !/^https?:\/\/\S+$/.test(l));
+  if (!lignes.length) return null;
+  const dernier = lignes[lignes.length - 1];
+  const phrases = dernier.split(/(?<=[.!?])\s+/).filter(Boolean);
+  const derniere = phrases[phrases.length - 1];
+  const cleParagraphe = mots3(dernier, nbMots), cle = mots3(derniere, nbMots);
+  if (cle.length < nbMots) return null;
+  return { cle: cle.join(" "), cleParagraphe: cleParagraphe.length === nbMots ? cleParagraphe.join(" ") : null, phrase: derniere, paragraphe: dernier };
+}
+/**
+ * posts : { id, compte, date, heure, texte, complet } ; `complet` faux = seul le debut est connu.
+ * historique : posts deja publies (meme forme). Retourne des constats { regle: "fin", ids, motif, preuve }.
+ */
+export function controlerFins(posts, { historique = [], fenetre = FENETRE_FINS } = {}) {
+  const tous = [...historique.map((p) => ({ ...p, publie: true })), ...posts]
+    .filter((p) => p.complet !== false && p.texte)
+    .map((p) => ({ ...p, fin: ouvertureFin(p.texte) }))
+    .filter((p) => p.fin)
+    .sort((a, b) => `${a.date} ${a.heure || "00:00"}`.localeCompare(`${b.date} ${b.heure || "00:00"}`));
+  const constats = [], vus = new Set();
+  for (let i = 0; i < tous.length; i++) {
+    for (let j = i + 1; j < Math.min(tous.length, i + fenetre); j++) {
+      const a = tous[i], b = tous[j];
+      if (a.publie && b.publie) continue;
+      const commun = [a.fin.cle, a.fin.cleParagraphe].filter(Boolean).find((c) => c === b.fin.cle || c === b.fin.cleParagraphe);
+      if (!commun) continue;
+      const k = `${a.id}|${b.id}`;
+      if (vus.has(k)) continue;
+      vus.add(k);
+      const qui = a.compte === b.compte ? "même compte" : "les deux comptes";
+      constats.push({ regle: "fin", ids: [a.id, b.id], motif: `formule de fin répétée (« ${commun} … »), ${qui}, dans une fenêtre de ${fenetre} posts`,
+        preuve: `${a.date} ${a.heure || ""} ${a.compte} « ${a.fin.paragraphe.slice(0, 70)} » / ${b.date} ${b.heure || ""} ${b.compte} « ${b.fin.paragraphe.slice(0, 70)} »` });
+    }
+  }
+  return constats;
+}

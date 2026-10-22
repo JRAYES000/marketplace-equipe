@@ -50,6 +50,12 @@ d'une autre skill ou d'un calendrier qui les contredit ne s'applique plus.
 **Controle avant publication (regles 1, 2, 4 et 5, plus les formules de la 3)** : obligatoire avant
 de programmer un post, sortie brute montree avec le brouillon.
 
+**Formules de fin repetees (22/10/2026)** : le meme controle compare l'ouverture (3 premiers mots) du dernier
+paragraphe et de la derniere phrase de chaque post aux 9 posts voisins (10 au total, publies ou programmes, les deux
+comptes confondus). Meme ouverture, par exemple « Dix minutes, aujourd'hui » : constat bloquant (`regle fin`).
+Les lignes `Source :`, de hashtags ou reduites a un lien ne comptent pas. Un post dont seul le debut est connu
+(post de Julien sans fichier) n'est pas controle.
+
 ```bash
 node "<dossier de la skill>/scripts/controle-avant-publication.mjs" --brouillon "C:/.../linkedin/2026-11-03/a50.final.txt" --date 2026-11-03 --heure 13:00 --sujet "libelle du sujet" --maintenant <UTC du serveur Buffer>
 ```

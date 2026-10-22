@@ -26,7 +26,7 @@ import { readFileSync, readdirSync, existsSync, statSync } from "node:fs";
 import { homedir } from "node:os";
 import { join, basename, resolve, relative, sep } from "node:path";
 import { lireCorpsFichier, compteDepuisNom } from "./precedent.mjs";
-import { controlerTexte, controlerFile, normaliser, JOURS_SANS_REPETITION } from "./regles-julien.mjs";
+import { controlerTexte, controlerFile, controlerFins, normaliser, JOURS_SANS_REPETITION } from "./regles-julien.mjs";
 
 const brut = process.argv.slice(2);
 const opt = {};
@@ -102,7 +102,7 @@ for (const l of readFileSync(fichierFile, "utf8").replace(/\r\n/g, "\n").split("
   if (parisVersUtc(date, heure) <= maintenant) continue; // deja parti
   const trouve = retrouver(debut, textes);
   file.push({ id: `${compte === "julien-agency" ? "A" : "P"} ${date} ${heure}`, compte, date, heure, format, debut,
-    texte: trouve ? trouve.texte : debut, sujet: trouve?.sujet || registre.get(`${date} ${heure} ${compte}`), source: trouve ? trouve.chemin : null, autres: trouve?.autres || [] });
+    texte: trouve ? trouve.texte : debut, complet: !!trouve, sujet: trouve?.sujet || registre.get(`${date} ${heure} ${compte}`), source: trouve ? trouve.chemin : null, autres: trouve?.autres || [] });
 }
 if (opt.brouillon) {
   if (!opt.date || !opt.heure) { console.error("ERREUR : --brouillon exige --date AAAA-MM-JJ et --heure HH:MM (Paris)"); process.exit(2); }
@@ -122,7 +122,7 @@ const parPost = file.map((p) => ({ ...p, constats: controlerTexte(p.texte) }));
 // Un brouillon sans etiquette de sujet ne peut pas passer la regle 4 : c'est un constat, pas une info.
 for (const p of parPost) if (p.id.startsWith("BROUILLON") && !p.sujet) p.constats.push({ regle: 4, motif: "sujet non étiqueté (option --sujet ou registre sujets.csv) : règle 4 non contrôlable", preuve: p.debut.slice(0, 100) });
 const sansSujet = parPost.filter((p) => !p.sujet && !p.id.startsWith("BROUILLON"));
-const constatsFile = controlerFile(file, { historique });
+const constatsFile = [...controlerFile(file, { historique }), ...controlerFins(file, { historique })];
 const total = parPost.reduce((n, p) => n + p.constats.length, 0) + constatsFile.length;
 
 if (opt.json) {

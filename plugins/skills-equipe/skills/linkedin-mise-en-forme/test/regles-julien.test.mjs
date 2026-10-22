@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { controlerTexte, controlerFile, similariteSujet } from "../scripts/regles-julien.mjs";
+import { controlerTexte, controlerFile, controlerFins, ouvertureFin, similariteSujet } from "../scripts/regles-julien.mjs";
 import { verifierTexte } from "../scripts/lib.mjs";
 
 const regles = (constats) => constats.map((c) => c.regle).sort();
@@ -111,4 +111,48 @@ test("CLI controle-avant-publication : regles 1, 2, 4 et 5 detectees sur une fil
   writeFileSync(propre, "2026-11-03 17:30 julien-partners # T Lundi, trois freelances nous ont envoyé le même modèle de relance.\n");
   const ok = lancer(propre);
   assert.equal(ok.status, 0, ok.stdout + ok.stderr);
+});
+
+test("fins repetees : « Dix minutes, aujourd'hui » sur deux comptes dans la fenetre de 10 posts = constat", () => {
+  const p = (id, compte, date, fin) => ({ id, compte, date, heure: "13:00", texte: `Accroche ${id}.
+
+Corps.
+
+${fin}` });
+  const posts = [
+    p("A1", "julien-agency", "2026-10-29", "Dix minutes, aujourd'hui : ouvrez le lien en commentaire."),
+    p("P1", "julien-partners", "2026-10-30", "Dix minutes, aujourd'hui : demandez au responsable securite."),
+    p("P2", "julien-partners", "2026-10-31", "À votre prochain point client, demandez-lui lesquels il utilise."),
+  ];
+  const c = controlerFins(posts);
+  assert.equal(c.length, 1);
+  assert.deepEqual(c[0].ids, ["A1", "P1"]);
+  assert.match(c[0].motif, /les deux comptes/);
+  assert.match(c[0].motif, /dix minutes aujourd/);
+});
+
+test("fins repetees : hors fenetre, ligne Source ignoree, post sans texte complet et deux posts publies ne declenchent rien", () => {
+  const mk = (n, compte, fin) => ({ id: `X${n}`, compte, date: `2026-10-${String(10 + n).padStart(2, "0")}`, heure: "13:00", texte: `Accroche.
+
+${fin}
+
+Source : Anthropic, 22/10/2026.` });
+  const loin = [mk(0, "julien-agency", "Dix minutes, aujourd'hui : un."), ...Array.from({ length: 10 }, (_, i) => mk(i + 1, "julien-partners", `Fin numero ${i + 1} differente de toutes.`)), mk(11, "julien-agency", "Dix minutes, aujourd'hui : deux.")];
+  assert.equal(controlerFins(loin).length, 0, "onze posts d'ecart : hors fenetre");
+  assert.equal(ouvertureFin("Corps.\n\nÀ vous de jouer ce soir.\n\nSource : Anthropic.").cle, "a vous de");
+  const debutSeul = [{ ...mk(1, "julien-agency", "Dix minutes, aujourd'hui : a."), complet: false }, mk(2, "julien-partners", "Dix minutes, aujourd'hui : b.")];
+  assert.equal(controlerFins(debutSeul).length, 0);
+  const publies = [mk(1, "julien-agency", "Dix minutes, aujourd'hui : a."), mk(2, "julien-partners", "Dix minutes, aujourd'hui : b.")];
+  assert.equal(controlerFins([], { historique: publies }).length, 0, "l'historique ne se juge pas lui-meme");
+  assert.equal(controlerFins([publies[1]], { historique: [publies[0]] }).length, 1, "un post programme contre un post publie : constat");
+});
+
+test("fins repetees : l'ouverture du dernier paragraphe compte, meme si une seconde phrase le suit", () => {
+  const p = (id, compte, date, fin) => ({ id, compte, date, heure: "13:00", texte: `Accroche ${id}.\n\n${fin}` });
+  const c = controlerFins([
+    p("A1", "julien-agency", "2026-10-29", "Dix minutes, aujourd'hui : ouvrez le lien. Notez ensuite vos formations."),
+    p("P1", "julien-partners", "2026-10-30", "Dix minutes, aujourd'hui : demandez au responsable securite."),
+  ]);
+  assert.equal(c.length, 1);
+  assert.match(c[0].motif, /dix minutes aujourd/);
 });
