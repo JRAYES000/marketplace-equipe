@@ -61,23 +61,38 @@ function lireFrontmatterSujet(chemin) {
 // Un post sans fichier (post de Julien) s'etiquette par son creneau : « AAAA-MM-JJ HH:MM compte;sujet ».
 const fichierRegistre = opt.registre || join(dossier, "sujets.csv");
 const relatif = (chemin) => relative(dossier, chemin).split(sep).join("/");
+// Type optionnel en fin de ligne : « fichier;sujet;type=annonce-mission » (les annonces de mission Partners
+// sont exclues du controle des fins, voir controlerFins). Le type n'est jamais deduit du texte du post.
 const registre = new Map();
+const types = new Map();
 if (existsSync(fichierRegistre)) {
   for (const l of readFileSync(fichierRegistre, "utf8").replace(/^﻿/, "").split(/\r?\n/)) {
     const i = l.indexOf(";");
-    if (i > 0 && !l.startsWith("#") && !/^fichier;/i.test(l)) registre.set(l.slice(0, i).trim(), l.slice(i + 1).trim());
+    if (i > 0 && !l.startsWith("#") && !/^fichier;/i.test(l)) {
+      const cle = l.slice(0, i).trim();
+      const m = l.slice(i + 1).match(/^(.*?);\s*type=([a-z-]+)\s*$/);
+      registre.set(cle, (m ? m[1] : l.slice(i + 1)).trim());
+      if (m) types.set(cle, m[2]);
+    }
   }
 }
 
 // Tous les textes connus : .final.txt des dossiers dates + annonces.
 function indexerTextes() {
   const textes = [];
-  const ajouter = (chemin, date) => textes.push({ chemin, date, texte: lireCorpsFichier(chemin), sujet: registre.get(relatif(chemin)) || lireFrontmatterSujet(chemin) });
+  const ajouter = (chemin, date) => textes.push({ chemin, date, texte: lireCorpsFichier(chemin), sujet: registre.get(relatif(chemin)) || lireFrontmatterSujet(chemin), type: types.get(relatif(chemin)) });
   if (existsSync(dossier)) for (const d of readdirSync(dossier)) {
     // Dossiers dates (posts) et dossiers de veille (« veille-AAAA-MM-JJ », posts recycles programmes).
     const date = (d.match(/^(?:veille-)?(\d{4}-\d{2}-\d{2})$/) || [])[1];
     if (!date || !statSync(join(dossier, d)).isDirectory()) continue;
     for (const f of readdirSync(join(dossier, d))) if (/\.final\.txt$/i.test(f)) ajouter(join(dossier, d, f), date);
+  }
+  // posts-nouveaux/ : « AAAA-MM-JJ-agency-q2.final.txt » (date du creneau dans le nom). Oublie jusqu'au 22/10/2026 :
+  // ces posts n'etaient jamais retrouves dans la file, donc jamais compares entre eux (complet: false).
+  const nouveaux = join(dossier, "posts-nouveaux");
+  if (existsSync(nouveaux)) for (const f of readdirSync(nouveaux)) {
+    const m = f.match(/^(\d{4}-\d{2}-\d{2})-.+\.final\.txt$/i);
+    if (m) ajouter(join(nouveaux, f), m[1]);
   }
   if (existsSync(dossierAnnonces)) for (const f of readdirSync(dossierAnnonces)) if (/\.final\.txt$/i.test(f)) ajouter(join(dossierAnnonces, f), null);
   return textes;
@@ -102,7 +117,7 @@ for (const l of readFileSync(fichierFile, "utf8").replace(/\r\n/g, "\n").split("
   if (parisVersUtc(date, heure) <= maintenant) continue; // deja parti
   const trouve = retrouver(debut, textes);
   file.push({ id: `${compte === "julien-agency" ? "A" : "P"} ${date} ${heure}`, compte, date, heure, format, debut,
-    texte: trouve ? trouve.texte : debut, complet: !!trouve, sujet: trouve?.sujet || registre.get(`${date} ${heure} ${compte}`), source: trouve ? trouve.chemin : null, autres: trouve?.autres || [] });
+    texte: trouve ? trouve.texte : debut, complet: !!trouve, type: trouve?.type, sujet: trouve?.sujet || registre.get(`${date} ${heure} ${compte}`), source: trouve ? trouve.chemin : null, autres: trouve?.autres || [] });
 }
 if (opt.brouillon) {
   if (!opt.date || !opt.heure) { console.error("ERREUR : --brouillon exige --date AAAA-MM-JJ et --heure HH:MM (Paris)"); process.exit(2); }
@@ -116,7 +131,7 @@ if (opt.brouillon) {
 const aujourdhui = new Date(maintenant).toISOString().slice(0, 10);
 const dansFile = new Set(file.map((p) => p.source).filter(Boolean));
 const historique = textes.filter((t) => t.date && t.date < aujourdhui && (Date.parse(aujourdhui) - Date.parse(t.date)) / 86400000 <= JOURS_SANS_REPETITION && !dansFile.has(t.chemin) && compteDepuisNom(t.chemin))
-  .map((t) => ({ id: `${basename(t.chemin)} (${t.date}, historique local)`, compte: compteDepuisNom(t.chemin), date: t.date, heure: "", texte: t.texte, sujet: t.sujet, debut: t.texte.split("\n")[0] }));
+  .map((t) => ({ id: `${basename(t.chemin)} (${t.date}, historique local)`, compte: compteDepuisNom(t.chemin), date: t.date, heure: "", texte: t.texte, sujet: t.sujet, type: t.type, debut: t.texte.split("\n")[0] }));
 
 const parPost = file.map((p) => ({ ...p, constats: controlerTexte(p.texte) }));
 // Un brouillon sans etiquette de sujet ne peut pas passer la regle 4 : c'est un constat, pas une info.

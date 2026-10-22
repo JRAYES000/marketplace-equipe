@@ -1,0 +1,35 @@
+Sans données fiables, un modèle d'IA reste une démo. Qui les construit pour 530 € HT par jour, pendant 12 mois ?
+Je cherche un data engineer senior IA pour un grand groupe, en hybride à Montrouge.
+
+Ce groupe veut des architectures data à la hauteur de ses ambitions IA.
+Il lui faut des pipelines industrialisés, une gouvernance des données et une qualité à grande échelle.
+
+Pourquoi cette mission vaut le coup ? Vous dessinez les fondations data d'un grand groupe.
+Et vous encadrez les data engineers juniors qui les feront vivre.
+
+🎯 𝗖𝗲 𝗾𝘂𝗲 𝘃𝗼𝘂𝘀 𝗮𝗹𝗹𝗲𝘇 𝗰𝗼𝗻𝘀𝘁𝗿𝘂𝗶𝗿𝗲
+
+Des architectures data robustes.
+Et les pipelines qui alimentent les plateformes d'analyse et les solutions IA.
+Un pipeline, c'est la chaîne qui amène les données d'un point à un autre.
+
+Concrètement :
+• Concevoir et maintenir les pipelines d'ingestion : lots, API, flux programmés.
+• Développer les traitements ETL et ELT qui alimentent le data lake.
+• Appliquer le DataOps : automatisation, versions, CI/CD, observabilité.
+• Garantir la qualité, la traçabilité et la conformité des données.
+• Encadrer et faire monter en compétence les data engineers juniors.
+
+🧭 𝗤𝘂𝗶 𝗷𝗲 𝗰𝗵𝗲𝗿𝗰𝗵𝗲
+
+Sept ans d'expérience et plus en ingénierie de la donnée.
+Dont des architectures au service de cas d'usage IA.
+Un leadership technique, et de l'exigence sur la reproductibilité et les audits.
+
+⚙️ Environnement : data lake, ETL/ELT, DataOps, Infrastructure as Code, data catalog, cloud.
+
+📍 Conditions : mission freelance portée par Claude Agency. 12 mois, 4 jours par semaine, hybride Montrouge. Démarrage sous 1 mois. Rémunération : 530 € HT par jour.
+
+🧪 Sélection : chaque candidat passe un test en ligne qui évalue ses compétences sur l'usage de Claude Code.
+
+Vous vous reconnaissez ? Créez votre fiche (le lien est en premier commentaire) et je reviens vers vous.

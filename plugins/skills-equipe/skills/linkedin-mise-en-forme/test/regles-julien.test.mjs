@@ -156,3 +156,59 @@ test("fins repetees : l'ouverture du dernier paragraphe compte, meme si une seco
   assert.equal(c.length, 1);
   assert.match(c[0].motif, /dix minutes aujourd/);
 });
+
+// Cas reel du 22/10/2026 : q2 (30/10) et q3 (29/10) finissaient tous deux par « Dix minutes, aujourd'hui »
+// et le controle n'a rien signale : les .final.txt de posts-nouveaux/ n'etaient pas indexes (complet: false),
+// donc q2 et q3 n'etaient jamais compares. Textes reels dans test/fixtures/.
+import { readFileSync } from "node:fs";
+import { compteDepuisNom } from "../scripts/precedent.mjs";
+const fixture = (nom) => readFileSync(new URL(`./fixtures/${nom}`, import.meta.url), "utf8").replace(/\r\n/g, "\n").trim();
+
+test("fins repetees : textes reels de q3 (29/10) et q2 (30/10), meme compte = constat", () => {
+  const q3 = { id: "q3", compte: "julien-agency", date: "2026-10-29", heure: "13:00", texte: fixture("2026-10-29-agency-q3.final.txt"), complet: true };
+  const q2 = { id: "q2", compte: "julien-agency", date: "2026-10-30", heure: "13:00", texte: fixture("2026-10-30-agency-q2.final.txt"), complet: true };
+  const c = controlerFins([q3, q2]);
+  assert.equal(c.length, 1);
+  assert.deepEqual(c[0].ids, ["q3", "q2"]);
+  assert.match(c[0].motif, /dix minutes aujourd/);
+});
+
+test("fins repetees : les annonces de mission (type du registre) sont exclues, pas leur texte", () => {
+  const annonce = (id, date, nom, type) => ({ id, compte: "julien-partners", date, heure: "13:00", texte: fixture(nom), complet: true, type });
+  const sans = [annonce("07", "2026-10-30", "annonce-07.final.txt"), annonce("08", "2026-10-27", "annonce-08.final.txt")];
+  assert.ok(controlerFins(sans).length >= 1, "sans type, les deux annonces ont la meme fin : constat");
+  const avec = sans.map((p) => ({ ...p, type: "annonce-mission" }));
+  assert.equal(controlerFins(avec).length, 0);
+  const q2 = { id: "q2", compte: "julien-agency", date: "2026-10-30", heure: "13:00", texte: "Accroche.\n\n" + fixture("annonce-07.final.txt").split("\n").filter(Boolean).pop(), complet: true };
+  assert.equal(controlerFins([avec[0], q2]).length, 0, "une annonce typee ne se compare pas non plus a un post ordinaire");
+});
+
+test("CLI : posts-nouveaux/ est indexe (q2 et q3 signales) et le type du registre exclut les annonces", () => {
+  const racine = mkdtempSync(join(tmpdir(), "fins-"));
+  const poser = (rel, texte) => { mkdirSync(join(racine, rel, ".."), { recursive: true }); writeFileSync(join(racine, rel), texte); };
+  poser("posts-nouveaux/2026-10-29-agency-q3.final.txt", fixture("2026-10-29-agency-q3.final.txt"));
+  poser("posts-nouveaux/2026-10-30-agency-q2.final.txt", fixture("2026-10-30-agency-q2.final.txt"));
+  poser("annonces/07.final.txt", fixture("annonce-07.final.txt"));
+  poser("annonces/08.final.txt", fixture("annonce-08.final.txt"));
+  writeFileSync(join(racine, "sujets.csv"), [
+    "fichier;sujet",
+    "posts-nouveaux/2026-10-29-agency-q3.final.txt;taxe d'apprentissage",
+    "posts-nouveaux/2026-10-30-agency-q2.final.txt;recouvrement des creances",
+    "annonces/07.final.txt;annonce : IA en banque;type=annonce-mission",
+    "annonces/08.final.txt;annonce : donnees pour modeles;type=annonce-mission",
+  ].join("\n") + "\n");
+  const debut = (nom) => fixture(nom).split("\n")[0].slice(0, 100);
+  const file = join(racine, "file.txt");
+  writeFileSync(file, [
+    `2026-10-27 13:00 julien-partners # I ${debut("annonce-08.final.txt")}`,
+    `2026-10-29 13:00 julien-agency # T ${debut("2026-10-29-agency-q3.final.txt")}`,
+    `2026-10-30 13:00 julien-agency # T ${debut("2026-10-30-agency-q2.final.txt")}`,
+    `2026-10-30 13:00 julien-partners # I ${debut("annonce-07.final.txt")}`,
+  ].join("\n"));
+  const r = spawnSync(process.execPath, [SCRIPT.pathname.replace(/^\/([A-Za-z]:)/, "$1"), "--file", file, "--dossier", racine, "--annonces", join(racine, "annonces"), "--maintenant", "2026-10-22T00:00:00Z"], { encoding: "utf8" });
+  const fins = r.stdout.split("\n").filter((l) => /^ALERTE règle fin/.test(l));
+  assert.equal(fins.length, 1, r.stdout + r.stderr);
+  assert.match(fins[0], /2026-10-29 13:00 julien-agency.*2026-10-30 13:00 julien-agency/);
+  assert.equal(compteDepuisNom("posts-nouveaux/2026-10-30-agency-q2.final.txt"), "julien-agency");
+  assert.equal(compteDepuisNom("2026-10-30-partners-hooks.final.txt"), "julien-partners");
+});

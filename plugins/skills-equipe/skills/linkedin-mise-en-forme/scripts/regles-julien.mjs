@@ -148,7 +148,10 @@ export function controlerFile(posts, { historique = [] } = {}) {
 // consecutifs, publies (historique) ou programmes, tous comptes confondus, ordonnes par date et heure.
 // Ouverture = les 3 premiers mots normalises de la derniere phrase du corps ; une ligne « Source : »,
 // de hashtags ou reduite a un lien ne compte pas comme derniere phrase. Un post dont on n'a que le
-// debut (post de Julien sans fichier) n'est pas controle.
+// debut (post de Julien sans fichier) n'est pas controle. Exception (Nomena, 22/10/2026) : les annonces
+// de mission Partners (`type: "annonce-mission"`, lu dans le registre sujets.csv, jamais deduit du texte)
+// gardent le gabarit voulu par Julien (mail du 21/10) et sont exclues, des deux cotes de la comparaison.
+export const TYPES_SANS_CONTROLE_FIN = ["annonce-mission"];
 export const FENETRE_FINS = 10;
 export const MOTS_OUVERTURE_FIN = 3;
 const mots3 = (t, nbMots) => normaliser(t).replace(/[^a-z0-9' ]/g, " ").replace(/'/g, " ").split(/\s+/).filter(Boolean).slice(0, nbMots);
@@ -170,7 +173,7 @@ export function ouvertureFin(texte, nbMots = MOTS_OUVERTURE_FIN) {
  */
 export function controlerFins(posts, { historique = [], fenetre = FENETRE_FINS } = {}) {
   const tous = [...historique.map((p) => ({ ...p, publie: true })), ...posts]
-    .filter((p) => p.complet !== false && p.texte)
+    .filter((p) => p.complet !== false && p.texte && !TYPES_SANS_CONTROLE_FIN.includes(p.type))
     .map((p) => ({ ...p, fin: ouvertureFin(p.texte) }))
     .filter((p) => p.fin)
     .sort((a, b) => `${a.date} ${a.heure || "00:00"}`.localeCompare(`${b.date} ${b.heure || "00:00"}`));

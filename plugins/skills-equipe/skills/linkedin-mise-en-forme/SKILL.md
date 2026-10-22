@@ -55,6 +55,10 @@ paragraphe et de la derniere phrase de chaque post aux 9 posts voisins (10 au to
 comptes confondus). Meme ouverture, par exemple « Dix minutes, aujourd'hui » : constat bloquant (`regle fin`).
 Les lignes `Source :`, de hashtags ou reduites a un lien ne comptent pas. Un post dont seul le debut est connu
 (post de Julien sans fichier) n'est pas controle.
+Les `.final.txt` de `linkedin/posts-nouveaux/` (« AAAA-MM-JJ-agency-q2.final.txt ») sont indexes comme les autres :
+avant le 22/10/2026 ils ne l'etaient pas, donc aucun de ces posts n'etait compare. Les annonces de mission Partners
+(gabarit de Julien, mail du 21/10) sont exclues du controle des fins, reperees par leur type dans le registre :
+`fichier;sujet;type=annonce-mission` dans `sujets.csv`, jamais par leur texte.
 
 ```bash
 node "<dossier de la skill>/scripts/controle-avant-publication.mjs" --brouillon "C:/.../linkedin/2026-11-03/a50.final.txt" --date 2026-11-03 --heure 13:00 --sujet "libelle du sujet" --maintenant <UTC du serveur Buffer>

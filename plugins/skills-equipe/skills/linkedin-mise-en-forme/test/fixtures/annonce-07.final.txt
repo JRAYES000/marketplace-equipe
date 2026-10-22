@@ -1,0 +1,33 @@
+En banque, une réponse d'IA sans source ne compte pas. Cette mission paie 480 € HT par jour pour l'éviter.
+Je cherche un data scientist IA agentique pour 6 mois, en hybride à Paris.
+
+La division IA d'une banque de financement et d'investissement renforce son équipe de data scientists.
+Son but : accélérer les financements structurés grâce à des agents IA.
+
+Pourquoi cette mission vaut le coup ? Vous menez des agents IA du cadrage à la mise en production.
+Et vous présentez vous-même leurs résultats aux équipes métiers et aux équipes des risques.
+
+🎯 𝗖𝗲 𝗾𝘂𝗲 𝘃𝗼𝘂𝘀 𝗮𝗹𝗹𝗲𝘇 𝗰𝗼𝗻𝘀𝘁𝗿𝘂𝗶𝗿𝗲
+
+Des solutions agentiques qui simplifient des processus métiers complexes.
+
+Concrètement :
+• Définir et mettre en œuvre des solutions agentiques adaptées aux processus métiers.
+• Développer les composants Python et FastAPI associés.
+• Évaluer la qualité et la fiabilité des réponses produites.
+• Documenter et présenter les résultats aux équipes métiers et risques.
+• Participer à toutes les étapes des projets de data science de la division IA.
+
+🧭 𝗤𝘂𝗶 𝗷𝗲 𝗰𝗵𝗲𝗿𝗰𝗵𝗲
+
+Quatre ans d'expérience et plus en data science, dont des projets LLM et agentiques en production.
+La connaissance du monde bancaire est appréciée.
+En environnement financier, une réponse non sourcée ne compte pas : la rigueur passe avant tout.
+
+⚙️ Environnement : Python, FastAPI, LLM, agents IA, SQL, outils d'évaluation.
+
+📍 Conditions : mission freelance portée par Claude Agency. 6 mois, 4 jours par semaine, hybride Paris. Démarrage dès que possible. Rémunération : 480 € HT par jour.
+
+🧪 Sélection : chaque candidat passe un test en ligne qui évalue ses compétences sur l'usage de Claude Code.
+
+Vous vous reconnaissez ? Créez votre fiche (le lien est en premier commentaire) et je reviens vers vous.

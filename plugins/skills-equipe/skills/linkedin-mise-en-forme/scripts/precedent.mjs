@@ -30,7 +30,10 @@ const PREFIXES = { a: "julien-agency", p: "julien-partners" };
 
 export function compteDepuisNom(chemin) {
   const m = basename(chemin).match(/^([ap])\d+/i);
-  return m ? PREFIXES[m[1].toLowerCase()] : null;
+  if (m) return PREFIXES[m[1].toLowerCase()];
+  // posts-nouveaux/ : « AAAA-MM-JJ-agency-q2.final.txt », « AAAA-MM-JJ-partners-duet.final.txt »
+  const n = basename(chemin).match(/^\d{4}-\d{2}-\d{2}-(agency|partners)-/i);
+  return n ? `julien-${n[1].toLowerCase()}` : null;
 }
 
 const cle = (dossierDate, fichier) => [dossierDate, Number(fichier.match(/(\d+)\.final\.txt$/)[1])];
