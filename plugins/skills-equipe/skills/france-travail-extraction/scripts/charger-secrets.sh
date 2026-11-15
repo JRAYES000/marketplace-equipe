@@ -10,10 +10,9 @@
 # Usage : bash charger-secrets.sh
 #   Ecrit %LOCALAPPDATA%/france-travail-extraction/secrets.env (ou $FT_SECRETS).
 #   nettoyer-cv.sh l'envoie a la corbeille en fin de run.
-# v9.3 : SALESHANDY_API_KEY en plus (import dans la sequence, notion.js).
 # v10.0 : plus de jetons NocoDB (NocoDB abandonne, Julien 04/10/2026).
-# Hors du poste de Julien : definir NOTION_TOKEN_FT et SALESHANDY_API_KEY dans
-# l'environnement ; ce script n'est alors pas necessaire.
+# v11.0 : plus de cle SalesHandy (SalesHandy abandonne, Julien 16/11/2026).
+# Hors du poste de Julien : definir NOTION_TOKEN_FT dans l'environnement ; ce script n'est alors pas necessaire.
 #
 # Format du coffre (identique a visibilite-ops/scripts/coffre-registre.sh) : 11 colonnes,
 # cle en colonne 3, valeur en colonne 6. Une ligne au nombre de colonnes different (valeur
@@ -25,7 +24,7 @@ if [ -n "${LOCALAPPDATA:-}" ]; then D="$(cygpath -u "$LOCALAPPDATA" 2>/dev/null 
 else D="$HOME/.local/state/france-travail-extraction"
 fi
 F="${FT_SECRETS:-$D/secrets.env}"
-CLES="NOTION_TOKEN_FT SALESHANDY_API_KEY"
+CLES="NOTION_TOKEN_FT"
 
 mkdir -p "$(dirname "$F")"
 umask 177

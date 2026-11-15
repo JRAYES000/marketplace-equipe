@@ -5,8 +5,8 @@
 //                                     ([RECOLLE], [RECONSTRUIT]), ou rien.
 //   require('./email-cv')             lireEmail(texte), nettoyer(email), douteux(email, profil, texteCv)
 //
-// v10.3 (08/10/2026) : 4 emails sur ~200 etaient faux, SalesHandy les a classes « bad » et les
-// prospects sont restes en « Waiting » sans alerte. Defauts corriges ou signales ici :
+// v10.3 (08/10/2026) : 4 emails sur ~200 etaient faux (classes « bad » a la
+// verification de l'outil d'envoi de l'epoque). Defauts corriges ou signales ici :
 //   1. partie locale coupee en fin de ligne (CV en deux colonnes) : « ROSALIE.VANDERMEU » puis
 //      « LEN@EXEMPLE.COM » a la ligne suivante -> seul « LEN@… » etait garde. Recollee.
 //   2. debut de l'email perdu (« rosine. dubreuill@… ») et « 1 » lu « l ». Le debut separe par

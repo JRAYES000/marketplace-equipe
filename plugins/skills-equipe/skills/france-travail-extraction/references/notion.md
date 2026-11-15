@@ -20,11 +20,10 @@ une connexion), sinon l'API répond 404 `object_not_found`.
 
 - `notion.js situer <connus.json>` (Phase 1) : une lecture, comptes par requête et noms connus.
 - `notion.js publier <lot.json>` (Phase 5) : reprise de la file, retrait des doublons, écriture,
-  relecture par date et requête, import SalesHandy. Codes : 0 ok, 2 écart, 3 file d'attente,
-  4 SalesHandy.
+  relecture par date et requête. Codes : 0 ok, 2 écart, 3 file d'attente.
 
 Les commandes de détail (`resume`, `connus`, `dedup`, `ecrire`, `reprendre`, `verifier`,
-`saleshandy`, `export`) restent pour diagnostiquer, pas pour le run.
+`export`) restent pour diagnostiquer, pas pour le run.
 
 ## La file d'attente
 

@@ -606,3 +606,17 @@ Phase 5 bis recopie desormais seulement les Id acceptes par `ecrire`.
   C:/Users/julien/.chromium-claude ». La session du lot manuel gardait sa fenetre Chromium ouverte.
   Second essai, fenetre fermee : tous les outils passent. Regle ajoutee aux Replis (annexes.md) :
   fermer le navigateur en fin de lot.
+
+2026-11-16 — v11.0 : plus d'import SalesHandy (decision de Julien).
+• Julien n'utilise plus SalesHandy. Warmbly le remplace ailleurs, mais aucune sequence Warmbly
+  n'existe pour Ecole Naturo : le skill n'importe dans aucun outil d'envoi, sauf instruction de
+  Julien. Il s'arrete a Notion et au depot des CV sur Drive.
+• Retire de notion.js : l'import dans la sequence, la relecture de verification des emails et les
+  commandes saleshandy, saleshandy-verifier et corriger-email ; codes de sortie 4 et 5 ; option
+  --sans-saleshandy. Le statut « Importe SalesHandy » des fiches anciennes reste lisible dans
+  Notion, il ne s'ecrit plus.
+• Retire l'Accroche (v10.2), qui ne servait qu'au premier e-mail SalesHandy : assembler.js ne
+  l'exige plus, notion.js ne l'ecrit plus. La colonne Notion reste, avec les valeurs anciennes.
+• charger-secrets.sh ne charge plus que NOTION_TOKEN_FT.
+• Les entrees ci-dessus qui citent SalesHandy restent telles quelles : elles racontent les runs
+  de l'epoque.
