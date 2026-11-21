@@ -18,11 +18,14 @@ Une procédure qui revient chaque lundi. Les calculs sont faits par les scripts,
 et jamais de tête. Lecture seule : rien n'est écrit dans l'outil de publication.
 
 **Buffer est résilié (décision de Julien du 21/11/2026)** : toute publication passe par le n8n du VPS
-(n8n.claudeagency.fr). **À faire : workflow n8n de relevé LinkedIn.** Au 21/11/2026, aucun workflow n8n
-ne relève LinkedIn (le 36 relève Instagram et Facebook). La publication passe par le workflow 38 (table
-`publications_linkedin`, `../../references/publication-linkedin-n8n.md`). Tant qu'il n'existe pas, l'analyse n'a pas de source : le dire, ne jamais inventer un chiffre.
-Le workflow à créer devra produire le relevé au format actuel (`releve-buffer-AAAA-MM-JJ.csv`, colonnes de
-[references/releve-buffer.md](references/releve-buffer.md)) pour que les scripts restent valables.
+(n8n.claudeagency.fr). Publication : workflow 38 (table `publications_linkedin`). **Relevé : workflow 39**,
+chaque lundi 07:30 : réactions, commentaires et abonnés des posts publiés par le 38 depuis 28 jours, dans la
+table n8n `stats_linkedin` (ScrapeCreators, 1 crédit par post). Détail : `../../references/publication-linkedin-n8n.md`.
+**Limites mesurées le 21/11/2026** : ni impressions ni taux d'engagement (aucune source automatique : l'API
+LinkedIn n'a que le droit d'écrire) ; les posts faits hors du workflow 38 ne sont pas relevés. Les impressions
+se lisent à la main sous chaque post dans Chrome connecté (« N impressions »). Ne jamais inventer un chiffre.
+À faire : convertir `stats_linkedin` au format `releve-buffer-AAAA-MM-JJ.csv`
+([references/releve-buffer.md](references/releve-buffer.md)) pour que les scripts restent valables.
 
 Indicateurs retenus, et eux seuls : impressions, réactions, commentaires, taux d'engagement.
 
@@ -39,9 +42,9 @@ Indicateurs retenus, et eux seuls : impressions, réactions, commentaires, taux 
 ## Procédure du lundi (dans l'ordre)
 
 1. `git pull` dans `livrables-Claude-Agency` et dans le clone `marketplace-equipe`. Lire `NOTES.md`.
-2. **Relevé des chiffres** : à faire, workflow n8n (voir plus haut). Il écrira un nouveau fichier
-   `releve-buffer-AAAA-MM-JJ.csv` (on ne modifie pas l'ancien) et la file programmée dans
-   `file-attente-buffer.txt`. Sans lui, s'arrêter ici et le signaler.
+2. **Relevé des chiffres** : lire la table n8n `stats_linkedin` (MCP `n8n`, `get_data_table_rows`, lignes du
+   lundi) et l'écrire dans un nouveau `releve-buffer-AAAA-MM-JJ.csv` (on ne modifie pas l'ancien), impressions
+   relevées à la main dans Chrome ou laissées vides et signalées. Table vide : s'arrêter et le signaler.
 3. **Lancer l'analyse** : `node scripts/analyse-lundi.mjs`
    - lit tous les relevés `releve-buffer-*.csv` du dossier du test (le plus récent l'emporte pour un même post,
      reconnu par son `id_buffer` : deux posts publiés à la même minute restent deux lignes), ou un seul avec
@@ -70,7 +73,7 @@ Le point du 28/10/2026 et ses chiffres : [references/objectif-2026-10-28.md](ref
 
 | Source | Chiffres | Usage |
 |---|---|---|
-| À faire : workflow n8n de relevé LinkedIn | impressions, réactions, commentaires, taux d'engagement, heure de publication, lien, format | source unique des chiffres |
+| Table n8n `stats_linkedin` (workflow 39, ScrapeCreators) | réactions, commentaires, abonnés, lien, format, date | source des chiffres (pas d'impressions) |
 | Table n8n `publications_linkedin` (workflow 38), lignes `publie` | liste des posts envoyés | contrôle de complétude du relevé, pas de chiffre |
 | Table n8n `publications_linkedin`, lignes `a_publier` | posts programmés, dont les annonces de Julien | contrôle des créneaux ; jamais modifiés |
 | Buffer Insights (jusqu'au 21/11/2026) | anciens relevés `releve-buffer-*.csv` | historique |

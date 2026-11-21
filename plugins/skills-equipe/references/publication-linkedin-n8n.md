@@ -50,5 +50,19 @@ Le workflow écrit ensuite `statut`, `post_id`, `post_url`, `publie_le` et `erre
   12 mois ; une erreur 426 `NONEXISTENT_VERSION` veut dire qu'il faut l'avancer.
 - **Texte au format « little text »** : `( ) [ ] { } < > @ # * _ ~ | \` sont échappés par le
   workflow (sinon LinkedIn coupe le texte) et `#mot` devient un vrai hashtag.
-- Relevé des statistiques LinkedIn : pas encore de workflow (le compte n'a pas le droit de lecture
-  des posts par l'API).
+
+## Relevé du lundi (workflow 39)
+
+**39 · Réseaux · Relevé LinkedIn du lundi (ScrapeCreators)** :
+https://n8n.claudeagency.fr/workflow/h61TFu5meb8AkTn9 — chaque lundi 07:30, pour chaque ligne
+`publie`/`publie_alerte` de `publications_linkedin` publiée depuis 28 jours, lit le post par l'API
+ScrapeCreators (`/v1/linkedin/post`, credential n8n « ScrapeCreators API », 1 crédit par post) et écrit
+une ligne dans la table `stats_linkedin` (`gjmnMzoFEmbefCtE`) : `releve_le`, `compte`, `format`,
+`post_id`, `post_url`, `publie_le`, `reactions`, `commentaires`, `abonnes`. Un post illisible fait
+échouer l'exécution (alerte du workflow 90), sans ligne vide.
+
+Limites mesurées le 21/11/2026 : **pas d'impressions** ni de taux d'engagement (l'API LinkedIn n'a que
+`w_member_social`, 403 en lecture ; ScrapeCreators ne lit que le public) ; **pas de liste des posts
+d'un profil** (profils en 404 chez ScrapeCreators, Bright Data « Customer is not active », Just One API
+à solde nul) : seuls les posts du workflow 38 sont relevés. L'API directe ScrapeCreators renvoie
+`likeCount`/`commentCount` (la version Composio : `like_count`/`comment_count`).
