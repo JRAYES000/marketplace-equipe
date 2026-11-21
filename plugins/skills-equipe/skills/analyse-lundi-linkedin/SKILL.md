@@ -19,8 +19,8 @@ et jamais de tête. Lecture seule : rien n'est écrit dans l'outil de publicatio
 
 **Buffer est résilié (décision de Julien du 21/11/2026)** : toute publication passe par le n8n du VPS
 (n8n.claudeagency.fr). **À faire : workflow n8n de relevé LinkedIn.** Au 21/11/2026, aucun workflow n8n
-ne relève ni ne publie LinkedIn (le 36 relève Instagram et Facebook, le 35 ne publie qu'Instagram et
-Facebook). Tant qu'il n'existe pas, l'analyse n'a pas de source : le dire, ne jamais inventer un chiffre.
+ne relève LinkedIn (le 36 relève Instagram et Facebook). La publication passe par le workflow 38 (table
+`publications_linkedin`, `../../references/publication-linkedin-n8n.md`). Tant qu'il n'existe pas, l'analyse n'a pas de source : le dire, ne jamais inventer un chiffre.
 Le workflow à créer devra produire le relevé au format actuel (`releve-buffer-AAAA-MM-JJ.csv`, colonnes de
 [references/releve-buffer.md](references/releve-buffer.md)) pour que les scripts restent valables.
 
@@ -71,8 +71,8 @@ Le point du 28/10/2026 et ses chiffres : [references/objectif-2026-10-28.md](ref
 | Source | Chiffres | Usage |
 |---|---|---|
 | À faire : workflow n8n de relevé LinkedIn | impressions, réactions, commentaires, taux d'engagement, heure de publication, lien, format | source unique des chiffres |
-| À faire : workflow n8n de publication LinkedIn (liste des envoyés) | liste des posts envoyés | contrôle de complétude du relevé, pas de chiffre |
-| À faire : file de publication n8n LinkedIn | posts programmés, dont les annonces de Julien | contrôle des créneaux ; jamais modifiés |
+| Table n8n `publications_linkedin` (workflow 38), lignes `publie` | liste des posts envoyés | contrôle de complétude du relevé, pas de chiffre |
+| Table n8n `publications_linkedin`, lignes `a_publier` | posts programmés, dont les annonces de Julien | contrôle des créneaux ; jamais modifiés |
 | Buffer Insights (jusqu'au 21/11/2026) | anciens relevés `releve-buffer-*.csv` | historique |
 
 ## Calculs faits en code

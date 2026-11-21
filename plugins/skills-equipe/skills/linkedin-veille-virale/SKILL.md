@@ -94,17 +94,16 @@ explicite ; seul `dry-run.js` a un repli fixture, pour `APIFY_TOKEN`.
 
 ## Publication
 
-**Voie réelle : n8n du VPS** (n8n.claudeagency.fr). Buffer est résilié (décision de Julien du
-21/11/2026). **À faire : workflow n8n** de publication LinkedIn : au 21/11/2026, aucun workflow
-n8n ne publie sur LinkedIn (le 35 ne couvre qu'Instagram et Facebook). En attendant, le post
-contrôlé est remis au demandeur. Le contrôle se fait juste avant, sur le fichier.
+**Voie réelle : workflow n8n 38** (Buffer résilié le 21/11/2026) : une ligne dans la table
+`publications_linkedin` (`format: texte`, lien en `premier_commentaire`). Colonnes, statuts et
+pièges : `../../references/publication-linkedin-n8n.md`. Le contrôle se fait juste avant, sur le fichier.
 
 1. Convertir chaque passage en gras :
    `node ../linkedin-mise-en-forme/scripts/verif-post.mjs gras "segment"`.
 2. Contrôler le texte : `node ../linkedin-mise-en-forme/scripts/verif-post.mjs verif <fichier>`
    (code 1 = ne pas programmer).
 3. `node ../linkedin-mise-en-forme/scripts/controle-avant-publication.mjs` (règles 1, 2, 4, 5).
-4. Programmer par le workflow n8n, puis, seulement après une programmation confirmée, inscrire le post au
+4. Programmer par le workflow n8n 38 (ligne `a_publier`), puis, seulement après une programmation confirmée, inscrire le post au
    registre :
    ```js
    const { enregistrerPostPublie } = require('./lib/registre');

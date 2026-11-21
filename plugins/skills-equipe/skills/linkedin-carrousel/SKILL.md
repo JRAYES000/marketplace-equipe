@@ -171,11 +171,9 @@ réellement concret, image conforme à son prompt. Seule la relecture visuelle l
 
 ## Publication
 
-**Voie réelle : n8n du VPS** (n8n.claudeagency.fr). Buffer est résilié et Zernio abandonné
-(décision de Julien du 21/11/2026). **À faire : workflow n8n** de publication LinkedIn (document
-PDF) : au 21/11/2026, aucun workflow n8n ne publie sur LinkedIn (le workflow 35, table
-`publications_sociales`, ne couvre qu'Instagram et Facebook). En attendant, la skill s'arrête au
-PDF validé et au texte du post, remis au demandeur pour publication.
+**Voie réelle : workflow n8n 38** (Buffer résilié, Zernio abandonné le 21/11/2026) : une ligne
+`format: carrousel` dans la table `publications_linkedin`, le PDF déposé à une URL https publique
+(`media_url`), le titre du document dans `titre`. Colonnes, statuts et pièges : `../../references/publication-linkedin-n8n.md`.
 
 - Le `documentTitle` (titre affiché sous le document) passe par `retirerPointFinal`, le contrôle
   d'accents et d'anglicismes (`../../lib/valider-orthographe.js`, `../../lib/valider-anglicismes.js`)

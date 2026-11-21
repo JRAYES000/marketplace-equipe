@@ -18,11 +18,10 @@ Reprend la chaîne du 08/10/2026 (`livrables-Claude-Agency/NOTES.md`, sections d
 Dépôt de travail : `livrables-Claude-Agency`. Dossier d'un lot : `sortants/annonces-missions/<lot>/`
 (le lot du 08/10 est `v4/`, à prendre comme modèle). Lire d'abord le `CLAUDE.md` du dépôt (pièges connus).
 
-**Publication : n8n du VPS** (n8n.claudeagency.fr). Buffer est résilié (décision de Julien du 21/11/2026).
-**À faire : workflow n8n** de publication et de relevé LinkedIn : au 21/11/2026, aucun workflow n8n ne
-couvre LinkedIn (le 35 publie Instagram et Facebook depuis la table `publications_sociales`, le 36 relève
-Instagram et Facebook). Tant qu'il n'existe pas, les étapes 5 à 7 et 9 s'arrêtent : les annonces validées
-sont remises au demandeur, rien n'est programmé ailleurs.
+**Publication : workflow n8n 38** (Buffer résilié le 21/11/2026) : une ligne par annonce dans la table
+`publications_linkedin`, `compte: partners`, `format: image`, fiche image à une URL https publique, lien de
+la fiche en `premier_commentaire`. Colonnes, statuts et pièges : `../../references/publication-linkedin-n8n.md`. **À faire : workflow n8n de
+relevé LinkedIn** : l'étape 9 (relevé à 48 h) s'arrête tant qu'il n'existe pas.
 
 ## Condition préalable bloquante
 
@@ -112,8 +111,8 @@ précaution. La mission réelle est le fait réel de la règle 2. Contrôle avan
 - Programmer d'abord **une seule** annonce avec image, puis la relire dans la file : heure
   « (Europe/Paris) », image présente, **aucun lien dans le texte, lien de la fiche dans le premier
   commentaire** (règle 5 du 14/10/2026).
-- Seulement ensuite, programmer les autres sur le compte Claude Partners, par le workflow n8n
-  (à faire) : empreinte du texte comparée au `.final.txt`, date relue après programmation.
+- Seulement ensuite, programmer les autres sur le compte Claude Partners, par le workflow n8n 38
+  (une ligne `a_publier` par annonce) : empreinte du texte comparée au `.final.txt`, date relue après programmation.
 
 ## 7. Relire la file
 
