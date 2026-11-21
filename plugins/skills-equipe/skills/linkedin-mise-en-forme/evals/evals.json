@@ -1,0 +1,82 @@
+[
+  {
+    "query": "Écris un post LinkedIn pour Claude Agency sur le temps perdu à relancer les candidats",
+    "should_trigger": true
+  },
+  {
+    "query": "Relis ce post avant que je le programme sur Claude Partners, vérifie l'accroche et le gras",
+    "should_trigger": true
+  },
+  {
+    "query": "Mets ça en forme pour LinkedIn : on a automatisé les devis d'un plombier, 3 h gagnées par semaine",
+    "should_trigger": true
+  },
+  {
+    "query": "Passe le script de vérif sur le brouillon a12 du compte julien-agency",
+    "should_trigger": true
+  },
+  {
+    "query": "Ce post a trop de gras et des phrases trop longues, corrige la mise en forme",
+    "should_trigger": true
+  },
+  {
+    "query": "Rédige le post du jour pour julien-partners sur le TJM des freelances IA",
+    "should_trigger": true
+  },
+  {
+    "query": "Mon accroche fait 170 caractères, raccourcis-la et vérifie le reste du post LinkedIn",
+    "should_trigger": true
+  },
+  {
+    "query": "Transforme ces notes en post LinkedIn prêt à publier : formation Claude chez un cabinet comptable",
+    "should_trigger": true
+  },
+  {
+    "query": "Le post p7 reprend la même fin que p6, refais la fin et relance le contrôle",
+    "should_trigger": true
+  },
+  {
+    "query": "Vérifie qu'il n'y a pas d'anglicisme ni d'accent manquant dans le gras de ce post LinkedIn",
+    "should_trigger": true
+  },
+  {
+    "query": "Fais-moi un carrousel LinkedIn sur les 5 erreurs d'un premier projet IA",
+    "should_trigger": false
+  },
+  {
+    "query": "Réponds aux commentaires sous mon dernier post Claude Agency",
+    "should_trigger": false
+  },
+  {
+    "query": "Quels sujets publier sur LinkedIn ce mois-ci pour Claude Partners ?",
+    "should_trigger": false
+  },
+  {
+    "query": "Lance l'analyse du lundi LinkedIn",
+    "should_trigger": false
+  },
+  {
+    "query": "Fais la veille du jour, cherche un post à recycler pour julien-agency",
+    "should_trigger": false
+  },
+  {
+    "query": "Écris un commentaire pertinent sous le post de Bernard Marr",
+    "should_trigger": false
+  },
+  {
+    "query": "Publie un nouveau lot d'annonces de mission sur la page Claude Partners",
+    "should_trigger": false
+  },
+  {
+    "query": "Rédige un mail à Nomena pour lui dire de programmer les posts de la semaine",
+    "should_trigger": false
+  },
+  {
+    "query": "Écris une légende Instagram pour @ecole.naturopathie sur les tisanes d'hiver",
+    "should_trigger": false
+  },
+  {
+    "query": "Résume cette vidéo YouTube sur la croissance LinkedIn",
+    "should_trigger": false
+  }
+]
