@@ -24,8 +24,8 @@ table n8n `stats_linkedin` (ScrapeCreators, 1 crédit par post). Détail : `../.
 **Limites mesurées le 21/11/2026** : ni impressions ni taux d'engagement (aucune source automatique : l'API
 LinkedIn n'a que le droit d'écrire) ; les posts faits hors du workflow 38 ne sont pas relevés. Les impressions
 se lisent à la main sous chaque post dans Chrome connecté (« N impressions »). Ne jamais inventer un chiffre.
-À faire : convertir `stats_linkedin` au format `releve-buffer-AAAA-MM-JJ.csv`
-([references/releve-buffer.md](references/releve-buffer.md)) pour que les scripts restent valables.
+La table se convertit au format `releve-buffer-AAAA-MM-JJ.csv`
+([references/releve-buffer.md](references/releve-buffer.md)) par `scripts/releve-depuis-n8n.mjs` (étape 2).
 
 Indicateurs retenus, et eux seuls : impressions, réactions, commentaires, taux d'engagement.
 
@@ -42,9 +42,13 @@ Indicateurs retenus, et eux seuls : impressions, réactions, commentaires, taux 
 ## Procédure du lundi (dans l'ordre)
 
 1. `git pull` dans `livrables-Claude-Agency` et dans le clone `marketplace-equipe`. Lire `NOTES.md`.
-2. **Relevé des chiffres** : lire la table n8n `stats_linkedin` (MCP `n8n`, `get_data_table_rows`, lignes du
-   lundi) et l'écrire dans un nouveau `releve-buffer-AAAA-MM-JJ.csv` (on ne modifie pas l'ancien), impressions
-   relevées à la main dans Chrome ou laissées vides et signalées. Table vide : s'arrêter et le signaler.
+2. **Relevé des chiffres** : lire la table n8n `stats_linkedin` (MCP `n8n`, `get_data_table_rows`, table
+   `gjmnMzoFEmbefCtE`, projet `2MVl33qcS1OYz0eZ`, 100 lignes par page : enregistrer chaque page telle quelle dans
+   un tableau JSON), puis `node scripts/releve-depuis-n8n.mjs --entree stats.json` : il garde le relevé le plus
+   récent (`--date AAAA-MM-JJ` pour un autre) et écrit `releve-buffer-<date>.csv` dans le dossier du test, sans
+   jamais écraser un relevé existant (`--a-blanc` pour voir le CSV). Impressions et taux vides : le signaler
+   dans le rapport. Table vide : s'arrêter et le signaler. Dépôt des livrables ailleurs que dans
+   `~/OneDrive/Documents/GitHub` (sur le poste de Julien : `~/OneDrive/PERSO/GitHub`) : `LIVRABLES_DIR=<chemin>`.
 3. **Lancer l'analyse** : `node scripts/analyse-lundi.mjs`
    - lit tous les relevés `releve-buffer-*.csv` du dossier du test (le plus récent l'emporte pour un même post,
      reconnu par son `id_buffer` : deux posts publiés à la même minute restent deux lignes), ou un seul avec

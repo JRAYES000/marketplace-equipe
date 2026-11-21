@@ -60,6 +60,7 @@ ScrapeCreators (`/v1/linkedin/post`, credential n8n « ScrapeCreators API », 1 
 une ligne dans la table `stats_linkedin` (`gjmnMzoFEmbefCtE`) : `releve_le`, `compte`, `format`,
 `post_id`, `post_url`, `publie_le`, `reactions`, `commentaires`, `abonnes`. Un post illisible fait
 échouer l'exécution (alerte du workflow 90), sans ligne vide.
+Conversion vers le CSV de l'analyse du lundi : `skills/analyse-lundi-linkedin/scripts/releve-depuis-n8n.mjs`.
 
 Limites mesurées le 21/11/2026 : **pas d'impressions** ni de taux d'engagement (l'API LinkedIn n'a que
 `w_member_social`, 403 en lecture ; ScrapeCreators ne lit que le public) ; **pas de liste des posts
