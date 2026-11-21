@@ -495,7 +495,7 @@ Phase 5 bis recopie desormais seulement les Id acceptes par `ecrire`.
 2026-10-04 — v10.0 : route Playwright, NocoDB abandonne.
 • Pourquoi : Claude in Chrome prenait l onglet visible en Phase 2 et dependait d une extension
   qui se deconnecte ; Julien voulait garder sa souris et son Chrome.
-• Test du 04/10 sur le profil Playwright C:/Users/julien/.chrome-claude : premiere connexion
+• Test du 04/10 sur le profil Playwright ~/.chrome-claude : premiere connexion
   complete (code compris) -> cookie EnrolementEffectue (1 an). Relance du navigateur : retour
   a la connexion (cookies de session JSESSIONID_CVRECHERCHE, idtkes), puis identifiant + mot
   de passe SANS ecran de code (releve ecran par ecran, 55 s). navigator.webdriver = false.
@@ -590,7 +590,7 @@ Phase 5 bis recopie desormais seulement les Id acceptes par `ecrire`.
 2026-10-08 — v10.6 : Playwright sur son propre Chromium, purge automatique (decision de Julien).
 • Serveur MCP passe de --browser chrome (Chrome 154.0.8037.98 du poste, mis a jour avec celui de
   Julien) a --browser chromium (canal chrome-for-testing, ms-playwright/chromium-1246,
-  154.0.8037.0, fige avec @playwright/mcp 0.0.82), profil neuf C:/Users/julien/.chromium-claude.
+  154.0.8037.0, fige avec @playwright/mcp 0.0.82), profil neuf ~/.chromium-claude.
   Sauvegarde de la config : ~/.claude.json.bak-20261008-chromium. Ancien profil garde.
 • Mesure : 5 telechargements successifs sur le nouveau profil, aucun plantage.
 • playwright.js preparer purge downloads, downloads_url_chains et downloads_slices du profil
@@ -603,7 +603,7 @@ Phase 5 bis recopie desormais seulement les Id acceptes par `ecrire`.
 
 2026-10-08 — v10.6.1 : profil Chromium exclusif.
 • Essai a blanc de la routine lot-france-travail-bihebdo : « Browser is already in use for
-  C:/Users/julien/.chromium-claude ». La session du lot manuel gardait sa fenetre Chromium ouverte.
+  ~/.chromium-claude ». La session du lot manuel gardait sa fenetre Chromium ouverte.
   Second essai, fenetre fermee : tous les outils passent. Regle ajoutee aux Replis (annexes.md) :
   fermer le navigateur en fin de lot.
 

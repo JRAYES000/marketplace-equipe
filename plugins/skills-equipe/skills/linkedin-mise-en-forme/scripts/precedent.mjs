@@ -6,11 +6,8 @@
 // Ordre de recherche (consigne de Julien du 29/09/2026, 22h08) :
 //   1. les .final.txt les plus recents DU COMPTE (5 au plus) dans livrables-Claude-Agency/linkedin/
 //      (chemin configurable : option --dossier, ou variable LIVRABLES_LINKEDIN_DIR) ;
-//   2. sinon les derniers posts publies via l'API Zernio (GET /v1/posts?status=published, filtre
-//      accountId, limit 5) -- lecture seule, cle ZERNIO_API_KEY lue dans l'environnement, jamais
-//      affichee. Le dossier local et Zernio ne se completent pas l'un l'autre : un post publie y
-//      figure deja sous forme de .final.txt, les melanger compterait le meme post deux fois ;
-//   3. sinon : un avertissement, jamais un echec.
+//   2. sinon : un avertissement, jamais un echec. (Le repli sur l'API Zernio est retire le
+//      21/11/2026 : Zernio est abandonne depuis le 08/10/2026 et ne voit pas les posts Buffer.)
 //
 // Compte : "a<N>.final.txt" = julien-agency, "p<N>.final.txt" = julien-partners (convention du
 // dossier livrables), ou --compte explicite.
@@ -24,8 +21,6 @@ import { join, basename, resolve } from "node:path";
 
 export const DOSSIER_PAR_DEFAUT = join(homedir(), "OneDrive", "Documents", "GitHub", "livrables-Claude-Agency", "linkedin");
 export const NB_POSTS_VARIETE = 5;
-const BASE_ZERNIO = "https://zernio.com/api/v1";
-const REGLAGES_COMPTES = new URL("../../linkedin-carrousel/reglages-comptes.json", import.meta.url);
 const PREFIXES = { a: "julien-agency", p: "julien-partners" };
 
 export function compteDepuisNom(chemin) {
@@ -70,40 +65,9 @@ export function lireCorpsFichier(chemin) {
   return texte.startsWith("---") ? texte.slice(texte.indexOf("\n---", 3) + 4).trim() : texte;
 }
 
-// Les n derniers posts publies du compte, via Zernio. Renvoie { textes } (du plus recent au plus
-// ancien) ou { erreur } -- ne leve jamais.
-export async function derniersPostsZernio({ compte, apiKey, comptes, fetchImpl = fetch, n = NB_POSTS_VARIETE }) {
-  // apiKey : la cle, ou une fonction qui la lit (appelee seulement ici, donc seulement si le dossier
-  // local n'a rien donne -- le .env n'est jamais ouvert pour rien).
-  const cle = typeof apiKey === "function" ? apiKey() : apiKey;
-  if (!cle) return { erreur: "ZERNIO_API_KEY absente de l'environnement" };
-  let accountId;
-  try {
-    accountId = (comptes || JSON.parse(readFileSync(REGLAGES_COMPTES, "utf8")))[compte]?.zernio_account_id;
-  } catch (e) {
-    return { erreur: `reglages-comptes.json illisible (${e.message})` };
-  }
-  if (!accountId) return { erreur: `aucun zernio_account_id pour "${compte}"` };
-  try {
-    const url = `${BASE_ZERNIO}/posts?status=published&accountId=${encodeURIComponent(accountId)}&sortBy=created-desc&limit=${n}`;
-    const r = await fetchImpl(url, { headers: { Authorization: `Bearer ${cle}` } });
-    if (!r.ok) return { erreur: `Zernio a repondu HTTP ${r.status}` };
-    const textes = ((await r.json()).posts || []).map((p) => (p?.content ? String(p.content).trim() : "")).filter(Boolean);
-    return textes.length ? { textes } : { erreur: "aucun post publie trouve sur Zernio pour ce compte" };
-  } catch (e) {
-    return { erreur: `appel Zernio impossible (${e.message})` };
-  }
-}
-
-// Dernier post publie seulement. Renvoie { texte } ou { erreur }.
-export async function dernierPostZernio(options) {
-  const r = await derniersPostsZernio({ ...options, n: 1 });
-  return r.textes ? { texte: r.textes[0] } : r;
-}
-
 // Point d'entree : { texte (le plus recent), textes (5 au plus, du plus recent au plus ancien), source,
 // sources } ou { avertissement }. Jamais d'echec.
-export async function resoudrePrecedent({ brouillon, compte, dossier, apiKey, comptes, fetchImpl, n = NB_POSTS_VARIETE }) {
+export async function resoudrePrecedent({ brouillon, compte, dossier, n = NB_POSTS_VARIETE }) {
   const c = compte || (brouillon ? compteDepuisNom(brouillon) : null);
   if (!c) return { avertissement: "compte inconnu (nom de fichier a<N>/p<N>.final.txt ou --compte) : regle de variete non mesuree" };
   const raisons = [];
@@ -114,11 +78,5 @@ export async function resoudrePrecedent({ brouillon, compte, dossier, apiKey, co
     return { texte: locaux[0].texte, textes: locaux.map((p) => p.texte), source: sources[0], sources };
   }
   raisons.push(existsSync(dossierLu) ? `aucun .final.txt precedent de ${c} dans ${dossierLu}` : `dossier introuvable : ${dossierLu}`);
-  const z = await derniersPostsZernio({ compte: c, apiKey, comptes, fetchImpl, n });
-  if (z.textes) {
-    const sources = z.textes.map(() => `${c} : post publie via Zernio`);
-    return { texte: z.textes[0], textes: z.textes, source: `${c} : dernier post publie via Zernio`, sources };
-  }
-  raisons.push(z.erreur);
   return { avertissement: `aucun post precedent pour ${c} (${raisons.join(" ; ")}) : regle de variete non mesuree` };
 }

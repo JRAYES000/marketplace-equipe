@@ -5,7 +5,7 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { spawnSync } from "node:child_process";
 import {
-  compteDepuisNom, postsLocauxDuCompte, precedentLocal, precedentsLocaux, dernierPostZernio, derniersPostsZernio, resoudrePrecedent, lireCorpsFichier,
+  compteDepuisNom, postsLocauxDuCompte, precedentLocal, precedentsLocaux, resoudrePrecedent, lireCorpsFichier,
 } from "../scripts/precedent.mjs";
 
 const CLI = new URL("../scripts/verif-post.mjs", import.meta.url).pathname.replace(/^\/([A-Za-z]:)/, "$1");
@@ -68,63 +68,23 @@ test("precedentLocal : dossier introuvable = null, jamais une exception ; frontm
   assert.equal(lireCorpsFichier(join(racine, "2026-10-02", "a9.final.txt")), "Le texte.\nSuite.");
 });
 
-const COMPTES = { "julien-agency": { zernio_account_id: "aaaaaaaaaaaaaaaaaaaaaaaa" }, "julien-partners": { zernio_account_id: "bbbbbbbbbbbbbbbbbbbbbbbb" } };
-const reponse = (corps, status = 200) => ({ ok: status < 400, status, json: async () => corps });
-
-test("dernierPostZernio : GET /v1/posts filtre sur le bon compte et les posts publies, renvoie le contenu", async () => {
-  let appel;
-  const fetchImpl = async (url, opts) => { appel = { url, opts }; return reponse({ posts: [{ content: "  Le dernier post publie.  " }] }); };
-  const r = await dernierPostZernio({ compte: "julien-partners", apiKey: "cle-de-test", comptes: COMPTES, fetchImpl });
-  assert.equal(r.texte, "Le dernier post publie.");
-  assert.match(appel.url, /^https:\/\/zernio\.com\/api\/v1\/posts\?/);
-  assert.match(appel.url, /status=published/);
-  assert.match(appel.url, /accountId=bbbbbbbbbbbbbbbbbbbbbbbb/);
-  assert.match(appel.url, /limit=1/);
-  assert.equal(appel.opts.headers.Authorization, "Bearer cle-de-test");
-  assert.equal(appel.opts.method, undefined, "lecture seule : GET par defaut, jamais de POST");
-});
-
-test("dernierPostZernio : sans cle, HTTP en erreur, aucun post, reseau en panne, compte inconnu -> une erreur, jamais une exception", async () => {
-  const ok = async () => reponse({ posts: [{ content: "x" }] });
-  assert.match((await dernierPostZernio({ compte: "julien-agency", apiKey: undefined, comptes: COMPTES, fetchImpl: ok })).erreur, /ZERNIO_API_KEY absente/);
-  assert.match((await dernierPostZernio({ compte: "julien-agency", apiKey: "k", comptes: COMPTES, fetchImpl: async () => reponse({}, 401) })).erreur, /HTTP 401/);
-  assert.match((await dernierPostZernio({ compte: "julien-agency", apiKey: "k", comptes: COMPTES, fetchImpl: async () => reponse({ posts: [] }) })).erreur, /aucun post publie/);
-  assert.match((await dernierPostZernio({ compte: "julien-agency", apiKey: "k", comptes: COMPTES, fetchImpl: async () => { throw new Error("ECONNRESET"); } })).erreur, /ECONNRESET/);
-  assert.match((await dernierPostZernio({ compte: "page-claude", apiKey: "k", comptes: COMPTES, fetchImpl: ok })).erreur, /aucun zernio_account_id/);
-});
-
-test("resoudrePrecedent : le dossier local passe avant Zernio, et la cle n'est meme pas lue", async () => {
+test("resoudrePrecedent : le dossier local donne le post precedent du compte", async () => {
   const { racine } = livrables();
-  let cleLue = false;
-  const r = await resoudrePrecedent({
-    brouillon: join(racine, "2026-10-01", "a8.final.txt"), dossier: racine,
-    apiKey: () => { cleLue = true; return "k"; }, comptes: COMPTES, fetchImpl: async () => { throw new Error("ne doit pas etre appele"); },
-  });
+  const r = await resoudrePrecedent({ brouillon: join(racine, "2026-10-01", "a8.final.txt"), dossier: racine });
   assert.equal(r.texte, "a6.final.txt");
   assert.match(r.source, /julien-agency/);
-  assert.equal(cleLue, false);
-});
-
-test("resoudrePrecedent : dossier sans post precedent du compte -> repli sur le dernier post Zernio", async () => {
-  const vide = mkdtempSync(join(tmpdir(), "vide-"));
-  const r = await resoudrePrecedent({
-    brouillon: "C:/x/p3.final.txt", dossier: vide, apiKey: () => "k", comptes: COMPTES,
-    fetchImpl: async () => reponse({ posts: [{ content: "Publie sur Zernio." }] }),
-  });
-  assert.equal(r.texte, "Publie sur Zernio.");
-  assert.match(r.source, /julien-partners.*Zernio/);
 });
 
 test("resoudrePrecedent : rien nulle part -> un avertissement (jamais d'exception), avec les raisons", async () => {
   const vide = mkdtempSync(join(tmpdir(), "vide-"));
-  const r = await resoudrePrecedent({ brouillon: "C:/x/a3.final.txt", dossier: vide, apiKey: undefined, comptes: COMPTES });
+  const r = await resoudrePrecedent({ brouillon: "C:/x/a3.final.txt", dossier: vide });
   assert.equal(r.texte, undefined);
   assert.match(r.avertissement, /aucun post precedent pour julien-agency/);
-  assert.match(r.avertissement, /ZERNIO_API_KEY absente/);
+  assert.doesNotMatch(r.avertissement, /zernio/i, "plus de repli Zernio (abandonne le 08/10/2026)");
   assert.match(r.avertissement, /non mesuree/);
   const inconnu = await resoudrePrecedent({ brouillon: "C:/x/brouillon.txt", dossier: vide });
   assert.match(inconnu.avertissement, /compte inconnu/);
-  const absent = await resoudrePrecedent({ brouillon: "C:/x/a3.final.txt", dossier: join(vide, "nope"), apiKey: undefined, comptes: COMPTES });
+  const absent = await resoudrePrecedent({ brouillon: "C:/x/a3.final.txt", dossier: join(vide, "nope") });
   assert.match(absent.avertissement, /dossier introuvable/);
 });
 
@@ -144,20 +104,6 @@ test("precedentsLocaux : jusqu'a 5 posts STRICTEMENT AVANT le brouillon, du plus
   assert.deepEqual(precedentsLocaux({ dossier: racine, compte: "julien-agency", brouillon: join(racine, "2026-09-28-30", "a1.final.txt") }), [], "le tout premier n'a rien avant lui");
 });
 
-test("derniersPostsZernio : limit=5 par defaut, textes nettoyes, contenus vides ignores ; erreurs sans exception", async () => {
-  let url;
-  const fetchImpl = async (u) => { url = u; return reponse({ posts: [{ content: " Un. " }, { content: "" }, {}, { content: "Deux." }] }); };
-  const r = await derniersPostsZernio({ compte: "julien-partners", apiKey: "k", comptes: COMPTES, fetchImpl });
-  assert.deepEqual(r.textes, ["Un.", "Deux."]);
-  assert.match(url, /limit=5/);
-  assert.match(url, /accountId=bbbbbbbbbbbbbbbbbbbbbbbb/);
-  assert.match(url, /status=published/);
-  await derniersPostsZernio({ compte: "julien-partners", apiKey: "k", comptes: COMPTES, fetchImpl, n: 3 });
-  assert.match(url, /limit=3/);
-  assert.match((await derniersPostsZernio({ compte: "julien-agency", apiKey: undefined, comptes: COMPTES })).erreur, /ZERNIO_API_KEY absente/);
-  assert.match((await derniersPostsZernio({ compte: "julien-agency", apiKey: "k", comptes: COMPTES, fetchImpl: async () => reponse({ posts: [] }) })).erreur, /aucun post publie/);
-});
-
 test("resoudrePrecedent : renvoie aussi `textes` (5 au plus, du plus recent au plus ancien) et leurs sources ; `texte` reste le plus recent", async () => {
   const { racine } = livrables();
   const r = await resoudrePrecedent({ brouillon: join(racine, "2026-10-01", "a8.final.txt"), dossier: racine });
@@ -165,12 +111,6 @@ test("resoudrePrecedent : renvoie aussi `textes` (5 au plus, du plus recent au p
   assert.equal(r.texte, r.textes[0]);
   assert.equal(r.sources.length, 4);
   assert.match(r.sources[0], /a6\.final\.txt$/);
-  const z = await resoudrePrecedent({
-    brouillon: "C:/x/p3.final.txt", dossier: mkdtempSync(join(tmpdir(), "vide-")), apiKey: () => "k", comptes: COMPTES,
-    fetchImpl: async () => reponse({ posts: [{ content: "Z1" }, { content: "Z2" }] }),
-  });
-  assert.deepEqual(z.textes, ["Z1", "Z2"]);
-  assert.equal(z.texte, "Z1");
 });
 
 // ---- CLI de bout en bout ----
@@ -179,7 +119,7 @@ const POST = (accroche, fin, gras = "retard trop long") => [
   accroche, "", `Un **${gras}** coute des candidats avant meme l'offre.`, "",
   "Ce post sert uniquement de gabarit de test pour verifier automatiquement les regles de forme. ".repeat(15).trim(), "", fin,
 ].join("\n");
-const lancer = (...args) => spawnSync(process.execPath, [CLI, ...args], { encoding: "utf8", env: { ...process.env, ZERNIO_API_KEY: "" } });
+const lancer = (...args) => spawnSync(process.execPath, [CLI, ...args], { encoding: "utf8", env: { ...process.env } });
 
 test("CLI : le post precedent du compte est trouve seul, et un schema identique fait echouer avec le code 1", () => {
   const { racine, poser } = livrables();

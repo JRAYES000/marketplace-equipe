@@ -1,20 +1,18 @@
 ---
 name: parallelisation-et-routage
-description: >-
-  Routeur modèle × effort et orchestrateur de parallélisation, à activation MANUELLE. Classe
-  la demande en trois étages — Haiku (exécution mécanique), Sonnet (travail courant), Opus
-  (raisonnement à enjeu) — puis exécute dans des sous-agents lancés au bon étage : un seul
-  pour une tâche isolée, un fan-out par vagues pour un lot de N unités indépendantes. Posture
-  par défaut : ne pas déléguer, ce modèle sur-délègue déjà. Déclencher UNIQUEMENT sur demande
-  explicite — FR : « parallélise », « lance des sous-agents », « worker pool », « éclate en
-  sous-tâches », « active le routeur », « quel modèle pour ça », « mode économie de tokens » ;
-  EN : « parallelize », « spawn workers », « dispatch to subagents ». NE PAS déclencher de
-  toi-même, même face à un gros lot manifestement parallélisable. Arrêt : « mode normal »,
-  « arrête le routage ». Ne PAS utiliser pour une question factuelle, une micro-tâche, ou des
-  étapes séquentielles dépendantes.
+description: >
+  Route une demande vers un sous-agent au bon modèle (haiku, sonnet, opus) et parallélise un lot
+  d'unités indépendantes en vagues, en déléguant le moins possible. Pour « parallélise », « lance
+  des sous-agents », « worker pool », « éclate en sous-tâches », « active le routeur », « quel
+  modèle pour ça », « parallelize », « spawn workers ». Arrêt : « arrête le routage ». Activation
+  manuelle : sur demande explicite uniquement, même face à un gros lot.
 ---
 
 # Parallélisation et routage de modèle
+
+Sommaire : Plancher · Ce que la skill peut faire · Activation et arrêt · Étape 1 Choisir l'étage ·
+Étape 2 Choisir la forme · Brief autonome · Forme A · Forme B · Templates · Plafonds · Session mal
+calibrée · Exemples · À éviter · Auto-contrôle.
 
 Un seul principe : **l'orchestrateur ne fait lui-même que ce qu'aucun étage
 inférieur ne peut faire.** Tout le reste part vers des sous-agents lancés sur le
@@ -62,7 +60,7 @@ modèle du fil principal.
 ## Activation et arrêt
 
 Sur déclencheur explicite uniquement. Confirmer en une ligne, puis router chaque
-demande suivante jusqu'à l'arrêt : « mode normal », « arrête le routage ».
+demande suivante jusqu'à l'arrêt : « arrête le routage ». (« mode normal » arrête `phrase-magique`.)
 
 ---
 
@@ -140,10 +138,12 @@ logique de décision reste chez l'orchestrateur.
 Agent({
   description: "<3-5 mots>",
   subagent_type: "Explore",   // "general-purpose" s'il écrit un fichier
-  model: "haiku",             // ou "sonnet" — jamais le modèle de l'orchestrateur
+  model: "haiku",             // ou "sonnet" ; jamais le modèle de l'orchestrateur
   prompt: "<brief autonome>"
 })
 ```
+
+Étage `opus` quand l'orchestrateur tourne déjà en Opus : il fait la tâche lui-même, sans sous-agent.
 
 **Au retour**, l'orchestrateur contrôle le résultat contre les critères avant de
 le rendre. Ne jamais transmettre une sortie de sous-agent sans l'avoir regardée :
@@ -181,8 +181,8 @@ il ne sature ni la concurrence ni le contexte de l'orchestrateur.
 ### 4. Pilot sur 3 items
 
 Pour tout batch de plus de 10 items : lancer 3 workers d'abord, inspecter (format
-respecté ? qualité ? pas d'invention ?), confirmer avec l'utilisateur, PUIS
-dérouler. Une erreur sur 3 items se corrige en 30 s ; la même sur 100 items est
+respecté ? qualité ? pas d'invention ?), confirmer avec l'utilisateur (sous `fonce` :
+inspecter le pilote et continuer sans question), puis dérouler. Une erreur sur 3 items se corrige en 30 s ; la même sur 100 items est
 un désastre coûteux.
 
 ### 5. Vérification post-dispatch
@@ -228,7 +228,7 @@ PLAN DE PARALLÉLISATION
 - Dossier sortie : <path> — un fichier unique par worker (out_<id>.ext)
 - Pilot : oui sur 3 items (si N > 10) / non
 
-Launch all workers of this wave in a single message so they start concurrently.
+Lancer tous les workers de la vague dans un seul message pour qu'ils démarrent ensemble.
 ```
 
 ### Prompt worker
@@ -275,7 +275,7 @@ récapituler la matrice.
 ## Plafonds déterministes
 
 Une consigne se contourne, un plafond non. Sur Claude Code et l'Agent SDK — version
-**2.1.217 ou plus récente**, mettre à jour un SDK épinglé avant de le pointer sur ce
+**2.1.217 ou plus récente** (relevé en novembre 2026, à revérifier dans la doc de Claude Code), mettre à jour un SDK épinglé avant de le pointer sur ce
 modèle :
 
 - `CLAUDE_CODE_MAX_SUBAGENT_SPAWN_DEPTH` — profondeur de spawn (un sous-agent qui en
@@ -321,7 +321,7 @@ en une ligne, sans insister :
 - Inventer une donnée pour un item `AMBIGUOUS`.
 - Livrer une sortie de sous-agent sans l'avoir regardée.
 - Écrire un identifiant de modèle versionné en dur : toujours les alias courts
-  `"haiku"`, `"sonnet"`, `"opus"`, `"fable"` — les identifiants versionnés périment.
+  `"haiku"`, `"sonnet"`, `"opus"` (et `"fable"`, autre alias accepté par l'outil Agent) : les identifiants versionnés périment.
 
 ## Auto-contrôle
 

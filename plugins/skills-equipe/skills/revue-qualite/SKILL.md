@@ -1,20 +1,20 @@
 ---
 name: revue-qualite
-description: >-
-  Revue qualité de fin de tâche, à lancer quand le travail est terminé et avant
-  de le rendre à Julien. Relit la demande d'origine et les livrables réels,
-  contrôle le socle commun puis la grille du type de tâche (contenu web / SEO,
-  réseaux sociaux), donne en version courte les 3 corrections prioritaires avec
-  l'action à faire (tout le détail sur demande), puis pose 4 à 8 questions de
-  challenge ancrées dans le livrable. Juge chaque réponse, en tire les corrections et rend un verdict
-  PRÊT / À REPRENDRE. Ton de coach exigeant. Activation MANUELLE uniquement :
-  « /revue-qualite », « revue qualité », « lance la revue qualité », « challenge
-  mon travail », « relis mon travail avant que je le rende ». NE PAS déclencher
-  de toi-même, même quand une tâche se termine : la revue se demande, elle ne se
-  suppose pas.
+description: >
+  Revue de fin de tâche avant de rendre un travail : relit la demande et les livrables réels,
+  contrôle le socle et la grille du type (web/SEO, réseaux sociaux), donne 3 corrections
+  prioritaires, pose 4 à 8 questions de challenge et rend PRÊT ou À REPRENDRE. Pour
+  « /revue-qualite », « revue qualité », « challenge mon travail avant que je le rende », « relis
+  mon travail avant que je le rende ». Activation manuelle : sur demande explicite uniquement.
 ---
 
 # Revue qualité de fin de tâche
+
+Sommaire : Posture · Ce que la revue ne fait pas · Étape 1 Ancrer · Étape 2 Contrôler ·
+Étape 3 Rendre la revue · Étape 4 Juger les réponses · Étape 5 Verdict · Si la personne veut aller vite.
+
+Une exigence tenue toute la session (cadrage, contradicteur) relève de `phrase-magique` ; cette
+skill revoit un livrable terminé.
 
 Le travail est fini. Cette skill répond à une seule question : **est-ce le meilleur résultat
 possible pour cette demande, ou seulement un résultat correct ?** Entre les deux, il y a
@@ -102,9 +102,8 @@ scripts : quand un script de contrôle existe, **lance-le** plutôt que de juger
 ## Étape 3 — Rendre la revue (un seul message, version courte)
 
 Tout ce qui a été trouvé aux étapes 1 et 2 est gardé en réserve, mais le message n'en montre
-que l'essentiel. **400 mots au plus**, lisible en deux minutes. Les essais du 03/10/2026 ont
-donné des revues complètes de 1 200 à 1 400 mots : trop pour être lues à chaque tâche, et une
-revue qu'on survole ne fait progresser personne.
+que l'essentiel. **400 mots au plus**, lisible en deux minutes : une revue complète trop longue est survolée, et
+une revue qu'on survole ne fait progresser personne.
 
 ```
 ## Revue qualité — <titre court de la tâche>

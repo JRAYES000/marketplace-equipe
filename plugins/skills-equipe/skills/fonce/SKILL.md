@@ -1,16 +1,11 @@
 ---
 name: fonce
-description: >-
-  Mode autonome à condition d'arrêt. Formule d'abord une condition de fin
-  vérifiable, puis exécute la demande de bout en bout sans poser une seule
-  question — décide seul, journalise ses hypothèses, vérifie sur le résultat
-  réel, ne rend qu'un récap final. Économe en tokens par construction.
-  Déclenche UNIQUEMENT sur intention explicite d'autonomie : « /fonce », «
-  fonce », « mode autonome », « vas-y sans rien me demander », «
-  débrouille-toi », « ne m'interromps pas », « va jusqu'au bout tout seul », «
-  je pars, gère ». NE PAS déclencher de toi-même sur une demande ordinaire,
-  même longue, floue ou complexe : l'autonomie totale se demande, elle ne se
-  suppose pas.
+description: >
+  Mode autonome : pose une condition de fin vérifiable (/goal), exécute la demande de bout en bout
+  sans poser de question, note ses hypothèses et ne rend qu'un récap final. Pour « /fonce »,
+  « fonce », « mode autonome », « vas-y sans rien me demander », « débrouille-toi », « je pars,
+  gère ». Activation manuelle : sur demande explicite uniquement, jamais sur une demande ordinaire
+  même longue ou floue.
 ---
 
 # Mode autonome
@@ -27,7 +22,7 @@ Avant le moindre appel d'outil, formule la condition de fin. Quatre éléments, 
 
 - **l'état mesurable** — un test qui passe, un code de sortie, une page qui répond, une file vide, un compte qui tombe juste. Pas « c'est mieux », pas « c'est propre » ;
 - **la preuve** — la commande ou l'appel exact qui le démontre, et que tu exécuteras vraiment ;
-- **l'intangible** — ce qui ne doit pas bouger en chemin (« aucun autre fichier de `web\` modifié »), **et toute action sortante que la demande ne nomme pas** (« sans déploiement », « sans email ») : la condition doit tenir sans elle ;
+- **l'intangible** — ce qui ne doit pas bouger en chemin (« aucun autre fichier de `web/` modifié »), **et toute action sortante que la demande ne nomme pas** (« sans déploiement », « sans email ») : la condition doit tenir sans elle ;
 - **la borne** — en approches, pas en tours : « ou j'arrête après avoir épuisé 3 approches sur le même point ». Un compteur de tours se remet à zéro à la reprise d'une session, une approche épuisée reste épuisée.
 
 Affiche-la **une seule fois, en tête, sous cette forme exacte** :
@@ -68,12 +63,11 @@ Le budget se joue sur le nombre d'allers-retours et sur ce que tu fais entrer da
 
 1. **Le sur-travail.** Condition atteinte = tu t'arrêtes, même si tu vois trois améliorations possibles. Elles vont dans « Reste », pas dans le diff.
 2. **Le tâtonnement.** Lis ce qui touche au changement, choisis une approche et tiens-la ; ne la revisite que devant une information qui la contredit. Un tour de raisonnement coûte moins que trois essais ratés, une exploration exhaustive coûte plus qu'un essai.
-3. **Les gros fichiers avalés en entier.** `Grep`/`Glob` pour localiser, `Read` avec `offset`/`limit` sur la zone utile seulement.
+3. **Les gros fichiers avalés en entier** : lire seulement la zone utile.
 
 **Réflexes :**
 
 - Investigation large — une dizaine de fichiers ou plus à parcourir pour répondre : **délègue à un sous-agent** (`Explore`), son contexte meurt avec lui et seule sa conclusion te revient. En dessous, fais-le toi-même : ce qui tient en quelques appels d'outils ne se délègue pas, et un sous-agent ne sert **jamais** à relire ton propre travail.
-- **Un seul `ToolSearch` pour plusieurs schémas d'outils différés** : `select:a,b,c`, jamais un appel par outil.
 - Écris un fichier d'un coup plutôt qu'en cascade de petits `Edit`.
 - Données intermédiaires volumineuses → un fichier dans le scratchpad, pas dans le contexte. **Sauf la preuve du contrat**, qui reste dans la conversation (§1).
 - Un fichier livré sur disque — rapport, note, doc — couvre le fond à la longueur que la tâche demande : sans section de remplissage, sans résumé redondant, sans boilerplate.
@@ -124,7 +118,7 @@ Ce skill est partagé au sein d'une équipe : tu ne connais pas l'appétit au ri
 
 ## 8. Cohabitation avec les autres skills
 
-- **phrase-magique** — son étape de cadrage (4 questions en un seul appel, puis attendre les réponses) est **suspendue** ; le contrat d'arrêt et le bloc « Supposé » la remplacent. Tout le reste tient : socle d'honnêteté, étiquetage des chiffres, devoir d'alerte, contradicteur, périmètre tenu, critères binaires repris à la clôture. Si la demande repose sur une hypothèse fausse ou porte un risque, tu le dis **en une ligne et tu exécutes quand même** la meilleure version possible — l'alerte n'est pas une demande de permission.
+- **fonce et phrase-magique** : incompatibles sur un seul point, les questions de cadrage. Sous `fonce`, l'étape de cadrage de phrase-magique (4 questions, puis attendre) est suspendue ; le contrat d'arrêt et le bloc « Supposé » la remplacent. Le reste de phrase-magique tient : socle, étiquetage des chiffres, devoir d'alerte (en une ligne, puis on exécute quand même), contradicteur, périmètre tenu, critères binaires repris à la clôture.
 - **ponytail** *(`ponytail:ponytail`, module public `DietrichGebert/ponytail`)* — compatible et complémentaire : ponytail gouverne la taille du diff, fonce gouverne le nombre d'allers-retours. Les deux poussent dans le même sens.
 - **`/goal`** *(Claude Code uniquement)* — voir §1, c'est le prolongement naturel entre les tours. Le pairer avec le mode auto laisse tourner chaque tour sans validation d'outil. Sans `/goal`, un travail qui dépasse un tour s'arrête à la fin du tour : le fichier de bord permet de le reprendre d'un mot.
 - **`/loop`** — non. Fonce n'est pas périodique, il s'arrête quand la condition tient.

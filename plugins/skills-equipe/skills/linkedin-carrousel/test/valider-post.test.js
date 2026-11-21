@@ -26,7 +26,7 @@ Lien en commentaire. #recrutement #rh`;
 
 test('accepte le brouillon conforme et renvoie un texte converti en gras unicode', () => {
   const resultat = validerEtConvertirPost(BROUILLON_CONFORME);
-  assert.ok(resultat.includes('𝐭𝐫𝐨𝐢𝐬 𝐬𝐢𝐠𝐧𝐞𝐬'), 'le gras doit etre converti en unicode');
+  assert.ok(resultat.includes('𝘁𝗿𝗼𝗶𝘀 𝘀𝗶𝗴𝗻𝗲𝘀'), 'le gras doit etre converti en Sans-Serif Bold (police de linkedin-mise-en-forme)');
   assert.ok(!resultat.includes('**'), 'aucune etoile ne doit subsister apres conversion');
 });
 

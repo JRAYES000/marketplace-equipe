@@ -1,79 +1,45 @@
 ---
 name: delegation-deepseek-openrouter
-description: >-
-  Skill à activation MANUELLE uniquement. Délègue les tâches de génération lourdes (résumés de
-  documents longs, traductions, extraction ou reformatage de données, premiers jets
-  volumineux) à DeepSeek V4 — Flash par défaut, Pro sur les rares tâches à raisonnement — via
-  l'outil send-message du connecteur OpenRouter MCP, pour économiser les tokens Claude. NE PAS
-  déclencher automatiquement, même face à une grosse tâche de génération : utiliser UNIQUEMENT
-  sur demande explicite — « passe par DeepSeek », « délègue à DeepSeek », « utilise le modèle
-  bon marché », « économise mes tokens via OpenRouter », « charge la skill délégation »,
-  « /delegation-deepseek » — ou quand l'utilisateur demande d'installer ou configurer le
-  connecteur OpenRouter MCP (voir alors references/installation.md). Une fois activée,
-  appliquer le routeur pour le reste de la conversation.
+description: >
+  Délègue les générations volumineuses (résumés longs, traductions, extraction, reformatage,
+  premiers jets répétitifs) à DeepSeek V4 Flash via l'outil send-message d'OpenRouter pour
+  économiser les tokens Claude ; aide aussi à installer le connecteur (references/installation.md).
+  Pour « passe par DeepSeek », « délègue à DeepSeek », « utilise le modèle bon marché ».
+  Activation manuelle : sur demande explicite uniquement, puis le routeur vaut pour la conversation.
 ---
 
 # Délégation DeepSeek via OpenRouter MCP
 
-## Activation et notification obligatoire
+## Activation
 
-Cette skill ne se déclenche que sur demande explicite de l'utilisateur —
-jamais automatiquement. Une fois activée, appliquer le routeur ci-dessous
-jusqu'à la fin de la conversation (ou jusqu'à contre-ordre).
-
-**Notification systématique, sans exception** : chaque réponse utilisant
-cette skill (chargée ou `send-message` appelé) COMMENCE par une ligne visible :
-« 🔁 Skill délégation DeepSeek utilisée — N appel(s) send-message (modèle). »
-L'utilisateur doit toujours savoir quand un modèle tiers a produit une
-partie du travail, et lequel — jamais de délégation silencieuse. Si la skill
-s'est déclenchée sans demande explicite, le signaler et demander confirmation
-AVANT tout appel `send-message`.
+Sur demande explicite uniquement. Une fois activée, le routeur ci-dessous vaut jusqu'à la fin de la
+conversation ou jusqu'à contre-ordre. Toute réponse qui a délégué l'annonce en tête (étape 6 du
+protocole) : jamais de délégation silencieuse.
 
 ## Objectif
 
 Réduire la consommation de tokens Claude. Claude reste l'orchestrateur
 (comprendre, planifier, relire, intégrer) ; les tâches de génération lourdes
-partent vers **DeepSeek V4** via l'outil `send-message` du connecteur
-**OpenRouter MCP**.
+partent vers **DeepSeek V4** via l'outil `OpenRouter:send-message` (connecteur OpenRouter MCP).
 
 ## Avant de déléguer : baisser l'effort
 
-L'écart de prix annoncé se mesure contre Claude à plein effort. Là où l'interface
-l'expose (API, Claude Code), `low` et `medium` tiennent la qualité sur une grande part
-du travail courant pour une fraction des tokens — sur une tâche de génération moyenne,
-ça suffit souvent et ça évite l'aller-retour, la relecture et le risque de sortie
-dégradée. La délégation garde son intérêt sur le **volume** (plusieurs milliers de mots
-à produire, un lot répétitif), pas sur une sous-tâche isolée.
+Là où l'interface l'expose, baisser d'abord l'effort de Claude (détail : `parallelisation-et-routage`).
+La délégation garde son intérêt sur le **volume** (plusieurs milliers de mots, un lot répétitif),
+pas sur une sous-tâche isolée.
 
 ## Les deux modèles
 
-| | Flash (défaut) | Pro (exception) |
-|---|---|---|
-| slug | `deepseek/deepseek-v4-flash-0731` | `deepseek/deepseek-v4-pro-0813` |
-| entrée / sortie par million | 0,04 $ / 0,08 $ | 0,58 $ / 1,74 $ chez DeepSeek, jusqu'à 1,32 $ / 3,96 $ ailleurs |
-| intelligence / code / agentique | 51,8 / 69,1 / 48,4 | 53,2 / **68,8** / 49,6 |
-| raisonnement | à couper | à garder, c'est ce qu'on paie |
+- **Flash (défaut)** : `deepseek/deepseek-v4-flash-0731`, raisonnement coupé.
+- **Pro (exception)** : `deepseek/deepseek-v4-pro-0813`, raisonnement gardé, fournisseur DeepSeek.
 
-Tarifs relevés dans le catalogue OpenRouter le 13/09/2026 ; indices Artificial
-Analysis relevés le 23/08/2026, non recontrôlés depuis.
-**Pro coûte 14 à 22× Flash, dans le meilleur des cas, pour +1,4 point
-d'intelligence et un score de code légèrement inférieur.** Il ne se justifie
-donc pas par « la tâche est un peu plus dure » : sur presque tout ce qui est
-déléguable, Flash fait aussi bien.
+Au 21/11/2026 (catalogue OpenRouter), Pro chez DeepSeek hors heures de pointe coûte environ 15 fois
+Flash en entrée et 7 fois en sortie, pour un gain d'intelligence marginal : sur presque tout ce qui
+est déléguable, Flash fait aussi bien. Tarifs, indices et slugs à éviter :
+[references/modeles.md](references/modeles.md).
 
-Ne pas confondre avec `deepseek/deepseek-v4-pro` tout court, le snapshot 0423
-(45,3 / 59,4 / 37,8) : celui-là est dépassé par Flash sur les trois indices,
-ne jamais le choisir. L'alias `~deepseek/deepseek-v4-flash-latest`, affiché
-moins cher, pointe aujourd'hui vers le même 0731 mais suivra le prochain
-modèle de la famille sans prévenir. `deepseek/deepseek-v4.1-flash`, apparu au
-catalogue le 10/09/2026, coûte 0,15 $ / 0,60 $ — presque quatre fois Flash 0731 :
-ce n'est pas un remplaçant du défaut, seulement une option si la qualité de 0731
-ne suffit pas sur un lot donné.
-
-**Les slugs sont datés et périmeront.** Avant une série d'appels, passer par
-`list-models` (attention, ce n'est pas `models-list`) : contrôler que le
-modèle est toujours servi et qu'aucun successeur moins cher n'est sorti. Un
-identifiant versionné écrit en dur dans une skill est une date de péremption.
+**Les slugs sont datés et périmeront.** Avant une série d'appels, passer par `OpenRouter:list-models`
+(pas `models-list`) : le modèle est-il toujours servi, un successeur moins cher est-il sorti ?
 
 ## Routeur : Flash, Pro, ou Claude
 
@@ -124,15 +90,15 @@ important que le choix du modèle lui-même.
 ### Pro : garder le raisonnement, mais le brider
 
 Couper le raisonnement sur Pro n'a aucun sens : c'est la seule chose qu'on y
-paie 10× plus cher. Donc `reasoning_effort: "low"` d'abord, `"high"` seulement
+paie nettement plus cher. Donc `reasoning_effort: "low"` d'abord, `"high"` seulement
 si la sortie « low » est visiblement bâclée. Et `max_tokens` généreux mais
 fini (6000), sinon la réflexion tourne sans plafond.
 
 Le routage de fournisseur par défaut n'est pas le moins cher sur Pro. Passer
-`provider: { order: ["deepseek"] }` : l'endpoint DeepSeek natif est à
-0,66 $ / 1,98 $ contre 1,32 $ / 3,96 $ chez la plupart des autres, avec
-99,99 % de disponibilité et la mise en cache implicite des entrées. `order`
-(et non `only`) garde la bascule automatique si l'endpoint tombe.
+`provider: { order: ["deepseek"] }` : l'endpoint DeepSeek natif est le moins cher des
+endpoints non quantifiés hors heures de pointe (chiffres : `references/modeles.md`), avec la mise
+en cache implicite des entrées. `order` (et non `only`) garde la bascule automatique si
+l'endpoint tombe.
 
 ## Prérequis
 
@@ -187,9 +153,9 @@ En cas de doute sur le niveau de qualité requis, demander à l'utilisateur.
 5. Relire systématiquement le résultat : corriger les erreurs, harmoniser le
    ton, puis intégrer dans la réponse finale. Ne jamais restituer une sortie
    déléguée sans relecture.
-6. Afficher la notification obligatoire (voir section « Activation et
-   notification obligatoire ») en tête de réponse, avec le nombre d'appels,
-   le ou les modèles utilisés, et ce qui a été délégué en une ligne.
+6. Commencer la réponse par une ligne visible : « 🔁 Délégation DeepSeek : N appel(s) send-message
+   (modèle) », plus ce qui a été délégué en une ligne. L'utilisateur sait toujours quand un modèle
+   tiers a produit une partie du travail, et lequel.
 
 ## Pourquoi ça marche (et ses limites)
 

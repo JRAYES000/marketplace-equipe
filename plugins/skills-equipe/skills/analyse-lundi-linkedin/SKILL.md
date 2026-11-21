@@ -1,37 +1,34 @@
 ---
 name: analyse-lundi-linkedin
-description: >-
-  Analyse du lundi des deux comptes LinkedIn de Julien (Claude Agency, Claude
-  Partners) et suivi du test des formats d'octobre (texte, image, carrousel) : les
-  chiffres sont relevés dans Buffer Insights (source unique), puis une commande
-  calcule en code médianes, taux et posts à zéro par format et écrit un
-  rapport de forme constante (semaine écoulée, verdict provisoire ou final,
-  week-end à part) sur les seuls indicateurs de Julien : impressions, réactions,
-  commentaires, taux d'engagement. Contrôle aussi les créneaux du calendrier
-  contre la file Buffer. Activation MANUELLE uniquement : ne se déclenche jamais
-  d'elle-même, seulement sur demande explicite (« analyse du lundi », « lance
-  l'analyse LinkedIn », « où en est le test des formats », « vérifie les créneaux
-  du calendrier »). NE PAS utiliser pour écrire un post (linkedin-mise-en-forme),
-  programmer, ni pour un compte client (analyse-reseau-client).
+description: >
+  Analyse hebdomadaire des comptes LinkedIn Claude Agency et Claude Partners : relevé Buffer
+  Insights, médianes par format (texte, image, carrousel) calculées par script, rapport à forme
+  fixe, contrôle des créneaux du calendrier contre la file Buffer. Pour « analyse du lundi »,
+  « lance l'analyse LinkedIn », « où en est le test des formats », « vérifie les créneaux du
+  calendrier ». Pas pour un compte client (analyse-reseau-client). Activation manuelle : sur
+  demande explicite uniquement.
 ---
 
 # Analyse du lundi LinkedIn
 
+Sommaire : Où sont les choses · Procédure du lundi · Point d'objectif ponctuel · Sources ·
+Calculs faits en code · Forme du rapport · Pièges.
+
 Une procédure qui revient chaque lundi. Les calculs sont faits par les scripts, jamais « à la main »
 et jamais de tête. Rien n'est écrit dans Buffer : lecture seule.
 
-**Source unique : Buffer Insights.** Consigne de Julien du 08/10/2026 (15 h 55 Paris) : « Vos objectifs reposent
-uniquement sur les métriques de Buffer. » Indicateurs retenus, et eux seuls : impressions, réactions,
-commentaires, taux d'engagement (« Eng. Rate » de Buffer).
+**Source unique : Buffer Insights** (décision de Julien). Indicateurs retenus, et eux seuls : impressions,
+réactions, commentaires, taux d'engagement (« Eng. Rate » de Buffer).
 
 ## Où sont les choses
 
-- Scripts de cette skill : `scripts/` (dossier du clone `marketplace-equipe`). Tests : `npm test` (25 tests).
+- Scripts de cette skill : `scripts/` (dossier du clone `marketplace-equipe`). Tests : `npm test`.
 - Données du test (dépôt privé des livrables) : `linkedin/test-formats-2026-10/` dans
   `livrables-Claude-Agency` (variable `LIVRABLES_DIR` pour un autre emplacement) :
-  `methode-comparaison.md` (méthode en vigueur), `PROTOCOLE.md` (30/09, remplacé), `plan-config.json`, `calendrier.json`, `calendrier.md`, `file-attente-buffer.txt`,
+  `methode-comparaison.md` (méthode en vigueur), `PROTOCOLE.md` (ancien protocole), `plan-config.json`, `calendrier.json`, `calendrier.md`, `file-attente-buffer.txt`,
   `releve-buffer-AAAA-MM-JJ.csv`, `analyses/`.
-- Aucune clé : Buffer se lit dans Chrome (extension Claude connectée à `publish.buffer.com`).
+- Aucune clé : Buffer se lit dans Claude in Chrome (`claude-in-chrome:navigate`, `claude-in-chrome:get_page_text`),
+  connecté à `publish.buffer.com`.
 
 ## Procédure du lundi (dans l'ordre)
 
@@ -57,26 +54,12 @@ commentaires, taux d'engagement (« Eng. Rate » de Buffer).
    (étape 2), puis les points qui demandent une décision de Julien. Ne rien ajouter que le rapport ne contienne.
 6. Mettre à jour `NOTES.md` (date, verdict, alertes), commiter en nommant les fichiers un par un.
 
-## Point d'objectif de Julien (mail du 14/10/2026) : mercredi 28/10/2026
+## Point d'objectif ponctuel
 
-Objectif : **médiane des impressions de Claude Agency au-dessus de 500** sur les posts publiés du 15 au
-28/10 (heure de Paris), **avec moins de posts**, comparée à 163 (chiffre de Julien, 07-12/10).
-
-1. `git pull` dans les deux dépôts ; relevé Buffer Insights complet du canal Agency (étape 2 ci-dessus,
-   toutes les pages, `id_buffer` par ligne) dans un nouveau `releve-buffer-2026-10-28.csv`, contrôlé contre
-   Publish > Sent.
-2. `node scripts/objectif-julien.mjs` (défauts : `--compte julien-agency --du 2026-10-15 --au 2026-10-28
-   --seuil 500 --reference 163`). Il fusionne tous les relevés, lit l'heure du serveur Buffer, et écrit
-   `analyses/2026-10-28-objectif-julien-julien-agency.md` (et `.json`).
-3. **Le verdict porte sur les seuls posts mûrs (48 h)** : le 28/10, les posts des 27 et 28/10 sont listés
-   mais hors verdict. Le refaire le **vendredi 30/10 après 13 h Paris** pour un chiffre complet, et le dire.
-4. Recopier « À retenir » tel quel, plus le nombre de posts de la période contre celui de la période de
-   référence (12 posts Agency publiés du 07 au 12/10 d'après le relevé du 12/10 : c'est le « moins de posts »).
-
-**Écart sur la référence, constaté le 14/10/2026** : avec les relevés du dépôt, la commande donne une
-médiane de **183,5** (12 posts) pour Agency du 07 au 12/10, pas 163
-(`node scripts/objectif-julien.mjs --du 2026-10-07 --au 2026-10-12 --a-blanc`). 163 reste la référence de
-Julien ; le rapport du 28/10 cite les deux chiffres sans trancher.
+`node scripts/objectif-julien.mjs` calcule la médiane des impressions d'un compte sur une période contre un
+seuil et une référence (options `--compte --du --au --seuil --reference`, `--a-blanc`) et écrit
+`analyses/<date>-objectif-julien-<compte>.md` et `.json`. Le verdict ne porte que sur les posts mûrs (48 h).
+Le point du 28/10/2026 et ses chiffres : [references/objectif-2026-10-28.md](references/objectif-2026-10-28.md).
 
 ## Sources et chiffres relevés
 
@@ -96,8 +79,7 @@ La méthode suit le calendrier (`methodeDuPlan`, `scripts/lib/lundi.mjs`) :
   (médiane, min, max), impressions, réactions et commentaires médians, posts à zéro. Un format ne bat le texte que
   si taux médian, impressions médianes ET part de posts à zéro sont meilleurs (`deciderFormats`) ; avant la fin
   du test, verdict « provisoire » et simple indication.
-- **Protocole du 30/09** (`PROTOCOLE.md`), sinon : rapport des médianes carrousel / texte, intervalle à 90 % par
-  bootstrap (10 000 tirages, graine fixe), test des signes sur les paires de même sujet (`decider`, constante `REGLES`).
+- **Ancien protocole** (`PROTOCOLE.md`), sinon : géré par `methodeDuPlan` (`decider`, constante `REGLES`).
 
 Dans les deux cas : un post entre dans les médianes 48 h après sa publication ; conversion de l'heure affichée par
 Buffer en UTC et en heure de Paris. Changer une règle = changer la méthode écrite en même temps, et le dire à Julien.
@@ -119,8 +101,8 @@ Buffer en UTC et en heure de Paris. Changer une règle = changer la méthode éc
 - Le lundi matin, les chiffres du week-end et de la veille sont incomplets : le rapport les marque « non mûrs ».
 - Une médiane sur 8 posts bouge avec un seul post viral, sur 4 carrousels encore plus : ne jamais annoncer un
   gagnant avant la fin du test ni sans les trois mesures de la méthode (taux, impressions, posts à zéro).
-- Deux posts peuvent partir à la même minute (vu le 08/10/2026, Agency, 11 h 06) : relever `id_buffer` pour chaque
+- Deux posts peuvent partir à la même minute : relever `id_buffer` pour chaque
   ligne, sinon le relevé suivant ne sait pas lequel mettre à jour.
 - Le week-end ne fait jamais partie du test ; ses posts sont listés à part, sans règle tirée.
-- Zernio est abandonné depuis le 08/10/2026 : il ne voit pas les posts publiés par Buffer. Ne pas s'en servir
+- Zernio est abandonné : il ne voit pas les posts publiés par Buffer. Ne pas s'en servir
   comme source, même en secours.

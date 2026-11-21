@@ -1,23 +1,20 @@
 ---
 name: analyse-reseau-client
-description: >-
-  Analyse le compte Instagram, le compte X (Twitter) ou la chaîne YouTube d'un
-  client de Claude Agency et en fait un onglet de son espace client : un
-  fichier .md rangé dans le dépôt des livrables, hors challenge-N, affiché tel
-  quel au client. Chiffres relevés et datés, publications gagnantes et
-  perdantes, stories, Shorts ou vidéos, couvertures, textes et réponses, outils
-  conseillés avec prix vérifiés, comptes de référence mesurés, plan d'action
-  daté, mode d'emploi pour l'assistant du client, note d'équipe. Activation
-  MANUELLE uniquement : seulement sur demande explicite (ex. « analyse le
-  compte Instagram du client X », « fais l'onglet Twitter de Y », « mets à jour
-  l'analyse YouTube de Z »). Ne se déclenche jamais d'elle-même sur une
-  conversation qui parle seulement d'un réseau social. NE PAS utiliser pour les
-  comptes de l'agence elle-même, pour publier, commenter ou écrire à quelqu'un
-  sur un réseau, ni pour TikTok ou LinkedIn : la méthode n'y a pas encore été
-  éprouvée.
+description: >
+  Analyse le compte Instagram, X ou YouTube d'un client de Claude Agency et produit l'onglet .md
+  de son espace client (chiffres datés, publications gagnantes et perdantes, outils, plan
+  d'action, note d'équipe). Pour « analyse le compte Instagram de X », « fais l'onglet Twitter de
+  Y », « mets à jour l'analyse YouTube de Z ». Pas pour les comptes de l'agence, ni pour publier
+  ou écrire sur un réseau, ni TikTok ou LinkedIn. Activation manuelle : sur demande explicite
+  uniquement.
 ---
 
 # Analyse d'un réseau social client → onglet de l'espace client
+
+Sommaire : Ce que le site fait du fichier · 1 Ancrer · 2 Faire trancher · 3 Relever les chiffres ·
+4 Chercher · 5 Analyser · 6 Rédiger · 7 Contrôler · 8 Publier et transmettre · Ce qu'on ne fait pas.
+
+TikTok et LinkedIn sont exclus parce que la méthode n'y a pas encore été éprouvée.
 
 Tu produis **un seul fichier** : `<dossier-client>/<RESEAU>/analyse-<reseau>.md`, par exemple
 `INSTAGRAM/analyse-instagram.md`. Dès qu'il est poussé sur GitHub, le site client l'affiche
@@ -32,7 +29,8 @@ le dépôt des livrables (cherche `*/YOUTUBE/analyse-youtube.md`,
 
 ## Ce que le site client fait de ton fichier
 
-Règles lues dans le code du site client (`rapport-claude-functions/clients.ts`, 24/09/2026) :
+Règles lues dans le code du site client le 24/09/2026 ; `rapport-claude-functions/clients.ts` fait foi
+s'il a changé depuis :
 
 - un `.md` rangé dans un **sous-dossier** du dossier client, **hors `challenge-N`**, devient
   un onglet ; un `.md` posé à la racine du dossier client n'en devient pas un ;

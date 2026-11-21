@@ -39,3 +39,21 @@ est propre à chaque poste.
 - `notion.js export <fichier.json>` : toute la base en JSON. Supprimer le fichier après usage.
 - `notion.js verifier <AAAA-MM-JJ> <requête>` : compte et notes vides d'un lot.
 - `notion.js archiver-test TEST-…` : archive les fiches d'essai (refuse toute autre requête).
+
+## Colonnes (sorti de SKILL.md le 2026-11-21)
+
+Colonnes (ASCII, ce sont des identifiants de schéma) : `Nom` (MAJUSCULES, à défaut l'intitulé),
+`Prenom`, `Email` (du CV uniquement), `Telephone` (`06 XX XX XX XX`, CV d'abord),
+`Fonction`, `Requete`, `Date extraction` (jour **et heure** du `lot`, v10.5 ; `--heure HH:MM` si
+le lot est rejoué un autre jour), `Profil mis a jour`, `Statut` (`A importer` par défaut),
+`Note` (jamais vide). La colonne `Accroche` des fiches anciennes (premier e-mail SalesHandy) ne
+s'écrit plus.
+
+## Empreintes hors-cible (sorti de SKILL.md le 2026-11-21)
+
+Il range aussi les **hors-cible** : chaque nouveau profil nommé absent de `choix.json` laisse son
+empreinte (SHA-256 tronqué du « prénom nom ») dans
+`%LOCALAPPDATA%/france-travail-extraction/ecartes.json`, 180 jours au plus. Jamais un nom en
+clair, rien dans Notion. Les lots suivants sautent ces profils sans CV ni OCR. Un profil gardé
+plus tard est retiré de la liste. Les profils anonymes n'y entrent jamais. La liste est propre à
+chaque poste.

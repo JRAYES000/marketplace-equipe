@@ -85,9 +85,10 @@ const EMOJIS_MIN = 0;
 const EMOJIS_MAX = 6;
 const HASHTAGS_MAX = 2;
 
-// Mathematical Bold (U+1D400 serie) -- pas d'equivalent accentue dans ce bloc
-// Unicode, d'ou le refus explicite d'un gras accentue : la conversion serait
-// silencieusement fausse (une lettre accentuee n'a pas de forme grasse ici).
+// Mathematical Sans-Serif Bold (U+1D5D4 serie), la police que fabrique et accepte
+// linkedin-mise-en-forme (enGras, scripts/lib.mjs) -- source de verite de la forme.
+// Pas d'equivalent accentue dans ce bloc Unicode, d'ou le refus explicite d'un gras
+// accentue : la conversion serait silencieusement fausse.
 const BOLD_MAJ = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
 const BOLD_MIN = 'abcdefghijklmnopqrstuvwxyz';
 const BOLD_CHIFFRES = '0123456789';
@@ -95,13 +96,13 @@ const BOLD_CHIFFRES = '0123456789';
 function construireTableBold() {
   const table = new Map();
   for (let i = 0; i < BOLD_MAJ.length; i += 1) {
-    table.set(BOLD_MAJ[i], String.fromCodePoint(0x1d400 + i));
+    table.set(BOLD_MAJ[i], String.fromCodePoint(0x1d5d4 + i));
   }
   for (let i = 0; i < BOLD_MIN.length; i += 1) {
-    table.set(BOLD_MIN[i], String.fromCodePoint(0x1d41a + i));
+    table.set(BOLD_MIN[i], String.fromCodePoint(0x1d5ee + i));
   }
   for (let i = 0; i < BOLD_CHIFFRES.length; i += 1) {
-    table.set(BOLD_CHIFFRES[i], String.fromCodePoint(0x1d7ce + i));
+    table.set(BOLD_CHIFFRES[i], String.fromCodePoint(0x1d7ec + i));
   }
   return table;
 }
@@ -408,8 +409,8 @@ function validerInterdits(texte) {
  * FAILLE REELLE TROUVEE ET CORRIGEE (audit adversarial, 15/09/2026) : cette
  * fonction s'execute sur le texte APRES conversion du gras (voir
  * `validerEtConvertirPost` plus bas), qui transforme les chiffres ASCII en
- * chiffres Unicode "Mathematical Bold" (`convertirEnGrasUnicode`, plage
- * U+1D7CE-U+1D7D7) des qu'ils sont entoures de `**etoiles**` -- un reflexe
+ * chiffres Unicode gras (`convertirEnGrasUnicode`, plage
+ * U+1D7EC-U+1D7F5, Sans-Serif Bold) des qu'ils sont entoures de `**etoiles**` -- un reflexe
  * d'ecriture naturel pour un chiffre choc. `\d+` ne reconnait PAS ces
  * caracteres : `"**40**% ... sans source"` passait entierement inapercu.
  * `REGEX_CHIFFRE` reconnait desormais aussi cette plage.
@@ -452,9 +453,13 @@ function contientLigneSourceFinale(texte) {
 }
 
 function versAscii(fragment) {
-  // Gras Unicode ("Mathematical Bold") -> ASCII, pour lire "𝟕𝟗 𝐚𝐧𝐬" comme "79 ans".
+  // Gras Unicode -> ASCII, pour lire "𝟳𝟵 𝗮𝗻𝘀" comme "79 ans". Sans-Serif Bold (la police
+  // produite) et Mathematical Bold a empattement (lue seulement, elle circule encore).
   return [...fragment].map((c) => {
     const cp = c.codePointAt(0);
+    if (cp >= 0x1D7EC && cp <= 0x1D7F5) return String.fromCharCode(48 + cp - 0x1D7EC);
+    if (cp >= 0x1D5D4 && cp <= 0x1D5ED) return String.fromCharCode(65 + cp - 0x1D5D4);
+    if (cp >= 0x1D5EE && cp <= 0x1D607) return String.fromCharCode(97 + cp - 0x1D5EE);
     if (cp >= 0x1D7CE && cp <= 0x1D7D7) return String.fromCharCode(48 + cp - 0x1D7CE);
     if (cp >= 0x1D400 && cp <= 0x1D419) return String.fromCharCode(65 + cp - 0x1D400);
     if (cp >= 0x1D41A && cp <= 0x1D433) return String.fromCharCode(97 + cp - 0x1D41A);

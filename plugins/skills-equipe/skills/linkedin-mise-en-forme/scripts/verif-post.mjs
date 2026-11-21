@@ -18,7 +18,7 @@
 //   node verif-post.mjs verif "C:/chemin/a6.final.txt" [options]
 //       -> les criteres, code 1 si un echoue. Le post precedent du MEME compte est trouve
 //          tout seul (voir precedent.mjs : .final.txt le plus recent du compte dans
-//          livrables-Claude-Agency/linkedin/, sinon dernier post publie via Zernio). Sans
+//          livrables-Claude-Agency/linkedin/). Sans
 //          post precedent : un AVERTISSEMENT, jamais un echec (regle du 30/09/2026).
 //   options : --precedent <fichier>  post precedent donne a la main (prioritaire)
 //             --compte <julien-agency|julien-partners>  sinon deduit du nom a<N>/p<N>.final.txt
@@ -69,19 +69,6 @@ if (action !== "verif" || !arg) {
   process.exit(1);
 }
 
-// Cle Zernio : environnement d'abord, sinon le .env de linkedin-carrousel (meme mecanisme que
-// publier-zernio.js). Lue seulement si le dossier local n'a rien donne ; jamais affichee.
-function cleZernio() {
-  if (process.env.ZERNIO_API_KEY) return process.env.ZERNIO_API_KEY;
-  const env = new URL("../../linkedin-carrousel/.env", import.meta.url);
-  if (!existsSync(env)) return undefined;
-  for (const ligne of readFileSync(env, "utf8").split(/\r?\n/)) {
-    const m = ligne.match(/^ZERNIO_API_KEY=(.*)$/);
-    if (m && m[1].trim()) return m[1].trim();
-  }
-  return undefined;
-}
-
 // Exception « offre » (21/10/2026) : --offre <url de la page d'offre> n'est accordee que si le .md voisin du
 // brouillon (meme nom, .final.txt -> .md) contient la ligne « Page d'offre : <url> » et que l'URL est une page
 // de claudeagency.fr. Un post sans cette ligne, ou sans --offre, garde le critere « aucun chiffre sans source ».
@@ -107,7 +94,6 @@ if (aLaMain) {
 } else if (!options.sansPrecedent) {
   const r = await resoudrePrecedent({
     brouillon: arg, compte: options.compte, dossier: options.dossier,
-    apiKey: cleZernio, // lue seulement si le dossier local n'a rien donne
   });
   if (r.texte !== undefined) {
     precedent = r.texte;

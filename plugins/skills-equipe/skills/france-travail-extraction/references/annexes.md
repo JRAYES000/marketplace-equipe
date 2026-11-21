@@ -2,7 +2,7 @@
 
 ## Pourquoi Playwright (v10.0)
 
-Mesuré le 04/10/2026 sur le profil Playwright `C:/Users/julien/.chrome-claude` :
+Mesuré le 04/10/2026 sur le profil Playwright `~/.chrome-claude` :
 
 - **Pas d'API.** `recherche-profil` est une appli Apache Tapestry rendue côté serveur.
 - **La double authentification ne bloque qu'une fois.** La première connexion complète (code
@@ -22,13 +22,13 @@ Mesuré le 04/10/2026 sur le profil Playwright `C:/Users/julien/.chrome-claude` 
 - **Pas le navigateur intégré, ni Firecrawl.** Ils n'ont pas la session recruteur.
 
 **Chromium de Playwright, pas Chrome** (v10.6, 08/10/2026). Le serveur MCP est lancé avec
-`--browser chromium --user-data-dir C:/Users/julien/.chromium-claude` (dans `~/.claude.json`).
+`--browser chromium --user-data-dir ~/.chromium-claude` (dans `~/.claude.json`).
 `chromium` y devient le canal `chrome-for-testing` : le binaire de `ms-playwright/chromium-<rev>`,
 qui ne change qu'avec le paquet `@playwright/mcp` (épinglé). Avant, `--browser chrome` suivait
 les mises à jour du Chrome de Julien, et Chrome 154 a planté à chaque téléchargement sur
 l'ancien profil `.chrome-claude` (gardé, inutilisé). Si le paquet MCP est mis à jour, réinstaller
 son navigateur : `node node_modules/playwright/cli.js install chromium` dans
-`C:/Users/julien/Claude/Tools/playwright-mcp`. Le nouveau profil demande l'enrôlement une fois
+`~/Claude/Tools/playwright-mcp`. Le nouveau profil demande l'enrôlement une fois
 (code 2FA) à sa première connexion. `playwright.js preparer` purge l'historique des téléchargements du profil à chaque
 lot (variable `FT_PROFIL_PLAYWRIGHT` pour un autre profil).
 
@@ -46,8 +46,8 @@ s'obtient que par le CV téléchargé. Un candidat sans CV n'a donc pas d'email 
 | Symptôme | Cause et geste |
 |---|---|
 | Retour vers la page de connexion en plein run | session expirée (inactivité ou navigateur relancé) : relancer `ft-connexion.js`, Julien se reconnecte, puis `ft-extraction.js` reprend (le journal saute les profils déjà vus) |
-| `Connection closed` au premier CV, le serveur Playwright redémarre | **Chrome plante sur le profil** à chaque téléchargement (rapports dans `C:/Users/julien/.chrome-claude/Crashpad/reports`), et le serveur sort sur l'erreur. Vu le 04/10/2026 après un redémarrage de Claude Desktop, réglé en vidant l'historique de téléchargements du profil : `browser_close`, vérifier qu'aucun `chrome.exe` ne tourne sur `.chrome-claude`, copier `Default/History` en `.bak`, puis vider les tables `downloads`, `downloads_url_chains` et `downloads_slices` (sqlite3 en Python). Cause exacte non prouvée. La session France Travail a survécu au plantage : relancer `ft-connexion.js`, puis reprendre la recherche. **Récidive le 08/10/2026** (85 lignes accumulées en 4 jours, Chrome 154.0.8037.98) : reproduit hors France Travail par un téléchargement sur serveur local avec ce profil, absent avec un profil neuf ou sans `History` ; ni les préférences ni les 3 téléchargements interrompus n'y sont pour rien. **Piège** : un `History-journal` laissé par un plantage annule la purge à l'ouverture suivante. Contrôle qui tranche : rouvrir la base, `downloads` doit compter 0 et `History-journal` ne doit plus exister ; sinon refaire la purge (suivie d'un `VACUUM`). À refaire tous les 2-3 lots tant que la cause n'est pas levée |
-| « Browser is already in use for C:/Users/julien/.chromium-claude » | **Le profil Chromium ne sert qu'à une session Claude à la fois** (mesuré le 08/10/2026 : la fenêtre d'un lot fini, restée ouverte dans une session, a bloqué Playwright dans la routine). Fermer le navigateur en fin de lot (`browser_close`, après `nettoyer-cv.sh`, même après un échec). Bloqué : demander à Julien de fermer la fenêtre Chromium de l'autre session ; ne jamais tuer de processus |
+| `Connection closed` au premier CV, le serveur Playwright redémarre | **Chrome plante sur le profil** à chaque téléchargement (rapports dans `~/.chrome-claude/Crashpad/reports`), et le serveur sort sur l'erreur. Vu le 04/10/2026 après un redémarrage de Claude Desktop, réglé en vidant l'historique de téléchargements du profil : `browser_close`, vérifier qu'aucun `chrome.exe` ne tourne sur `.chrome-claude`, copier `Default/History` en `.bak`, puis vider les tables `downloads`, `downloads_url_chains` et `downloads_slices` (sqlite3 en Python). Cause exacte non prouvée. La session France Travail a survécu au plantage : relancer `ft-connexion.js`, puis reprendre la recherche. **Récidive le 08/10/2026** (85 lignes accumulées en 4 jours, Chrome 154.0.8037.98) : reproduit hors France Travail par un téléchargement sur serveur local avec ce profil, absent avec un profil neuf ou sans `History` ; ni les préférences ni les 3 téléchargements interrompus n'y sont pour rien. **Piège** : un `History-journal` laissé par un plantage annule la purge à l'ouverture suivante. Contrôle qui tranche : rouvrir la base, `downloads` doit compter 0 et `History-journal` ne doit plus exister ; sinon refaire la purge (suivie d'un `VACUUM`). À refaire tous les 2-3 lots tant que la cause n'est pas levée |
+| « Browser is already in use for ~/.chromium-claude » | **Le profil Chromium ne sert qu'à une session Claude à la fois** (mesuré le 08/10/2026 : la fenêtre d'un lot fini, restée ouverte dans une session, a bloqué Playwright dans la routine). Fermer le navigateur en fin de lot (`browser_close`, après `nettoyer-cv.sh`, même après un échec). Bloqué : demander à Julien de fermer la fenêtre Chromium de l'autre session ; ne jamais tuer de processus |
 | `ERREUR : ecouteur de telechargements absent` | le navigateur Playwright a été relancé : relancer `ft-connexion.js` |
 | `erreurs` non vide dans le retour d'un tour | un CV n'a pas pu être enregistré : le noter, il sortira `non recu` à la revue |
 | `cv_enregistres` = 0 alors que `telecharges` > 0 | écouteur branché sur un autre onglet : relancer `ft-connexion.js` |
@@ -102,3 +102,10 @@ Depuis la v9.4 : le CV de chaque candidat **retenu** est gardé dans le Google D
 partie de la base de l'École et suit les mêmes règles : jamais partagé hors de l'École,
 supprimé avec la fiche (sur demande, ou 24 mois après le dernier contact). Le CV d'un
 hors-cible n'y entre jamais.
+
+## Recherches enregistrées
+
+Dans l'espace recruteur (à tenir à jour à chaque nouvelle recherche enregistrée) :
+
+- « Formation naturopathie dispo immediate maj 3 mois » (créée le 29/09/2026) ;
+- « Reconversion bien-etre dispo immediate maj 3 mois » (créée le 04/10/2026).

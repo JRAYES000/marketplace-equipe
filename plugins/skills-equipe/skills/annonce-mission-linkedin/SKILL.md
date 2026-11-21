@@ -1,12 +1,18 @@
 ---
 name: annonce-mission-linkedin
-description: >-
-  Quand : publier un lot d'annonces de mission freelance IA de Julien sur la page LinkedIn Claude Partners (document, rédaction, image, planning, Buffer, relevé à 48 h).
-  Pas pour : un post LinkedIn ordinaire (linkedin-mise-en-forme), un carrousel (linkedin-carrousel), un commentaire.
-  Activation MANUELLE uniquement, sur demande explicite (« nouveau lot d'annonces de mission ») ; ne se déclenche jamais d'elle-même.
+description: >
+  Publie un lot d'annonces de mission freelance IA de Julien sur la page LinkedIn Claude Partners :
+  lecture du .docx, rédaction, fiches image, planning Buffer, relevé à 48 h. Pour « nouveau lot
+  d'annonces de mission ». Pas pour un post ordinaire (linkedin-mise-en-forme) ni un carrousel.
+  Activation manuelle : sur demande explicite uniquement.
 ---
 
 # Annonces de mission LinkedIn (Claude Partners)
+
+Sommaire : Condition préalable · Règles du 14/10 · 1 Lire le document · 2 Comparer · 3 Rédiger ·
+4 Images · 5 Planning · 6 Tester puis programmer · 7 Relire la file · 8 Mail · 9 Relevé à 48 h · Fin.
+Historique des règles et mesures : [references/historique.md](references/historique.md). Cas de test :
+[references/evals.md](references/evals.md).
 
 Reprend la chaîne du 08/10/2026 (`livrables-Claude-Agency/NOTES.md`, sections du 08/10).
 Dépôt de travail : `livrables-Claude-Agency`. Dossier d'un lot : `sortants/annonces-missions/<lot>/`
@@ -23,11 +29,9 @@ programmation. Rien n'est programmé avant le troisième. Aucun mail n'est envoy
 
 ## Règles de Julien du 14/10/2026 (elles priment ; détail : `linkedin-mise-en-forme`, règle 0)
 
-Une annonce est un post : elle compte dans les **2 posts par jour et par compte au maximum** (un
-jour à 13:00 avec annonce garde au plus un autre post) ; son sujet (la mission) s'inscrit dans
-`linkedin/sujets.csv` (« annonce : <mission> ») et ne tombe pas le même jour qu'un post d'Agency sur
-le même thème ; **le lien de la fiche va en premier commentaire, jamais dans le texte** ; aucune
-précaution. La mission réelle est le fait réel de la règle 2. Avant de programmer :
+Une annonce est un post : elle compte dans les 2 posts par jour et par compte, son sujet s'inscrit dans
+`linkedin/sujets.csv` (« annonce : <mission> »), le lien de la fiche va en premier commentaire, aucune
+précaution. La mission réelle est le fait réel de la règle 2. Contrôle avant programmation :
 `linkedin-mise-en-forme/scripts/controle-avant-publication.mjs`.
 
 ## 1. Lire le document de Julien
@@ -50,16 +54,13 @@ précaution. La mission réelle est le fait réel de la règle 2. Avant de progr
 - Appliquer les constats de `sortants/annonces-missions/etude/corps.md` (chiffres et écarts
   succès / flops : les lire dans ce fichier, ne pas les recopier ici) : phrase « pourquoi cette
   mission vaut le coup », écriture en « je », rémunération chiffrée.
-- **Accroche (décision de Julien du 18/10/2026, remplace la règle v4 « TJM jamais en gras »)** :
+- **Accroche** :
   ligne 1 = `💼 Mission freelance IA : <intitulé>, <durée>, <lieu>. <TJM> € HT/jour.`, avec le
   **TJM seul en gras**, fabriqué par `verif-post.mjs gras "800 € HT/jour."` (un seul passage,
   le « € » reste maigre). Deux-points après « IA », jamais de tiret long (refusé par le script).
   La ligne 2 dit l'enjeu concret du client en une phrase (« Un organisme de formation veut
   industrialiser la création de ses modules »), pas « je cherche ».
-- **Pourquoi** (Buffer, relevé du 18/10/2026, posts Partners publiés depuis plus de 48 h, médiane
-  des impressions) : format 💼 avec TJM en gras **2 926** (n = 9, dont les 5 meilleurs posts du
-  compte), format v4 « 450 € HT par jour pour… » sans gras **1 477** (n = 3). Biais connu : les 9
-  annonces 💼 affichaient toutes 800 €, les v4 de 320 à 600 €. Refaire la mesure au prochain lot.
+- Pourquoi ce format : mesure Buffer dans `linkedin-mise-en-forme` (règle 1) ; la refaire au prochain lot.
 - Le reste du corps prend jusqu'à 3 autres passages en gras (règle 2 de `linkedin-mise-en-forme`,
   4 au plus) : la phrase « pourquoi cette mission vaut le coup », un titre de bloc.
 - Le préfixe « Mission freelance IA » et le TJM en gras ne comptent pas dans la règle de variété ;
@@ -69,8 +70,8 @@ précaution. La mission réelle est le fait réel de la règle 2. Avant de progr
 - **Textes fixes, identiques dans toutes les annonces** : la phrase d'envoi
   « Vous pensez à quelqu'un en lisant ça ? Envoyez-lui ce post. » et l'appel à candidater
   du document de Julien, **sans le lien** : le texte dit « le lien est en commentaire » et le lien
-  part en premier commentaire (règle 5 du 14/10/2026, qui remplace « avec le lien dans le texte »).
-- Deux fichiers par annonce : `NN.md` (relecture), `NN.final.txt` (gras Unicode, à coller) et
+  part en premier commentaire (règle 5 du 14/10/2026).
+- Trois fichiers par annonce : `NN.md` (relecture), `NN.final.txt` (gras Unicode, à coller) et
   `NN.commentaire.txt` (le lien seul, à coller en premier commentaire).
 - `verif-post.mjs` sur chaque annonce, comparée à celle qui la précède dans le planning : schéma
   toujours différent. L'échec « aucun chiffre sans source » sur le TJM est un faux positif connu.
@@ -101,7 +102,7 @@ précaution. La mission réelle est le fait réel de la règle 2. Avant de progr
 
 - Programmer d'abord **une seule** annonce avec image, puis la relire dans la file : heure
   « (Europe/Paris) », image présente, **aucun lien dans le texte, lien de la fiche dans le premier
-  commentaire** (règle 5 du 14/10/2026 ; avant : lien dans le texte, premier commentaire vide).
+  commentaire** (règle 5 du 14/10/2026).
 - Seulement ensuite, programmer les autres, canal Claude Partners (`6aa87ac6ea19ca0bde439e7f`) :
   texte collé par évènement `paste` (la frappe au clavier n'entre pas dans l'éditeur), empreinte
   comparée au `.final.txt`, aperçu de lien vide retiré sur les annonces sans image, date relue sur
@@ -128,15 +129,15 @@ par annonce avec « Publication prévue » et « Relevé à faire le » (publica
 Paris), colonnes « Impressions », « Réactions », « Commentaires », « Taux d'engagement », « Abonnés (canal) »,
 « Lien LinkedIn ».
 La routine Windows « LinkedIn - 5 Releve 48 h des annonces » (`linkedin/routines/5-releve-48h-annonces.md`)
-remplit ces colonnes chaque jour à 14:00 Paris ; si le lot dépasse le
-15/11/2026, prolonger sa date de fin dans `register-routines.ps1`.
+remplit ces colonnes chaque jour à 14:00 Paris. Avant chaque lot, contrôler la date de fin de cette
+routine dans `register-routines.ps1` et la prolonger si le lot la dépasse.
 **Identification d'une annonce** (routine comme relevé à la main), les deux conditions à la fois :
 son intitulé exact (ligne 💼, ou ligne 2 de l'accroche, telle qu'elle est dans `NN.final.txt`) ET sa date de publication prévue (jour de Paris). Si deux posts du même jour correspondent, lire leur heure dans Publish > Sent du canal Claude Partners pour les départager ; si l'ambiguïté reste, ou si aucun post ne correspond : rien n'est écrit dans la ligne, « ALERTE : identification ambiguë » est noté avec les candidats trouvés (date, heure, début du texte).
 Un post absent de nos fichiers n'est jamais relevé : c'est un post de Julien.
 **Indicateurs : les métriques Buffer fixées par Julien, et elles seules** : impressions, réactions,
 commentaires, taux d'engagement (« Eng. Rate » du tableau Insights), abonnés (« Total Followers » du canal
-au moment du relevé). Julien, 08/10/2026 à 15:55 Paris : « Vos objectifs reposent uniquement sur les
-métriques de Buffer. » Aucun autre chiffre n'est demandé ni relevé.
+au moment du relevé). Aucun autre chiffre n'est demandé ni relevé. Méthode de relevé dans Insights :
+`../analyse-lundi-linkedin/references/releve-buffer.md`.
 
 ## Fin
 

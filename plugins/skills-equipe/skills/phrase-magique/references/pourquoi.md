@@ -87,3 +87,13 @@ L'étude sur la validation par exécution porte sur l'analyse de vulnérabilité
 - *One More Turn, Less Regret*, arXiv:2607.21143 (23/07/2026) — https://arxiv.org/abs/2607.21143
 - Anthropic, *Building verification loops in Claude Code with skills* (22/07/2026) — https://claude.com/blog/building-verification-loops-in-claude-code-with-skills
 - Anthropic, *Agent Skills — Best practices* — https://platform.claude.com/docs/en/agents-and-tools/agent-skills/best-practices
+
+---
+
+## Sobriété tokens (déplacé de SKILL.md le 2026-11-21)
+
+Un seul appel de cadrage · propositions multiples **uniquement** quand le choix ouvert *est* le livrable (créatif, naming) — sur une tâche à réponse juste, N variantes coûtent vingt fois plus pour un gain nul · exemples few-shot ≤ 1 500 mots · citations minimales, pas des pages.
+
+**L'effort avant tout le reste.** Là où l'interface l'expose (API, Claude Code), l'effort de réflexion est le premier levier de coût, et le seul réglage de la réflexion : elle ne se coupe plus. `medium` est le défaut et suffit à la plupart du travail, `low` tient une bonne part du travail courant, `xhigh` et `max` se réservent aux cas où un gain a été constaté. Pour moins de réflexion, baisser l'effort plutôt qu'écrire « réfléchis moins ». Attention au contresens : l'effort règle la quantité de réflexion, **pas** la longueur de la réponse visible — celle-ci ne se raccourcit qu'en la demandant, d'où la règle anti-verbosité ci-dessus.
+
+**Hygiène de conversation** — le contexte entier est retraité à chaque tour, donc une conversation longue se repaie à chaque message. L'argument est le coût, pas la dégradation : le suivi d'instructions de ce modèle tient sur toute la fenêtre : conversation longue et aboutie → capitaliser puis repartir sur une conversation neuve ; demander des modifications ciblées plutôt que des régénérations complètes ; ne jamais re-coller un document déjà présent.
