@@ -31,7 +31,7 @@ commente aujourd'hui ».
 4. La session Claude **écrit elle-même** le commentaire, dans le ton de `reglages-comptes.json`,
    en choisissant un genre : `information_chiffree`, `desaccord_argumente`, `histoire_vecue`,
    `vraie_question` (`GENRES`, `lib/valider-commentaire.js`).
-   **Réponse à un commentaire reçu** (sous un post de Julien, via Buffer Community) : genre
+   **Réponse à un commentaire reçu** (sous un post de Julien, lu sur LinkedIn ; Buffer Community a disparu avec Buffer, résilié le 21/11/2026) : genre
    `reponse` (`GENRE_REPONSE`). Mêmes contrôles, plus `validerAucunePromesse` (aucune promesse au
    nom de Julien : recontact, message privé, rendez-vous, prix). Une réponse ne compte pas dans le
    quota et ne s'inscrit ni au registre ni dans Notion.
@@ -102,7 +102,7 @@ Refus explicite, jamais un avertissement.
   contre le registre. Le compte est normalisé (`julien-agency` / `julien-partners` exactement), la
   date au format `AAAA-MM-JJ`, le nom de l'auteur sans casse ni espaces multiples.
 - **Canal réel** (`validerCanalPublicationReel`) : refus si `canal_publication_reel` n'est pas
-  `true` pour le compte. Buffer ne peut pas servir de repli (il ne commente pas chez un tiers).
+  `true` pour le compte. Aucun outil de programmation ne sert de repli.
 - **Connexion vérifiée avant chaque publication** (`verifierConnexionAvantPublication`, via
   `LINKEDIN_GET_MY_INFO`) : refus si la connexion Composio active ne correspond pas à l'`actorUrn`.
   Le canal MCP résout toujours vers la connexion préférée (julien-agency) ; sans ce contrôle, un

@@ -17,7 +17,7 @@ const test = require('node:test');
 const assert = require('node:assert/strict');
 const { chromium } = require('playwright');
 const { validerDiapos } = require('../lib/valider-diapos');
-const { validerAnglicismes } = require('../lib/valider-anglicismes');
+const { validerAnglicismes } = require('../../../lib/valider-anglicismes');
 const { validerEtConvertirPost, LIGNES_MAX } = require('../lib/valider-post');
 const { chargerGabarit, injecterDiapo, nomFichierDepuisTitre, retirerPointFinal, titreDepuisDiapos } = require('../generer-pdf');
 
@@ -68,21 +68,6 @@ test('validerDiapos refuse un anglicisme dans le titre/texte d\'une diapo', () =
 test('validerEtConvertirPost refuse un anglicisme, y compris a l\'interieur d\'un passage en gras', () => {
   const brouillon = 'Votre **process** est-il vraiment efficace ? 🚀\n\nUn constat simple. 📌\n\nLien en commentaire. #recrutement';
   assert.throws(() => validerEtConvertirPost(brouillon), /anglicisme/);
-});
-
-test('publierDocumentZernio (via lib/publier-zernio) refuse un anglicisme dans documentTitle', () => {
-  const { publierDocumentZernio } = require('../lib/publier-zernio');
-  return publierDocumentZernio({
-    compte: 'julien-agency',
-    content: 'Post valide.',
-    publicUrl: 'https://exemple.test/fichier.pdf',
-    documentTitle: 'Notre business en pleine croissance',
-    apiKey: 'sk_test',
-    reglages: { 'julien-agency': { zernio_account_id: 'abc' } },
-  }).then(
-    () => assert.fail('devait refuser'),
-    (erreur) => assert.match(erreur.message, /anglicisme/)
-  );
 });
 
 // ---------- 2. Page "Comment..."/"methode" sans exemple ----------
@@ -223,7 +208,7 @@ test('rappel : le texte du post reste plafonne a 5 lignes (LIGNES_MAX)', () => {
 });
 
 test('rappel : les 3 surfaces (diapos, documentTitle, post) sont bien toutes couvertes par validerAccents', () => {
-  const { validerAccents } = require('../lib/valider-orthographe');
+  const { validerAccents } = require('../../../lib/valider-orthographe');
   assert.throws(() => validerAccents('Ceci est deja fini.'), /accent/);
 });
 
@@ -231,8 +216,7 @@ test('rappel : les 3 surfaces (diapos, documentTitle, post) sont bien toutes cou
 // Bug reel trouve le 25/09/2026 en verifiant le carrousel de test : un titre
 // de diapo hook qui se termine par une phrase complete (point final) produit
 // "...pdf" -- "Titre..pdf", jamais retire avant. Corrige dans
-// generer-pdf.js (retirerPointFinal, nomFichierDepuisTitre) et propage a
-// lib/publier-zernio.js (documentTitle, meme defaut possible).
+// generer-pdf.js (retirerPointFinal, nomFichierDepuisTitre).
 
 test('retirerPointFinal retire un point final unique et les espaces qui suivraient', () => {
   assert.equal(retirerPointFinal('Voici pourquoi.'), 'Voici pourquoi');
@@ -255,40 +239,3 @@ test('titreDepuisDiapos (utilise pour le nom de fichier reel) ne renvoie jamais 
   const nom = titreDepuisDiapos(diapos);
   assert.ok(!nom.endsWith('.'), `titre derive "${nom}" se termine encore par un point`);
 });
-
-test('publierDocumentZernio nettoie le point final du documentTitle avant tout envoi a Zernio', async () => {
-  const { publierDocumentZernio } = require('../lib/publier-zernio');
-  const restaurer = mockerFetch(async (url, opts) => {
-    if (String(url) === 'https://zernio.com/api/v1/accounts') {
-      return reponseJson({ accounts: [{ _id: '6ab50c438d284ffb213b7c55', platform: 'linkedin', isActive: true }] });
-    }
-    if (String(url) === 'https://zernio.com/api/v1/posts') {
-      const corps = JSON.parse(opts.body);
-      assert.equal(corps.platforms[0].platformSpecificData.documentTitle, 'Voici pourquoi');
-      return reponseJson({ message: 'ok', post: { _id: 'post-test', status: 'published' } }, 201);
-    }
-    throw new Error(`Mock fetch : requete inattendue -- ${url}`);
-  });
-  try {
-    await publierDocumentZernio({
-      compte: 'julien-agency',
-      content: 'Texte du post deja valide.',
-      publicUrl: 'https://media.zernio.com/temp/carrousel-test.pdf',
-      documentTitle: 'Voici pourquoi.',
-      apiKey: 'sk_test',
-      reglages: { 'julien-agency': { zernio_account_id: '6ab50c438d284ffb213b7c55' } },
-    });
-  } finally {
-    restaurer();
-  }
-});
-
-function mockerFetch(gestionnaire) {
-  const original = global.fetch;
-  global.fetch = gestionnaire;
-  return () => { global.fetch = original; };
-}
-
-function reponseJson(corps, status = 200) {
-  return { ok: status >= 200 && status < 300, status, json: async () => corps, text: async () => JSON.stringify(corps) };
-}

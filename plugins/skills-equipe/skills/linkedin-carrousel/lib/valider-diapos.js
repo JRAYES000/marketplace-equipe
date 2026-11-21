@@ -17,8 +17,8 @@
  * d'ecriture, pas un garde-fou automatisable.
  */
 
-const { validerAccents } = require('./valider-orthographe');
-const { validerAnglicismes } = require('./valider-anglicismes');
+const { validerAccents } = require('../../../lib/valider-orthographe');
+const { validerAnglicismes } = require('../../../lib/valider-anglicismes');
 const { validerInterdits } = require('./valider-post');
 const { resoudreModele, champsVisibles } = require('./modeles');
 

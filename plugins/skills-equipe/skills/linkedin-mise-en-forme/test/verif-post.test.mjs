@@ -530,7 +530,7 @@ test("anglicismes : « processus » (bon mot) et post propre passent", () => {
 });
 
 test("anglicismes : la liste utilisee est celle du carrousel, pas une copie", async () => {
-  const { ANGLICISMES_VERS_FRANCAIS } = (await import("node:module")).createRequire(import.meta.url)("../../linkedin-carrousel/lib/valider-anglicismes.js");
+  const { ANGLICISMES_VERS_FRANCAIS } = (await import("node:module")).createRequire(import.meta.url)("../../../lib/valider-anglicismes.js");
   for (const [mot, attendu] of Object.entries(ANGLICISMES_VERS_FRANCAIS)) {
     const r = anglicisme(`${CONFORME}
 Le ${mot} ici.`);

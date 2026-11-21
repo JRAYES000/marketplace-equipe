@@ -1,7 +1,7 @@
 ---
 name: parallelisation-et-routage
 description: >
-  Route une demande vers un sous-agent au bon modèle (haiku, sonnet, opus) et parallélise un lot
+  Route une demande vers un sous-agent au bon modèle et au bon effort (Sonnet 5.5 effort bas, Sonnet 5.5, Opus 5.5) et parallélise un lot
   d'unités indépendantes en vagues, en déléguant le moins possible. Pour « parallélise », « lance
   des sous-agents », « worker pool », « éclate en sous-tâches », « active le routeur », « quel
   modèle pour ça », « parallelize », « spawn workers ». Arrêt : « arrête le routage ». Activation
@@ -53,8 +53,8 @@ indépendant à cinq petits.
 principal est fixé au démarrage (Cowork : au lancement de la tâche ; Claude Code :
 `/model`) et n'est pas modifiable depuis une skill.
 
-**Peut** exécuter le travail dans des sous-agents lancés explicitement en Haiku
-ou en Sonnet. C'est là qu'est l'économie, et elle est immédiate quel que soit le
+**Peut** exécuter le travail dans des sous-agents lancés explicitement en Sonnet 5.5
+(effort bas ou normal) ou en Opus 5.5. C'est là qu'est l'économie, et elle est immédiate quel que soit le
 modèle du fil principal.
 
 ## Activation et arrêt
@@ -68,16 +68,16 @@ demande suivante jusqu'à l'arrêt : « arrête le routage ». (« mode normal �
 
 | Étage | Nature | Exemples |
 |---|---|---|
-| **`haiku`** | Exécution mécanique, zéro jugement | extraction, reformatage, conversion, scraping, résumé factuel, recherche/grep/inventaire, traduction littérale, classification sur critères explicites fournis, application d'un gabarit connu |
-| **`sonnet`** | Travail courant, jugement borné *(défaut)* | rédaction courante, code de taille moyenne, correctif ciblé, refactor localisé, audit sur grille fournie, scoring, synthèse de plusieurs sources, automatisation multi-étapes claire |
+| **`sonnet` + effort `low`** | Exécution mécanique, zéro jugement | extraction, reformatage, conversion, scraping, résumé factuel, recherche/grep/inventaire, traduction littérale, classification sur critères explicites fournis, application d'un gabarit connu |
+| **`sonnet`** (effort `medium`) | Travail courant, jugement borné *(défaut)* | rédaction courante, code de taille moyenne, correctif ciblé, refactor localisé, audit sur grille fournie, scoring, synthèse de plusieurs sources, automatisation multi-étapes claire |
 | **`opus`** | Raisonnement à enjeu | architecture et choix structurant, stratégie, débogage à cause inconnue, livrable long où la cohérence d'ensemble compte, décision à conséquence (juridique, financière, santé, réputation), demande ambiguë à cadrer |
 
 **Trancher en trois secondes :**
 
 1. **Compter les inconnues, pas la longueur.** Trois lignes avec quatre inconnues :
-   Opus. Quarante lignes entièrement spécifiées : Haiku.
+   Opus. Quarante lignes entièrement spécifiées : Sonnet effort bas.
 2. **Test du stagiaire** : « saurais-je écrire la procédure exacte en cinq lignes ? »
-   Oui → Haiku. À peu près → Sonnet. Non → Opus.
+   Oui → Sonnet effort bas. À peu près → Sonnet. Non → Opus.
 3. **Coût de l'erreur** : réversible en une minute → descendre d'un cran. Part
    chez un client ou en production → monter d'un cran.
 
@@ -138,7 +138,8 @@ logique de décision reste chez l'orchestrateur.
 Agent({
   description: "<3-5 mots>",
   subagent_type: "Explore",   // "general-purpose" s'il écrit un fichier
-  model: "haiku",             // ou "sonnet" ; jamais le modèle de l'orchestrateur
+  model: "sonnet",            // ou "opus" ; jamais le modèle de l'orchestrateur
+  effort: "low",              // étage bas ; "medium" pour le travail courant
   prompt: "<brief autonome>"
 })
 ```
@@ -149,8 +150,8 @@ Agent({
 le rendre. Ne jamais transmettre une sortie de sous-agent sans l'avoir regardée :
 c'est le seul point où une économie mal placée devient une erreur livrée.
 
-**Escalade sur échec** : un cran à la fois, jamais deux. Haiku échoue → relancer
-en Sonnet **avec le diagnostic de l'échec ajouté au brief**. Relancer le même
+**Escalade sur échec** : un cran à la fois, jamais deux. Sonnet effort bas échoue → relancer
+en Sonnet effort `medium` **avec le diagnostic de l'échec ajouté au brief**. Relancer le même
 modèle sur le même prompt ne produit rien de nouveau. Après deux échecs,
 l'orchestrateur reprend la main et le dit.
 
@@ -222,7 +223,7 @@ PLAN DE PARALLÉLISATION
 - Mission : <ce que demande l'utilisateur>
 - Découpage : N = <nombre> unités indépendantes
 - Vagues : <N / taille> vagues de <5-10> workers
-- Étage worker : haiku (mécanique) | sonnet (jugement)
+- Étage worker : sonnet effort low (mécanique) | sonnet effort medium (jugement)
 - subagent_type : Explore (lecture seule) | general-purpose (écrit un fichier)
 - Output par worker : <format précis>
 - Dossier sortie : <path> — un fichier unique par worker (out_<id>.ext)
@@ -264,7 +265,7 @@ OUTPUT (format strict, et rien d'autre) :
 Une ligne, sans cérémonie, puis exécuter :
 
 ```
-→ haiku · extraction mécanique sur fichier fourni
+→ sonnet · effort low · extraction mécanique sur fichier fourni
 ```
 
 Ne pas expliquer le routeur, ne pas justifier le choix sur un paragraphe, ne pas
@@ -291,7 +292,7 @@ Sur un lot facturé, les poser **avant** la première vague, pas après avoir vu
 Si l'essentiel du travail prévu tient dans un seul étage, le signaler **une fois**,
 en une ligne, sans insister :
 
-- **Claude Code** : `/model haiku` (ou `sonnet`, `opus`) change le fil principal immédiatement.
+- **Claude Code** : `/model sonnet` (ou `opus`) et `/effort` change le fil principal immédiatement.
 - **Cowork** : le modèle se choisit au lancement de la tâche — il faut en relancer une.
 
 ---
@@ -299,10 +300,10 @@ en une ligne, sans insister :
 ## Exemples (illustratifs — le pattern marche dans tout contexte)
 
 **Forme A** — « Reformate ce CSV de 400 lignes en JSON groupé par catégorie. »
-→ `haiku` + `general-purpose`, brief avec chemin absolu et schéma de sortie, contrôle du retour sur 3 lignes au hasard.
+→ `sonnet` effort `low` + `general-purpose`, brief avec chemin absolu et schéma de sortie, contrôle du retour sur 3 lignes au hasard.
 
 **Forme B** — « Parallélise un audit on-page sur ces 12 pages et sors les 3 problèmes communs. »
-→ N = 12, une vague de 8 puis le reste, worker `haiku` + `Explore` (fetch, extraction title/meta/Hn/word count/canonical/schema → JSON). Pilot sur 3. Synthèse par l'orchestrateur : patterns récurrents, top 3 priorisés.
+→ N = 12, une vague de 8 puis le reste, worker `sonnet` effort `low` + `Explore` (fetch, extraction title/meta/Hn/word count/canonical/schema → JSON). Pilot sur 3. Synthèse par l'orchestrateur : patterns récurrents, top 3 priorisés.
 
 **Forme B avec jugement** — « Worker pool pour qualifier ces 25 candidats : nom/email/tél/diplôme + score de match. »
 → N = 25, vagues de 8, worker `sonnet` (scoring) + grille fournie en entrée, output `out_<id>.json`. Pilot sur 3. Orchestrateur : CSV fusionné trié par score.
@@ -321,7 +322,7 @@ en une ligne, sans insister :
 - Inventer une donnée pour un item `AMBIGUOUS`.
 - Livrer une sortie de sous-agent sans l'avoir regardée.
 - Écrire un identifiant de modèle versionné en dur : toujours les alias courts
-  `"haiku"`, `"sonnet"`, `"opus"` (et `"fable"`, autre alias accepté par l'outil Agent) : les identifiants versionnés périment.
+  `"sonnet"`, `"opus"` : les identifiants versionnés périment. Jamais `"haiku"` (décision de Julien du 21/11/2026 : Sonnet 5.5 ou Opus 5.5 uniquement).
 
 ## Auto-contrôle
 

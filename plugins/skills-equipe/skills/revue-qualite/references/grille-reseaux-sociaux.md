@@ -45,11 +45,11 @@ carrousel et les commentaires ont leurs propres contrôles, décrits dans leur s
 7. **Lu comme un humain.** Pas de tournure générique d'IA. Lire le texte à voix haute :
    ce qui ne se dirait pas se réécrit.
 8. **Visuel.** Lisible sur téléphone, cohérent avec le texte, sans faute.
-9. **Programmation vérifiée dans l'outil.** Le post apparaît dans la file (Buffer ou
-   autre) avec le bon compte, le bon texte, le bon visuel et la bonne heure. Convertir
-   l'heure : Buffer programme à l'heure de Paris, Madagascar est en avance d'une heure en
+9. **Programmation vérifiée dans l'outil.** Le post apparaît dans la file de publication
+   (n8n du VPS, table `publications_sociales` ; Buffer est résilié) avec le bon compte, le bon texte, le bon visuel et la bonne heure. Convertir
+   l'heure : la file est programmée à l'heure de Paris, Madagascar est en avance d'une heure en
    heure d'été française, de deux en heure d'hiver.
-10. **Après publication** : le lien du post publié est donné à Julien.
+10. **Après publication** : le lien du post publié est donné au demandeur.
 
 ## Questions de challenge typiques
 

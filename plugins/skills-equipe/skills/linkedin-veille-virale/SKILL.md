@@ -43,7 +43,7 @@ même jour. Il s'ajoute à la limite de 2 posts par jour tous types confondus : 
    inspiré, dans le ton de `reglages-comptes.json`.
 4. `lib/planifier-veille.js` (`validerQuotaHebdomadaire`) refuse de proposer un post qui
    violerait le quota de veille, contre `data/registre-veille.json`.
-5. Contrôle de forme, puis programmation dans Buffer (voir « Publication »).
+5. Contrôle de forme, puis programmation par n8n (voir « Publication »).
 
 **Essai à blanc** : `node dry-run.js` exécute les étapes 1 à 4 sans publier. Sans `APIFY_TOKEN` ou
 sans `comptes_a_surveiller`, il bascule sur la fixture. Sortie dans
@@ -94,15 +94,17 @@ explicite ; seul `dry-run.js` a un repli fixture, pour `APIFY_TOKEN`.
 
 ## Publication
 
-**Voie réelle : Buffer** (compte `contact@claudeagency.fr`, connecté aux deux profils). Coller
-un texte dans Buffer échappe à tout code : le contrôle se fait juste avant, sur le fichier.
+**Voie réelle : n8n du VPS** (n8n.claudeagency.fr). Buffer est résilié (décision de Julien du
+21/11/2026). **À faire : workflow n8n** de publication LinkedIn : au 21/11/2026, aucun workflow
+n8n ne publie sur LinkedIn (le 35 ne couvre qu'Instagram et Facebook). En attendant, le post
+contrôlé est remis au demandeur. Le contrôle se fait juste avant, sur le fichier.
 
 1. Convertir chaque passage en gras :
    `node ../linkedin-mise-en-forme/scripts/verif-post.mjs gras "segment"`.
 2. Contrôler le texte : `node ../linkedin-mise-en-forme/scripts/verif-post.mjs verif <fichier>`
    (code 1 = ne pas programmer).
 3. `node ../linkedin-mise-en-forme/scripts/controle-avant-publication.mjs` (règles 1, 2, 4, 5).
-4. Programmer dans Buffer, puis, seulement après une programmation confirmée, inscrire le post au
+4. Programmer par le workflow n8n, puis, seulement après une programmation confirmée, inscrire le post au
    registre :
    ```js
    const { enregistrerPostPublie } = require('./lib/registre');
@@ -130,7 +132,7 @@ un texte dans Buffer échappe à tout code : le contrôle se fait juste avant, s
 
 - `profiles` au lieu de `targetUrls` dans l'appel Apify : zéro post, aucune erreur.
 - Le registre ne se remplit que si la session appelle `enregistrerPostPublie` après la
-  programmation Buffer ; il ne protège que les lancements suivants.
+  programmation ; il ne protège que les lancements suivants.
 - Les abonnés bougent et aucun script ne les met à jour : un `_capture_date` ancien fausse les scores.
 - Réponse Apify, Notion ou Composio malformée, registre corrompu : messages explicites, pas
   d'exception brute.
@@ -140,6 +142,6 @@ un texte dans Buffer échappe à tout code : le contrôle se fait juste avant, s
 - [references/historique.md](references/historique.md) : ancien corps complet (rebranchement du
   pont sur `linkedin-mise-en-forme`, audit du 15/09, incidents).
 - [../../references/linkedin-veille-historique.md](../../references/linkedin-veille-historique.md) :
-  score d'engagement, choix des comptes, déblocages Notion, programmation Buffer.
+  score d'engagement, choix des comptes, déblocages Notion, ancienne programmation Buffer.
 - [../../references/etat-linkedin-20260912.md](../../references/etat-linkedin-20260912.md) : état
   des lieux transverse aux skills LinkedIn.

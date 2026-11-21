@@ -2,7 +2,7 @@
 
 const { test, before, after } = require('node:test');
 const assert = require('node:assert/strict');
-const { validerAccents } = require('../lib/valider-orthographe');
+const { validerAccents } = require('../../../lib/valider-orthographe');
 const { executerPourCompte } = require('../dry-run');
 
 // Isole APIFY_TOKEN pour forcer le chemin fixture dans executerPourCompte

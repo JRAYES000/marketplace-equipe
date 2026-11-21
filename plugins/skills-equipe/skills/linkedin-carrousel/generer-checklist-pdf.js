@@ -3,7 +3,7 @@
 
 /**
  * Genere le lead magnet "checklist recrutement" (PDF A4, une page) promis
- * dans le post Zernio julien-agency programme pour le 26/09/2026 08:30 Paris
+ * dans le post julien-agency programme pour le 26/09/2026 08:30 Paris
  * (id `6ab66ea404c51b0900f1e2db`, voir SKILL.md). Contenu en continuite
  * directe du carrousel source (`a-publier/julien-agency-2026-09-25-test-regles-mail.json`) :
  * meme chiffre source (Yaggo/Ifop, janvier 2026), meme delai de relance

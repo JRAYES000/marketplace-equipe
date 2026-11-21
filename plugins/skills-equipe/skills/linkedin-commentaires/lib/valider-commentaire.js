@@ -21,7 +21,7 @@
  * les plus frequents.
  */
 
-const { validerAccents } = require('./valider-orthographe');
+const { validerAccents } = require('../../../lib/valider-orthographe');
 
 const PHRASES_MIN = 2;
 const PHRASES_MAX = 4;

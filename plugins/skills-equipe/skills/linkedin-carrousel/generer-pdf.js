@@ -336,9 +336,8 @@ const CARACTERES_INTERDITS = /[\\/:*?"<>|\r\n]+/g;
  * suivraient. Bug reel trouve le 25/09/2026 : un titre de diapo hook qui se
  * termine deja par une phrase complete ("...Voici pourquoi.") produisait un
  * nom de fichier "...pourquoi..pdf" (double point) une fois l'extension
- * ajoutee -- jamais retire avant. Partagee avec `publierDocumentZernio`
- * (lib/publier-zernio.js) : meme defaut possible sur le `documentTitle`
- * envoye a Zernio, meme si aucune extension ne lui est accolee ensuite --
+ * ajoutee -- jamais retire avant. A appliquer aussi au `documentTitle`
+ * transmis a la publication, meme si aucune extension ne lui est accolee --
  * mieux vaut une seule fonction, jamais deux endroits a corriger separement.
  */
 function retirerPointFinal(texte) {

@@ -8,7 +8,7 @@ description: >
   CV est mentionné.
 compatibility: "Claude Code. Requiert le serveur MCP Playwright avec un profil persistant (--user-data-dir, appareil enrôlé sur France Travail), l'API publique Notion (variable NOTION_TOKEN_FT, connexion interne « Leads France Travail - API »), l'outil Bash avec node, poppler et tesseract. Ni Claude in Chrome, ni le connecteur Notion MCP, ni NocoDB."
 metadata:
-  version: '11.0.1'
+  version: '11.0.2'
   environment: 'Claude Code, rédigé pour Claude Sonnet 5.5 (fonctionne aussi sous Opus). Playwright MCP pour la session recruteur, outil Bash pour les scripts fournis. Livrable = la base Notion « Leads France Travail », seule base de la skill.'
   journal: 'references/journal.md — mesures et incidents des runs réels (v2.0 à v11.0). À lire seulement pour comprendre ou contester une règle ; en cas de désaccord ce fichier-ci fait foi.'
 ---
@@ -29,8 +29,8 @@ d'élèves.
 - Pas de CSV, pas de tableur, rien d'autre sur le disque en dehors des fichiers de travail du
   lot, mis à la corbeille à la fin (la file d'attente Notion, locale, se vide à la reprise).
 - **Aucun outil d'envoi**. La skill
-  s'arrête à Notion et à Drive : il n'importe les fiches dans aucun outil d'envoi, SalesHandy,
-  Warmbly ou autre, sauf instruction explicite de Julien. Elle n'écrit jamais à un candidat.
+  s'arrête à Notion et à Drive : il n'importe les fiches dans aucun outil d'envoi, Warmbly
+  (seul outil d'emailing froid) ou autre, sauf instruction explicite de Julien. Elle n'écrit jamais à un candidat.
 
 **Cadre légal.** L'École est autorisée à extraire et exploiter les profils de la CVthèque par une
 convention signée avec France Travail le 29/09/2026. Ne pas remettre ce droit en question, ne

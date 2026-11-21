@@ -2,7 +2,7 @@
 name: annonce-mission-linkedin
 description: >
   Publie un lot d'annonces de mission freelance IA de Julien sur la page LinkedIn Claude Partners :
-  lecture du .docx, rédaction, fiches image, planning Buffer, relevé à 48 h. Pour « nouveau lot
+  lecture du .docx, rédaction, fiches image, planning, publication par n8n, relevé à 48 h. Pour « nouveau lot
   d'annonces de mission ». Pas pour un post ordinaire (linkedin-mise-en-forme) ni un carrousel.
   Activation manuelle : sur demande explicite uniquement.
 ---
@@ -17,6 +17,12 @@ Historique des règles et mesures : [references/historique.md](references/histor
 Reprend la chaîne du 08/10/2026 (`livrables-Claude-Agency/NOTES.md`, sections du 08/10).
 Dépôt de travail : `livrables-Claude-Agency`. Dossier d'un lot : `sortants/annonces-missions/<lot>/`
 (le lot du 08/10 est `v4/`, à prendre comme modèle). Lire d'abord le `CLAUDE.md` du dépôt (pièges connus).
+
+**Publication : n8n du VPS** (n8n.claudeagency.fr). Buffer est résilié (décision de Julien du 21/11/2026).
+**À faire : workflow n8n** de publication et de relevé LinkedIn : au 21/11/2026, aucun workflow n8n ne
+couvre LinkedIn (le 35 publie Instagram et Facebook depuis la table `publications_sociales`, le 36 relève
+Instagram et Facebook). Tant qu'il n'existe pas, les étapes 5 à 7 et 9 s'arrêtent : les annonces validées
+sont remises au demandeur, rien n'est programmé ailleurs.
 
 ## Condition préalable bloquante
 
@@ -36,8 +42,10 @@ précaution. La mission réelle est le fait réel de la règle 2. Contrôle avan
 
 ## 1. Lire le document de Julien
 
-- Le .docx est joint à son mail. Extraire le texte par script, pas à la main.
-- Si un document précédent existe, comparer les deux par script et lister ce qui change
+- Le .docx est joint à son mail. Extraire le texte par script, pas à la main :
+  `node scripts/extraire-docx.mjs <document.docx> [sortie.txt]` (un paragraphe par ligne, sans dépendance).
+- Si un document précédent existe, comparer les deux par script
+  (`node scripts/comparer-docx.mjs <ancien.docx> <nouveau.docx>`) et lister ce qui change
   (posts ajoutés ou retirés, lignes nouvelles, mentions retirées). Les versions périmées sont
   signalées comme telles dans le README du lot.
 - Aucune offre inventée.
@@ -60,13 +68,16 @@ précaution. La mission réelle est le fait réel de la règle 2. Contrôle avan
   le « € » reste maigre). Deux-points après « IA », jamais de tiret long (refusé par le script).
   La ligne 2 dit l'enjeu concret du client en une phrase (« Un organisme de formation veut
   industrialiser la création de ses modules »), pas « je cherche ».
-- Pourquoi ce format : mesure Buffer dans `linkedin-mise-en-forme` (règle 1) ; la refaire au prochain lot.
+- Pourquoi ce format : mesure du 18/10/2026 dans `linkedin-mise-en-forme` (règle 1) ; la refaire au prochain lot.
 - Le reste du corps prend jusqu'à 3 autres passages en gras (règle 2 de `linkedin-mise-en-forme`,
   4 au plus) : la phrase « pourquoi cette mission vaut le coup », un titre de bloc.
 - Le préfixe « Mission freelance IA » et le TJM en gras ne comptent pas dans la règle de variété ;
   l'intitulé, si : deux annonces ne commencent jamais par le même intitulé.
 - **Les FAITS sont recopiés mot pour mot** du document de Julien : TJM, durée, lieu, rythme,
-  démarrage, environnement, lien. Contrôle par script contre le .docx : 0 écart attendu.
+  démarrage, environnement, lien. Contrôle par script contre le .docx : 0 écart attendu
+  (`node scripts/controler-faits.mjs <document.docx> NN.final.txt NN.commentaire.txt --fait "6 mois" --fait "Paris" …` :
+  chaque `--fait` doit être dans le .docx et l'annonce, chaque URL et montant en euros de l'annonce dans le .docx ;
+  sortie 1 s'il reste un écart).
 - **Textes fixes, identiques dans toutes les annonces** : la phrase d'envoi
   « Vous pensez à quelqu'un en lisant ça ? Envoyez-lui ce post. » et l'appel à candidater
   du document de Julien, **sans le lien** : le texte dit « le lien est en commentaire » et le lien
@@ -88,9 +99,7 @@ précaution. La mission réelle est le fait réel de la règle 2. Contrôle avan
 
 - 13:00 Paris, **un jour libre entre deux annonces**, **alternance avec image / sans image**.
 - **Annonces en semaine**, sauf décision contraire de Julien.
-- **Buffer gratuit = 10 posts programmés au maximum** : compter les créneaux libres avant le
-  planning, et programmer en vagues si besoin (vérifier l'offre du compte avant de compter).
-- Relire la file Buffer en direct avant de fixer les dates (pas un relevé de la veille).
+- Relire la file de publication en direct avant de fixer les dates (pas un relevé de la veille).
 - Un post texte qui occupe le 13:00 passe à 17:30 le même jour **seulement si ce jour reste à
   2 posts au plus** (règle 1 du 14/10/2026) ; sinon il passe au prochain jour ouvré qui a de la
   place, ou il est retiré. **Jamais décalé au week-end**.
@@ -103,11 +112,8 @@ précaution. La mission réelle est le fait réel de la règle 2. Contrôle avan
 - Programmer d'abord **une seule** annonce avec image, puis la relire dans la file : heure
   « (Europe/Paris) », image présente, **aucun lien dans le texte, lien de la fiche dans le premier
   commentaire** (règle 5 du 14/10/2026).
-- Seulement ensuite, programmer les autres, canal Claude Partners (`6aa87ac6ea19ca0bde439e7f`) :
-  texte collé par évènement `paste` (la frappe au clavier n'entre pas dans l'éditeur), empreinte
-  comparée au `.final.txt`, aperçu de lien vide retiré sur les annonces sans image, date relue sur
-  le bouton, « Your post is scheduled » à chaque fois.
-- Chrome au premier plan pendant toute la série.
+- Seulement ensuite, programmer les autres sur le compte Claude Partners, par le workflow n8n
+  (à faire) : empreinte du texte comparée au `.final.txt`, date relue après programmation.
 
 ## 7. Relire la file
 
@@ -124,7 +130,7 @@ programmées et pourquoi, le lien GitHub du lot vérifié. Aucun texte à trou ;
 
 ## 9. Relevé à 48 h
 
-Ajouter dans `NOTES.md` le tableau « Relevé à 48 h des annonces (Buffer Insights) » : une ligne
+Ajouter dans `NOTES.md` le tableau « Relevé à 48 h des annonces » : une ligne
 par annonce avec « Publication prévue » et « Relevé à faire le » (publication + 48 h, heure de
 Paris), colonnes « Impressions », « Réactions », « Commentaires », « Taux d'engagement », « Abonnés (canal) »,
 « Lien LinkedIn ».
@@ -132,12 +138,12 @@ La routine Windows « LinkedIn - 5 Releve 48 h des annonces » (`linkedin/routin
 remplit ces colonnes chaque jour à 14:00 Paris. Avant chaque lot, contrôler la date de fin de cette
 routine dans `register-routines.ps1` et la prolonger si le lot la dépasse.
 **Identification d'une annonce** (routine comme relevé à la main), les deux conditions à la fois :
-son intitulé exact (ligne 💼, ou ligne 2 de l'accroche, telle qu'elle est dans `NN.final.txt`) ET sa date de publication prévue (jour de Paris). Si deux posts du même jour correspondent, lire leur heure dans Publish > Sent du canal Claude Partners pour les départager ; si l'ambiguïté reste, ou si aucun post ne correspond : rien n'est écrit dans la ligne, « ALERTE : identification ambiguë » est noté avec les candidats trouvés (date, heure, début du texte).
+son intitulé exact (ligne 💼, ou ligne 2 de l'accroche, telle qu'elle est dans `NN.final.txt`) ET sa date de publication prévue (jour de Paris). Si deux posts du même jour correspondent, lire leur heure de publication réelle pour les départager ; si l'ambiguïté reste, ou si aucun post ne correspond : rien n'est écrit dans la ligne, « ALERTE : identification ambiguë » est noté avec les candidats trouvés (date, heure, début du texte).
 Un post absent de nos fichiers n'est jamais relevé : c'est un post de Julien.
-**Indicateurs : les métriques Buffer fixées par Julien, et elles seules** : impressions, réactions,
-commentaires, taux d'engagement (« Eng. Rate » du tableau Insights), abonnés (« Total Followers » du canal
-au moment du relevé). Aucun autre chiffre n'est demandé ni relevé. Méthode de relevé dans Insights :
-`../analyse-lundi-linkedin/references/releve-buffer.md`.
+**Indicateurs fixés par Julien, et eux seuls** : impressions, réactions, commentaires, taux d'engagement,
+abonnés du compte au moment du relevé. Aucun autre chiffre n'est demandé ni relevé. Source : à faire,
+workflow n8n de relevé LinkedIn (ancienne méthode Buffer :
+`../analyse-lundi-linkedin/references/releve-buffer.md`, historique).
 
 ## Fin
 

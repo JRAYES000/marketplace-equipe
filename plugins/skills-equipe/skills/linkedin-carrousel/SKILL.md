@@ -151,13 +151,13 @@ Refus explicite, jamais un avertissement.
   `(source : …)` collé, ou source vague (« une étude récente »). Un chiffre-anecdote (âge, date,
   durée, « 12 personnes ») est dispensé si le post porte une ligne `Source : …` non vague.
 
-### Accents — `lib/valider-orthographe.js`
+### Accents — `../../lib/valider-orthographe.js`
 
 Liste fermée de mots toujours accentués (été, déjà, même, déclaratif, réel…), mots ambigus
 (« a », « ou ») exclus. Appelée sur les diapos, le texte du post (y compris chaque passage en
 gras) et le `documentTitle`.
 
-### Anglicismes — `lib/valider-anglicismes.js`
+### Anglicismes — `../../lib/valider-anglicismes.js`
 
 Liste fermée (process, deadline, feedback, workflow, business, brief, benchmark, reporting,
 roadmap, kickoff, mindset, insight, targets, networking) avec l'équivalent français dans le
@@ -171,24 +171,19 @@ réellement concret, image conforme à son prompt. Seule la relecture visuelle l
 
 ## Publication
 
-`publier-zernio.js` est le script de publication de cette skill (`lib/publier-zernio.js`,
-`lib/zernio.js`) :
+**Voie réelle : n8n du VPS** (n8n.claudeagency.fr). Buffer est résilié et Zernio abandonné
+(décision de Julien du 21/11/2026). **À faire : workflow n8n** de publication LinkedIn (document
+PDF) : au 21/11/2026, aucun workflow n8n ne publie sur LinkedIn (le workflow 35, table
+`publications_sociales`, ne couvre qu'Instagram et Facebook). En attendant, la skill s'arrête au
+PDF validé et au texte du post, remis au demandeur pour publication.
 
-```
-node publier-zernio.js <compte> <pdf> <documentTitle> [texte-post.txt] [--publier] [--schedule <scheduledFor> <timezone>]
-```
-
-- Vérifie d'abord le compte (`GET /v1/accounts` : existe, actif, LinkedIn, bonne URL de profil).
-- Sans `--publier`, s'arrête après le téléversement (test sans publication).
-- `--schedule "2026-09-26T08:30:00" "Europe/Paris"` : heure locale ISO sans décalage et fuseau
-  IANA, fournis ensemble ; force `publishNow: false`.
 - Le `documentTitle` (titre affiché sous le document) passe par `retirerPointFinal`, le contrôle
-  d'accents et d'anglicismes avant tout appel réseau.
-- `ZERNIO_API_KEY` vient de l'environnement ou du `.env` local (jamais commité, jamais affiché).
+  d'accents et d'anglicismes (`../../lib/valider-orthographe.js`, `../../lib/valider-anglicismes.js`)
+  avant d'être transmis.
 
 Feu vert : publication sans accord poste par poste pour julien-agency et julien-partners
 seulement (décision de Julien, rappelée dans le `CLAUDE.md` du dépôt). Les contrôles des étapes 5 à
-7 du déroulé restent obligatoires avant le script. Tout autre compte suit la règle générale du
+7 du déroulé restent obligatoires avant la publication. Tout autre compte suit la règle générale du
 feu vert explicite.
 
 **Sorties** : `sortants/<compte>/<Titre lisible>.pdf`, sans date, casse et accents conservés
@@ -207,8 +202,6 @@ refus si le rendu déborde) et un `.verif.png` de contrôle à ne pas commiter.
 - Un chiffre en gras était invisible au contrôle de source : les chiffres gras Unicode sont reconnus.
 - Une image de 480 px faisait déborder les pages checklist/comparaison : `.image-slot` est à
   380 px, et `validerEspacementReel` attrape le reste.
-- Les autres skills linkedin-* programment par Buffer, et Zernio ne voit pas les posts Buffer
-  (`analyse-lundi-linkedin`) : ne pas lire Zernio pour savoir ce qui est publié.
 - `lib/composio.js` et `lib/publier.js` ne servent plus à la publication de cette skill ; le canal
   partagé `../../lib/composio-canal.js` sert encore à `linkedin-commentaires`.
 - LinkedIn gèle parfois le lecteur multi-pages dans le navigateur piloté : inspecter les PNG

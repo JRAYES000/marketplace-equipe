@@ -42,10 +42,10 @@ Une règle plus ancienne, d'une autre skill ou d'un calendrier, qui les contredi
 Obligatoire avant de programmer, sortie brute montrée avec le brouillon :
 
 ```bash
-node "<dossier de la skill>/scripts/controle-avant-publication.mjs" --brouillon "$LIVRABLES_LINKEDIN_DIR/2026-11-03/a50.final.txt" --date 2026-11-03 --heure 13:00 --sujet "libellé du sujet" --maintenant <UTC du serveur Buffer>
+node "<dossier de la skill>/scripts/controle-avant-publication.mjs" --brouillon "$LIVRABLES_LINKEDIN_DIR/2026-11-03/a50.final.txt" --date 2026-11-03 --heure 13:00 --sujet "libellé du sujet" --maintenant <UTC d'une source fiable>
 ```
 
-Il lit la file Buffer relevée (`file-attente-buffer.txt`), retrouve le texte complet de chaque
+Il lit la file de publication relevée (`file-attente-buffer.txt` ; Buffer est résilié depuis le 21/11/2026, à faire : relevé par le workflow n8n LinkedIn), retrouve le texte complet de chaque
 post dans les `.final.txt` (y compris `linkedin/posts-nouveaux/`), et refuse (code 1, une ligne
 `ALERTE regle N` par constat, avec la phrase en cause) :
 
@@ -223,7 +223,7 @@ Critères mesurés (seul le niveau de lecture se relit) :
     `.md` voisin, pour une page de `https://claudeagency.fr/`, les chiffres de la page sont admis
     sans source ; sinon refus.
 11. Aucun anglicisme (« process » → « processus »), liste partagée avec
-    `linkedin-carrousel/lib/valider-anglicismes.js` : ajouter un mot là-bas vaut pour les deux.
+    `../../lib/valider-anglicismes.js` (partagé) : ajouter un mot là-bas vaut pour les deux.
 12. Règles de Julien du 14/10 sur le texte seul (règles 2, 3 pour les formules, 5).
 13. Variété sur les 5 derniers posts (si des posts précédents sont trouvés).
 

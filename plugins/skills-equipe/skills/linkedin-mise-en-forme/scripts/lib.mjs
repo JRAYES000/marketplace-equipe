@@ -29,7 +29,7 @@ import { controlerTexte } from "./regles-julien.mjs";
 // "process" passe dans le post A1 du 28/09) : on importe la fonction et la liste du
 // carrousel au lieu de les recopier, pour qu'il n'existe jamais deux listes qui divergent.
 // Les deux skills vivent dans le meme paquet : le chemin relatif est stable.
-const { detecterAnglicismes } = createRequire(import.meta.url)("../../linkedin-carrousel/lib/valider-anglicismes.js");
+const { detecterAnglicismes } = createRequire(import.meta.url)("../../../lib/valider-anglicismes.js");
 
 // Mathematical Sans-Serif Bold -- celle que fabrique enGras() ci-dessous, choisie par
 // Julien le 18/09/2026 (SKILL.md, regle 2). Aucune lettre accentuee n'existe dans ce
@@ -661,7 +661,7 @@ export function verifierTexte(corps, { precedent, precedents, nomsPropres = [], 
   ));
 
   // Nouveau critere (29/09/2026) : aucun anglicisme de la liste fermee de
-  // linkedin-carrousel/lib/valider-anglicismes.js (process -> processus, etc.). Lu sur le
+  // lib/valider-anglicismes.js du plugin (process -> processus, etc.). Lu sur le
   // texte ramene en ASCII : un mot deja converti en gras Unicode ne doit pas y echapper.
   const anglicismes = detecterAnglicismes(versAscii(corps));
   resultats.push(dire(

@@ -11,7 +11,7 @@ const test = require('node:test');
 const assert = require('node:assert/strict');
 
 const { convertirGras } = require('../lib/valider-post');
-const { validerAccents } = require('../lib/valider-orthographe');
+const { validerAccents } = require('../../../lib/valider-orthographe');
 
 // --- Erreur 1 : "declaratif au reel" dans un passage en gras du texte du post -----
 //
@@ -38,11 +38,11 @@ test('le meme segment correctement accentue mais SANS le forcer en gras reste ac
   assert.doesNotThrow(() => convertirGras('Passez du déclaratif au réel. **Un audit gratuit**.'));
 });
 
-// --- Erreur 2 : "L'IA declarative" dans le documentTitle passe a publier-zernio.js -----
+// --- Erreur 2 : "L'IA declarative" dans le documentTitle (publication) -----
 //
 // Avant correction : aucun garde-fou ne portait sur documentTitle -- generer-post.js/
 // valider-post.js ne verifient que le texte du post, jamais ce titre, transmis tel
-// quel en argument CLI a publier-zernio.js.
+// quel au canal de publication.
 
 test('"L\'IA declarative" (documentTitle exact utilise le 25/09) est refuse par validerAccents', () => {
   assert.throws(() => validerAccents("L'IA declarative"), /"declarative".*"déclarative"/);

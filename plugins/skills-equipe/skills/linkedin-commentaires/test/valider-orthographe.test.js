@@ -2,7 +2,7 @@
 
 const test = require('node:test');
 const assert = require('node:assert/strict');
-const { validerAccents } = require('../lib/valider-orthographe');
+const { validerAccents } = require('../../../lib/valider-orthographe');
 const { validerCommentaire } = require('../lib/valider-commentaire');
 
 test('accepte un texte correctement accentue', () => {

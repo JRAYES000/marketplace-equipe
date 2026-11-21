@@ -1,9 +1,9 @@
 ---
 name: analyse-lundi-linkedin
 description: >
-  Analyse hebdomadaire des comptes LinkedIn Claude Agency et Claude Partners : relevé Buffer
-  Insights, médianes par format (texte, image, carrousel) calculées par script, rapport à forme
-  fixe, contrôle des créneaux du calendrier contre la file Buffer. Pour « analyse du lundi »,
+  Analyse hebdomadaire des comptes LinkedIn Claude Agency et Claude Partners : relevé des
+  chiffres, médianes par format (texte, image, carrousel) calculées par script, rapport à forme
+  fixe, contrôle des créneaux du calendrier contre la file de publication. Pour « analyse du lundi »,
   « lance l'analyse LinkedIn », « où en est le test des formats », « vérifie les créneaux du
   calendrier ». Pas pour un compte client (analyse-reseau-client). Activation manuelle : sur
   demande explicite uniquement.
@@ -15,10 +15,16 @@ Sommaire : Où sont les choses · Procédure du lundi · Point d'objectif ponctu
 Calculs faits en code · Forme du rapport · Pièges.
 
 Une procédure qui revient chaque lundi. Les calculs sont faits par les scripts, jamais « à la main »
-et jamais de tête. Rien n'est écrit dans Buffer : lecture seule.
+et jamais de tête. Lecture seule : rien n'est écrit dans l'outil de publication.
 
-**Source unique : Buffer Insights** (décision de Julien). Indicateurs retenus, et eux seuls : impressions,
-réactions, commentaires, taux d'engagement (« Eng. Rate » de Buffer).
+**Buffer est résilié (décision de Julien du 21/11/2026)** : toute publication passe par le n8n du VPS
+(n8n.claudeagency.fr). **À faire : workflow n8n de relevé LinkedIn.** Au 21/11/2026, aucun workflow n8n
+ne relève ni ne publie LinkedIn (le 36 relève Instagram et Facebook, le 35 ne publie qu'Instagram et
+Facebook). Tant qu'il n'existe pas, l'analyse n'a pas de source : le dire, ne jamais inventer un chiffre.
+Le workflow à créer devra produire le relevé au format actuel (`releve-buffer-AAAA-MM-JJ.csv`, colonnes de
+[references/releve-buffer.md](references/releve-buffer.md)) pour que les scripts restent valables.
+
+Indicateurs retenus, et eux seuls : impressions, réactions, commentaires, taux d'engagement.
 
 ## Où sont les choses
 
@@ -27,29 +33,28 @@ réactions, commentaires, taux d'engagement (« Eng. Rate » de Buffer).
   `livrables-Claude-Agency` (variable `LIVRABLES_DIR` pour un autre emplacement) :
   `methode-comparaison.md` (méthode en vigueur), `PROTOCOLE.md` (ancien protocole), `plan-config.json`, `calendrier.json`, `calendrier.md`, `file-attente-buffer.txt`,
   `releve-buffer-AAAA-MM-JJ.csv`, `analyses/`.
-- Aucune clé : Buffer se lit dans Claude in Chrome (`claude-in-chrome:navigate`, `claude-in-chrome:get_page_text`),
-  connecté à `publish.buffer.com`.
+- Anciens relevés : faits dans Buffer Insights par Claude in Chrome jusqu'au 21/11/2026 (méthode dans
+  `references/releve-buffer.md`, historique).
 
 ## Procédure du lundi (dans l'ordre)
 
 1. `git pull` dans `livrables-Claude-Agency` et dans le clone `marketplace-equipe`. Lire `NOTES.md`.
-2. **Relevé Buffer Insights** (Chrome, onglet neuf) : suivre `references/releve-buffer.md`, canal par canal,
-   toutes les pages du tableau « Performance per Post », détail de chaque post pour l'heure affichée et son
-   fuseau. Écrire un nouveau fichier `releve-buffer-AAAA-MM-JJ.csv` (on ne modifie pas l'ancien), puis contrôler
-   la complétude contre Publish > Sent. Relever aussi la file d'attente dans `file-attente-buffer.txt`.
+2. **Relevé des chiffres** : à faire, workflow n8n (voir plus haut). Il écrira un nouveau fichier
+   `releve-buffer-AAAA-MM-JJ.csv` (on ne modifie pas l'ancien) et la file programmée dans
+   `file-attente-buffer.txt`. Sans lui, s'arrêter ici et le signaler.
 3. **Lancer l'analyse** : `node scripts/analyse-lundi.mjs`
    - lit tous les relevés `releve-buffer-*.csv` du dossier du test (le plus récent l'emporte pour un même post,
      reconnu par son `id_buffer` : deux posts publiés à la même minute restent deux lignes), ou un seul avec
      `--buffer fichier.csv` ;
-   - l'heure de référence est l'en-tête `Date` du **serveur Buffer** (abandon après 20 s), jamais l'horloge de la
+   - l'heure de référence est l'en-tête `Date` d'un serveur web (aujourd'hui `publish.buffer.com`, à remplacer, abandon après 20 s), jamais l'horloge de la
      machine (Madagascar, UTC+3) ; à défaut, `--maintenant AAAA-MM-JJTHH:MM:SSZ` lu sur une source fiable ;
    - écrit `analyses/AAAA-MM-JJ-analyse.md` et `.json`.
    Options : `--date AAAA-MM-JJ` (le lundi analysé), `--a-blanc` (affiche posts et chiffres par compte, n'écrit
    rien), `--sortie dossier`, `--plan calendrier.json`.
-4. **Contrôler le calendrier restant** : `node scripts/verifier-creneaux.mjs` — contre la seule file Buffer
-   (code de sortie 1 s'il reste un écart). Un créneau absent de la file est « manquant », un post de la file absent du
+4. **Contrôler le calendrier restant** : `node scripts/verifier-creneaux.mjs` — contre la seule file de publication
+   relevée (code de sortie 1 s'il reste un écart). Un créneau absent de la file est « manquant », un post de la file absent du
    calendrier est « hors plan » ; même compte et même début de texte = « ALERTE déplacé », avec l'ancien et le nouveau
-   créneau. La routine 1 (contrôle quotidien Buffer) le lance chaque matin. Rien n'est jamais reprogrammé.
+   créneau. Rien n'est jamais reprogrammé.
 5. Recopier dans la conversation : l'encadré « À retenir » du rapport, tel quel, les posts absents d'Insights
    (étape 2), puis les points qui demandent une décision de Julien. Ne rien ajouter que le rapport ne contienne.
 6. Mettre à jour `NOTES.md` (date, verdict, alertes), commiter en nommant les fichiers un par un.
@@ -65,9 +70,10 @@ Le point du 28/10/2026 et ses chiffres : [references/objectif-2026-10-28.md](ref
 
 | Source | Chiffres | Usage |
 |---|---|---|
-| Buffer Insights, vue du canal, « Performance per Post » + détail du post | impressions, réactions, commentaires, taux d'engagement, heure de publication, lien, format | source unique des chiffres |
-| Buffer Publish > Sent (fuseau Paris) | liste des posts envoyés | contrôle de complétude du relevé, pas de chiffre |
-| Buffer Publish > Queue | posts programmés, dont les annonces de Julien | contrôle des créneaux ; jamais modifiés |
+| À faire : workflow n8n de relevé LinkedIn | impressions, réactions, commentaires, taux d'engagement, heure de publication, lien, format | source unique des chiffres |
+| À faire : workflow n8n de publication LinkedIn (liste des envoyés) | liste des posts envoyés | contrôle de complétude du relevé, pas de chiffre |
+| À faire : file de publication n8n LinkedIn | posts programmés, dont les annonces de Julien | contrôle des créneaux ; jamais modifiés |
+| Buffer Insights (jusqu'au 21/11/2026) | anciens relevés `releve-buffer-*.csv` | historique |
 
 ## Calculs faits en code
 
@@ -81,8 +87,8 @@ La méthode suit le calendrier (`methodeDuPlan`, `scripts/lib/lundi.mjs`) :
   du test, verdict « provisoire » et simple indication.
 - **Ancien protocole** (`PROTOCOLE.md`), sinon : géré par `methodeDuPlan` (`decider`, constante `REGLES`).
 
-Dans les deux cas : un post entre dans les médianes 48 h après sa publication ; conversion de l'heure affichée par
-Buffer en UTC et en heure de Paris. Changer une règle = changer la méthode écrite en même temps, et le dire à Julien.
+Dans les deux cas : un post entre dans les médianes 48 h après sa publication ; conversion de l'heure relevée
+en UTC et en heure de Paris. Changer une règle = changer la méthode écrite en même temps, et le dire à Julien.
 
 ## Forme du rapport (toujours la même)
 
@@ -93,10 +99,8 @@ Buffer en UTC et en heure de Paris. Changer une règle = changer la méthode éc
 ## Pièges
 
 - Ne jamais lire l'heure sur l'horloge de la machine pour dire qu'un post est « en retard » (voir `CLAUDE.md` du dépôt).
-- Le détail d'un post Insights affiche l'heure en **Europe/Minsk** (UTC+3), pas en heure de Paris : recopier
-  l'heure et le fuseau tels quels, le script convertit.
-- Le tableau n'affiche que 10 posts par page : sans parcourir toutes les pages, le relevé est incomplet.
-- Insights se met à jour avec retard : un post envoyé peut manquer pendant plus d'un jour. Jamais de chiffre
+- Anciens relevés Buffer : heure en **Europe/Minsk** (UTC+3), recopiée telle quelle, le script convertit.
+- Les statistiques LinkedIn se mettent à jour avec retard : un post envoyé peut manquer pendant plus d'un jour. Jamais de chiffre
   inventé pour le combler ; le signaler et le relever au lundi suivant.
 - Le lundi matin, les chiffres du week-end et de la veille sont incomplets : le rapport les marque « non mûrs ».
 - Une médiane sur 8 posts bouge avec un seul post viral, sur 4 carrousels encore plus : ne jamais annoncer un
@@ -104,5 +108,4 @@ Buffer en UTC et en heure de Paris. Changer une règle = changer la méthode éc
 - Deux posts peuvent partir à la même minute : relever `id_buffer` pour chaque
   ligne, sinon le relevé suivant ne sait pas lequel mettre à jour.
 - Le week-end ne fait jamais partie du test ; ses posts sont listés à part, sans règle tirée.
-- Zernio est abandonné : il ne voit pas les posts publiés par Buffer. Ne pas s'en servir
-  comme source, même en secours.
+- Buffer (résilié) et Zernio (abandonné) ne servent plus de source, même en secours.

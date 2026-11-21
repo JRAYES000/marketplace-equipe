@@ -12,7 +12,7 @@
  * que Julien a cites ou leur famille directe.
  *
  * Applique aux trois surfaces citees dans le mail de Julien : le texte des
- * diapos (lib/valider-diapos.js), le titre du document (lib/publier-zernio.js)
+ * diapos (lib/valider-diapos.js), le titre du document
  * et le texte du post (lib/valider-post.js) -- memes trois surfaces que le
  * controle d'accents (lib/valider-orthographe.js), pour la meme raison : un
  * controle qui ne couvre qu'une seule des trois laisse passer un anglicisme

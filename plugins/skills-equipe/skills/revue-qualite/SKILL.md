@@ -49,7 +49,7 @@ Elle s'adresse à la personne qui a réalisé la tâche. Tutoiement.
 ## Étape 1 — Ancrer (outils d'abord, pas de texte)
 
 1. **Retrouver la demande d'origine**, mot pour mot : le premier message de la session, le
-   mail ou le brief de Julien collé, le fichier de consignes. Si elle est introuvable,
+   mail ou le brief du demandeur collé, le fichier de consignes. Si elle est introuvable,
    demande-la en une seule question et arrête-toi là : une revue sans la demande juge le
    travail contre lui-même.
 2. **Lister les livrables** : fichiers créés ou modifiés, pages publiées, posts programmés,
@@ -57,7 +57,7 @@ Elle s'adresse à la personne qui a réalisé la tâche. Tutoiement.
 3. **Ouvrir chaque livrable pour de vrai**, dans son état final : relire le fichier, ouvrir
    l'URL publiée, relire le post dans l'outil de programmation. Ce que la session « a
    écrit » et ce qui est en ligne peuvent différer. Si c'est déjà publié, la revue se
-   fait quand même : les corrections deviennent des propositions à soumettre à Julien.
+   fait quand même : les corrections deviennent des propositions à soumettre au demandeur.
 4. **Classer la tâche** : `web` (article, page, SEO), `social` (post, carrousel,
    commentaire), ou `autre`. Une tâche peut cumuler deux types.
 5. **Charger la grille** du type dans `references/` :
@@ -80,7 +80,7 @@ Rien entre les trois. « Globalement bon » n'est pas un statut.
 1. **Tout ce qui est demandé est fait.** Découpe la demande en éléments. Chaque élément
    pointe vers un livrable. Un élément sans livrable est `À REPRENDRE`.
 2. **Rien de plus que ce qui est demandé.** Un ajout non demandé n'est pas un bonus :
-   c'est un risque que Julien doit relire. Le signaler.
+   c'est un risque que le demandeur doit relire. Le signaler.
 3. **Rien d'inventé.** Chaque chiffre, citation, nom, date et URL renvoie à une source
    réellement ouverte pendant la session. Un chiffre « de mémoire » est `À REPRENDRE`.
 4. **Vérifié dans son état réel.** La page s'ouvre en ligne, le post est visible dans
@@ -88,7 +88,7 @@ Rien entre les trois. « Globalement bon » n'est pas un statut.
 5. **Orthographe et accents irréprochables** dans tout ce qui sera lu par quelqu'un.
 6. **Rien d'envoyé sans accord.** Aucun mail, message ou publication hors de ce que la
    demande autorise.
-7. **Le compte rendu à Julien est prêt** : ce qui a été fait, où (URL cliquable ou chemin),
+7. **Le compte rendu au demandeur est prêt** : ce qui a été fait, où (URL cliquable ou chemin),
    ce qui reste ouvert et pourquoi. « C'est fait » ne suffit pas.
 8. **Niveau d'exigence.** Compare le livrable au meilleur exemple comparable que tu
    connais (un livrable précédent réussi, un concurrent, le modèle de la skill métier).
@@ -185,7 +185,7 @@ Axes à couvrir, en choisissant ceux qui comptent pour cette tâche :
 
 | Axe | Ce que la question cherche |
 |---|---|
-| Objectif | Qu'est-ce que Julien veut obtenir, au-delà de la consigne littérale ? |
+| Objectif | Qu'est-ce que le demandeur veut obtenir, au-delà de la consigne littérale ? |
 | Lecteur final | Qui lit, que sait-il déjà, que doit-il faire après ? |
 | Alternatives | Quelle autre approche était possible, pourquoi l'avoir écartée ? |
 | Preuve | Comment sais-tu que ça marche ou que c'est vrai ? |
@@ -236,7 +236,7 @@ Veux-tu qu'on les fasse maintenant ?
   `PRÊT`.
 - Après les corrections, **relance seulement les contrôles touchés**, avec preuve, puis
   redonne le verdict. Pas de nouvelle série de questions.
-- Quand le verdict est `PRÊT`, rappelle le compte rendu à envoyer à Julien (socle,
+- Quand le verdict est `PRÊT`, rappelle le compte rendu à rendre au demandeur (socle,
   point 7).
 
 ## Si la personne veut aller vite

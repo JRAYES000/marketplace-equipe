@@ -4,7 +4,7 @@ const test = require('node:test');
 const assert = require('node:assert/strict');
 const fs = require('fs');
 const path = require('path');
-const { validerAccents, detecterMotsSansAccent } = require('../lib/valider-orthographe');
+const { validerAccents, detecterMotsSansAccent } = require('../../../lib/valider-orthographe');
 
 test('accepte un texte correctement accentue', () => {
   assert.doesNotThrow(() => validerAccents('Le délai a été respecté, comme prévu.'));

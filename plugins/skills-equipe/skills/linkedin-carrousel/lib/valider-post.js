@@ -15,8 +15,8 @@
  * en caracteres Unicode gras se fait ICI, au dernier moment, jamais avant.
  */
 
-const { validerAccents, MOTS_SANS_ACCENT_VERS_CORRECT } = require('./valider-orthographe');
-const { validerAnglicismes } = require('./valider-anglicismes');
+const { validerAccents, MOTS_SANS_ACCENT_VERS_CORRECT } = require('../../../lib/valider-orthographe');
+const { validerAnglicismes } = require('../../../lib/valider-anglicismes');
 const path = require('node:path');
 const fs = require('node:fs');
 
