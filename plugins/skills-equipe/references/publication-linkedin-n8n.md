@@ -38,8 +38,11 @@ Le workflow écrit ensuite `statut`, `post_id`, `post_url`, `publie_le` et `erre
 
 - **Comptes** : la clé Composio de n8n est un autre projet Composio que celui du serveur MCP. Le
   workflow trouve la connexion par son e-mail (`contact@claudeagency.fr`, `contact@claudepartners.fr`).
-  Au 21/11/2026, seul **Claude Partners** y est connecté ; une ligne `agency` part en `erreur`
-  (« aucune connexion LinkedIn active ») tant que Julien n'a pas connecté Claude Agency dans ce projet.
+  Les deux comptes y sont connectés depuis le 21/11/2026 (testés en brouillon). Si une connexion
+  expire, la ligne part en `erreur` (« aucune connexion LinkedIn active ») : reconnecter par
+  `POST /api/v3/connected_accounts/link` (`auth_config_id: ac_BOXDEv4T2_MG`, `user_id: julien`),
+  lien valable 10 min. Une page « Connection failed, invalid or expired state » peut s'afficher alors
+  que la connexion a réussi : vérifier la liste des comptes avant de recommencer.
 - **Statut d'origine** : le workflow lit le statut dans « Lignes dues », avant le passage à
   `en_cours`. Le lire après faisait publier les tests `a_tester` (incident du 21/11/2026 : trois
   posts de test publiés puis supprimés en 20 secondes).
