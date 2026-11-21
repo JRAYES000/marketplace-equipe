@@ -65,3 +65,11 @@ test('commande : écrit le relevé, puis refuse de l’écraser', () => {
   assert.equal(r.status, 1);
   assert.match(r.stderr, /existe déjà/);
 });
+
+test('dossier des livrables : LIVRABLES_DIR, puis le premier emplacement existant, sinon le premier', async () => {
+  const { dossierLivrables } = await import('../../../lib/livrables.mjs');
+  const home = join('H');
+  assert.equal(dossierLivrables({ env: { LIVRABLES_DIR: 'X' }, home, existe: () => false }), 'X');
+  assert.equal(dossierLivrables({ env: {}, home, existe: (d) => d.includes('PERSO') }), join('H', 'OneDrive', 'PERSO', 'GitHub', 'livrables-Claude-Agency'));
+  assert.equal(dossierLivrables({ env: {}, home, existe: () => false }), join('H', 'OneDrive', 'Documents', 'GitHub', 'livrables-Claude-Agency'));
+});

@@ -37,9 +37,9 @@
 // deux formes comptent. Chemins en C:/... — node ne resout pas la forme /c/Users/...
 import { readFileSync, existsSync } from "node:fs";
 import { basename, join } from "node:path";
-import { homedir } from "node:os";
 import { enGras, ACCENTUE, verifierTexte, lireNomsPropres, controlerOffre } from "./lib.mjs";
 import { lireCorpsFichier, resoudrePrecedent } from "./precedent.mjs";
+import { dossierLivrables } from "../../../lib/livrables.mjs";
 
 const OPTIONS_AVEC_VALEUR = ["--precedent", "--compte", "--dossier", "--noms-propres", "--offre"];
 const brut = process.argv.slice(2);
@@ -106,7 +106,7 @@ if (aLaMain) {
 
 // Liste des noms propres a chiffre (« OPCO 2i ») : fichier des livrables, independant de
 // --dossier (qui peut pointer vers une copie des posts precedents).
-const fichierNoms = options["noms-propres"] || join(process.env.LIVRABLES_LINKEDIN_DIR || join(homedir(), "OneDrive", "Documents", "GitHub", "livrables-Claude-Agency", "linkedin"), "noms-propres-autorises.txt");
+const fichierNoms = options["noms-propres"] || join(process.env.LIVRABLES_LINKEDIN_DIR || join(dossierLivrables(), "linkedin"), "noms-propres-autorises.txt");
 const nomsPropres = lireNomsPropres(fichierNoms);
 console.log(`Noms propres autorises (${nomsPropres.length}) : ${nomsPropres.length ? nomsPropres.join(", ") : "aucun"} -- ${existsSync(fichierNoms) ? fichierNoms : "fichier absent : " + fichierNoms}`);
 

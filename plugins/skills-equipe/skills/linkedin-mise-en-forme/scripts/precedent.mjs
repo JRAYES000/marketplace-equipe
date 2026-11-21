@@ -16,10 +16,10 @@
 // ce dossier, on prend le dernier post STRICTEMENT AVANT lui : comparer un brouillon a lui-meme
 // ou a un post programme apres lui n'aurait aucun sens.
 import { readdirSync, readFileSync, existsSync, statSync } from "node:fs";
-import { homedir } from "node:os";
 import { join, basename, resolve } from "node:path";
+import { dossierLivrables } from "../../../lib/livrables.mjs";
 
-export const DOSSIER_PAR_DEFAUT = join(homedir(), "OneDrive", "Documents", "GitHub", "livrables-Claude-Agency", "linkedin");
+export const DOSSIER_PAR_DEFAUT = join(dossierLivrables(), "linkedin");
 export const NB_POSTS_VARIETE = 5;
 const PREFIXES = { a: "julien-agency", p: "julien-partners" };
 

@@ -47,8 +47,8 @@ Indicateurs retenus, et eux seuls : impressions, réactions, commentaires, taux 
    un tableau JSON), puis `node scripts/releve-depuis-n8n.mjs --entree stats.json` : il garde le relevé le plus
    récent (`--date AAAA-MM-JJ` pour un autre) et écrit `releve-buffer-<date>.csv` dans le dossier du test, sans
    jamais écraser un relevé existant (`--a-blanc` pour voir le CSV). Impressions et taux vides : le signaler
-   dans le rapport. Table vide : s'arrêter et le signaler. Dépôt des livrables ailleurs que dans
-   `~/OneDrive/Documents/GitHub` (sur le poste de Julien : `~/OneDrive/PERSO/GitHub`) : `LIVRABLES_DIR=<chemin>`.
+   dans le rapport. Table vide : s'arrêter et le signaler. Dépôt des livrables : trouvé seul
+   (`~/OneDrive/Documents/GitHub`, `~/OneDrive/PERSO/GitHub`…, `../../lib/livrables.mjs`), sinon `LIVRABLES_DIR=<chemin>`.
 3. **Lancer l'analyse** : `node scripts/analyse-lundi.mjs`
    - lit tous les relevés `releve-buffer-*.csv` du dossier du test (le plus récent l'emporte pour un même post,
      reconnu par son `id_buffer` : deux posts publiés à la même minute restent deux lignes), ou un seul avec

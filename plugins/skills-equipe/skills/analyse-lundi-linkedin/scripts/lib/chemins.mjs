@@ -1,8 +1,8 @@
 // Chemins par défaut et lecture d'arguments, communs aux commandes de la skill.
-import { homedir } from 'node:os';
 import { join } from 'node:path';
+import { dossierLivrables } from '../../../../lib/livrables.mjs';
 
-export const LIVRABLES = process.env.LIVRABLES_DIR || join(homedir(), 'OneDrive', 'Documents', 'GitHub', 'livrables-Claude-Agency');
+export const LIVRABLES = dossierLivrables();
 export const DOSSIER_TEST = join(LIVRABLES, 'linkedin', 'test-formats-2026-10');
 
 /** `--cle valeur` et `--drapeau` → objet. */

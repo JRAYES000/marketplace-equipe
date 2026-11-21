@@ -23,9 +23,9 @@
 // Le texte complet d'un post de la file est retrouve par son debut dans les .final.txt ; un post
 // introuvable (post de Julien) n'est controle que sur son debut.
 import { readFileSync, readdirSync, existsSync, statSync } from "node:fs";
-import { homedir } from "node:os";
 import { join, basename, resolve, relative, sep } from "node:path";
 import { lireCorpsFichier, compteDepuisNom } from "./precedent.mjs";
+import { dossierLivrables } from "../../../lib/livrables.mjs";
 import { controlerTexte, controlerFile, controlerFins, normaliser, JOURS_SANS_REPETITION } from "./regles-julien.mjs";
 
 const brut = process.argv.slice(2);
@@ -34,7 +34,7 @@ for (let i = 0; i < brut.length; i++) {
   if (brut[i] === "--json") opt.json = true;
   else if (brut[i].startsWith("--")) opt[brut[i].slice(2)] = brut[++i];
 }
-const dossier = resolve(opt.dossier || process.env.LIVRABLES_LINKEDIN_DIR || join(homedir(), "OneDrive", "Documents", "GitHub", "livrables-Claude-Agency", "linkedin"));
+const dossier = resolve(opt.dossier || process.env.LIVRABLES_LINKEDIN_DIR || join(dossierLivrables(), "linkedin"));
 const fichierFile = opt.file || join(dossier, "test-formats-2026-10", "file-attente-buffer.txt");
 const dossierAnnonces = opt.annonces || join(dossier, "..", "sortants", "annonces-missions", "v4");
 const maintenant = opt.maintenant ? Date.parse(opt.maintenant) : Date.now();

@@ -196,7 +196,7 @@ node "<dossier de la skill>/scripts/verif-post.mjs" verif "$LIVRABLES_LINKEDIN_D
 ```
 
 Options : `--precedent <fichier>` (prioritaire), `--compte <compte>`, `--dossier <dossier>` (sinon
-`LIVRABLES_LINKEDIN_DIR`, sinon `~/OneDrive/Documents/GitHub/livrables-Claude-Agency/linkedin`),
+`LIVRABLES_LINKEDIN_DIR`, sinon le dossier `linkedin` du dépôt des livrables trouvé par `../../lib/livrables.mjs`),
 `--sans-precedent`, `--noms-propres <fichier>`, `--offre <url>`. Le brouillon s'accepte en markdown
 `**gras**` ou déjà converti en Unicode : mêmes mesures. Code 1 si un critère échoue. Montrer la
 sortie brute avec le brouillon ; ne jamais écrire « contrôles passés » sans elle.
