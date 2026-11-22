@@ -33,7 +33,7 @@ let maintenant;
 if (a.maintenant) maintenant = new Date(a.maintenant);
 else {
   try { maintenant = await lireHeureServeur(); } catch (e) {
-    console.error(`Heure du serveur Buffer illisible (${e.message}). Relancer avec --maintenant <UTC lu sur une source fiable>.`);
+    console.error(`Heure du serveur n8n illisible (${e.message}). Relancer avec --maintenant <UTC lu sur une source fiable>.`);
     process.exit(2);
   }
 }

@@ -4,7 +4,9 @@
 // formules du moule de la regle 3. La regle 6 et le reste de la 3 se jugent a l'oeil.
 //
 //   node controle-avant-publication.mjs [options]
-//     --file <fichier>        file Buffer relevee (format de la routine 1 :
+//     --n8n <export.json>     file lue dans la table n8n publications_linkedin (reponse de get_data_table_rows,
+//                             MCP n8n, table GCjlt3vNRlqbBfUB) : lignes a_publier, texte complet. Prioritaire sur --file.
+//     --file <fichier>        ancienne file Buffer relevee (format de la routine 1 :
 //                             « AAAA-MM-JJ HH:MM compte # F debut du texte ») ; defaut :
 //                             <livrables>/linkedin/test-formats-2026-10/file-attente-buffer.txt
 //     --dossier <dossier>     dossier linkedin/ des livrables (sinon LIVRABLES_LINKEDIN_DIR, sinon
@@ -15,17 +17,18 @@
 //     --sujet "<libelle>"     sujet du brouillon (sinon registre sujets.csv, sinon frontmatter `sujet:`)
 //     --registre <fichier>    registre des sujets (defaut : <dossier>/sujets.csv, « fichier;sujet »)
 //     --maintenant <ISO UTC>  les posts deja partis sont ignores ; defaut : horloge UTC du poste.
-//                             Pour une comparaison fiable, passer l'UTC lu sur le serveur Buffer
-//                             (en-tete Date de https://publish.buffer.com).
+//                             Pour une comparaison fiable, passer l'UTC lu sur un serveur
+//                             (en-tete Date de https://n8n.claudeagency.fr).
 //     --json                  sortie JSON (pour un rapport)
 //
 // Code de sortie : 0 si aucun constat, 1 sinon, 2 si la file est illisible.
-// Le texte complet d'un post de la file est retrouve par son debut dans les .final.txt ; un post
-// introuvable (post de Julien) n'est controle que sur son debut.
+// Le texte complet d'un post de la file est retrouve par son debut dans les .final.txt, sinon pris dans la
+// table n8n (--n8n) ; avec l'ancienne file, un post introuvable n'est controle que sur son debut.
 import { readFileSync, readdirSync, existsSync, statSync } from "node:fs";
 import { join, basename, resolve, relative, sep } from "node:path";
 import { lireCorpsFichier, compteDepuisNom } from "./precedent.mjs";
 import { dossierLivrables } from "../../../lib/livrables.mjs";
+import { lignesN8n, fileDepuisN8n } from "../../../lib/file-n8n.mjs";
 import { controlerTexte, controlerFile, controlerFins, normaliser, JOURS_SANS_REPETITION } from "./regles-julien.mjs";
 
 const brut = process.argv.slice(2);
@@ -35,7 +38,7 @@ for (let i = 0; i < brut.length; i++) {
   else if (brut[i].startsWith("--")) opt[brut[i].slice(2)] = brut[++i];
 }
 const dossier = resolve(opt.dossier || process.env.LIVRABLES_LINKEDIN_DIR || join(dossierLivrables(), "linkedin"));
-const fichierFile = opt.file || join(dossier, "test-formats-2026-10", "file-attente-buffer.txt");
+const fichierFile = opt.n8n || opt.file || join(dossier, "test-formats-2026-10", "file-attente-buffer.txt");
 const dossierAnnonces = opt.annonces || join(dossier, "..", "sortants", "annonces-missions", "v4");
 const maintenant = opt.maintenant ? Date.parse(opt.maintenant) : Date.now();
 
@@ -110,14 +113,23 @@ if (!existsSync(fichierFile)) { console.error(`ERREUR : file introuvable : ${fic
 const textes = indexerTextes();
 const LIGNE = /^(\d{4}-\d{2}-\d{2}) (\d{2}:\d{2}) (julien-partners|julien-agency) # ([TIC]) (.+)$/;
 const file = [];
-for (const l of readFileSync(fichierFile, "utf8").replace(/\r\n/g, "\n").split("\n")) {
+// texteComplet : texte de la table n8n ; a defaut, seul le debut releve est controle.
+const ajouterPost = (compte, date, heure, format, debut, texteComplet) => {
+  const trouve = retrouver(debut, textes);
+  file.push({ id: `${compte === "julien-agency" ? "A" : "P"} ${date} ${heure}`, compte, date, heure, format, debut,
+    texte: trouve ? trouve.texte : texteComplet || debut, complet: !!trouve || !!texteComplet, type: trouve?.type, sujet: trouve?.sujet || registre.get(`${date} ${heure} ${compte}`), source: trouve ? trouve.chemin : null, autres: trouve?.autres || [] });
+};
+if (opt.n8n) {
+  let posts;
+  try { posts = fileDepuisN8n(lignesN8n(JSON.parse(readFileSync(fichierFile, "utf8")))); }
+  catch (e) { console.error(`ERREUR : export n8n illisible : ${e.message}`); process.exit(2); }
+  for (const p of posts) if (Date.parse(p.instant) > maintenant) ajouterPost(p.compte, p.date, p.heure, p.format, p.texte.split("\n")[0], p.texte);
+} else for (const l of readFileSync(fichierFile, "utf8").replace(/\r\n/g, "\n").split("\n")) {
   const m = l.match(LIGNE);
   if (!m) continue;
   const [, date, heure, compte, format, debut] = m;
   if (parisVersUtc(date, heure) <= maintenant) continue; // deja parti
-  const trouve = retrouver(debut, textes);
-  file.push({ id: `${compte === "julien-agency" ? "A" : "P"} ${date} ${heure}`, compte, date, heure, format, debut,
-    texte: trouve ? trouve.texte : debut, complet: !!trouve, type: trouve?.type, sujet: trouve?.sujet || registre.get(`${date} ${heure} ${compte}`), source: trouve ? trouve.chemin : null, autres: trouve?.autres || [] });
+  ajouterPost(compte, date, heure, format, debut, null);
 }
 if (opt.brouillon) {
   if (!opt.date || !opt.heure) { console.error("ERREUR : --brouillon exige --date AAAA-MM-JJ et --heure HH:MM (Paris)"); process.exit(2); }
@@ -147,7 +159,7 @@ if (opt.json) {
   console.log(`Contrôle des règles de Julien (14/10/2026) — file : ${fichierFile}`);
   console.log(`Posts à venir après ${new Date(maintenant).toISOString()} : ${file.length} ; historique local sur ${JOURS_SANS_REPETITION} jours : ${historique.length}`);
   for (const p of parPost) {
-    const src = p.source ? basename(p.source) : "texte complet introuvable (post de Julien ?) : début seul contrôlé";
+    const src = p.source ? basename(p.source) : p.complet ? "texte de la table n8n" : "texte complet introuvable (post de Julien ?) : début seul contrôlé";
     for (const c of p.constats) console.log(`ALERTE règle ${c.regle} : ${p.id} [${src}] ${c.motif} -- « ${c.preuve} »`);
   }
   for (const c of constatsFile) console.log(`ALERTE règle ${c.regle} : ${c.motif} -- ${c.preuve}`);

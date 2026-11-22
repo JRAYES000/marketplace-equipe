@@ -54,16 +54,15 @@ Indicateurs retenus, et eux seuls : impressions, réactions, commentaires, taux 
    - lit tous les relevés `releve-buffer-*.csv` du dossier du test (le plus récent l'emporte pour un même post,
      reconnu par son `id_buffer` : deux posts publiés à la même minute restent deux lignes), ou un seul avec
      `--buffer fichier.csv` ;
-   - l'heure de référence est l'en-tête `Date` d'un serveur web (aujourd'hui `publish.buffer.com`, à remplacer, abandon après 20 s), jamais l'horloge de la
+   - l'heure de référence est l'en-tête `Date` d'un serveur web (`n8n.claudeagency.fr`, abandon après 20 s), jamais l'horloge de la
      machine (Madagascar, UTC+3) ; à défaut, `--maintenant AAAA-MM-JJTHH:MM:SSZ` lu sur une source fiable ;
    - écrit `analyses/AAAA-MM-JJ-analyse.md` et `.json`.
    Options : `--date AAAA-MM-JJ` (le lundi analysé), `--a-blanc` (affiche posts et chiffres par compte, n'écrit
    rien), `--sortie dossier`, `--plan calendrier.json`.
-4. **Contrôler le calendrier restant** : écrire d'abord `file-attente-buffer.txt` (nom conservé) dans le dossier du
-   test à partir des lignes `a_publier` de `publications_linkedin` (MCP `n8n`, `get_data_table_rows`, table
-   `GCjlt3vNRlqbBfUB`) : une ligne par post, `AAAA-MM-JJ HH:MM julien-<compte> # <format> <début du texte>`, heure de
-   Paris (format : [references/releve-buffer.md](references/releve-buffer.md), « File d'attente »). Puis
-   `node scripts/verifier-creneaux.mjs` — contre cette seule file (code de sortie 1 s'il reste un écart). Un créneau absent de la file est « manquant », un post de la file absent du
+4. **Contrôler le calendrier restant** : enregistrer la réponse de `get_data_table_rows` (MCP `n8n`, table
+   `GCjlt3vNRlqbBfUB`, filtre `statut = a_publier`, limite 100) dans `file.json`, puis
+   `node scripts/file-depuis-n8n.mjs --entree file.json` réécrit `file-attente-buffer.txt` (nom conservé) dans le
+   dossier du test (`--a-blanc` pour voir sans écrire). Puis `node scripts/verifier-creneaux.mjs` — contre cette seule file (code de sortie 1 s'il reste un écart). Un créneau absent de la file est « manquant », un post de la file absent du
    calendrier est « hors plan » ; même compte et même début de texte = « ALERTE déplacé », avec l'ancien et le nouveau
    créneau. Rien n'est jamais reprogrammé.
 5. Recopier dans la conversation : l'encadré « À retenir » du rapport, tel quel, les posts publiés absents du

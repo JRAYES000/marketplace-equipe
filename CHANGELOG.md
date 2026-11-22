@@ -2,6 +2,16 @@
 
 Ce que disait le tableau du README avant le 22/11/2026, quand chaque ligne empilait les changements datés. Le README ne garde plus que ce que fait la skill aujourd'hui.
 
+## 22/11/2026 (1.56.0)
+
+- Posts programmés par n8n contrôlés : `lib/file-n8n.mjs` lit la table `publications_linkedin` ; `controle-avant-publication.mjs --n8n` (linkedin-mise-en-forme, texte complet) et `file-depuis-n8n.mjs` (analyse-lundi-linkedin, écrit la file pour `verifier-creneaux.mjs`).
+- analyse-lundi-linkedin : heure de référence lue sur `n8n.claudeagency.fr` ; libellés « Buffer Insights » des rapports remplacés par la table n8n.
+- linkedin-carrousel : PDF déposé dans le bucket R2 public `linkedin-medias` (URL r2.dev) pour `media_url`.
+- annonce-mission-linkedin : routine Windows du relevé à 48 h arrêtée (15/11), relevé à la main.
+- linkedin-mise-en-forme : gras facultatif dans la légende de carrousel écrit en clair.
+- france-travail-extraction : `playwright.js recherche` à vérifier au premier lot réel.
+- CLAUDE.md du dépôt : clause d'activation manuelle alignée sur la formule des skills.
+
 ## parallelisation-et-routage
 
 Le mode « économie ». Claude arrête de tout faire lui-même : il regarde ce que tu demandes, décide quel assistant suffit (Haiku pour le mécanique, Sonnet pour le courant, Opus pour ce qui demande vraiment de réfléchir) et lui passe le travail. Pour un gros lot (50 documents à résumer, 60 lignes à classer, 12 pages à auditer), il découpe et lance plusieurs assistants rapides en même temps. Moins de tokens consommés, et plus rapide. À l'inverse de ce qu'on croit, elle sert surtout à **freiner** : Claude a tendance à lancer des assistants pour des broutilles, et elle lui dit quand ça n'en vaut pas la peine. Dis « parallélise ça », « active le routeur » ou « mode économie de tokens » ; `mode normal` pour l'arrêter.

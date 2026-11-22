@@ -202,8 +202,9 @@ ne la désactive pas, la valeur a été lue.
 ## Activation des skills : manuelle, toujours
 
 Aucune skill de `skills-equipe` ne s'active d'elle-même. Chaque `description`
-porte la mention « activation MANUELLE » **et** l'interdiction explicite de se
-déclencher seule. Le paquet ne déclare aucun hook : rien ne s'installe dans la
+finit par la même clause : « Activation manuelle : sur demande explicite
+uniquement », complétée au besoin par le cas qui pourrait tromper (« même face à
+un gros lot »). Le paquet ne déclare aucun hook : rien ne s'installe dans la
 session au démarrage.
 
 Une skill qui se déclenche sans qu'on l'ait demandée est un bug.

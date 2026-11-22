@@ -4,9 +4,9 @@
 // Source unique : les relevés Buffer Insights (releve-buffer-*.csv du dossier du test, references/releve-buffer.md).
 // Options : --plan calendrier.json  --buffer releve.csv (un seul relevé au lieu de tous)  --sortie dossier
 //           --date AAAA-MM-JJ (analyse du lundi donné, 08:00 Paris ; jamais au-delà de l'heure réelle)
-//           --maintenant ISO (heure de référence imposée, si le serveur Buffer ne répond pas)
+//           --maintenant ISO (heure de référence imposée, si le serveur n8n ne répond pas)
 //           --a-blanc (affiche les posts trouvés et les chiffres lus, n'écrit rien)
-// Lecture seule : rien n'est écrit dans Buffer ni ailleurs que dans le dossier de sortie.
+// Lecture seule : rien n'est écrit ailleurs que dans le dossier de sortie.
 import { mkdirSync, readFileSync, readdirSync, writeFileSync, existsSync } from 'node:fs';
 import { join } from 'node:path';
 import { parisVersUtc, utcVersParis } from './lib/calendrier.mjs';

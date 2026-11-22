@@ -38,7 +38,7 @@ const nb = (x) => (x === null ? "inconnu" : Number.isInteger(x) ? x.toLocaleStri
 export function rendreObjectif(r, { releves = [], sourceReference = "" } = {}) {
   const l = [];
   l.push(`# Objectif de Julien : médiane ${r.compte} du ${r.du} au ${r.au}`, "");
-  l.push(`Calculé le ${r.maintenant} (UTC, heure du serveur Buffer sauf mention contraire). Source unique : relevés Buffer Insights (${releves.length} fichier(s) : ${releves.join(", ") || "aucun"}). Calcul en code : \`analyse-lundi-linkedin/scripts/objectif-julien.mjs\`.`, "");
+  l.push(`Calculé le ${r.maintenant} (UTC, heure du serveur n8n sauf mention contraire). Source unique : relevés de la table n8n stats_linkedin (${releves.length} fichier(s) : ${releves.join(", ") || "aucun"}). Calcul en code : \`analyse-lundi-linkedin/scripts/objectif-julien.mjs\`.`, "");
   l.push("## À retenir", "");
   l.push(`- Posts publiés sur la période : **${r.nPosts}**, dont **${r.nMurs}** mûrs (48 h ou plus au moment du calcul)${r.nSansChiffre ? `, dont ${r.nSansChiffre} sans chiffre dans Insights` : ""}.`);
   l.push(`- Médiane des impressions, posts mûrs : **${nb(r.medianeMurs)}** (tous posts, y compris non mûrs : ${nb(r.medianeTous)}).`);

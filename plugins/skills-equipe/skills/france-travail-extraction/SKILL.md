@@ -8,7 +8,7 @@ description: >
   CV est mentionné.
 compatibility: "Claude Code. Requiert le serveur MCP Playwright avec un profil persistant (--user-data-dir, appareil enrôlé sur France Travail), l'API publique Notion (variable NOTION_TOKEN_FT, connexion interne « Leads France Travail - API »), l'outil Bash avec node, poppler et tesseract. Ni Claude in Chrome, ni le connecteur Notion MCP, ni NocoDB."
 metadata:
-  version: '11.0.3'
+  version: '11.0.4'
   environment: 'Claude Code, rédigé pour Claude Sonnet 5.5 (fonctionne aussi sous Opus). Playwright MCP pour la session recruteur, outil Bash pour les scripts fournis. Livrable = la base Notion « Leads France Travail », seule base de la skill.'
   journal: 'references/journal.md — mesures et incidents des runs réels (v2.0 à v11.0). À lire seulement pour comprendre ou contester une règle ; en cas de désaccord ce fichier-ci fait foi.'
 ---
@@ -188,6 +188,8 @@ L'appareil est enrôlé : aucun code, sauf à la toute première connexion d'un 
 
    puis `playwright:browser_run_code_unsafe`, `filename` = `<pw>/ft-recherche.js`. Contrôler
    l'en-tête « N résultats pour : X » et les filtres affichés (`playwright:browser_snapshot`).
+   Commande testée hors site seulement (22/11/2026) : au premier lot réel, si la recherche n'est pas
+   trouvée ou l'en-tête faux, s'arrêter et le signaler plutôt que d'improviser un script.
 4. **Nouvelle requête** (aucune recherche enregistrée ne convient) : mot-clé posé par
    l'interface, puis filtres, en suivant `references/annexes.md`, section « Nouvelle requête ».
    L'en-tête « N résultats pour : X » fait foi, pas les tags. Puis « Enregistrez votre

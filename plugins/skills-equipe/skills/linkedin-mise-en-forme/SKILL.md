@@ -17,7 +17,7 @@ Contrôle par script · Pièges · Ce que la skill ne fait pas.
 Ces règles valent pour les deux comptes, Claude Agency et Claude Partners, au même niveau. Elles
 sont la source de vérité de la forme pour toutes les skills linkedin-* (gras, formulations
 interdites, accents, anglicismes). Seule exception : la légende d'un carrousel (5 lignes, 60 à 700
-caractères) suit ses propres limites, dans `linkedin-carrousel`. La règle 0 vaut pour tous.
+caractères, gras facultatif) suit ses propres limites, dans `linkedin-carrousel`. La règle 0 vaut pour tous.
 Historique des décisions : [references/historique.md](references/historique.md). Cas de test :
 [references/evals.md](references/evals.md).
 
@@ -45,12 +45,15 @@ Une règle plus ancienne, d'une autre skill ou d'un calendrier, qui les contredi
 Obligatoire avant de programmer, sortie brute montrée avec le brouillon :
 
 ```bash
-node "<dossier de la skill>/scripts/controle-avant-publication.mjs" --brouillon "$LIVRABLES_LINKEDIN_DIR/2026-11-03/a50.final.txt" --date 2026-11-03 --heure 13:00 --sujet "libellé du sujet" --maintenant <UTC d'une source fiable>
+node "<dossier de la skill>/scripts/controle-avant-publication.mjs" --brouillon "$LIVRABLES_LINKEDIN_DIR/2026-11-03/a50.final.txt" --date 2026-11-03 --heure 13:00 --sujet "libellé du sujet" --n8n file.json --maintenant <UTC d'une source fiable>
 ```
 
-Il lit la file des posts programmés (`--file`, par défaut `file-attente-buffer.txt`, ancien relevé
-Buffer), retrouve le texte complet de chaque post dans les `.final.txt` (y compris
-`linkedin/posts-nouveaux/`), et refuse (code 1, une ligne `ALERTE regle N` par constat, avec la
+`file.json` : réponse de `get_data_table_rows` (MCP `n8n`, table `GCjlt3vNRlqbBfUB`, filtre
+`statut = a_publier`, limite 100), enregistrée telle quelle.
+
+Il lit la file des posts programmés dans la table n8n `publications_linkedin` (`--n8n`, texte complet
+de chaque post ; l'ancienne option `--file` lit encore un `file-attente-buffer.txt`), retrouve le
+fichier de chaque post dans les `.final.txt` (y compris `linkedin/posts-nouveaux/`) pour son sujet, et refuse (code 1, une ligne `ALERTE regle N` par constat, avec la
 phrase en cause) :
 
 - un jour à 3 posts sur un compte ;
@@ -63,10 +66,6 @@ phrase en cause) :
   comptes confondus. Les lignes `Source :`, de hashtags ou réduites à un lien ne comptent pas ;
   un post dont seul le début est connu n'est pas contrôlé ; les annonces de mission
   (`fichier;sujet;type=annonce-mission` dans `sujets.csv`) sont exclues.
-
-Limite actuelle : les posts programmés par le workflow n8n 38 (lignes `a_publier` de
-`publications_linkedin`) n'entrent pas dans ce fichier. À faire : lecture de la table n8n ; d'ici
-là, vérifier les règles 1 et 4 contre la table à l'œil.
 
 Sans `--brouillon`, il contrôle toute la file. Cœur : `scripts/regles-julien.mjs` (fonctions
 pures, `test/regles-julien.test.mjs`). Un sujet ne se reconnaît pas par code : sans étiquette, le

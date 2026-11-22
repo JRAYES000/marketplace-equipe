@@ -56,7 +56,7 @@ function sectionFormats(c, r) {
 const LIGNE_FORMAT = (nom, r) =>
   `| ${nom} | ${r.n} | **${n0(r.impressions.mediane)}** | ${n0(r.impressions.q1)} à ${n0(r.impressions.q3)} | ${n0(r.impressions.min)} / ${n0(r.impressions.max)} | ${n0(r.reactions)} | ${n0(r.commentaires)} | ${pct(r.tauxEngagement)} |`;
 const ENTETE_FORMAT = [
-  '| Format | Posts | Impressions médianes | Quartiles (Q1 à Q3) | Min / max | Réactions méd. | Commentaires méd. | Taux d’engagement méd. (Buffer) |',
+  '| Format | Posts | Impressions médianes | Quartiles (Q1 à Q3) | Min / max | Réactions méd. | Commentaires méd. | Taux d’engagement méd. |',
   '|---|---|---|---|---|---|---|---|',
 ];
 
@@ -70,7 +70,7 @@ function tableSemaines(compte) {
 
 function tableDetail(compte) {
   if (compte.methode === 'formats') {
-    const l = ['| Créneau | Date | Format | Comparaison | Mûr | Impressions | Réactions | Commentaires | Taux d’engagement (Buffer) | Lien |', '|---|---|---|---|---|---|---|---|---|---|'];
+    const l = ['| Créneau | Date | Format | Comparaison | Mûr | Impressions | Réactions | Commentaires | Taux d’engagement | Lien |', '|---|---|---|---|---|---|---|---|---|---|'];
     for (const d of compte.detail) {
       l.push(`| ${d.id} | ${d.date} | ${d.format} | ${d.comparaison ? 'oui' : 'non'} | ${d.mur ? 'oui' : 'non'} | ${n0(d.impressions)} | ${n0(d.reactions)} | ${n0(d.commentaires)} | ${pct(d.tauxEngagement)} | ${d.url || '–'} |`);
     }
@@ -96,8 +96,8 @@ export function rendreRapport(r) {
   const L = [];
   L.push(`# Analyse du lundi ${r.dateAnalyse} — test des formats LinkedIn`);
   L.push('');
-  L.push(`Heure de référence : ${r.heureServeur} (en-tête Date du serveur Buffer, pas l'horloge de la machine) — ${parisLong(r.heureServeur)}.`);
-  L.push(`Test : ${r.plan.debut} au ${r.plan.fin}, ${r.plan.semaines} semaines, jours ${r.plan.jours.join('/')}. Source unique : Buffer Insights (relevés ${r.releves.map((f) => f.split(/[\/]/).pop()).join(', ') || 'aucun'}). Indicateurs : impressions, réactions, commentaires, taux d’engagement (métriques Buffer, consigne de Julien du 08/10/2026).`);
+  L.push(`Heure de référence : ${r.heureServeur} (en-tête Date du serveur n8n, pas l'horloge de la machine) — ${parisLong(r.heureServeur)}.`);
+  L.push(`Test : ${r.plan.debut} au ${r.plan.fin}, ${r.plan.semaines} semaines, jours ${r.plan.jours.join('/')}. Source unique : table n8n stats_linkedin (relevés ${r.releves.map((f) => f.split(/[\/]/).pop()).join(', ') || 'aucun'}). Indicateurs : impressions, réactions, commentaires, taux d’engagement (métriques Buffer, consigne de Julien du 08/10/2026).`);
   L.push('');
   L.push('## 1. À retenir');
   L.push('');
@@ -154,7 +154,7 @@ export function rendreRapport(r) {
   L.push(`## ${num++}. Week-end (suivi à part, jamais dans les médianes du test)`);
   L.push('');
   if (!r.weekend.posts.length) {
-    L.push('Aucun post de week-end dans les relevés Buffer.');
+    L.push('Aucun post de week-end dans les relevés.');
   } else {
     L.push('| Compte | Jour | Heure | Format | Mûr | Impressions | Médiane semaine du compte | Réactions | Commentaires | Lien |');
     L.push('|---|---|---|---|---|---|---|---|---|---|');
@@ -166,7 +166,7 @@ export function rendreRapport(r) {
 
   L.push(`## ${num++}. Historique par format (jours de semaine, posts mûrs)`);
   L.push('');
-  L.push(`Buffer Insights, tous les posts relevés (${r.historique.du || '–'} au ${r.historique.au || '–'}) :`);
+  L.push(`Relevés (table n8n stats_linkedin, avant le 21/11/2026 Buffer Insights), tous les posts relevés (${r.historique.du || '–'} au ${r.historique.au || '–'}) :`);
   L.push('');
   for (const h of r.historique.comptes) {
     L.push(`**${h.compte}**`);
@@ -189,7 +189,7 @@ export function rendreRapport(r) {
   if (r.horsPlan.length) {
     L.push(`## ${num++}. Posts hors plan (exclus des médianes)`);
     L.push('');
-    L.push('Offres de mission de Julien (Buffer) ou posts imprévus, jours de semaine :');
+    L.push('Offres de mission de Julien ou posts imprévus, jours de semaine :');
     L.push('');
     for (const p of r.horsPlan) L.push(`- ${p.url || p.id}`);
     L.push('');
@@ -211,8 +211,8 @@ export function rendreRapport(r) {
   }
   L.push(`- Un post compte dans les médianes ${REGLES.maturiteHeures} h après sa publication ; avant, ses chiffres sont incomplets.`);
   L.push("- Le commentaire quotidien sous les posts d'autres comptes continue pendant le test ; il n'est pas neutralisé, il est constant.");
-  L.push('- Buffer Insights se rafraîchit avec retard (« Refreshed … ago » sur le détail du post) : les chiffres de la veille sont encore incomplets.');
-  L.push('- Buffer Insights ne donne ni enregistrements ni envois par post : ils ne font pas partie des objectifs (Julien, 08/10/2026).');
+  L.push('- Le relevé n8n (workflow 39) passe le lundi : un post publié la veille n’a pas encore mûri, ses chiffres restent provisoires.');
+  L.push('- Le relevé ne donne ni impressions, ni enregistrements, ni envois par post : ils ne font pas partie des chiffres suivis.');
   L.push('');
   return L.join('\n');
 }

@@ -134,9 +134,9 @@ Ajouter dans `NOTES.md` le tableau « Relevé à 48 h des annonces » : une lign
 par annonce avec « Publication prévue » et « Relevé à faire le » (publication + 48 h, heure de
 Paris), colonnes « Impressions », « Réactions », « Commentaires », « Taux d'engagement », « Abonnés (canal) »,
 « Lien LinkedIn ».
-La routine Windows « LinkedIn - 5 Releve 48 h des annonces » (`linkedin/routines/5-releve-48h-annonces.md`,
-14:00 Paris) lisait Buffer : sans nouvelle source, elle ne remplit plus ces colonnes. Avant chaque lot,
-contrôler son état et sa date de fin dans `register-routines.ps1`.
+Le relevé à 48 h se fait à la main tant qu'aucun workflow n8n ne le fait. L'ancienne routine Windows
+« LinkedIn - 5 Releve 48 h des annonces » lisait Buffer ; son déclencheur s'est arrêté le 15/11/2026 et
+`register-routines.ps1` ne la recrée plus.
 **Identification d'une annonce** (routine comme relevé à la main), les deux conditions à la fois :
 son intitulé exact (ligne 💼, ou ligne 2 de l'accroche, telle qu'elle est dans `NN.final.txt`) ET sa date de publication prévue (jour de Paris). Si deux posts du même jour correspondent, lire leur heure de publication réelle pour les départager ; si l'ambiguïté reste, ou si aucun post ne correspond : rien n'est écrit dans la ligne, « ALERTE : identification ambiguë » est noté avec les candidats trouvés (date, heure, début du texte).
 Un post absent de nos fichiers n'est jamais relevé : c'est un post de Julien.

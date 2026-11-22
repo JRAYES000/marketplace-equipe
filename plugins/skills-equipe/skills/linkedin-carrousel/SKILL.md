@@ -175,6 +175,18 @@ réellement concret, image conforme à son prompt. Seule la relecture visuelle l
 dans la table `publications_linkedin`, le PDF déposé à une URL https publique (`media_url`), le
 titre du document dans `titre`. Colonnes, statuts et pièges : `../../references/publication-linkedin-n8n.md`.
 
+- **Dépôt du PDF** (`media_url`) : bucket R2 public `linkedin-medias` du compte Cloudflare de Julien,
+  dossier `carrousels/`, nom en minuscules sans espace ni accent :
+
+  ```bash
+  npx wrangler r2 object put "linkedin-medias/carrousels/<compte>-<AAAA-MM-JJ>-<slug>.pdf" --file "<PDF>" --content-type application/pdf --remote
+  ```
+
+  URL à mettre dans `media_url` : `https://pub-178cbd4740924a20ad8c186a6877409d.r2.dev/carrousels/<nom>.pdf`.
+  La vérifier avant d'écrire la ligne : `curl -s -o /dev/null -w "%{http_code} %{content_type}" <url>` doit
+  rendre `200 application/pdf`. wrangler demande une connexion Cloudflare (`npx wrangler login`) ; les
+  jetons API du coffre n'ont pas le droit R2. Tout ce qui est déposé là est lisible par n'importe qui.
+
 - **Titre du document** (`titre`) : reprendre le nom du PDF produit, sans `.pdf`. Il vient du titre
   du hook, point final retiré (`retirerPointFinal`), et ce titre est déjà passé par les contrôles
   d'accents et d'anglicismes des diapos. Un autre titre n'est contrôlé par aucun script : le relire.

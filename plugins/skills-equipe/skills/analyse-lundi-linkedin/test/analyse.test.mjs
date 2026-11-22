@@ -82,7 +82,7 @@ test('analyse complète : final, deux comptes concordants, carrousel retenu', ()
   const md = rendreRapport(r);
   assert.match(md, /Décision finale/);
   assert.match(md, /## 3\. Test des formats — julien-partners/);
-  assert.match(md, /Source unique : Buffer Insights/);
+  assert.match(md, /Source unique : table n8n stats_linkedin/);
   assert.doesNotMatch(md, /Zernio|Portée/);
 });
 
@@ -225,7 +225,7 @@ test('méthode d\'octobre : texte, image et carrousel, taux calculé, hors compa
   assert.equal(analyserTout({ plan, posts: autre, maintenant: new Date('2026-10-12T06:00:00Z'), jour: '2026-10-12' }).comptes[0].decision.verdict, 'non_concluant');
 });
 
-test('heure de référence : en-tête Date du serveur Buffer, abandon au bout du délai', async () => {
+test('heure de référence : en-tête Date du serveur n8n, abandon au bout du délai', async () => {
   const ok = await lireHeureServeur({ fetchFn: async () => ({ status: 200, headers: new Headers({ date: 'Thu, 08 Oct 2026 14:00:00 GMT' }) }) });
   assert.equal(ok.toISOString(), '2026-10-08T14:00:00.000Z');
   const lent = (url, { signal }) => new Promise((_, ko) => signal.addEventListener('abort', () => ko(signal.reason)));
