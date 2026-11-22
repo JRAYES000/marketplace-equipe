@@ -1,8 +1,8 @@
 'use strict';
 
 /**
- * Selection du canal Composio par compte, partagee entre linkedin-carrousel et
- * linkedin-commentaires.
+ * Selection du canal Composio par compte pour linkedin-commentaires (le
+ * carrousel publie par le workflow n8n 38 depuis le 21/11/2026).
  *
  * Decision actee le 17/09/2026, apres verification reelle (GET
  * /api/v3/connected_accounts sur le projet de la cle "ak_" -- voir
@@ -181,77 +181,10 @@ async function executerActionRest(slug, { arguments: args = {}, userId, apiKey, 
   return json;
 }
 
-/**
- * Televerse un fichier local vers le stockage S3/R2 propre a Composio et
- * renvoie le descripteur FileUploadable ({name, mimetype, s3key}) attendu par
- * les parametres de type fichier des actions Composio (ex.
- * LINKEDIN_CREATE_LINKED_IN_POST.images) -- confirme fonctionnel le
- * 17/09/2026 avec une cle de projet "ak_" reelle (POST
- * /api/v3/files/upload/request -> 200, PUT sur l'URL S3 presignee -> 200).
- *
- * Corrige une impasse documentee le 12/09/2026 : la methode alors utilisee
- * (LINKEDIN_REGISTER_IMAGE_UPLOAD + PUT sur l'URL LinkedIn native) produit une
- * URN LinkedIn simple, refusee par LINKEDIN_CREATE_LINKED_IN_POST.images (400
- * "doit etre un FileUploadable"). Cette fonction-ci passe par le bon
- * endpoint -- celui que le SDK Python officiel de Composio utilise.
- */
-async function televerserFichierComposio({ cheminFichier, mimetype, toolSlug, toolkitSlug, apiKey, compte, cheminRegistreEchecs }) {
-  const cle = apiKey || process.env.COMPOSIO_API_KEY;
-  if (!cle) {
-    throw new Error('COMPOSIO_API_KEY manquant pour televerserFichierComposio (variable d\'environnement ou parametre apiKey).');
-  }
-
-  const fs = require('fs');
-  const crypto = require('crypto');
-  const path = require('path');
-
-  const octets = fs.readFileSync(cheminFichier);
-  const md5 = crypto.createHash('md5').update(octets).digest('hex');
-  const filename = path.basename(cheminFichier);
-
-  const reponseRequest = await fetch('https://backend.composio.dev/api/v3/files/upload/request', {
-    method: 'POST',
-    headers: { 'x-api-key': cle, 'Content-Type': 'application/json' },
-    body: JSON.stringify({ md5, filename, mimetype, tool_slug: toolSlug, toolkit_slug: toolkitSlug }),
-  });
-  if (!reponseRequest.ok) {
-    const texte = await reponseRequest.text();
-    const err = new Error(`Composio files/upload/request a echoue (HTTP ${reponseRequest.status}) : ${texte.slice(0, 300)}`);
-    journaliserEchec(cheminRegistreEchecs, {
-      compte, canal: 'rest', action: 'files/upload/request', httpStatus: reponseRequest.status,
-      source: 'composio', message: err.message,
-    });
-    throw err;
-  }
-  const donneesRequest = await reponseRequest.json();
-  const cleS3 = donneesRequest.key;
-  const urlPresignee = donneesRequest.new_presigned_url || donneesRequest.newPresignedUrl;
-  if (!cleS3 || !urlPresignee) {
-    throw new Error(`Composio files/upload/request n'a pas renvoye key/new_presigned_url exploitables : ${JSON.stringify(donneesRequest)}`);
-  }
-
-  const reponsePut = await fetch(urlPresignee, {
-    method: 'PUT',
-    headers: { 'Content-Type': mimetype },
-    body: octets,
-  });
-  if (!reponsePut.ok) {
-    const err = new Error(`PUT de ${cheminFichier} vers l'URL S3 presignee a echoue (HTTP ${reponsePut.status}).`);
-    journaliserEchec(cheminRegistreEchecs, {
-      compte, canal: 'rest', action: 'files/upload/put', httpStatus: reponsePut.status,
-      source: 'composio', message: err.message,
-    });
-    throw err;
-  }
-
-  return { name: filename, mimetype, s3key: cleS3 };
-}
-
 module.exports = {
   ROUTAGE_COMPTES,
   resoudreRoutage,
   resoudreCompteParUrn,
   executerActionRest,
-  televerserFichierComposio,
   journaliserEchec,
 };

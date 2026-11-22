@@ -16,7 +16,10 @@ Contrôle par script · Pièges · Ce que la skill ne fait pas.
 
 Ces règles valent pour les deux comptes, Claude Agency et Claude Partners, au même niveau. Elles
 sont la source de vérité de la forme pour toutes les skills linkedin-* (gras, formulations
-interdites, accents, anglicismes). Historique des décisions : [references/historique.md](references/historique.md).
+interdites, accents, anglicismes). Seule exception : la légende d'un carrousel (5 lignes, 60 à 700
+caractères) suit ses propres limites, dans `linkedin-carrousel`. La règle 0 vaut pour tous.
+Historique des décisions : [references/historique.md](references/historique.md). Cas de test :
+[references/evals.md](references/evals.md).
 
 ## 0. Les 6 règles de Julien du 14/10/2026 — elles priment sur tout le reste
 
@@ -45,9 +48,10 @@ Obligatoire avant de programmer, sortie brute montrée avec le brouillon :
 node "<dossier de la skill>/scripts/controle-avant-publication.mjs" --brouillon "$LIVRABLES_LINKEDIN_DIR/2026-11-03/a50.final.txt" --date 2026-11-03 --heure 13:00 --sujet "libellé du sujet" --maintenant <UTC d'une source fiable>
 ```
 
-Il lit la file de publication relevée (`file-attente-buffer.txt` ; Buffer est résilié depuis le 21/11/2026, à faire : relevé par le workflow n8n LinkedIn), retrouve le texte complet de chaque
-post dans les `.final.txt` (y compris `linkedin/posts-nouveaux/`), et refuse (code 1, une ligne
-`ALERTE regle N` par constat, avec la phrase en cause) :
+Il lit la file des posts programmés (`--file`, par défaut `file-attente-buffer.txt`, ancien relevé
+Buffer), retrouve le texte complet de chaque post dans les `.final.txt` (y compris
+`linkedin/posts-nouveaux/`), et refuse (code 1, une ligne `ALERTE regle N` par constat, avec la
+phrase en cause) :
 
 - un jour à 3 posts sur un compte ;
 - « inventé » ou un cas ouvert par « Exemple : », « Ma position », un lien ou une précaution dans
@@ -59,6 +63,10 @@ post dans les `.final.txt` (y compris `linkedin/posts-nouveaux/`), et refuse (co
   comptes confondus. Les lignes `Source :`, de hashtags ou réduites à un lien ne comptent pas ;
   un post dont seul le début est connu n'est pas contrôlé ; les annonces de mission
   (`fichier;sujet;type=annonce-mission` dans `sujets.csv`) sont exclues.
+
+Limite actuelle : les posts programmés par le workflow n8n 38 (lignes `a_publier` de
+`publications_linkedin`) n'entrent pas dans ce fichier. À faire : lecture de la table n8n ; d'ici
+là, vérifier les règles 1 et 4 contre la table à l'œil.
 
 Sans `--brouillon`, il contrôle toute la file. Cœur : `scripts/regles-julien.mjs` (fonctions
 pures, `test/regles-julien.test.mjs`). Un sujet ne se reconnaît pas par code : sans étiquette, le
@@ -88,19 +96,12 @@ donner envie de cliquer sur « … plus ». C'est le temps de lecture qui décid
 - Trois mots au moins (le script n'attrape que l'accroche dégénérée).
 - **Jamais toute l'accroche en gras** : le gras de la ligne 1 se pose sur le chiffre ou le TJM.
 
-### Ce qui marche (mesure Buffer du 18/10/2026, Claude Partners, 62 posts)
+### Ce qui marche
 
-Corrélations sur de petits groupes, pas des preuves ; refaire la mesure avant de citer ces chiffres.
-
-| Accroche (ligne 1) | n | Impressions (médiane) |
-|---|---|---|
-| `💼 Mission freelance IA : intitulé, durée, lieu.` + **TJM en gras** | 9 | **2 926** |
-| Annonce qui ouvre sur « 450 € HT par jour pour… », TJM pas en gras | 3 | 1 477 |
-| Interpelle le lecteur par son métier (« Développeur, vous… ») | 2 | 1 130 |
-| Autre question concrète (tarif, mission, paiement) | 16 | 338 |
-| Question entièrement en gras | 13 | 391 |
-| « Et si… ? » | 4 | **170** |
-| Ouvre sur « Exemple : » ou un cas inventé | 4 | 169 |
+Tiré d'une mesure sur 62 posts Claude Partners (18/10/2026, tableau dans
+[references/historique.md](references/historique.md)) : corrélations sur de petits groupes, pas
+des preuves. L'accroche d'annonce gagnante : `💼 Mission freelance IA : intitulé, durée, lieu.`
+avec le TJM en gras.
 
 À faire : un chiffre concret en ligne 1, en gras (TJM, durée, nombre) ; nommer le lecteur (son
 métier, sa situation) ; une prise de position nette plutôt qu'une question ouverte.

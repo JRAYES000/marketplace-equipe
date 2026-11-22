@@ -25,6 +25,19 @@ une connexion), sinon l'API répond 404 `object_not_found`.
 Les commandes de détail (`resume`, `connus`, `dedup`, `ecrire`, `reprendre`, `verifier`,
 `export`) restent pour diagnostiquer, pas pour le run.
 
+## Ce que fait publier (sorti de SKILL.md le 2026-11-22)
+
+1. reprend la file d'attente d'un lot précédent ;
+2. **retire les doublons** et les liste (`doublon retire : …`) : même email, même téléphone, ou
+   même nom + prénom. Un profil **anonyme** (sans prénom) ne se compare que par email ou
+   téléphone : son intitulé est partagé par d'autres (un nouvel anonyme était retiré à tort en
+   v9.0). Un profil déjà en base est un doublon quel que soit son `Statut`. Une même personne
+   présente deux fois dans le lot ne s'écrit qu'une fois (`deux fois dans le lot`) ;
+3. crée les fiches une par une (~3 par seconde, réessais sur 429, 5xx et délai de 30 s) ;
+4. **relit** par date et requête : `relu=N attendu=N notes_vides=0`.
+
+Mesuré : 9 s pour 3 fiches.
+
 ## La file d'attente
 
 Si Notion refuse une écriture après 5 essais (panne, 429 persistant, jeton invalide, délai de

@@ -13,6 +13,7 @@ description: >
 
 Sommaire : Ce que le site fait du fichier · 1 Ancrer · 2 Faire trancher · 3 Relever les chiffres ·
 4 Chercher · 5 Analyser · 6 Rédiger · 7 Contrôler · 8 Publier et transmettre · Ce qu'on ne fait pas.
+Cas de test : [references/evals.md](references/evals.md).
 
 TikTok et LinkedIn sont exclus parce que la méthode n'y a pas encore été éprouvée.
 
@@ -143,8 +144,8 @@ travers, et certaines pages bloquent les robots de lecture : ouvre-les dans un n
 
 Pars de `references/gabarit-onglet.md`. En écrivant :
 
-- tu parles au client : « vous », phrases courtes, un mot technique expliqué au passage.
-  Franc sur ce qui fâche si l'équipe l'a décidé (c'est écrit dans son `CLAUDE.md`) ;
+- tu vouvoies le client ; franc sur ce qui fâche si l'équipe l'a décidé (c'est écrit dans son
+  `CLAUDE.md`) ;
 - ses propres mots servent : une légende, une phrase de sa vidéo, citées courtement ;
 - **jamais** le pseudo d'un commentateur, le nom des outils internes (outil de collecte,
   navigateur piloté, sous-agents), un coût de collecte, une note d'équipe, ni ce que le

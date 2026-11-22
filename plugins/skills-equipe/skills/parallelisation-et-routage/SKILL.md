@@ -11,8 +11,8 @@ description: >
 # Parallélisation et routage de modèle
 
 Sommaire : Plancher · Ce que la skill peut faire · Activation et arrêt · Étape 1 Choisir l'étage ·
-Étape 2 Choisir la forme · Brief autonome · Forme A · Forme B · Templates · Plafonds · Session mal
-calibrée · Exemples · À éviter · Auto-contrôle.
+Étape 2 Choisir la forme · Brief autonome · Forme A · Forme B · Prompt worker · Plafonds · Session
+mal calibrée · Exemples · À éviter · Auto-contrôle. Cas de test : `references/evals.md`.
 
 Un seul principe : **l'orchestrateur ne fait lui-même que ce qu'aucun étage
 inférieur ne peut faire.** Tout le reste part vers des sous-agents lancés sur le
@@ -144,6 +144,9 @@ Agent({
 })
 ```
 
+Annonce : une ligne (`→ sonnet · effort low · extraction mécanique sur fichier fourni`), puis
+exécuter, sans justifier le choix ni récapituler la matrice.
+
 Étage `opus` quand l'orchestrateur tourne déjà en Opus : il fait la tâche lui-même, sans sous-agent.
 
 **Au retour**, l'orchestrateur contrôle le résultat contre les critères avant de
@@ -214,25 +217,7 @@ proposer de la planifier en tâche récurrente.
 
 ---
 
-## Templates
-
-### Préambule orchestrateur (forme B)
-
-```
-PLAN DE PARALLÉLISATION
-- Mission : <ce que demande l'utilisateur>
-- Découpage : N = <nombre> unités indépendantes
-- Vagues : <N / taille> vagues de <5-10> workers
-- Étage worker : sonnet effort low (mécanique) | sonnet effort medium (jugement)
-- subagent_type : Explore (lecture seule) | general-purpose (écrit un fichier)
-- Output par worker : <format précis>
-- Dossier sortie : <path> — un fichier unique par worker (out_<id>.ext)
-- Pilot : oui sur 3 items (si N > 10) / non
-
-Lancer tous les workers de la vague dans un seul message pour qu'ils démarrent ensemble.
-```
-
-### Prompt worker
+## Prompt worker
 
 ```
 Tu es un worker. Une seule tâche, un seul output.
@@ -259,17 +244,6 @@ OUTPUT (format strict, et rien d'autre) :
   "error": <null, ou string si FAILURE/AMBIGUOUS>
 }
 ```
-
-### Annonce (forme A)
-
-Une ligne, sans cérémonie, puis exécuter :
-
-```
-→ sonnet · effort low · extraction mécanique sur fichier fourni
-```
-
-Ne pas expliquer le routeur, ne pas justifier le choix sur un paragraphe, ne pas
-récapituler la matrice.
 
 ---
 
@@ -322,7 +296,7 @@ en une ligne, sans insister :
 - Inventer une donnée pour un item `AMBIGUOUS`.
 - Livrer une sortie de sous-agent sans l'avoir regardée.
 - Écrire un identifiant de modèle versionné en dur : toujours les alias courts
-  `"sonnet"`, `"opus"` : les identifiants versionnés périment. Jamais `"haiku"` (décision de Julien du 21/11/2026 : Sonnet 5.5 ou Opus 5.5 uniquement).
+  `"sonnet"`, `"opus"` : les identifiants versionnés périment. Jamais `"haiku"` : Sonnet 5.5 ou Opus 5.5 uniquement.
 
 ## Auto-contrôle
 

@@ -2,6 +2,9 @@
 // Prepare la route Playwright d'un lot (v10.0, 2026-10-04 ; purge de l'historique v10.6).
 //
 // Usage : node playwright.js preparer <connus.json> <cible>
+//         node playwright.js recherche "<nom de la recherche enregistree>"
+//
+// recherche : ecrit ft-recherche.js, qui lance la recherche enregistree de ce nom (Phase 2).
 //
 // Ecrit quatre fichiers dans <dossier de la session>/.playwright-mcp/, le seul dossier (avec
 // celui de la session) que `browser_run_code_unsafe` accepte en `filename`. On les lance par
@@ -26,7 +29,27 @@ const path = require('path');
 
 const die = m => { console.error('ERREUR : ' + m); process.exit(1); };
 const [cmd, connusF, cibleS] = process.argv.slice(2);
-if (cmd !== 'preparer' || !connusF || !cibleS) die('usage : node playwright.js preparer <connus.json> <cible>');
+
+if (cmd === 'recherche') {
+  if (!connusF) die('usage : node playwright.js recherche "<nom de la recherche enregistree>"');
+  const motif = connusF.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  const dossier = path.join(process.cwd(), '.playwright-mcp');
+  fs.mkdirSync(dossier, { recursive: true });
+  const f = path.join(dossier, 'ft-recherche.js');
+  fs.writeFileSync(f, `async (page) => {
+  const nom = new RegExp(${JSON.stringify(motif)}, 'i');
+  const ligne = page.locator('tr, li').filter({ hasText: nom }).filter({ has: page.getByText(/Lancer la recherche/i) }).last();
+  if (!(await ligne.count())) return 'ERREUR : recherche enregistree introuvable : ' + nom;
+  await ligne.getByText(/Lancer la recherche/i).first().click();
+  const entete = page.getByText(/résultats? pour/i).first();
+  await entete.waitFor({ timeout: 30000 });
+  return (await entete.innerText()).slice(0, 150);
+}
+`);
+  console.log('fichier Playwright : ' + f.split(path.sep).join('/'));
+  process.exit(0);
+}
+if (cmd !== 'preparer' || !connusF || !cibleS) die('usage : node playwright.js preparer <connus.json> <cible> | recherche "<nom>"');
 const cible = parseInt(cibleS, 10);
 if (!(cible > 0)) die('cible invalide : ' + cibleS);
 let connus;

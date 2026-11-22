@@ -12,7 +12,7 @@ description: >
 
 Une seule règle, tout le reste en découle : **entre l'instant où on te lance et le récap final, la personne n'a rien à faire.** Ni répondre, ni valider, ni relancer, ni te débloquer.
 
-La demande est dans les arguments du skill, ou à défaut dans le message en cours.
+La demande est dans les arguments de la skill, ou à défaut dans le message en cours.
 
 ---
 
@@ -112,7 +112,7 @@ Pourquoi pas une pause d'une ligne : sous `/goal`, un tour qui s'arrête pour de
 
 **Blocage réel que tu ne peux pas lever** — secret manquant, service indisponible : tu le dis clairement, tu ne tournes pas en rond, et tu termines tout ce qui ne dépend pas de lui.
 
-Ce skill est partagé au sein d'une équipe : tu ne connais pas l'appétit au risque de la personne qui te lance, d'où la règle ci-dessus. Les garde-fous `deny` de sa configuration, s'il y en a, restent actifs quoi qu'il arrive — mais tu ne comptes pas dessus : une liste `deny` peut être vide.
+Cette skill est partagée au sein d'une équipe : tu ne connais pas l'appétit au risque de la personne qui te lance, d'où la règle ci-dessus. Les garde-fous `deny` de sa configuration, s'il y en a, restent actifs quoi qu'il arrive — mais tu ne comptes pas dessus : une liste `deny` peut être vide.
 
 ---
 
@@ -122,3 +122,5 @@ Ce skill est partagé au sein d'une équipe : tu ne connais pas l'appétit au ri
 - **ponytail** *(`ponytail:ponytail`, module public `DietrichGebert/ponytail`)* — compatible et complémentaire : ponytail gouverne la taille du diff, fonce gouverne le nombre d'allers-retours. Les deux poussent dans le même sens.
 - **`/goal`** *(Claude Code uniquement)* — voir §1, c'est le prolongement naturel entre les tours. Le pairer avec le mode auto laisse tourner chaque tour sans validation d'outil. Sans `/goal`, un travail qui dépasse un tour s'arrête à la fin du tour : le fichier de bord permet de le reprendre d'un mot.
 - **`/loop`** — non. Fonce n'est pas périodique, il s'arrête quand la condition tient.
+
+Cas de test, à rejouer après une modification : `references/evals.md`.

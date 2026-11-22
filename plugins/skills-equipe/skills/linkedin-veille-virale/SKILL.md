@@ -12,8 +12,6 @@ description: >
 Sommaire : Règles · Déroulé · Point de situation · Comptes à surveiller · Variables
 d'environnement · Garde-fous · Publication · Bilan et suivi à 7 jours · Pièges · Annexes.
 
-Phrase de lancement : « fais la veille du jour », « cherche un post à recycler pour julien-agency ».
-
 ## Règles
 
 **Règles de Julien du 14/10/2026** (détail : `linkedin-mise-en-forme`, règle 0) : un post de
@@ -83,7 +81,7 @@ explicite ; seul `dry-run.js` a un repli fixture, pour `APIFY_TOKEN`.
   `lib/valider-mise-en-forme.js`, qui appelle les critères de `linkedin-mise-en-forme`
   (`../linkedin-mise-en-forme/scripts/lib.mjs`) et transforme leur rapport en refus, avant tout appel réseau. Le pont
   applique aussi les règles 2, 3 (formules) et 5 du 14/10 via `verifierTexte`.
-- **Accents** : `lib/valider-orthographe.js` (`validerAccents`), qui ignore le contenu des
+- **Accents** : `../../lib/valider-orthographe.js` (`validerAccents`, partagé entre les skills LinkedIn), qui ignore le contenu des
   `**…**`. En cas d'échec, `contenuFinal` devient `null` et `erreurOrthographe` porte le détail.
 - **Quota de veille** : `validerQuotaHebdomadaire` (semaine du lundi au dimanche,
   `debutSemaineISO`) refuse un 4e post dans la semaine ou un 2e le même jour ; `erreurQuota` porte
@@ -94,7 +92,7 @@ explicite ; seul `dry-run.js` a un repli fixture, pour `APIFY_TOKEN`.
 
 ## Publication
 
-**Voie réelle : workflow n8n 38** (Buffer résilié le 21/11/2026) : une ligne dans la table
+**Voie réelle : workflow n8n 38** (Buffer est résilié) : une ligne dans la table
 `publications_linkedin` (`format: texte`, lien en `premier_commentaire`). Colonnes, statuts et
 pièges : `../../references/publication-linkedin-n8n.md`. Le contrôle se fait juste avant, sur le fichier.
 
@@ -138,6 +136,7 @@ pièges : `../../references/publication-linkedin-n8n.md`. Le contrôle se fait j
 
 ## Annexes
 
+- [references/evals.md](references/evals.md) : cas de test à rejouer après une modification.
 - [references/historique.md](references/historique.md) : ancien corps complet (rebranchement du
   pont sur `linkedin-mise-en-forme`, audit du 15/09, incidents).
 - [../../references/linkedin-veille-historique.md](../../references/linkedin-veille-historique.md) :

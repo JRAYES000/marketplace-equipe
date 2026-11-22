@@ -13,7 +13,7 @@
  *    connected_account_id explicite (ca_vn1-dhh8VcYf) -- une connexion
  *    LinkedIn ACTIVE existe reellement pour ce compte sur ce canal (verifie
  *    via GET /api/v3/connected_accounts). L'implementation REST vit dans
- *    lib/composio-canal.js (partagee avec linkedin-carrousel).
+ *    plugins/skills-equipe/lib/composio-canal.js.
  *
  * Historique : ce fichier a utilise le REST direct jusqu'au 16/09/2026, sans
  * jamais fonctionner (pas de cle de projet ak_ alors disponible) -- migre

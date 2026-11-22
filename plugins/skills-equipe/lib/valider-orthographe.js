@@ -114,9 +114,8 @@ const MOTS_SANS_ACCENT_VERS_CORRECT = {
   // du post ET "L'IA declarative" dans le documentTitle sont passes tous les
   // deux -- ni l'un ni l'autre n'etait dans cette liste. Voir aussi
   // lib/valider-post.js (convertirGras verifie desormais ces mots DANS un
-  // passage en gras, pas seulement dans le texte courant) et
-  // lib/publier-zernio.js (documentTitle passe par validerAccents avant tout
-  // envoi -- rien ne le verifiait jusqu'ici).
+  // passage en gras, pas seulement dans le texte courant) ; le documentTitle
+  // passe aussi par validerAccents avant publication.
   declaratif: 'déclaratif',
   declaratifs: 'déclaratifs',
   declarative: 'déclarative',
@@ -142,7 +141,7 @@ const MOTS_SANS_ACCENT_VERS_CORRECT = {
  * appelle deja validerAccents() APRES convertirGras() pour cette raison, mais
  * linkedin-veille-virale/dry-run.js l'appelait AVANT, sur le markdown brut, d'ou le
  * faux positif. Stripper les `**...**` ici rend la fonction correcte quel que soit
- * l'ordre d'appel, dans les trois paquets qui la dupliquent.
+ * l'ordre d'appel, pour toutes les skills qui importent ce fichier partage.
  */
 function detecterMotsSansAccent(texte) {
   const trouves = [];

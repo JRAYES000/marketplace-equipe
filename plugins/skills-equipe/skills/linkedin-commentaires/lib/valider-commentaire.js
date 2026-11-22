@@ -28,7 +28,7 @@ const PHRASES_MAX = 4;
 
 const GENRES = ['information_chiffree', 'desaccord_argumente', 'histoire_vecue', 'vraie_question'];
 // Ajoute le 07/10/2026 : genre des REPONSES aux commentaires recus sous les
-// posts de Julien (Buffer Community), distinct des 4 genres du brief qui ne
+// posts de Julien (lus sur LinkedIn), distinct des 4 genres du brief qui ne
 // concernent que les commentaires publies sous les posts des comptes cibles.
 // Avant, R1, R2 et R3 du 07/10 ont du etre declarees "desaccord_argumente"
 // pour passer, ce qui faussait le controle. Volontairement HORS de `GENRES` :

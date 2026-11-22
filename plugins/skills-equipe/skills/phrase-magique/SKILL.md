@@ -18,7 +18,7 @@ La revue d'un livrable avant de le rendre (« challenge mon travail ») relève 
 
 **Suspendre sans qu'on le demande**, puis reprendre au tour suivant sans le commenter : question factuelle, micro-tâche ou conversation courante ; urgence explicite (« vite », « juste la réponse ») ; question répétée par l'utilisateur ; questions de cadrage déjà répondues ; **demande déjà entièrement spécifiée** (objectif, périmètre, format et critères fournis) — dans ce cas, produire : ce modèle donne son meilleur quand on lui remet la spécification complète et qu'on le laisse dérouler.
 
-**fonce et phrase-magique** : incompatibles sur un seul point, les questions de cadrage. Sous `fonce`, l'étape de cadrage de phrase-magique (4 questions, puis attendre) est suspendue ; le contrat d'arrêt et le bloc « Supposé » la remplacent. Le reste de phrase-magique tient : socle, étiquetage des chiffres, devoir d'alerte (en une ligne, puis on exécute quand même), contradicteur, périmètre tenu, critères binaires repris à la clôture.
+**Sous `fonce`**, le cadrage (4 questions, puis attendre) est suspendu ; le reste tient. Règle complète : `fonce`, section « Cohabitation avec les autres skills ».
 
 ---
 
@@ -111,7 +111,7 @@ Ils dirigent la production. Écrits après, ils ne font que la justifier.
 
 ## Ce qui n'a pas sa place
 
-Commentaire méta sur le skill · cérémonie d'auto-critique · questions creuses pour remplir le quota de 4 · second tour de questions · **auto-notation** (« je me mets 7/10 ») : une note globale n'est ni fiable ni actionnable · **persona décorative** (« tu es un expert senior en… ») : aucune connaissance ajoutée, exactitude dégradée · **« réfléchis étape par étape »** : ce modèle raisonne déjà, la consigne coûte sans rien apporter · **recopier son raisonnement dans la réponse** : ce modèle peut refuser la demande, et le plan utile se donne en trois à cinq étapes, pas en transcription.
+Commentaire méta sur la skill · cérémonie d'auto-critique · questions creuses pour remplir le quota de 4 · second tour de questions · **auto-notation** (« je me mets 7/10 ») : une note globale n'est ni fiable ni actionnable · **persona décorative** (« tu es un expert senior en… ») : aucune connaissance ajoutée, exactitude dégradée · **« réfléchis étape par étape »** : ce modèle raisonne déjà, la consigne coûte sans rien apporter · **recopier son raisonnement dans la réponse** : ce modèle peut refuser la demande, et le plan utile se donne en trois à cinq étapes, pas en transcription.
 
 ---
 
@@ -124,6 +124,8 @@ Un seul appel de cadrage ; plusieurs variantes seulement quand le choix ouvert e
 ## Annexes — à ouvrir seulement au besoin
 
 `references/catalogue-phrases.md` — les 17 formulations, dont 4 annotées « réfutée par la mesure ». À lire quand l'utilisateur soumet un prompt à améliorer ou demande la liste. **Ce sont « les 17 formulations », jamais « les phrases magiques »** : ce nom-là est celui de la skill, et le confondre avec son annexe est ce qui fait chercher la mauvaise chose.
+
+`references/evals.md` — trois cas de test, à rejouer après une modification.
 
 `references/pourquoi.md` — preuves, chiffres et sources, dont ce qui est calibré pour Claude Opus 5.5. À lire quand une règle est contestée ou avant de modifier ce fichier.
 

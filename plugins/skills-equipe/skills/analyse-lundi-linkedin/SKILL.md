@@ -12,18 +12,19 @@ description: >
 # Analyse du lundi LinkedIn
 
 Sommaire : Où sont les choses · Procédure du lundi · Point d'objectif ponctuel · Sources ·
-Calculs faits en code · Forme du rapport · Pièges.
+Calculs faits en code · Forme du rapport · Pièges. Cas de test : [references/evals.md](references/evals.md).
 
 Une procédure qui revient chaque lundi. Les calculs sont faits par les scripts, jamais « à la main »
 et jamais de tête. Lecture seule : rien n'est écrit dans l'outil de publication.
 
-**Buffer est résilié (décision de Julien du 21/11/2026)** : toute publication passe par le n8n du VPS
+**Publication et relevé par n8n** (Buffer est résilié) : toute publication passe par le n8n du VPS
 (n8n.claudeagency.fr). Publication : workflow 38 (table `publications_linkedin`). **Relevé : workflow 39**,
 chaque lundi 07:30 : réactions, commentaires et abonnés des posts publiés par le 38 depuis 28 jours, dans la
 table n8n `stats_linkedin` (ScrapeCreators, 1 crédit par post). Détail : `../../references/publication-linkedin-n8n.md`.
-**Limites mesurées le 21/11/2026** : ni impressions ni taux d'engagement (aucune source automatique : l'API
+**Limites** : ni impressions ni taux d'engagement (aucune source automatique : l'API
 LinkedIn n'a que le droit d'écrire) ; les posts faits hors du workflow 38 ne sont pas relevés. Les impressions
-se lisent à la main sous chaque post dans Chrome connecté (« N impressions »). Ne jamais inventer un chiffre.
+se lisent à la main sous chaque post avec Claude in Chrome (`claude-in-chrome:navigate`, `get_page_text` :
+« N impressions »). Ne jamais inventer un chiffre.
 La table se convertit au format `releve-buffer-AAAA-MM-JJ.csv`
 ([references/releve-buffer.md](references/releve-buffer.md)) par `scripts/releve-depuis-n8n.mjs` (étape 2).
 
@@ -58,12 +59,15 @@ Indicateurs retenus, et eux seuls : impressions, réactions, commentaires, taux 
    - écrit `analyses/AAAA-MM-JJ-analyse.md` et `.json`.
    Options : `--date AAAA-MM-JJ` (le lundi analysé), `--a-blanc` (affiche posts et chiffres par compte, n'écrit
    rien), `--sortie dossier`, `--plan calendrier.json`.
-4. **Contrôler le calendrier restant** : `node scripts/verifier-creneaux.mjs` — contre la seule file de publication
-   relevée (code de sortie 1 s'il reste un écart). Un créneau absent de la file est « manquant », un post de la file absent du
+4. **Contrôler le calendrier restant** : écrire d'abord `file-attente-buffer.txt` (nom conservé) dans le dossier du
+   test à partir des lignes `a_publier` de `publications_linkedin` (MCP `n8n`, `get_data_table_rows`, table
+   `GCjlt3vNRlqbBfUB`) : une ligne par post, `AAAA-MM-JJ HH:MM julien-<compte> # <format> <début du texte>`, heure de
+   Paris (format : [references/releve-buffer.md](references/releve-buffer.md), « File d'attente »). Puis
+   `node scripts/verifier-creneaux.mjs` — contre cette seule file (code de sortie 1 s'il reste un écart). Un créneau absent de la file est « manquant », un post de la file absent du
    calendrier est « hors plan » ; même compte et même début de texte = « ALERTE déplacé », avec l'ancien et le nouveau
    créneau. Rien n'est jamais reprogrammé.
-5. Recopier dans la conversation : l'encadré « À retenir » du rapport, tel quel, les posts absents d'Insights
-   (étape 2), puis les points qui demandent une décision de Julien. Ne rien ajouter que le rapport ne contienne.
+5. Recopier dans la conversation : l'encadré « À retenir » du rapport, tel quel, les posts publiés absents du
+   relevé (lignes `publie` de `publications_linkedin` sans ligne dans `stats_linkedin`), puis les points qui demandent une décision de Julien. Ne rien ajouter que le rapport ne contienne.
 6. Mettre à jour `NOTES.md` (date, verdict, alertes), commiter en nommant les fichiers un par un.
 
 ## Point d'objectif ponctuel

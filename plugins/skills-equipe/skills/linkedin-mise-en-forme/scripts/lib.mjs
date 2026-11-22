@@ -255,9 +255,8 @@ const contientUnVraiGras = (s) => new RegExp(`[${PLAGE_SANS_SERIF}${PLAGE_SERIF}
 
 // Formulations interdites -- reprises telles quelles de
 // linkedin-carrousel/lib/valider-post.js (meme motif, meme retour de Julien du
-// 10/09/2026 section 3) : pas de code partage entre skills dans ce depot (convention
-// deja en usage, voir valider-orthographe.js duplique dans les 3 paquets), donc
-// dupliquees ici plutot qu'importees. Aucune formulation nouvelle inventee pour cette
+// 10/09/2026 section 3), dupliquees ici plutot qu'importees (les listes partagees
+// vivent dans plugins/skills-equipe/lib/ : valider-orthographe.js, valider-anglicismes.js). Aucune formulation nouvelle inventee pour cette
 // skill : seules celles deja eprouvees par Julien sur linkedin-carrousel.
 // Chiffre sans source -- reprise telle quelle de linkedin-carrousel/lib/valider-post.js
 // (validerChiffreSource, contientLigneSourceFinale, estDetailAnecdote, SOURCES_VAGUES,

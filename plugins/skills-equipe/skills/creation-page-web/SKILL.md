@@ -1,7 +1,12 @@
 ---
 name: creation-page-web
 description: >
-  Consignes par défaut pour une page web à créer ou refaire (landing page, page de site, page HTML, artifact, maquette) : design qui ne fait pas IA (skill impeccable si disponible), textes passés par humanizer, gras sur l'essentiel, 2 ou 3 images générées en WebP, un seul appel à l'action, bases SEO, contrôle mobile en 375 px. Pour « /creation-page-web », « applique les consignes page web », « crée la page avec les consignes de l'équipe ». Se combine aux skills métier. Pas pour un article de blog seul, un e-mail ni un post de réseau social. Activation MANUELLE : sur demande explicite uniquement, ne jamais se déclencher seule, même face à une demande de page web.
+  Consignes par défaut d'une page web à créer ou refaire (landing, page de site, page HTML,
+  artifact, maquette) : design non générique (impeccable si disponible), textes humanisés, gras
+  sur l'essentiel, 2 ou 3 images WebP générées, un seul appel à l'action, bases SEO, contrôle
+  à 375 px. Pour « /creation-page-web », « applique les consignes page web ». Pas pour un
+  article de blog seul, un e-mail ni un post. Activation manuelle : sur demande explicite
+  uniquement, même face à une demande de page web.
 ---
 
 # Création de page web : consignes par défaut
@@ -13,7 +18,7 @@ skills métier, elles ne les remplacent pas.
 
 - **Design** : charger la skill `impeccable` si elle est disponible, avant d'écrire la page.
   Sinon, appliquer le crible anti-IA ci-dessous dès la première version.
-- **Textes** : les passer par `humanizer` avant la mise en page.
+- **Textes** : les passer par `humanizer` (si disponible) avant la mise en page.
 
 ## Dans la page
 

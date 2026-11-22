@@ -18,10 +18,11 @@ Reprend la chaîne du 08/10/2026 (`livrables-Claude-Agency/NOTES.md`, sections d
 Dépôt de travail : `livrables-Claude-Agency`. Dossier d'un lot : `sortants/annonces-missions/<lot>/`
 (le lot du 08/10 est `v4/`, à prendre comme modèle). Lire d'abord le `CLAUDE.md` du dépôt (pièges connus).
 
-**Publication : workflow n8n 38** (Buffer résilié le 21/11/2026) : une ligne par annonce dans la table
+**Publication : workflow n8n 38** (Buffer est résilié) : une ligne par annonce dans la table
 `publications_linkedin`, `compte: partners`, `format: image`, fiche image à une URL https publique, lien de
-la fiche en `premier_commentaire`. Colonnes, statuts et pièges : `../../references/publication-linkedin-n8n.md`. **À faire : workflow n8n de
-relevé LinkedIn** : l'étape 9 (relevé à 48 h) s'arrête tant qu'il n'existe pas.
+la fiche en `premier_commentaire`. Colonnes, statuts et pièges : `../../references/publication-linkedin-n8n.md`. **Relevé** : le workflow n8n 39
+relève chaque lundi réactions, commentaires et abonnés des posts du 38 (table `stats_linkedin`), sans impressions ;
+le relevé à 48 h de l'étape 9 n'a pas encore de workflow n8n (à faire).
 
 ## Condition préalable bloquante
 
@@ -108,17 +109,17 @@ précaution. La mission réelle est le fait réel de la règle 2. Contrôle avan
 
 ## 6. Tester une annonce avec image, puis programmer le reste
 
-- Programmer d'abord **une seule** annonce avec image, puis la relire dans la file : heure
-  « (Europe/Paris) », image présente, **aucun lien dans le texte, lien de la fiche dans le premier
-  commentaire** (règle 5 du 14/10/2026).
+- Programmer d'abord **une seule** annonce avec image, puis relire sa ligne dans `publications_linkedin` :
+  `publier_le` en heure de Paris (`+01:00` ou `+02:00`), `media_url` présente, **aucun lien dans le texte, lien
+  de la fiche dans `premier_commentaire`** (règle 5 du 14/10/2026).
 - Seulement ensuite, programmer les autres sur le compte Claude Partners, par le workflow n8n 38
   (une ligne `a_publier` par annonce) : empreinte du texte comparée au `.final.txt`, date relue après programmation.
 
 ## 7. Relire la file
 
-Recharger la page, relire **toute** la file (20 posts par chargement, défiler) : chaque annonce à
-son créneau, image ou non selon le planning, lien en premier commentaire, jamais 3 posts le même
-jour sur le compte, posts décalés à 17:30. Noter le compteur.
+Relire **toutes** les lignes `a_publier` de `publications_linkedin` (MCP `n8n`, `get_data_table_rows`, toutes
+les pages) : chaque annonce à son créneau, image ou non selon le planning, lien en premier commentaire, jamais
+3 posts le même jour sur le compte, posts décalés à 17:30. Noter le nombre de lignes.
 
 ## 8. Mail du planning à Julien
 
@@ -133,15 +134,16 @@ Ajouter dans `NOTES.md` le tableau « Relevé à 48 h des annonces » : une lign
 par annonce avec « Publication prévue » et « Relevé à faire le » (publication + 48 h, heure de
 Paris), colonnes « Impressions », « Réactions », « Commentaires », « Taux d'engagement », « Abonnés (canal) »,
 « Lien LinkedIn ».
-La routine Windows « LinkedIn - 5 Releve 48 h des annonces » (`linkedin/routines/5-releve-48h-annonces.md`)
-remplit ces colonnes chaque jour à 14:00 Paris. Avant chaque lot, contrôler la date de fin de cette
-routine dans `register-routines.ps1` et la prolonger si le lot la dépasse.
+La routine Windows « LinkedIn - 5 Releve 48 h des annonces » (`linkedin/routines/5-releve-48h-annonces.md`,
+14:00 Paris) lisait Buffer : sans nouvelle source, elle ne remplit plus ces colonnes. Avant chaque lot,
+contrôler son état et sa date de fin dans `register-routines.ps1`.
 **Identification d'une annonce** (routine comme relevé à la main), les deux conditions à la fois :
 son intitulé exact (ligne 💼, ou ligne 2 de l'accroche, telle qu'elle est dans `NN.final.txt`) ET sa date de publication prévue (jour de Paris). Si deux posts du même jour correspondent, lire leur heure de publication réelle pour les départager ; si l'ambiguïté reste, ou si aucun post ne correspond : rien n'est écrit dans la ligne, « ALERTE : identification ambiguë » est noté avec les candidats trouvés (date, heure, début du texte).
 Un post absent de nos fichiers n'est jamais relevé : c'est un post de Julien.
 **Indicateurs fixés par Julien, et eux seuls** : impressions, réactions, commentaires, taux d'engagement,
-abonnés du compte au moment du relevé. Aucun autre chiffre n'est demandé ni relevé. Source : à faire,
-workflow n8n de relevé LinkedIn (ancienne méthode Buffer :
+abonnés du compte au moment du relevé. Aucun autre chiffre n'est demandé ni relevé. Sources : réactions,
+commentaires et abonnés dans `stats_linkedin` (workflow 39, le lundi) ; impressions et taux à la main sous le
+post avec Claude in Chrome ; relevé à 48 h : à faire, workflow n8n (ancienne méthode Buffer :
 `../analyse-lundi-linkedin/references/releve-buffer.md`, historique).
 
 ## Fin

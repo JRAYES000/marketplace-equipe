@@ -31,7 +31,7 @@ commente aujourd'hui ».
 4. La session Claude **écrit elle-même** le commentaire, dans le ton de `reglages-comptes.json`,
    en choisissant un genre : `information_chiffree`, `desaccord_argumente`, `histoire_vecue`,
    `vraie_question` (`GENRES`, `lib/valider-commentaire.js`).
-   **Réponse à un commentaire reçu** (sous un post de Julien, lu sur LinkedIn ; Buffer Community a disparu avec Buffer, résilié le 21/11/2026) : genre
+   **Réponse à un commentaire reçu** (sous un post de Julien, lu sur LinkedIn) : genre
    `reponse` (`GENRE_REPONSE`). Mêmes contrôles, plus `validerAucunePromesse` (aucune promesse au
    nom de Julien : recontact, message privé, rendez-vous, prix). Une réponse ne compte pas dans le
    quota et ne s'inscrit ni au registre ni dans Notion.
@@ -75,13 +75,15 @@ seul `dry-run.js` a un repli fixture, pour `APIFY_TOKEN`.
 - `APIFY_TOKEN` : requis par `trouverPosts`.
 - `NOTION_TOKEN` + `NOTION_PARENT_PAGE_ID` : base « Commentaires » (suivi à 3 jours) ; la page
   parente doit être partagée avec l'intégration (« … » → « Connexions »).
+- `NOTION_COMMENTAIRES_DATA_SOURCE_ID` : base « Commentaires » pour `mettre-a-jour-stats.js`
+  (sinon `--dataSourceId`).
 - `COMPOSIO_CONSUMER_API_KEY` (préfixe `ck_`, canal MCP `https://connect.composio.dev/mcp`) :
   julien-agency uniquement.
 - `COMPOSIO_API_KEY` (préfixe `ak_`, canal REST `backend.composio.dev/api/v3.1`,
   `connected_account_id: "ca_vn1-dhh8VcYf"`) : julien-partners uniquement.
 
-Le routage par compte est automatique (`../../lib/composio-canal.js`, partagé avec
-`linkedin-carrousel`) : `publierCommentaire({ actorUrn, … })` choisit le canal. Une clé `ak_`
+Le routage par compte est automatique (`../../lib/composio-canal.js`) :
+`publierCommentaire({ actorUrn, … })` choisit le canal. Une clé `ak_`
 n'est jamais passée au canal MCP (`validerCle` la refuse avant tout appel). Protocole complet :
 [../../references/actions-composio.md](../../references/actions-composio.md).
 
@@ -121,7 +123,7 @@ Refus explicite, jamais un avertissement.
 - **Généralisation vague refusée** (`validerQuantificationVague`) : « la plupart des », « la
   majorité des », « beaucoup de », « peu de » + nom, sans échappatoire (reformuler). « La plupart
   du temps » et « dans la plupart des cas » restent admis.
-- **Accents manquants** (`lib/valider-orthographe.js`, liste fermée).
+- **Accents manquants** (`../../lib/valider-orthographe.js`, liste fermée partagée).
 
 Tests : `node --test`.
 
@@ -181,6 +183,7 @@ Marche à suivre détaillée :
 
 - [references/historique.md](references/historique.md) : ancien corps complet (passages réels de
   septembre, audits adversariaux du 15 et du 22/09, incidents).
+- [references/evals.md](references/evals.md) : cas de test à rejouer après une modification.
 - [../../references/linkedin-commentaires-historique.md](../../references/linkedin-commentaires-historique.md) :
   décisions de conception, incident de l'anecdote inventée, blocages Notion, publications réelles.
 - [../../references/comptes-cibles-proposition-20260914.md](../../references/comptes-cibles-proposition-20260914.md)

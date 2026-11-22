@@ -12,6 +12,7 @@ description: >
 
 Sommaire : Posture · Ce que la revue ne fait pas · Étape 1 Ancrer · Étape 2 Contrôler ·
 Étape 3 Rendre la revue · Étape 4 Juger les réponses · Étape 5 Verdict · Si la personne veut aller vite.
+Cas de test : `references/evals.md`.
 
 Une exigence tenue toute la session (cadrage, contradicteur) relève de `phrase-magique` ; cette
 skill revoit un livrable terminé.

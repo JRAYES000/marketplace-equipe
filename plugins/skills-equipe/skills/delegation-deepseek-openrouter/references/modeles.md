@@ -35,8 +35,3 @@ modèle de la famille sans prévenir. `deepseek/deepseek-v4.1-flash`, apparu au
 catalogue le 10/09/2026, coûte 0,15 $ / 0,60 $ — presque quatre fois Flash 0731 :
 ce n'est pas un remplaçant du défaut, seulement une option si la qualité de 0731
 ne suffit pas sur un lot donné.
-
-**Les slugs sont datés et périmeront.** Avant une série d'appels, passer par
-`list-models` (attention, ce n'est pas `models-list`) : contrôler que le
-modèle est toujours servi et qu'aucun successeur moins cher n'est sorti. Un
-identifiant versionné écrit en dur dans une skill est une date de péremption.

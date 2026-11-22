@@ -16,9 +16,9 @@
  *
  * Limite assumee : ce registre ne se remplit QUE si `enregistrerPostPublie`
  * est reellement appele apres une publication confirmee -- la voie reelle en
- * usage courant (Buffer, programmation via l'interface, voir SKILL.md) n'est
+ * usage courant (workflow n8n 38, ligne a_publier, voir SKILL.md) n'est
  * pas scriptable depuis ce paquet. C'est a la session Claude qui programme un
- * post dans Buffer d'appeler ensuite ce module (ou le script CLI
+ * post par le workflow n8n 38 d'appeler ensuite ce module (ou le script CLI
  * `enregistrer-publication.js`) avec la date reellement programmee -- jamais
  * en anticipant, jamais devine.
  */
@@ -122,7 +122,7 @@ function entreesDeLaSemaine(registre, compte, jourISO) {
 
 /**
  * Ajoute une entree au registre et le persiste. A appeler seulement APRES
- * une publication reelle confirmee (programmation Buffer verifiee, ou appel
+ * une publication reelle confirmee (ligne n8n a_publier verifiee, ou appel
  * direct publierPost() reussi) -- sinon un brouillon jamais publie
  * compterait a tort dans le quota de la semaine.
  */

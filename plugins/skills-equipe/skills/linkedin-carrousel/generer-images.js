@@ -2,16 +2,15 @@
 'use strict';
 
 /**
- * Rendu LOCAL (Playwright, aucun appel Composio) des deux options de repli
- * image documentees dans lib/publier.js et SKILL.md -- pour verifier
- * resolution/qualite avant de brancher quoi que ce soit cote publication.
+ * Rendu LOCAL (Playwright, aucun appel reseau) des diapos en PNG : inspection
+ * page par page avant le PDF final (etape 3 du deroule de SKILL.md) et image
+ * de couverture unique.
  *
  * Reutilise exactement le meme gabarit/injection que generer-pdf.js
  * (chargerGabarit, injecterDiapo) : le rendu d'une diapo en PNG ne doit
  * jamais diverger visuellement du rendu de la meme diapo en PDF.
  *
- * Deux fonctions, correspondant aux deux options du "modeRepli" documente
- * dans lib/publier.js :
+ * Deux fonctions :
  *   - genererImagesParDiapo  : une image PNG par diapo (mode "par-diapo").
  *   - genererImageCouverture : une seule image PNG, la diapo hook (ou la
  *     premiere) (mode "couverture").
@@ -75,11 +74,7 @@ function cheminCouvertureParDefaut(compte, diapos) {
 
 /**
  * Mode "par-diapo" : une image PNG par diapo, numerotees comme dans le PDF
- * (01, 02, ...). Correspond a l'option (a) documentee dans lib/publier.js --
- * en publication reelle, chaque fichier serait televerse separement via
- * LINKEDIN_REGISTER_IMAGE_UPLOAD puis passe dans `images` de
- * LINKEDIN_CREATE_LINKED_IN_POST. Ce script ne fait QUE le rendu local, zero
- * appel reseau Composio.
+ * (01, 02, ...). Ce script ne fait QUE le rendu local, zero appel reseau.
  */
 async function genererImagesParDiapo({ compte, diapos, dossierSortie }) {
   if (!Array.isArray(diapos) || diapos.length === 0) {
@@ -104,9 +99,7 @@ async function genererImagesParDiapo({ compte, diapos, dossierSortie }) {
 
 /**
  * Mode "couverture" : une seule image PNG, la diapo "hook" si presente sinon
- * la premiere diapo de la liste. Correspond a l'option (b) documentee dans
- * lib/publier.js -- perd le format feuilletable, mais une seule image a
- * televerser en publication reelle.
+ * la premiere diapo de la liste (perd le format feuilletable).
  *
  * Rendue avec `contexte: 'image-seule'` (ajoute le 18/09/2026) : masque la
  * fleche "Balayez" et le numero de page, reperes de carrousel qui n'ont pas

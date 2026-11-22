@@ -52,7 +52,7 @@ de PDF échoue (« Executable doesn't exist »). `npm ci` et non `npm install`, 
 ## Comptes
 
 - **julien-agency** et **julien-partners** : actifs, gabarits `templates/julien-agency.html` et
-  `templates/julien-partners.html`, identifiants de publication dans `reglages-comptes.json`.
+  `templates/julien-partners.html`, ton du compte dans `reglages-comptes.json`.
 - **page-claude** : en pause sur décision de Julien (autorisation d'organisation LinkedIn non
   validée). Ne pas publier dessus.
 
@@ -154,14 +154,14 @@ Refus explicite, jamais un avertissement.
 ### Accents — `../../lib/valider-orthographe.js`
 
 Liste fermée de mots toujours accentués (été, déjà, même, déclaratif, réel…), mots ambigus
-(« a », « ou ») exclus. Appelée sur les diapos, le texte du post (y compris chaque passage en
-gras) et le `documentTitle`.
+(« a », « ou ») exclus. Appelée sur les diapos et le texte du post (y compris chaque passage en
+gras).
 
 ### Anglicismes — `../../lib/valider-anglicismes.js`
 
 Liste fermée (process, deadline, feedback, workflow, business, brief, benchmark, reporting,
 roadmap, kickoff, mindset, insight, targets, networking) avec l'équivalent français dans le
-message. « email », « planning », « week-end » sont admis. Mêmes trois surfaces que les accents.
+message. « email », « planning », « week-end » sont admis. Mêmes surfaces que les accents.
 
 ### Limites assumées
 
@@ -171,13 +171,13 @@ réellement concret, image conforme à son prompt. Seule la relecture visuelle l
 
 ## Publication
 
-**Voie réelle : workflow n8n 38** (Buffer résilié, Zernio abandonné le 21/11/2026) : une ligne
-`format: carrousel` dans la table `publications_linkedin`, le PDF déposé à une URL https publique
-(`media_url`), le titre du document dans `titre`. Colonnes, statuts et pièges : `../../references/publication-linkedin-n8n.md`.
+**Voie réelle : workflow n8n 38** (remplace Buffer et Zernio) : une ligne `format: carrousel`
+dans la table `publications_linkedin`, le PDF déposé à une URL https publique (`media_url`), le
+titre du document dans `titre`. Colonnes, statuts et pièges : `../../references/publication-linkedin-n8n.md`.
 
-- Le `documentTitle` (titre affiché sous le document) passe par `retirerPointFinal`, le contrôle
-  d'accents et d'anglicismes (`../../lib/valider-orthographe.js`, `../../lib/valider-anglicismes.js`)
-  avant d'être transmis.
+- **Titre du document** (`titre`) : reprendre le nom du PDF produit, sans `.pdf`. Il vient du titre
+  du hook, point final retiré (`retirerPointFinal`), et ce titre est déjà passé par les contrôles
+  d'accents et d'anglicismes des diapos. Un autre titre n'est contrôlé par aucun script : le relire.
 
 Feu vert : publication sans accord poste par poste pour julien-agency et julien-partners
 seulement (décision de Julien, rappelée dans le `CLAUDE.md` du dépôt). Les contrôles des étapes 5 à
@@ -193,15 +193,12 @@ refus si le rendu déborde) et un `.verif.png` de contrôle à ne pas commiter.
 
 ## Pièges
 
-- `.env` en fins de ligne Windows : la lecture coupe sur `/\r?\n/`, sinon la clé paraît absente.
 - Titre de hook terminé par un point : `retirerPointFinal` évite « pourquoi..pdf ».
 - Un mot sans accent dans un `**gras**` devient invisible aux regex après conversion : le contrôle
   se fait avant conversion.
 - Un chiffre en gras était invisible au contrôle de source : les chiffres gras Unicode sont reconnus.
 - Une image de 480 px faisait déborder les pages checklist/comparaison : `.image-slot` est à
   380 px, et `validerEspacementReel` attrape le reste.
-- `lib/composio.js` et `lib/publier.js` ne servent plus à la publication de cette skill ; le canal
-  partagé `../../lib/composio-canal.js` sert encore à `linkedin-commentaires`.
 - LinkedIn gèle parfois le lecteur multi-pages dans le navigateur piloté : inspecter les PNG
   locaux plutôt que le rendu LinkedIn.
 
@@ -209,6 +206,7 @@ refus si le rendu déborde) et un `.verif.png` de contrôle à ne pas commiter.
 
 - [references/historique.md](references/historique.md) : ancien corps complet (refonte des
   modèles, corrections du 24 et 25/09, audits adversariaux, publications réelles, décisions).
+- [references/evals.md](references/evals.md) : cas de test à rejouer après une modification.
 - [references/plan-accent-hook-18-09-2026.md](references/plan-accent-hook-18-09-2026.md) : plan
   de l'accent coloré du hook.
 - [../../references/linkedin-carrousel-historique.md](../../references/linkedin-carrousel-historique.md) :

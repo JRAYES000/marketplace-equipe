@@ -518,7 +518,7 @@ module.exports = {
   construireDocument,
   nomFichierDepuisTitre,
   cheminSortieParDefaut,
-  // Exportes pour generer-images.js (repli image, voir lib/publier.js) : la
+  // Exportes pour generer-images.js (rendu PNG par diapo et couverture) : la
   // construction d'un document a une seule diapo reutilise exactement le
   // meme gabarit/injection que le PDF multi-page, aucune divergence de rendu
   // entre les deux formats de sortie.

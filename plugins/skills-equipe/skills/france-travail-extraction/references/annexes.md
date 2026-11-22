@@ -83,7 +83,7 @@ annexe 2 habilite le gérant, Antoine Rayes, et tous les salariés de l'École.
 formations de l'École, les contacter pour présenter ces formations et les orienter vers
 l'emploi, et constituer la base de l'École.
 
-**Obligations**, à tenir hors du skill :
+**Obligations**, à tenir hors de la skill :
 
 - informer chaque candidat, au premier contact, du responsable du traitement, de la finalité et
   de ses droits (art. 4.2) ;
@@ -102,6 +102,20 @@ Depuis la v9.4 : le CV de chaque candidat **retenu** est gardé dans le Google D
 partie de la base de l'École et suit les mêmes règles : jamais partagé hors de l'École,
 supprimé avec la fiche (sur demande, ou 24 mois après le dernier contact). Le CV d'un
 hors-cible n'y entre jamais.
+
+## Nouvelle requête (sorti de SKILL.md le 2026-11-22)
+
+Quand aucune recherche enregistrée ne convient (Phase 2, étape 4) :
+
+1. **Poser le mot-clé par l'interface** (`playwright:browser_click`, `playwright:browser_type`).
+   `?mot=...` est ignoré. Cliquer le champ « Métier, compétences, mots clés », taper la requête,
+   cliquer la suggestion « **Ajouter : <requête>** ». Entrée vide le champ sans créer de tag. Un
+   tag se retire par `li.tag span.delete`.
+2. **Cliquer « Rechercher ».** L'en-tête « N résultats pour : X » fait foi, pas les tags.
+3. **Filtres** (« Disponibilité immédiate », « Profil mis à jour depuis moins de 3 mois »).
+   « Tout réinitialiser » les retire aussi.
+4. « Enregistrez votre recherche », nom en ASCII sans `<`, case d'abonnement décochée, puis
+   ajouter la ligne ci-dessous.
 
 ## Recherches enregistrées
 

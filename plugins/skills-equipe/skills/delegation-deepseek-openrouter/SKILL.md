@@ -195,3 +195,5 @@ Pour Pro, même test avec `model: deepseek/deepseek-v4-pro-0813`,
 `reasoning_effort: low`, `max_tokens: 6000` et
 `provider: { order: ["deepseek"] }` : vérifier que le fournisseur indiqué dans
 la réponse est bien DeepSeek, sinon le prix payé est le double.
+
+Cas de test du routeur : `references/evals.md`.

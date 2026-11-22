@@ -110,7 +110,7 @@ const COMPTES = ['page-claude', 'julien-agency', 'julien-partners'];
 const FORMATS = ['texte', 'carrousel', 'video'];
 // "Programme" ajoute le 15/09/2026 : la base Notion reelle ne distinguait pas
 // "redige et valide, date de publication fixee" de "reellement en ligne" --
-// necessaire des que Buffer permet de planifier a l'avance (voir SKILL.md).
+// necessaire des qu'un post est programme a l'avance (workflow n8n 38, voir SKILL.md).
 const ETATS = ['Repere', 'Adapte', 'A relire', 'Programme', 'Publie', 'Rejete'];
 const BILANS = ['Gagnant', 'Neutre', 'Perdant'];
 
