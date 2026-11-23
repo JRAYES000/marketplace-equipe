@@ -83,12 +83,14 @@ annexe 2 habilite le gérant, Antoine Rayes, et tous les salariés de l'École.
 formations de l'École, les contacter pour présenter ces formations et les orienter vers
 l'emploi, et constituer la base de l'École.
 
-**Obligations**, à tenir hors de la skill :
+**Obligations**, à tenir hors du run, dans la base Notion (`SKILL.md`, section « Après
+l'extraction ») :
 
 - informer chaque candidat, au premier contact, du responsable du traitement, de la finalité et
   de ses droits (art. 4.2) ;
 - supprimer une fiche sur demande, et au plus tard **24 mois** après le dernier contact
-  (`Date extraction` sert de point de départ quand aucun contact n'a eu lieu) ;
+  (la formule `A supprimer avant` retombe sur `Date extraction` quand aucun contact n'a eu lieu :
+  état de la formule, choix non validé, pas une règle de la convention) ;
 - ne jamais céder, louer ni vendre la base (art. 3.3).
 
 Côté skill, depuis la v9.2 : les hors-cible ne sont jamais écrits. Seule une empreinte

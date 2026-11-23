@@ -62,6 +62,13 @@ le lot est rejoué un autre jour), `Profil mis a jour`, `Statut` (`A importer` p
 `Note` (jamais vide). La colonne `Accroche` des fiches anciennes (premier e-mail SalesHandy) ne
 s'écrit plus.
 
+Posés hors extraction, jamais écrits par `notion.js` (23/11/2026) : les valeurs de `Statut`
+`Contacte`, `A repondu`, `Inscrit`, `Pas interesse` ; les colonnes `Dernier contact` (date),
+`Information RGPD donnee` (case), `Demande de suppression` (date) et la formule `A supprimer
+avant` ; les vues « À appeler », « À relancer », « RGPD - à supprimer ». Valeurs anciennes encore
+présentes : `Importe SalesHandy`, `Ecarte`. Règles de suivi : `SKILL.md`, section « Après
+l'extraction ».
+
 ## Empreintes hors-cible (sorti de SKILL.md le 2026-11-21)
 
 Il range aussi les **hors-cible** : chaque nouveau profil nommé absent de `choix.json` laisse son
