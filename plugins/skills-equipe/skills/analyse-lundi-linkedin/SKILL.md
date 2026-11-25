@@ -5,7 +5,7 @@ description: >
   chiffres, médianes par format (texte, image, carrousel) calculées par script, rapport à forme
   fixe, contrôle des créneaux du calendrier contre la file de publication. Pour « analyse du lundi »,
   « lance l'analyse LinkedIn », « où en est le test des formats », « vérifie les créneaux du
-  calendrier ». Pas pour un compte client (analyse-reseau-client). Activation manuelle : sur
+  calendrier ». Pas pour un compte client. Activation manuelle : sur
   demande explicite uniquement.
 ---
 

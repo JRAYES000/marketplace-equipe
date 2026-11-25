@@ -2,6 +2,12 @@
 
 Ce que disait le tableau du README avant le 22/11/2026, quand chaque ligne empilait les changements datés. Le README ne garde plus que ce que fait la skill aujourd'hui.
 
+## 25/11/2026 (1.57.0)
+
+- Retrait de `delegation-deepseek-openrouter` et `analyse-reseau-client` : presque jamais utilisées (1 et 0 session depuis juin, mesure sur 3 782 transcripts). Récupérables dans l'historique git.
+- analyse-lundi-linkedin 1.3.1 : la description ne renvoie plus à analyse-reseau-client.
+- README : liste des douze skills corrigée (annonce-mission-linkedin et creation-page-web manquaient), numéro du paquet à jour.
+
 ## 25/11/2026 (1.56.6)
 
 - france-travail-extraction 11.1.1 : la section « Après l'extraction » (suivi des leads, hors run) passe dans `references/suivi.md`, mot pour mot ; le corps garde le renvoi et la règle « aucun message sans l'accord de Julien ». Sommaire retiré. Scripts inchangés.
