@@ -97,3 +97,22 @@ Un seul appel de cadrage · propositions multiples **uniquement** quand le choix
 **L'effort avant tout le reste.** Là où l'interface l'expose (API, Claude Code), l'effort de réflexion est le premier levier de coût, et le seul réglage de la réflexion : elle ne se coupe plus. `medium` est le défaut et suffit à la plupart du travail, `low` tient une bonne part du travail courant, `xhigh` et `max` se réservent aux cas où un gain a été constaté. Pour moins de réflexion, baisser l'effort plutôt qu'écrire « réfléchis moins ». Attention au contresens : l'effort règle la quantité de réflexion, **pas** la longueur de la réponse visible — celle-ci ne se raccourcit qu'en la demandant, d'où la règle anti-verbosité ci-dessus.
 
 **Hygiène de conversation** — le contexte entier est retraité à chaque tour, donc une conversation longue se repaie à chaque message. L'argument est le coût, pas la dégradation : le suivi d'instructions de ce modèle tient sur toute la fenêtre : conversation longue et aboutie → capitaliser puis repartir sur une conversation neuve ; demander des modifications ciblées plutôt que des régénérations complètes ; ne jamais re-coller un document déjà présent.
+
+---
+
+## Justifications sorties de SKILL.md le 2026-11-25
+
+Le corps garde la règle ; la raison est ici.
+
+- **Demande entièrement spécifiée → produire** : ce modèle donne son meilleur quand on lui remet la spécification complète et qu'on le laisse dérouler.
+- **Premier jet dans le message de cadrage** : personne ne repart les mains vides d'un tour de cadrage.
+- **4 questions, pas 5** : quatre est un plafond de l'outil, pas une réserve de place ; tout ce qu'on veut savoir en plus se gagne dans les options. `multiSelect` : une seule case récupère ce que trois questions demandaient. `preview` : deux extraits à comparer tranchent mieux qu'une question sur le format posée dans le vide. Une option de plus coûte une ligne ; une question de plus coûte un axe.
+- **Critères écrits avant** : ils dirigent la production ; écrits après, ils ne font que la justifier. Un critère posé avant de produire et jamais relu à la fin n'a servi qu'à décorer le cadrage.
+- **Plan dans un fichier** : une conversation se vide, et c'est même ce qu'il faut faire quand elle s'allonge. Sans fichier, chaque nettoyage de contexte oblige à recadrer depuis zéro, et l'équipe finit par ne plus nettoyer.
+- **Deux tentatives puis arrêt** : varier légèrement une commande qui échoue est une boucle, et elle se paie en quota.
+- **Fichier sur disque** : c'est un axe distinct, la règle de longueur de la réponse ne s'y applique pas toute seule.
+- **Pas de sous-agent pour se vérifier** : ce modèle relit déjà ce qu'il produit, un vérificateur délégué n'ajoute que du coût.
+- **Capitaliser** : proposer la skill maintenant, tant que le déroulé est frais ; une clôture cérémonieuse est aussi coûteuse qu'une ouverture cérémonieuse.
+- **Auto-notation** : une note globale n'est ni fiable ni actionnable. **Persona** : aucune connaissance ajoutée, exactitude dégradée. **« Réfléchis étape par étape »** : ce modèle raisonne déjà, la consigne coûte sans rien apporter. Mesures : section « Ce qui est réfuté ».
+- **« Les 17 formulations »** : confondre le nom de la skill avec son annexe est ce qui fait chercher la mauvaise chose.
+- **Mode audit, tout remonter** : une consigne du type « ne signale que le grave » est suivie à la lettre par ce modèle ; on demande tout, on trie ensuite.

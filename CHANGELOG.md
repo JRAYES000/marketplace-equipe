@@ -2,6 +2,10 @@
 
 Ce que disait le tableau du README avant le 22/11/2026, quand chaque ligne empilait les changements datés. Le README ne garde plus que ce que fait la skill aujourd'hui.
 
+## 25/11/2026 (1.56.4)
+
+- phrase-magique 1.11.1 : corps allégé (13,3 → 11,2 Ko) sans règle retirée ; les phrases de justification passent dans `references/pourquoi.md` (section « Justifications sorties de SKILL.md le 2026-11-25 »). Évals avant/après identiques sur les trois cas de `references/evals.md`.
+
 ## 25/11/2026 (1.56.3)
 
 - fonce 1.5.0 : règle « Faire soi-même avant de laisser quoi que ce soit à la personne » (§7) : Claude in Chrome ou Windows MCP vérifiés avant de ranger un geste dans « Reste » ; geste restant réduit au minimum.
