@@ -2,6 +2,10 @@
 
 Ce que disait le tableau du README avant le 22/11/2026, quand chaque ligne empilait les changements datés. Le README ne garde plus que ce que fait la skill aujourd'hui.
 
+## 25/11/2026 (1.56.2)
+
+- phrase-magique 1.11.0 : règle « Faire soi-même avant de demander » (Claude in Chrome ou Windows MCP vérifiés avant toute demande à l'utilisateur ; geste restant réduit au minimum : page ouverte, valeur copiée, lien direct, un seul geste décrit).
+
 ## 23/11/2026 (1.56.1)
 
 - france-travail-extraction 11.1.0 : section « Après l'extraction » (suivi des leads dans Notion : statuts `Contacte`, `A repondu`, `Inscrit`, `Pas interesse`, `Dernier contact`, `Information RGPD donnee`, `Demande de suppression`) ; relance à 7 jours passée en règle (vue « À relancer ») ; aucun envoi sans l'accord de Julien. `references/notion.md` et `annexes.md` alignés ; scripts inchangés.
