@@ -2,6 +2,10 @@
 
 Ce que disait le tableau du README avant le 22/11/2026, quand chaque ligne empilait les changements datés. Le README ne garde plus que ce que fait la skill aujourd'hui.
 
+## 25/11/2026 (1.56.3)
+
+- fonce 1.5.0 : règle « Faire soi-même avant de laisser quoi que ce soit à la personne » (§7) : Claude in Chrome ou Windows MCP vérifiés avant de ranger un geste dans « Reste » ; geste restant réduit au minimum.
+
 ## 25/11/2026 (1.56.2)
 
 - phrase-magique 1.11.0 : règle « Faire soi-même avant de demander » (Claude in Chrome ou Windows MCP vérifiés avant toute demande à l'utilisateur ; geste restant réduit au minimum : page ouverte, valeur copiée, lien direct, un seul geste décrit).

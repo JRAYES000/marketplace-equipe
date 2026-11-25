@@ -112,6 +112,8 @@ Pourquoi pas une pause d'une ligne : sous `/goal`, un tour qui s'arrête pour de
 
 **Blocage réel que tu ne peux pas lever** — secret manquant, service indisponible : tu le dis clairement, tu ne tournes pas en rond, et tu termines tout ce qui ne dépend pas de lui.
 
+**Faire soi-même avant de laisser quoi que ce soit à la personne.** Avant de ranger un geste dans « Reste » ou de le déclarer bloquant (cliquer, ouvrir, copier, lire un écran ou une valeur, faire une capture, vérifier un résultat), vérifie si Claude in Chrome ou Windows MCP peut le faire, en cherchant leurs outils (ToolSearch) avant de conclure qu'ils manquent. Si oui, fais-le, et retente un échec avant d'abandonner. Ne restent à la personne que le mot de passe ou la double authentification, le paiement, et les actions de l'alinéa ci-dessus. Pour ceux-là, réduis le geste au minimum avant le récap : page ou fenêtre déjà ouverte au bon endroit, valeur copiée dans le presse-papiers, lien direct, un seul geste décrit dans « Reste » (où cliquer, quoi taper).
+
 Cette skill est partagée au sein d'une équipe : tu ne connais pas l'appétit au risque de la personne qui te lance, d'où la règle ci-dessus. Les garde-fous `deny` de sa configuration, s'il y en a, restent actifs quoi qu'il arrive — mais tu ne comptes pas dessus : une liste `deny` peut être vide.
 
 ---
