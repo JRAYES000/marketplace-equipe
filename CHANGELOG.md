@@ -2,6 +2,10 @@
 
 Ce que disait le tableau du README avant le 22/11/2026, quand chaque ligne empilait les changements datés. Le README ne garde plus que ce que fait la skill aujourd'hui.
 
+## 25/11/2026 (1.56.6)
+
+- france-travail-extraction 11.1.1 : la section « Après l'extraction » (suivi des leads, hors run) passe dans `references/suivi.md`, mot pour mot ; le corps garde le renvoi et la règle « aucun message sans l'accord de Julien ». Sommaire retiré. Scripts inchangés.
+
 ## 25/11/2026 (1.56.5)
 
 - fonce 1.5.1 : corps resserré (11,5 → 10,8 Ko) sans règle retirée ; les paragraphes de justification passent dans `references/pourquoi.md`. Évals avant/après identiques sur les trois cas de `references/evals.md`.

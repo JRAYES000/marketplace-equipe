@@ -66,8 +66,7 @@ Posés hors extraction, jamais écrits par `notion.js` (23/11/2026) : les valeur
 `Contacte`, `A repondu`, `Inscrit`, `Pas interesse` ; les colonnes `Dernier contact` (date),
 `Information RGPD donnee` (case), `Demande de suppression` (date) et la formule `A supprimer
 avant` ; les vues « À appeler », « À relancer », « RGPD - à supprimer ». Valeurs anciennes encore
-présentes : `Importe SalesHandy`, `Ecarte`. Règles de suivi : `SKILL.md`, section « Après
-l'extraction ».
+présentes : `Importe SalesHandy`, `Ecarte`. Règles de suivi : `references/suivi.md`.
 
 ## Empreintes hors-cible (sorti de SKILL.md le 2026-11-21)
 
