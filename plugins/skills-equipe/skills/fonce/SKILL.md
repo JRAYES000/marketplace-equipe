@@ -33,7 +33,7 @@ Affiche-la **une seule fois, en tête, sous cette forme exacte** :
 
 Puis **enchaîne immédiatement**. Tu n'attends aucune réponse, tu ne demandes pas si elle convient.
 
-Pourquoi cette forme précise : dans Claude Code, `/goal` fait juger la condition par un petit modèle après chaque tour et relance tant qu'elle ne tient pas. Si le travail dépasse un tour, la personne colle cette ligne et tu repars seul, sans elle. Hors Claude Code — chat, Cowork — ce mécanisme n'existe pas : la ligne reste ta définition non négociable de « terminé », rien de plus, et tu ne promets pas une relance automatique qui n'aura pas lieu. Dans les deux cas, tu n'as sollicité personne.
+Dans Claude Code, `/goal` fait juger la condition par un petit modèle après chaque tour et relance tant qu'elle ne tient pas : si le travail dépasse un tour, la personne colle cette ligne et tu repars seul. Hors Claude Code (chat, Cowork), ce mécanisme n'existe pas : la ligne reste ta définition non négociable de « terminé », et tu ne promets pas une relance automatique qui n'aura pas lieu.
 
 Ce juge **ne lance aucune commande et n'ouvre aucun fichier** : il ne voit que la conversation. La preuve du contrat doit donc y apparaître telle quelle — la sortie du test, le code HTTP, le compte. Une preuve rangée dans un fichier n'existe pas pour lui.
 
@@ -57,7 +57,7 @@ Ne renvoie jamais la balle : une question posée en cours de route, c'est la rè
 
 ## 3. Économiser les tokens
 
-Le budget se joue sur le nombre d'allers-retours et sur ce que tu fais entrer dans le contexte, pas sur la longueur de tes phrases. Le niveau d'effort, lui, se règle avant de te lancer et n'est pas dans tes mains : c'est à la personne qui lance, voir le README.
+Le budget se joue sur le nombre d'allers-retours et sur ce que tu fais entrer dans le contexte, pas sur la longueur de tes phrases. Le niveau d'effort se règle avant de te lancer, par la personne (voir le README).
 
 **Ce qui coûte le plus cher, dans l'ordre :**
 
@@ -88,7 +88,7 @@ Le budget se joue sur le nombre d'allers-retours et sur ce que tu fais entrer da
 
 Rien n'est terminé sur « ça devrait marcher ». La preuve que tu as annoncée au contrat, tu l'exécutes : déployer et appeler, ouvrir la page, lancer le test, lire la réponse, purger le jeu d'essai.
 
-**Celle-là, et rien de plus.** Ce modèle relit et corrige déjà son travail sans qu'on le lui demande : ajouter une passe générique « un contrôle pour toute logique non triviale » produit de la sur-vérification, coûte des tokens et n'améliore pas le résultat. Ce qui reste non négociable, c'est de ne jamais écrire « vérifié » sans avoir constaté le signal.
+**Celle-là, et rien de plus** : pas de passe générique de contrôle en supplément, elle coûte des tokens sans améliorer le résultat. Ce qui reste non négociable, c'est de ne jamais écrire « vérifié » sans avoir constaté le signal.
 
 ---
 
@@ -108,21 +108,21 @@ Cinq blocs, dans cet ordre, courts :
 
 **Une action sortante ou irréversible que la demande ne nomme pas ne s'exécute pas.** Déploiement, publication, email à un tiers, mouvement d'argent, suppression de données en masse, changement DNS racine, suppression d'un site : tu prépares tout jusqu'à cette action, tu la mets dans « Reste » avec la commande prête, et la condition d'arrêt a été écrite pour tenir sans elle (§1). Si la demande couvre explicitement l'action, tu la fais sans demander.
 
-Pourquoi pas une pause d'une ligne : sous `/goal`, un tour qui s'arrête pour demander est jugé « pas encore atteint » et relancé avec pour consigne d'avancer. La question n'atteint jamais la personne, et l'action finit par partir sans réponse. Une action non faite se rattrape d'un mot ; une action partie ne se rattrape pas.
+Pas de pause pour demander : sous `/goal`, un tour qui s'arrête sur une question est jugé « pas encore atteint » et relancé. La question n'atteint jamais la personne, et l'action finit par partir sans réponse. Une action non faite se rattrape d'un mot ; une action partie ne se rattrape pas.
 
 **Blocage réel que tu ne peux pas lever** — secret manquant, service indisponible : tu le dis clairement, tu ne tournes pas en rond, et tu termines tout ce qui ne dépend pas de lui.
 
 **Faire soi-même avant de laisser quoi que ce soit à la personne.** Avant de ranger un geste dans « Reste » ou de le déclarer bloquant (cliquer, ouvrir, copier, lire un écran ou une valeur, faire une capture, vérifier un résultat), vérifie si Claude in Chrome ou Windows MCP peut le faire, en cherchant leurs outils (ToolSearch) avant de conclure qu'ils manquent. Si oui, fais-le, et retente un échec avant d'abandonner. Ne restent à la personne que le mot de passe ou la double authentification, le paiement, et les actions de l'alinéa ci-dessus. Pour ceux-là, réduis le geste au minimum avant le récap : page ou fenêtre déjà ouverte au bon endroit, valeur copiée dans le presse-papiers, lien direct, un seul geste décrit dans « Reste » (où cliquer, quoi taper).
 
-Cette skill est partagée au sein d'une équipe : tu ne connais pas l'appétit au risque de la personne qui te lance, d'où la règle ci-dessus. Les garde-fous `deny` de sa configuration, s'il y en a, restent actifs quoi qu'il arrive — mais tu ne comptes pas dessus : une liste `deny` peut être vide.
+Tu ne connais pas l'appétit au risque de la personne qui te lance, d'où la règle ci-dessus. Ne compte pas sur les garde-fous `deny` de sa configuration : la liste peut être vide.
 
 ---
 
 ## 8. Cohabitation avec les autres skills
 
 - **fonce et phrase-magique** : incompatibles sur un seul point, les questions de cadrage. Sous `fonce`, l'étape de cadrage de phrase-magique (4 questions, puis attendre) est suspendue ; le contrat d'arrêt et le bloc « Supposé » la remplacent. Le reste de phrase-magique tient : socle, étiquetage des chiffres, devoir d'alerte (en une ligne, puis on exécute quand même), contradicteur, périmètre tenu, critères binaires repris à la clôture.
-- **ponytail** *(`ponytail:ponytail`, module public `DietrichGebert/ponytail`)* — compatible et complémentaire : ponytail gouverne la taille du diff, fonce gouverne le nombre d'allers-retours. Les deux poussent dans le même sens.
-- **`/goal`** *(Claude Code uniquement)* — voir §1, c'est le prolongement naturel entre les tours. Le pairer avec le mode auto laisse tourner chaque tour sans validation d'outil. Sans `/goal`, un travail qui dépasse un tour s'arrête à la fin du tour : le fichier de bord permet de le reprendre d'un mot.
+- **ponytail** — compatible : ponytail gouverne la taille du diff, fonce le nombre d'allers-retours.
+- **`/goal`** *(Claude Code uniquement)* — voir §1. Avec le mode auto, chaque tour tourne sans validation d'outil. Sans `/goal`, un travail qui dépasse un tour s'arrête à la fin du tour : le fichier de bord permet de le reprendre d'un mot.
 - **`/loop`** — non. Fonce n'est pas périodique, il s'arrête quand la condition tient.
 
-Cas de test, à rejouer après une modification : `references/evals.md`.
+Cas de test, à rejouer après une modification : `references/evals.md`. Justification des règles : `references/pourquoi.md`.
