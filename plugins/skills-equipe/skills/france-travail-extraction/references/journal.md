@@ -674,3 +674,7 @@ Phase 5 bis recopie desormais seulement les Id acceptes par `ecrire`.
 • Filtre « Valid seul » abandonne : la sonde integree rend « inconclusive » sur Gmail, Hotmail,
   iCloud. Un « Re-verify » des 47 a fait passer les valides de 15 a 5 : ne pas le relancer.
 • Entree automatique d'un nouveau contact dans la campagne : pas encore vue sur un vrai lot.
+
+2026-11-26 — v11.6.2 : plafond de la campagne mdc passe de 10 a 20 envois par jour (Julien).
+• Reglage « Maximum per mailbox per day » de la campagne, une seule boite d'envoi. Lu apres
+  enregistrement : compteur « 5 of 20 sent today ».
