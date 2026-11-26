@@ -263,6 +263,8 @@ function deposerSurDrive(liste, date) {
     copies++;
   }
   console.log('CV deposes sur Drive : ' + copies + (deja ? ', deja presents : ' + deja : '') + ' -> ' + dossier);
+  // Lien web du dossier, pose par le profil (v11.4.1) : a reporter dans le recapitulatif.
+  if (process.env.FT_CV_DRIVE_URL) console.log('dossier Drive : ' + process.env.FT_CV_DRIVE_URL);
   if (manques.length) console.log('CV non deposes : ' + manques.join(' ; '));
 }
 
