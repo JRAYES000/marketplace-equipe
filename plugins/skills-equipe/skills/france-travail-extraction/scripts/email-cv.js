@@ -18,6 +18,10 @@
 
 const CAR = 'A-Za-z0-9._%+-';
 const RE_EMAIL = new RegExp('[' + CAR + ']+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}', 'g');
+// Meme motif, extension d'une lettre admise : sert a voir une extension coupee en fin de ligne.
+const RE_EMAIL_LARGE = new RegExp('[' + CAR + ']+@[A-Za-z0-9.-]+\\.[A-Za-z]+', 'g');
+// Extensions courantes des CV francais. « co » n'y est pas : « gmail.co » suivi de « m » se recolle.
+const EXTENSIONS = new Set(['com', 'fr', 'net', 'org', 'eu', 'be', 'ch', 'me', 'info', 'io', 're']);
 // Libelles qu'un CV pose juste avant l'email : jamais un debut de partie locale.
 const LIBELLES = /^(e-?mail|mail|m[eé]l|courriel|contact|adresse|coordonn[eé]es|t[eé]l|phone)$/i;
 const FAI = 'gmail|yahoo|hotmail|outlook|orange|wanadoo|free|laposte|sfr|icloud';
@@ -70,9 +74,20 @@ function lireEmail(texte) {
   // 1) tel quel, avec recollage du debut de la partie locale
   for (let i = 0; i < lignes.length; i++) {
     const l = lignes[i];
-    for (const m of l.matchAll(RE_EMAIL)) {
+    for (const m of l.matchAll(RE_EMAIL_LARGE)) {
       let email = m[0];
       const marques = [];
+      // Extension coupee en fin de ligne (v11.6) : « …@gmail.c » / « om », « …@gmail.co » / « m »,
+      // « …@ik.m » / « e » (quatre CV le 26/11/2026). Recollee seulement si l'email finit sa
+      // ligne, si la ligne suivante ne contient que 1 a 3 lettres, et si l'ensemble donne une
+      // extension courante. Une extension d'une seule lettre non recollee n'est pas un email.
+      const ext = email.split('.').pop().toLowerCase();
+      if (!EXTENSIONS.has(ext)) {
+        const suite = (lignes[i + 1] || '').trim();
+        if (!l.slice(m.index + m[0].length).trim() && /^[A-Za-z]{1,3}$/.test(suite) && EXTENSIONS.has(ext + suite.toLowerCase())) {
+          email += suite; marques.push('RECOLLE');
+        } else if (ext.length < 2) continue;
+      }
       const lu = email.replace(/^[^A-Za-z0-9]+/, '');
       const debut = m.index + (email.length - lu.length);
       email = lu;

@@ -656,3 +656,13 @@ Phase 5 bis recopie desormais seulement les Id acceptes par `ecrire`.
 • Non corrige : domaine coupe sur son extension (« @ik.m » / « e ») et email present seulement en
   lien souligne ; les deux se lisent a l'oeil sur le CV.
 • Recherche « Creation entreprise dispo immediate » enregistree ; pieges notes dans annexes.md.
+
+2026-11-26 — v11.6 : troisieme lot mdc (20 profils) et deux corrections.
+• Lot : 63 profils parcourus, 24 CV, dont 4 profils anonymes deja en base retelecharges ; 14 sans
+  CV ecartes. « playwright.js recherche » teste sur le site pour la premiere fois : fonctionne.
+• Profils anonymes : « notion.js situer » rend `presentations` (empreinte des 120 premiers
+  caracteres de la cle du texte de presentation, 40 au moins) ; la page saute le profil dont le
+  texte est connu (`dejaPres`, compteur `sautesPres`). Teste sur page factice et sur les deux
+  bases (44 et 382 empreintes) ; pas encore vu sur le site.
+• email-cv.js : extension coupee en fin de ligne (« gmail.c » / « om », « gmail.co » / « m »,
+  « ik.m » / « e ») recollee et marquee [RECOLLE], donc a relire sur le CV. Quatre CV du jour.

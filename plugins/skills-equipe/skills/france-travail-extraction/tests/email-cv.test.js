@@ -75,3 +75,21 @@ test('v11.5 : un telephone au-dessus de l email n est pas recolle', () => {
   assert.strictEqual(r.email, 'alex.exemple@exemple.fr');
   assert.deepStrictEqual(r.marques, []);
 });
+
+test('v11.6 : extension coupee en fin de ligne, recollee et marquee', () => {
+  for (const [texte, attendu] of [
+    ['06 00 00 00 00\njean.exemple58@gmail.c\nom\nPermis B', 'jean.exemple58@gmail.com'],
+    [' camille93@gmail.co\nm\n', 'camille93@gmail.com'],
+    ['dominiqueexemple@ik.m\ne\nAdresse', 'dominiqueexemple@ik.me'],
+  ]) {
+    const r = lireEmail(texte);
+    assert.strictEqual(r.email, attendu);
+    assert.deepStrictEqual(r.marques, ['RECOLLE']);
+  }
+});
+
+test('v11.6 : pas de recollage si la ligne suivante est un mot, ni si l extension est complete', () => {
+  assert.strictEqual(lireEmail('camille@exemple.fr\nom\n').email, 'camille@exemple.fr');
+  assert.strictEqual(lireEmail('camille@exemple.co\nmobile 06\n').email, 'camille@exemple.co');
+  assert.strictEqual(lireEmail('camille@exemple.c\nPermis B\n').email, '');
+});

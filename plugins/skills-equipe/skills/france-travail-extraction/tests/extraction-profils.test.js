@@ -14,7 +14,7 @@ const source = fs.readFileSync(path.join(__dirname, '..', 'scripts', 'extraction
 const PROFILS = [
   { nom: 'Camille EXEMPLE', titre: 'Projet de test', cv: true, pres: 'Presentation un.' },
   { nom: 'Sans CVTHEQUE', titre: 'Profil sans CV', cv: false, pres: 'Presentation deux.' },
-  { nom: 'Dominique FICTIF', titre: 'Autre projet', cv: true, pres: 'Joignable au +596 696 00 00 00.' },
+  { nom: 'Dominique FICTIF', titre: 'Autre projet', cv: true, pres: 'Joignable au +596 696 00 00 00 pour tout projet de creation en Martinique.' },
 ];
 
 function pageFactice() {
@@ -74,4 +74,22 @@ test('un profil deja en base est saute sans telechargement', async () => {
 test('un numero d outre-mer de la presentation est lu', async () => {
   const { journal } = await lancer(2);
   assert.strictEqual(journal.find(r => r.nom === 'Dominique FICTIF').tel, '+596 696 00 00 00');
+});
+
+test('v11.6 : un profil deja en base est reconnu a son texte de presentation', async () => {
+  const cle = s => s.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().replace(/[^a-z0-9]+/g, ' ').trim();
+  const h = s => require('crypto').createHash('sha256').update(cle(cle(s).slice(0, 120))).digest('hex').slice(0, 16);
+  const { run, journal, telecharges } = await lancer(2, { noms: [], ecartes: [], presentations: [h(PROFILS[2].pres)] });
+  assert.strictEqual(run.sautesPres, 1);
+  assert.strictEqual(run.nouveaux, 1);
+  assert.deepStrictEqual(telecharges, ['Camille EXEMPLE']);
+  assert.strictEqual(journal.find(r => r.dejaPres).nom, 'Dominique FICTIF');
+});
+
+test('v11.6 : un texte de presentation court ne fait jamais sauter un profil', async () => {
+  const cle = s => s.toLowerCase().replace(/[^a-z0-9]+/g, ' ').trim();
+  const h = s => require('crypto').createHash('sha256').update(cle(s)).digest('hex').slice(0, 16);
+  const { run } = await lancer(2, { noms: [], ecartes: [], presentations: [h(PROFILS[0].pres)] });
+  assert.strictEqual(run.sautesPres, 0);
+  assert.strictEqual(run.nouveaux, 2);
 });

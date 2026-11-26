@@ -264,8 +264,16 @@ const sec = drapeau('--sec');
     const connus = connusDe(rows);
     const ecartes = lireEcartes();
     // v9.2 : { noms, ecartes }. extraction-profils.js accepte encore l'ancien tableau de noms.
-    fs.writeFileSync(f, JSON.stringify({ noms: connus, ecartes }));
-    console.log('connus : ' + connus.length + ' nom(s), ' + ecartes.length + ' hors-cible deja vu(s) -> ' + f);
+    // v11.6 : empreinte du texte de presentation de chaque fiche (debut de la Note, avant les
+    // motifs). La page s'en sert pour sauter un profil anonyme deja en base, qu'aucun nom ne
+    // designe. Meme calcul que dans extraction-profils.js ; jamais le texte en clair.
+    const cle = s => (s || '').normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().replace(/[^a-z0-9]+/g, ' ').trim();
+    const empreinte = s => require('crypto').createHash('sha256').update(cle(s)).digest('hex').slice(0, 16);
+    const presentations = [...new Set(rows.map(r => cle((r.Note || '').split(' — ')[0]).slice(0, 120))
+      .filter(k => k.length >= 40 && k !== cle('Pas de texte de presentation')).map(empreinte))];
+    fs.writeFileSync(f, JSON.stringify({ noms: connus, ecartes, presentations }));
+    console.log('connus : ' + connus.length + ' nom(s), ' + ecartes.length + ' hors-cible deja vu(s), ' +
+      presentations.length + ' presentation(s) -> ' + f);
   } else if (cmd === 'publier') {
     const propres = valider(lireLot(process.argv[3]));
     let code = 0;

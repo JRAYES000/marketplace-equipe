@@ -113,6 +113,9 @@ const __bruts = window.__connusBruts || [];
 // Hors-cible deja vus : empreintes seules (assembler.js), jamais un nom en clair.
 window.__ecartes = window.__ecartes || new Set();
 (Array.isArray(__bruts) ? [] : (__bruts.ecartes || [])).forEach(h => window.__ecartes.add(h));
+// Empreintes des textes de presentation des fiches deja en base (v11.6).
+window.__presConnues = window.__presConnues || new Set();
+(Array.isArray(__bruts) ? [] : (__bruts.presentations || [])).forEach(h => window.__presConnues.add(h));
 // Doit rester egale a `empreinte` d'assembler.js : SHA-256 de la cle, 16 premiers hex.
 window.__empreinte = async s => [...new Uint8Array(await crypto.subtle.digest('SHA-256', new TextEncoder().encode(window.__cle(s))))]
   .map(b => b.toString(16).padStart(2, '0')).join('').slice(0, 16);
@@ -164,9 +167,12 @@ window.__corps = async (BATCH, BUDGET_MS) => {
     return pag();
   };
 
+  // Texte de presentation du panneau, coupe avant « Adresse » (un candidat y avait colle la sienne).
+  const presDe = t => norm((t.match(/\nDisponibilit[^\n]*\n([\s\S]*?)(?:\n\s*(?:Points forts|Pour des raisons de s|Adresse\b)|$)/) || [])[1] || '');
+
   const lot = [];
   let arret = 'batch atteint';
-  let sautes = 0, sautesEcartes = 0, sansCV = 0;
+  let sautes = 0, sautesEcartes = 0, sansCV = 0, sautesPres = 0;
 
   for (let i = 0; lot.length < BATCH; i++) {
     if (Date.now() - debut > BUDGET_MS) { arret = 'budget'; break; }
@@ -204,6 +210,22 @@ window.__corps = async (BATCH, BUDGET_MS) => {
     // Le téléphone vient du CV par OCR, pas du panneau : mesuré le 2026-09-17,
     // l'OCR en rend 25 sur 26 CV, contre 25 profils sur 30 pour le clic, et il
     // trouve des numéros que le panneau n'affiche pas du tout.
+    // v11.6 : profil deja en base reconnu a son texte de presentation. Un profil anonyme n'a
+    // pas de nom a comparer, et il etait retelecharge a chaque lot (4 sur 24 le 26/11/2026).
+    // Meme calcul que « notion.js situer » : empreinte des 120 premiers caracteres de la cle,
+    // 40 au moins pour ne pas confondre deux textes courts.
+    const clePres = window.__cle(presDe(t0)).slice(0, 120);
+    if (window.__presConnues.size && clePres.length >= 40 && window.__presConnues.has(await window.__empreinte(clePres))) {
+      window.__log.push({ pag: courant, nom: nom0, deja: true, dejaPres: true, recherche: window.__recherche || null });
+      sautes++;
+      sautesPres++;
+      const nxp = suivant();
+      if (!nxp) { arret = 'suivant introuvable'; break; }
+      nxp.click();
+      if (await attendre(courant) === courant) { arret = 'pagination bloquee a ' + courant; break; }
+      continue;
+    }
+
     const boutonCV = () => { const x = P(); return !!(x && [...x.querySelectorAll('a,button')].find(e => /Télécharger/i.test(norm(e.textContent)))); };
     let aCV = boutonCV();
     // Second regard avant d'ecarter : un bouton rendu en retard ferait perdre un profil avec CV.
@@ -262,7 +284,7 @@ window.__corps = async (BATCH, BUDGET_MS) => {
       // « Disponibilite » et « Points forts ». C'est la source OBLIGATOIRE de la
       // Note de la fiche (depuis le 29/09/2026). Coupe avant « Adresse » : un
       // candidat y avait colle son adresse postale.
-      presentation: norm((t.match(/\nDisponibilit[^\n]*\n([\s\S]*?)(?:\n\s*(?:Points forts|Pour des raisons de s|Adresse\b)|$)/) || [])[1] || '')
+      presentation: presDe(t)
     };
     window.__log.push(rec);
     lot.push(rec);
@@ -276,7 +298,7 @@ window.__corps = async (BATCH, BUDGET_MS) => {
 
   // Compact : le pont coupe vers 1 000 caracteres. Le detail se lit par `__exporter()`.
   return JSON.stringify({
-    nouveaux: lot.length, sautes, sautesEcartes, sansCV, total: window.__log.length,
+    nouveaux: lot.length, sautes, sautesEcartes, sautesPres, sansCV, total: window.__log.length,
     nouveauxTotal: window.__log.filter(r => !r.deja).length,
     telecharges: window.__log.filter(r => r.telecharge).length,
     arret, secondes: Math.round((Date.now() - debut) / 1000),

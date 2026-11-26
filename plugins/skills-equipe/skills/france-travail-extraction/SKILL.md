@@ -8,7 +8,7 @@ description: >
   CV est mentionné.
 compatibility: "Claude Code. Requiert le serveur MCP Playwright avec un profil persistant (--user-data-dir, appareil enrôlé sur France Travail), l'API publique Notion (variable NOTION_TOKEN_FT, connexion interne « Leads France Travail - API »), l'outil Bash avec node, poppler et tesseract. Ni Claude in Chrome, ni le connecteur Notion MCP, ni NocoDB."
 metadata:
-  version: '11.5.0'
+  version: '11.6.0'
   environment: 'Claude Code, rédigé pour Claude Sonnet 5.5 (fonctionne aussi sous Opus). Playwright MCP pour la session recruteur, outil Bash pour les scripts fournis. Livrable = la base Notion « Leads France Travail », seule base de la skill.'
   journal: 'references/journal.md — mesures et incidents des runs réels (v2.0 à v11.0). À lire seulement pour comprendre ou contester une règle ; en cas de désaccord ce fichier-ci fait foi.'
 ---
@@ -205,6 +205,10 @@ défaut de Bash) : `browser_run_code_unsafe` n'accepte en `filename` que ce doss
 `.playwright-mcp/`. Il écrit `ft-connexion.js`, `ft-extraction.js`, `ft-suite.js` et `ft-fin.js`
 (noms connus et cible compris), et crée le dossier de téléchargements du lot. Il refuse de
 démarrer si ce dossier contient encore les fichiers d'un lot précédent : `nettoyer-cv.sh` d'abord.
+
+`connus.json` porte aussi `presentations` (v11.6) : l'empreinte du texte de présentation de chaque
+fiche. La page s'en sert pour sauter un profil **anonyme** déjà en base, qu'aucun nom ne désigne
+(`run.sautesPres`). Avant, il était retéléchargé à chaque lot.
 
 **Barrière :** `situer` a répondu avec le code 0 (même base vide), et `preparer` a affiché les
 quatre chemins `ft-*.js`.
