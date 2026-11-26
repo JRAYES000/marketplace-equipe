@@ -8,7 +8,7 @@ description: >
   CV est mentionné.
 compatibility: "Claude Code. Requiert le serveur MCP Playwright avec un profil persistant (--user-data-dir, appareil enrôlé sur France Travail), l'API publique Notion (variable NOTION_TOKEN_FT, connexion interne « Leads France Travail - API »), l'outil Bash avec node, poppler et tesseract. Ni Claude in Chrome, ni le connecteur Notion MCP, ni NocoDB."
 metadata:
-  version: '11.6.0'
+  version: '11.6.1'
   environment: 'Claude Code, rédigé pour Claude Sonnet 5.5 (fonctionne aussi sous Opus). Playwright MCP pour la session recruteur, outil Bash pour les scripts fournis. Livrable = la base Notion « Leads France Travail », seule base de la skill.'
   journal: 'references/journal.md — mesures et incidents des runs réels (v2.0 à v11.0). À lire seulement pour comprendre ou contester une règle ; en cas de désaccord ce fichier-ci fait foi.'
 ---
@@ -72,8 +72,13 @@ Sous un profil, trois choses changent ; le reste du run est identique :
   fin (60 s au plus) et rend `verification (espace entier) : valides=… invalides=… inconnues=…`,
   à reporter dans le récapitulatif. `inconnues` est normal pour Outlook, Hotmail et iCloud, qui
   ne répondent pas à la sonde. `invalides` > 0 : le dire, ne rien supprimer.
-  **Importer n'est pas envoyer** : aucune campagne n'est créée ni lancée, tout envoi se demande à
-  Julien.
+  **Profil `mdc` : importer déclenche l'envoi** (Julien, 26/11/2026). La campagne Warmbly
+  « Email 1 - simulateur » est liée au segment vivant « Tous les contacts - hors Invalid et
+  Risky » : tout contact importé y entre seul et reçoit l'Email 1, à 10 envois par jour. Le dire
+  dans le récapitulatif, avec le nombre de contacts importés. Ne pas relancer la vérification
+  des adresses à la main (« Re-verify ») : la sonde intégrée repasse des adresses `valides` en
+  `inconnues`. Tout autre profil : aucune campagne n'est créée ni lancée, tout envoi se demande
+  à Julien.
 - **Récapitulatif (Phase 6)** : le lien de la base du profil et celui de son dossier Drive
   (`FT_CV_DRIVE_URL`, que `assembler.js lot` affiche en `dossier Drive : …`), pas ceux de
   l'École, et la ligne de l'import Warmbly. Le même lien Drive est en tête de la description de

@@ -666,3 +666,11 @@ Phase 5 bis recopie desormais seulement les Id acceptes par `ecrire`.
   bases (44 et 382 empreintes) ; pas encore vu sur le site.
 • email-cv.js : extension coupee en fin de ligne (« gmail.c » / « om », « gmail.co » / « m »,
   « ik.m » / « e ») recollee et marquee [RECOLLE], donc a relire sur le CV. Quatre CV du jour.
+
+2026-11-26 — v11.6.1 : profil mdc, l'import declenche l'envoi (Julien).
+• Campagne Warmbly « Email 1 - simulateur » liee au segment vivant « Tous les contacts - hors
+  Invalid et Risky » (verification_status none of invalid, risky). Constate dans Warmbly :
+  47 leads, 4 envoyes, 43 en attente, 10 envois par jour. Le segment du premier lot (7) reste lie.
+• Filtre « Valid seul » abandonne : la sonde integree rend « inconclusive » sur Gmail, Hotmail,
+  iCloud. Un « Re-verify » des 47 a fait passer les valides de 15 a 5 : ne pas le relancer.
+• Entree automatique d'un nouveau contact dans la campagne : pas encore vue sur un vrai lot.
