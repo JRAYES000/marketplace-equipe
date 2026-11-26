@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 // Import Warmbly de fin de lot (v11.2, Julien 26/11/2026) : charge dans un espace Warmbly les
 // fiches Notion « A importer » qui ont un e-mail, puis les passe en « Importe Warmbly ».
+// Il cree aussi, une fois, le segment « FT - <requete> » de chaque requete importee (v11.3).
 // Aucun e-mail ne part d'ici : ce script ne touche ni campagne, ni sequence, ni envoi.
 //
 //   node warmbly.js importer [--sec]     --sec : compte, n'ecrit rien (ni Warmbly ni Notion)
@@ -134,6 +135,7 @@ const sec = process.argv.includes('--sec');
   if (sec) return console.log('simulation : rien ecrit');
 
   let importes = 0, deja = 0, echecs = 0;
+  const requetes = new Set();
   for (const f of fiches) {
     const qui = [f.prenom, f.nom].filter(Boolean).join(' ');
     const vu = warmbly(['contact', 'lookup', '--email', f.email]);
@@ -152,12 +154,33 @@ const sec = process.argv.includes('--sec');
       if (!cr.ok) { echecs++; console.log('  echec (creation) : ' + qui + ' -> ' + cr.err); continue; }
       importes++;
     }
+    if (f.requete) requetes.add(f.requete);
     // Notion seulement apres Warmbly : une fiche « Importe Warmbly » est toujours dans Warmbly.
     try {
       await notion('PATCH', '/pages/' + f.page, { properties: { Statut: { select: { name: IMPORTE } } } });
     } catch (e) { echecs++; console.log('  echec (statut Notion) : ' + qui + ' -> ' + e.message); }
   }
+  // Un segment par requete (v11.3, Julien 26/11/2026) : « FT - <requete> », sur le champ
+  // personnalise requete. Vivant : les contacts des lots suivants y entrent seuls. Cree une fois.
+  let segments = 0;
+  if (requetes.size) {
+    const ls = warmbly(['segment', 'list']);
+    if (!ls.ok) { echecs++; console.log('  echec (liste des segments) : ' + ls.err); }
+    else {
+      const connus = new Set((ls.data.data || []).map(x => norm(x.name)));
+      for (const r of requetes) {
+        const nom = 'FT - ' + r;
+        if (connus.has(norm(nom))) continue;
+        const cr = warmbly(['segment', 'create', '--input', '-'], JSON.stringify({
+          name: nom, description: 'Leads France Travail, requete « ' + r + ' »', match: 'all',
+          conditions: [{ field: 'custom.requete', operator: 'equals', value: r }],
+        }));
+        if (!cr.ok) { echecs++; console.log('  echec (segment « ' + nom + ' ») : ' + cr.err); continue; }
+        segments++;
+      }
+    }
+  }
   const reste = (await aImporter()).length;
-  console.log('importes=' + importes + ' deja_dans_warmbly=' + deja + ' echecs=' + echecs + ' restent_a_importer=' + reste);
+  console.log('importes=' + importes + ' deja_dans_warmbly=' + deja + ' segments_crees=' + segments + ' echecs=' + echecs + ' restent_a_importer=' + reste);
   process.exit(echecs || reste ? 2 : 0);
 })().catch(e => die(e.message));

@@ -8,7 +8,7 @@ description: >
   CV est mentionné.
 compatibility: "Claude Code. Requiert le serveur MCP Playwright avec un profil persistant (--user-data-dir, appareil enrôlé sur France Travail), l'API publique Notion (variable NOTION_TOKEN_FT, connexion interne « Leads France Travail - API »), l'outil Bash avec node, poppler et tesseract. Ni Claude in Chrome, ni le connecteur Notion MCP, ni NocoDB."
 metadata:
-  version: '11.2.0'
+  version: '11.3.0'
   environment: 'Claude Code, rédigé pour Claude Sonnet 5.5 (fonctionne aussi sous Opus). Playwright MCP pour la session recruteur, outil Bash pour les scripts fournis. Livrable = la base Notion « Leads France Travail », seule base de la skill.'
   journal: 'references/journal.md — mesures et incidents des runs réels (v2.0 à v11.0). À lire seulement pour comprendre ou contester une règle ; en cas de désaccord ce fichier-ci fait foi.'
 ---
@@ -63,8 +63,12 @@ Sous un profil, trois choses changent ; le reste du run est identique :
   `node "<skill>/scripts/warmbly.js" importer`. Il crée dans l'espace Warmbly du profil un contact
   par fiche `A importer` qui a un e-mail, puis passe la fiche en `Importe Warmbly`. Il refuse de
   tourner si la clé ouvre un autre espace ou si la base n'a pas ce statut. Sortie à lire :
-  `importes=N deja_dans_warmbly=M echecs=K restent_a_importer=R`. Code 2 (échecs) : le dire avec
-  les lignes `echec`, ne pas relancer en boucle ; le prochain lot reprend ce qui reste.
+  `importes=N deja_dans_warmbly=M segments_crees=S echecs=K restent_a_importer=R`. Code 2
+  (échecs) : le dire avec les lignes `echec`, ne pas relancer en boucle ; le prochain lot reprend
+  ce qui reste. Chaque contact porte les champs personnalisés `source`, `fonction` et `requete`.
+  Le script crée une fois le segment « FT - <requête> » (condition `requete` égale à la
+  requête) : vivant, il reçoit seul les contacts des lots suivants. Pas de label : il doublerait
+  le champ `requete`.
   **Importer n'est pas envoyer** : aucune campagne n'est créée ni lancée, tout envoi se demande à
   Julien.
 - **Récapitulatif (Phase 6)** : le lien de la base du profil, pas celui de l'École, et la ligne
@@ -153,9 +157,14 @@ Trois questions, en un seul appel :
    compter.
 3. **Filtres** — garder « Disponibilité immédiate » + « Profil mis à jour < 3 mois » ? Lieu ?
 
-Puis confirmer en une ligne : requête, taille, filtres, destination Notion, le fait que
-l'email manquera pour les candidats sans CV, et que Julien devra taper son mot de passe France
-Travail dans la fenêtre Playwright en Phase 2.
+**La cible ne se demande pas : un profil sans CV est écarté d'office**, pour tous les lots et
+tous les profils (Julien, 26/11/2026). Sans CV, pas d'email. Le parcours le saute sans le
+compter dans les nouveaux, rien n'est écrit, aucune empreinte n'est gardée : s'il dépose un CV
+plus tard, un lot suivant le prendra.
+
+Puis confirmer en une ligne : requête, taille (comptée en profils **avec CV**), filtres,
+destination Notion, et que Julien devra taper son mot de passe France Travail dans la fenêtre
+Playwright en Phase 2.
 
 **Barrière :** requête, taille et filtres connus.
 
@@ -265,8 +274,10 @@ Julien peut réduire la fenêtre : le parcours tourne à pleine vitesse (annexes
    appeler `window.__reset()` avant (`browser_evaluate`).
 
 Le script lit pour chaque profil nom, titre, présentation, date de mise à jour, téléphone
-affiché ; il télécharge le CV s'il existe (avec son rang, `dlRang`) ; il ne clique « Afficher le
-numéro » que pour les profils sans CV.
+affiché, et télécharge le CV (avec son rang, `dlRang`). **Un profil sans CV est sauté** (second
+regard après 0,8 s, puis `sansCV` dans les compteurs du tour) : il ne compte pas dans
+`nouveauxTotal`, et « Afficher le numéro » n'est plus jamais cliqué. `run.sansCV` proche de
+`run.total` → le bouton « Télécharger » a changé : s'arrêter et le dire.
 
 **Les bons profils sont en tête** : la pertinence décroît avec l'ancienneté. Sur « formation
 naturopathie », 1 079 résultats annoncés mais du hors-sujet au-delà de ~100. Si le vivier
@@ -342,7 +353,7 @@ node "<skill>/scripts/notion.js" publier "<tmp>/lot.json"
 ```
 
 `assembler.js lot` remplit toutes les colonnes, dont la `Note` : présentation du candidat telle
-qu'il l'a écrite, puis les motifs après ` — ` (`pas de CV`, `CV non recu`, `email non trouve`,
+qu'il l'a écrite, puis les motifs après ` — ` (`CV non recu`, `email non trouve`,
 `PDF illisible`, `email reconstruit`, `email recolle sur deux morceaux`, `email douteux (…)`,
 `appariement incertain`, `profil anonyme`, `telephone non trouve`). Ce n'est pas une analyse du CV. **Aucun champ vide sans motif**
 (Julien).
@@ -416,15 +427,16 @@ Raison : données de candidats (RGPD), et un CV resté là fait refuser le lot s
 
 - le lien de la base Notion « Leads France Travail »
   (`https://www.notion.so/1cfd41a205fc44f797b39e4e8e1d6978`) ;
-- profils parcourus, retenus, écartés hors-cible, doublons ;
+- profils parcourus, sans CV (écartés d'office), retenus, écartés hors-cible, doublons ;
 - leads écrits, dont avec email et avec téléphone ;
 - le motif de chaque champ vide, regroupé par `Note` ;
 - les CV déposés sur Drive (nombre, et ceux qui n'y sont pas avec leur motif), avec le lien du
   dossier (`https://drive.google.com/drive/folders/1SrIRCoTf3p5-1QOXgsM-uHAHe9jqaFm7`) ;
 - en première ligne si elle existe : la file d'attente Notion et son nombre de fiches.
 
-Repère mesuré (lot de 100) : 76 fiches exploitables sur 99. Le plafond est le dépôt
-de CV (un profil sur quatre n'en a pas). Rendement très en dessous → chercher d'abord des CV non
+Repère mesuré avant la v11.3 (lot de 100) : 76 fiches exploitables sur 99, le plafond étant le
+dépôt de CV (un profil sur quatre n'en avait pas). Depuis, les sans-CV ne comptent plus dans le
+lot. Rendement très en dessous → chercher d'abord des CV non
 enregistrés (`erreurs`, `cv_enregistres` des tours).
 
 Ne rien proposer d'autre en fin de run : le suivi des leads se fait ensuite dans Notion (section

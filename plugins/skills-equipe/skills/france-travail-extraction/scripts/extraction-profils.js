@@ -1,4 +1,6 @@
 // Script d'extraction v9.6 — un lot de profils France Travail Pro.
+// v11.3 (2026-11-26) : profil sans CV ecarte d'office (`deja: true, sansCV: true`), plus aucun
+//   clic « Afficher le numero ».
 // v10.0 (2026-10-04) : route Playwright. Injecte par ft-extraction.js (scripts/playwright.js), qui
 //   ouvre lui-meme le premier profil d'un vrai clic. Les points 1, 1 bis et la LIMITE CONNUE
 //   ci-dessous ne valent plus que pour le repli Claude in Chrome : Playwright ne bride pas les
@@ -164,7 +166,7 @@ window.__corps = async (BATCH, BUDGET_MS) => {
 
   const lot = [];
   let arret = 'batch atteint';
-  let sautes = 0, sautesEcartes = 0;
+  let sautes = 0, sautesEcartes = 0, sansCV = 0;
 
   for (let i = 0; lot.length < BATCH; i++) {
     if (Date.now() - debut > BUDGET_MS) { arret = 'budget'; break; }
@@ -201,13 +203,21 @@ window.__corps = async (BATCH, BUDGET_MS) => {
 
     // Le téléphone vient du CV par OCR, pas du panneau : mesuré le 2026-09-17,
     // l'OCR en rend 25 sur 26 CV, contre 25 profils sur 30 pour le clic, et il
-    // trouve des numéros que le panneau n'affiche pas du tout. On ne clique
-    // « Afficher le numéro » que pour les profils SANS CV, où c'est la seule
-    // source — ce qui économise ~1,6 s sur la grande majorité des profils.
-    const aCV = !!(p ? [...p.querySelectorAll('a,button')].find(e => /Télécharger/i.test(norm(e.textContent))) : null);
+    // trouve des numéros que le panneau n'affiche pas du tout.    const boutonCV = () => { const x = P(); return !!(x && [...x.querySelectorAll('a,button')].find(e => /Télécharger/i.test(norm(e.textContent)))); };
+    let aCV = boutonCV();
+    // Second regard avant d'ecarter : un bouton rendu en retard ferait perdre un profil avec CV.
+    if (!aCV) { await pause(800); aCV = boutonCV(); }
+    // v11.3 (Julien, 26/11/2026) : un profil sans CV est ecarte d'office, pour tous les lots.
+    // Sans CV, pas d'email. Il ne compte pas dans les nouveaux, n'est pas ecrit, et ne laisse
+    // aucune empreinte : s'il depose un CV plus tard, un lot suivant le prendra.
     if (!aCV) {
-      const btnTel = [...p.querySelectorAll('button')].find(e => /^Afficher le num/i.test(norm(e.textContent)));
-      if (btnTel) { btnTel.click(); await pause(1600); }
+      window.__log.push({ pag: courant, nom: nom0, deja: true, sansCV: true, recherche: window.__recherche || null });
+      sansCV++;
+      const nxs = suivant();
+      if (!nxs) { arret = 'suivant introuvable'; break; }
+      nxs.click();
+      if (await attendre(courant) === courant) { arret = 'pagination bloquee a ' + courant; break; }
+      continue;
     }
 
     const q = P();
@@ -265,7 +275,7 @@ window.__corps = async (BATCH, BUDGET_MS) => {
 
   // Compact : le pont coupe vers 1 000 caracteres. Le detail se lit par `__exporter()`.
   return JSON.stringify({
-    nouveaux: lot.length, sautes, sautesEcartes, total: window.__log.length,
+    nouveaux: lot.length, sautes, sautesEcartes, sansCV, total: window.__log.length,
     nouveauxTotal: window.__log.filter(r => !r.deja).length,
     telecharges: window.__log.filter(r => r.telecharge).length,
     arret, secondes: Math.round((Date.now() - debut) / 1000),

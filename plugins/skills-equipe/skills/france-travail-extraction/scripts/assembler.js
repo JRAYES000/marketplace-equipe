@@ -98,7 +98,7 @@ function journal() {
   const neufs = garde.filter(r => !r.deja);
   const vus = new Set();
   for (const r of neufs) { if (vus.has(r.pag)) die('pag ' + r.pag + ' en double dans le journal (deux recherches melangees ?) : relancer sans --toutes-recherches'); vus.add(r.pag); }
-  console.error('journal : ' + path.basename(f) + ', ' + neufs.length + ' nouveau(x) profil(s)' +
+  console.error('journal : ' + path.basename(f) + ', ' + neufs.length + ' nouveau(x) profil(s), ' + garde.filter(r => r.sansCV).length + ' sans CV ecarte(s)' +
     (garde.length < j.length ? ' (derniere recherche seulement, ' + (j.length - garde.length) + ' ligne(s) plus anciennes ignorees)' : ''));
   return neufs;
 }

@@ -620,3 +620,13 @@ Phase 5 bis recopie desormais seulement les Id acceptes par `ecrire`.
 • charger-secrets.sh ne charge plus que NOTION_TOKEN_FT.
 • Les entrees ci-dessus qui citent SalesHandy restent telles quelles : elles racontent les runs
   de l'epoque.
+
+2026-11-26 — v11.3 : profils sans CV ecartes d'office, segment Warmbly par requete (Julien).
+• Premier lot du profil mdc (« Creation d'entreprise », 10 profils, 9 CV, 9 fiches, 9 contacts
+  Warmbly). Julien : la cible de tous les lots est desormais « profil avec CV ».
+• extraction-profils.js : un profil sans bouton « Telecharger » (second regard apres 0,8 s) est
+  journalise `deja: true, sansCV: true` et saute ; il ne compte plus dans les nouveaux, « Afficher
+  le numero » n'est plus clique, aucune empreinte. Non teste sur le site le jour meme (session
+  fermee) : au premier lot, lire `run.sansCV`.
+• warmbly.js : cree une fois le segment « FT - <requete> » (custom.requete equals). Teste en reel :
+  segments_crees=1 puis 0, 9 membres. L'operateur d'egalite est `equals`, pas `eq`.
