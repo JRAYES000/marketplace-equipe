@@ -29,7 +29,9 @@ const IMPORTE = 'Importe Warmbly';
 const TOKEN = process.env.NOTION_TOKEN_FT || '';
 const DB = process.env.NOTION_DB_FT || '';
 const ESPACE = process.env.FT_WARMBLY_ESPACE || '';
-const CLE_F = (process.env.FT_WARMBLY_CLE || '').replace(/^~(?=[\\/])/, os.homedir());
+// Git Bash donne « /c/Users/… » dans $HOME : node sous Windows ne le lit pas (vu le 26/11/2026).
+const CLE_F = (process.env.FT_WARMBLY_CLE || '').replace(/^~(?=[\\/])/, os.homedir())
+  .replace(/^\/([a-zA-Z])\//, (_, l) => l.toUpperCase() + ':/');
 
 function die(msg) { console.error('ERREUR : ' + msg); process.exit(1); }
 const pause = ms => new Promise(r => setTimeout(r, ms));
@@ -136,7 +138,8 @@ const sec = process.argv.includes('--sec');
     const qui = [f.prenom, f.nom].filter(Boolean).join(' ');
     const vu = warmbly(['contact', 'lookup', '--email', f.email]);
     if (!vu.ok && !vu.absent) { echecs++; console.log('  echec (recherche) : ' + qui + ' -> ' + vu.err); continue; }
-    if (vu.ok && (vu.data.id || (vu.data.data && vu.data.data.id))) {
+    // Reponse de lookup, relevee le 26/11/2026 : { contact: {…} | null, match }.
+    if (vu.ok && vu.data.contact && vu.data.contact.id) {
       deja++;
     } else {
       const corps = { email: f.email, custom_fields: { source: 'France Travail' } };
