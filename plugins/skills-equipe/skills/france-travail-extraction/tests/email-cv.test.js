@@ -69,3 +69,9 @@ test('ligne de commande : format lu par emails-depuis-cv.sh', () => {
   const sortie = execFileSync(process.execPath, [cli], { input: cas('cas1-deux-colonnes.txt') }).toString();
   assert.strictEqual(sortie, 'ROSALIE.VANDERMEULEN@EXEMPLE.COM [RECOLLE]');
 });
+
+test('v11.5 : un telephone au-dessus de l email n est pas recolle', () => {
+  const r = lireEmail('Contact\n06.75.82.24.26\nalex.exemple@exemple.fr\n');
+  assert.strictEqual(r.email, 'alex.exemple@exemple.fr');
+  assert.deepStrictEqual(r.marques, []);
+});

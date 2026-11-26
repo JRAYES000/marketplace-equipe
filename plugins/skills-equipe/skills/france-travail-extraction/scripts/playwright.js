@@ -94,6 +94,9 @@ fs.mkdirSync(sortie, { recursive: true });
 let script = fs.readFileSync(path.join(__dirname, 'extraction-profils.js'), 'utf8');
 const fin = /await window\.__run\(8\)\s*$/;
 if (!fin.test(script)) die('extraction-profils.js ne finit plus par « await window.__run(8) » : adapter playwright.js');
+// Lignes de commentaire retirees (v11.5) : le serveur MCP renvoie le code execute dans chaque
+// reponse, et les commentaires en faisaient plus de la moitie (mesure le 26/11/2026).
+script = script.split(/\r?\n/).filter(l => !/^\s*\/\//.test(l)).join('\n');
 script = '(async () => {\n' + script.replace(fin, 'return await window.__run(' + cible + ');') + '\n})()';
 
 // Partage : attend les CV en cours d'enregistrement, exporte le journal (ft-journal.json, ecrase a

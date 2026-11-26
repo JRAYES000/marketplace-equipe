@@ -203,7 +203,8 @@ window.__corps = async (BATCH, BUDGET_MS) => {
 
     // Le téléphone vient du CV par OCR, pas du panneau : mesuré le 2026-09-17,
     // l'OCR en rend 25 sur 26 CV, contre 25 profils sur 30 pour le clic, et il
-    // trouve des numéros que le panneau n'affiche pas du tout.    const boutonCV = () => { const x = P(); return !!(x && [...x.querySelectorAll('a,button')].find(e => /Télécharger/i.test(norm(e.textContent)))); };
+    // trouve des numéros que le panneau n'affiche pas du tout.
+    const boutonCV = () => { const x = P(); return !!(x && [...x.querySelectorAll('a,button')].find(e => /Télécharger/i.test(norm(e.textContent)))); };
     let aCV = boutonCV();
     // Second regard avant d'ecarter : un bouton rendu en retard ferait perdre un profil avec CV.
     if (!aCV) { await pause(800); aCV = boutonCV(); }

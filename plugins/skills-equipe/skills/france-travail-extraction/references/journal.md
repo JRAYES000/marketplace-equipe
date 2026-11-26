@@ -641,3 +641,18 @@ Phase 5 bis recopie desormais seulement les Id acceptes par `ecrire`.
   la Phase 2, avec le controle des filtres restes d'un lot precedent.
 • Dossier Drive : assembler.js cree deja le sous-dossier quand son parent existe (mkdirSync
   recursif). Rien a changer.
+
+2026-11-26 — v11.5 : deuxieme lot mdc (20 profils avec CV) et corrections.
+• BUG publie en 11.3 et 11.4 : une retouche avait colle « const boutonCV » a la fin d'un
+  commentaire ; le parcours plantait au premier profil non connu (« boutonCV is not defined »).
+  node --check ne le voit pas. Corrige, et tests/extraction-profils.test.js execute desormais le
+  script sur une page factice (il echoue bien sur la version fautive).
+• Mesures du lot : preparation 2 s, connexion 10 s, parcours 45 s pour 34 profils (20 nouveaux,
+  9 deja en base, 5 sans CV), OCR 18 s pour 20 CV, lot + Notion + Drive + Warmbly 66 s. Le
+  navigateur n'est pas le frein : le temps part dans la pose de la requete et la relecture des CV.
+• playwright.js retire les lignes de commentaire du script injecte : 17 924 -> 7 717 caracteres
+  renvoyes par le serveur MCP a chaque appel.
+• email-cv.js : un telephone au-dessus de l'email n'est plus recolle devant lui.
+• Non corrige : domaine coupe sur son extension (« @ik.m » / « e ») et email present seulement en
+  lien souligne ; les deux se lisent a l'oeil sur le CV.
+• Recherche « Creation entreprise dispo immediate » enregistree ; pieges notes dans annexes.md.

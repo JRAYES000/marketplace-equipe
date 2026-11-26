@@ -52,6 +52,9 @@ function prefixeLignePrecedente(prec, ligne, debut, local) {
   const colFrag = m.index + m[1].length;
   if (LIBELLES.test(frag) || !compatibles(frag, local)) return '';
   if (/[:;,]$/.test(frag)) return '';
+  // Un numero de telephone au-dessus de l'email n'est pas un morceau d'adresse (v11.5 :
+  // « 06.75.82.24.26 » colle devant l'email d'un CV du 26/11/2026).
+  if (/^\+?\d[\d.]*$/.test(frag) && frag.replace(/\D/g, '').length >= 9) return '';
   const aligne = Math.abs(colFrag - debut) <= 3;
   const seuls = !prec.slice(0, colFrag).trim() && !ligne.slice(0, debut).trim();
   if (!aligne && !seuls) return '';

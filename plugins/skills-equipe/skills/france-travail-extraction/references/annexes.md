@@ -126,6 +126,16 @@ Dans l'espace recruteur (à tenir à jour à chaque nouvelle recherche enregistr
 - « Formation naturopathie dispo immediate maj 3 mois » (créée le 29/09/2026) ;
 - « Reconversion bien-etre dispo immediate maj 3 mois » (créée le 04/10/2026).
 
-Profil `mdc` : aucune recherche enregistrée à ce jour. « Création d'entreprise » + « Disponibilité
-immédiate » a servi au premier lot (26/11/2026) sans être enregistrée : à enregistrer au
-prochain lot, sous « Creation entreprise dispo immediate », puis l'ajouter ici.
+Profil `mdc` :
+
+- « Creation entreprise dispo immediate » (créée le 26/11/2026) : mot-clé « création d'entreprise »,
+  filtre « Disponibilité immédiate » seul.
+
+Bouton `#boutonEnregistrerRecherche`, champ `#search-name`, case `#checkbox-pop-1` (décochée par
+défaut), bouton `#submitButtonPopinEnregistrer`. La fenêtre de confirmation (« Votre recherche a
+bien été sauvegardée ») reste ouverte et bloque le clic sur le premier profil : la fermer.
+
+Le champ de mots-clés garde la requête précédente : un mot-clé retapé s'ajoute en double
+(« Création d'entreprise, Création d'entreprise », 116 974 résultats au lieu de 199 600 le
+26/11/2026). Lire les tags `li.tag span.content` avant de taper, retirer le doublon par
+`li.tag span.delete`.
