@@ -76,9 +76,7 @@ const formatTel = s => { const d = chiffres(s); return d.length === 10 ? d.repla
 // ---- Journal -------------------------------------------------------------------------------
 // v10.0 : dossier du lot rempli par l'ecouteur Playwright (playwright.js) d'abord, Downloads en repli.
 function dossiersDL() {
-  const ft = process.env.LOCALAPPDATA
-    ? path.join(process.env.LOCALAPPDATA, 'france-travail-extraction', 'telechargements')
-    : path.join(os.homedir(), '.local', 'state', 'france-travail-extraction', 'telechargements');
+  const ft = path.join(DOSSIER, 'telechargements');
   return [ft, path.join(os.homedir(), 'Downloads'), path.join(os.homedir(), 'Téléchargements')].filter(d => fs.existsSync(d));
 }
 function journal() {

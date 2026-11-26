@@ -56,9 +56,7 @@ let connus;
 try { connus = JSON.parse(fs.readFileSync(connusF, 'utf8')); } catch (e) { die('connus.json illisible : ' + e.message); }
 
 // Meme racine que secrets.env et ecartes.json.
-const racine = process.env.LOCALAPPDATA
-  ? path.join(process.env.LOCALAPPDATA, 'france-travail-extraction')
-  : path.join(os.homedir(), '.local', 'state', 'france-travail-extraction');
+const racine = require('./secrets-env').DOSSIER;
 const dl = path.join(racine, 'telechargements');
 const restes = fs.existsSync(dl) ? fs.readdirSync(dl).filter(n => /^(Document.*\.pdf|ft-journal.*\.json)$/i.test(n)) : [];
 if (restes.length) die(restes.length + ' fichier(s) d un lot precedent dans ' + dl + ' : lancer nettoyer-cv.sh avant un nouveau lot');

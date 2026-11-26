@@ -6,7 +6,12 @@ const fs = require('fs');
 const os = require('os');
 const path = require('path');
 
-const DOSSIER = path.join(process.env.LOCALAPPDATA || path.join(os.homedir(), '.local', 'state'), 'france-travail-extraction');
+// v11.2 : un dossier par projet (FT_PROJET=mdc -> france-travail-extraction-mdc). File d'attente,
+// hors-cible et telechargements ne se melangent plus entre deux bases Notion. Sans FT_PROJET :
+// le dossier historique, celui de l'Ecole.
+const PROJET = (process.env.FT_PROJET || '').toLowerCase();
+if (PROJET && !/^[a-z0-9-]{1,30}$/.test(PROJET)) { console.error('ERREUR : FT_PROJET invalide (lettres, chiffres, tirets)'); process.exit(1); }
+const DOSSIER = path.join(process.env.LOCALAPPDATA || path.join(os.homedir(), '.local', 'state'), 'france-travail-extraction' + (PROJET ? '-' + PROJET : ''));
 const FICHIER = process.env.FT_SECRETS || path.join(DOSSIER, 'secrets.env');
 try {
   for (const l of fs.readFileSync(FICHIER, 'utf8').split(/\r?\n/)) {
@@ -17,4 +22,4 @@ try {
   }
 } catch {}
 
-module.exports = { DOSSIER, FICHIER };
+module.exports = { DOSSIER, FICHIER, PROJET };

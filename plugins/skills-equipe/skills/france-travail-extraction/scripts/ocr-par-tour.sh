@@ -20,8 +20,8 @@ set -u
 SKILL="$(cd "$(dirname "$0")/.." && pwd)"
 # v10.0 : les CV arrivent dans le dossier du lot que remplit l'ecouteur Playwright (playwright.js),
 # plus dans Downloads. Downloads reste le repli quand ce dossier n'existe pas.
-if [ -n "${LOCALAPPDATA:-}" ]; then FT="$(cygpath -u "$LOCALAPPDATA" 2>/dev/null || printf '%s' "$LOCALAPPDATA")/france-travail-extraction/telechargements"
-else FT="$HOME/.local/state/france-travail-extraction/telechargements"
+if [ -n "${LOCALAPPDATA:-}" ]; then FT="$(cygpath -u "$LOCALAPPDATA" 2>/dev/null || printf '%s' "$LOCALAPPDATA")/france-travail-extraction${FT_PROJET:+-$FT_PROJET}/telechargements"
+else FT="$HOME/.local/state/france-travail-extraction${FT_PROJET:+-$FT_PROJET}/telechargements"
 fi
 if   [ -d "$FT" ];                 then DL="$FT"
 elif [ -d "$HOME/Downloads" ];       then DL="$HOME/Downloads"

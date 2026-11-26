@@ -32,8 +32,8 @@ set -u
 MIN=240
 case "${1:-}" in ''|*[!0-9]*) ;; *) MIN="$1"; shift ;; esac
 
-if [ -n "${LOCALAPPDATA:-}" ]; then FT="$(cygpath -u "$LOCALAPPDATA" 2>/dev/null || printf '%s' "$LOCALAPPDATA")/france-travail-extraction/telechargements"
-else FT="$HOME/.local/state/france-travail-extraction/telechargements"
+if [ -n "${LOCALAPPDATA:-}" ]; then FT="$(cygpath -u "$LOCALAPPDATA" 2>/dev/null || printf '%s' "$LOCALAPPDATA")/france-travail-extraction${FT_PROJET:+-$FT_PROJET}/telechargements"
+else FT="$HOME/.local/state/france-travail-extraction${FT_PROJET:+-$FT_PROJET}/telechargements"
 fi
 if   [ -d "$FT" ];                 then DL="$FT"
 elif [ -d "$HOME/Downloads" ];       then DL="$HOME/Downloads"
@@ -104,8 +104,8 @@ fi
 reste=$( [ -d "$DL" ] && { [ -n "$REPERE" ] || [ "$DL" = "$FT" ]; } || { echo 0; exit 0; };find "$DL" -maxdepth 1 -type f \( -name 'Document*.pdf' -o -name 'ft-journal*.json' \) "${FENETRE[@]}" | wc -l)
 [ -n "$REPERE" ] && rm -f "$REPERE"
 
-if [ -n "${LOCALAPPDATA:-}" ]; then SEC="$(cygpath -u "$LOCALAPPDATA" 2>/dev/null || printf '%s' "$LOCALAPPDATA")/france-travail-extraction/secrets.env"
-else SEC="$HOME/.local/state/france-travail-extraction/secrets.env"
+if [ -n "${LOCALAPPDATA:-}" ]; then SEC="$(cygpath -u "$LOCALAPPDATA" 2>/dev/null || printf '%s' "$LOCALAPPDATA")/france-travail-extraction${FT_PROJET:+-$FT_PROJET}/secrets.env"
+else SEC="$HOME/.local/state/france-travail-extraction${FT_PROJET:+-$FT_PROJET}/secrets.env"
 fi
 SEC="${FT_SECRETS:-$SEC}"
 [ -f "$SEC" ] && rm -f "$SEC" && echo "jetons du run supprimes"

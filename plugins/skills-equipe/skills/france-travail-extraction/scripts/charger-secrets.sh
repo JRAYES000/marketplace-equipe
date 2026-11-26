@@ -20,8 +20,8 @@
 set -u
 set -o pipefail
 
-if [ -n "${LOCALAPPDATA:-}" ]; then D="$(cygpath -u "$LOCALAPPDATA" 2>/dev/null || printf '%s' "$LOCALAPPDATA")/france-travail-extraction"
-else D="$HOME/.local/state/france-travail-extraction"
+if [ -n "${LOCALAPPDATA:-}" ]; then D="$(cygpath -u "$LOCALAPPDATA" 2>/dev/null || printf '%s' "$LOCALAPPDATA")/france-travail-extraction${FT_PROJET:+-$FT_PROJET}"
+else D="$HOME/.local/state/france-travail-extraction${FT_PROJET:+-$FT_PROJET}"
 fi
 F="${FT_SECRETS:-$D/secrets.env}"
 CLES="NOTION_TOKEN_FT"

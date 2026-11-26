@@ -60,8 +60,8 @@ if tesseract --list-langs 2>/dev/null | grep -qx "fra"; then LANGUE="fra+eng"; e
 # puis Downloads, qui change de nom d un poste a l autre.
 # v10.0 : les CV arrivent dans le dossier du lot que remplit l'ecouteur Playwright (playwright.js),
 # plus dans Downloads. Downloads reste le repli quand ce dossier n'existe pas.
-if [ -n "${LOCALAPPDATA:-}" ]; then FT="$(cygpath -u "$LOCALAPPDATA" 2>/dev/null || printf '%s' "$LOCALAPPDATA")/france-travail-extraction/telechargements"
-else FT="$HOME/.local/state/france-travail-extraction/telechargements"
+if [ -n "${LOCALAPPDATA:-}" ]; then FT="$(cygpath -u "$LOCALAPPDATA" 2>/dev/null || printf '%s' "$LOCALAPPDATA")/france-travail-extraction${FT_PROJET:+-$FT_PROJET}/telechargements"
+else FT="$HOME/.local/state/france-travail-extraction${FT_PROJET:+-$FT_PROJET}/telechargements"
 fi
 if   [ -n "${FT_SOURCE:-}" ];         then SOURCE="$FT_SOURCE"
 elif [ -d "$FT" ];                  then SOURCE="$FT"

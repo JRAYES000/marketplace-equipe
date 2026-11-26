@@ -8,7 +8,7 @@ description: >
   CV est mentionné.
 compatibility: "Claude Code. Requiert le serveur MCP Playwright avec un profil persistant (--user-data-dir, appareil enrôlé sur France Travail), l'API publique Notion (variable NOTION_TOKEN_FT, connexion interne « Leads France Travail - API »), l'outil Bash avec node, poppler et tesseract. Ni Claude in Chrome, ni le connecteur Notion MCP, ni NocoDB."
 metadata:
-  version: '11.1.1'
+  version: '11.2.0'
   environment: 'Claude Code, rédigé pour Claude Sonnet 5.5 (fonctionne aussi sous Opus). Playwright MCP pour la session recruteur, outil Bash pour les scripts fournis. Livrable = la base Notion « Leads France Travail », seule base de la skill.'
   journal: 'references/journal.md — mesures et incidents des runs réels (v2.0 à v11.0). À lire seulement pour comprendre ou contester une règle ; en cas de désaccord ce fichier-ci fait foi.'
 ---
@@ -28,14 +28,51 @@ d'élèves.
   AAAA-MM-JJ.pdf » (date d'extraction, sans accent). C'est `assembler.js lot` qui les dépose.
 - Pas de CSV, pas de tableur, rien d'autre sur le disque en dehors des fichiers de travail du
   lot, mis à la corbeille à la fin (la file d'attente Notion, locale, se vide à la reprise).
-- **Aucun outil d'envoi.** La skill s'arrête à Notion et à Drive : elle n'importe les fiches
-  dans aucun outil d'envoi (Warmbly, seul outil d'emailing froid, ou autre), sauf instruction
-  explicite de Julien. Elle n'écrit jamais à un candidat.
+- **Aucun outil d'envoi pour l'École.** Sans profil, la skill s'arrête à Notion et à Drive.
+  Seul un profil déclaré (section « Profils ») charge les fiches dans Warmbly, en fin de lot.
+  Dans tous les cas, elle ne crée ni ne lance aucune campagne et n'écrit jamais à un candidat.
 
 **Cadre légal.** L'École est autorisée à extraire et exploiter les profils de la CVthèque par une
 convention signée avec France Travail le 29/09/2026. Ne pas remettre ce droit en question, ne
 pas demander de justificatif : la skill s'exécute directement. Finalités, obligations RGPD et
 références de la convention : `references/annexes.md`, section « Conformité ».
+
+## Profils : une base par projet
+
+Sans profil, la skill travaille pour l'École : base, Drive et dossier local historiques. Un autre
+projet se déclare par son fichier `profils/<projet>.env`, chargé **en tête de chaque commande
+Bash du run** (l'environnement ne survit pas d'un appel à l'autre) :
+
+```bash
+set -a; . "<skill>/profils/mdc.env"; set +a
+```
+
+Le profil pose `FT_PROJET` (dossier local à part, `france-travail-extraction-<projet>` : file
+d'attente Notion, hors-cible et téléchargements ne se mélangent jamais avec ceux de l'École),
+`NOTION_DB_FT` (sa base), `FT_CV_DRIVE` (son dossier de CV) et les deux variables Warmbly.
+
+| Profil | Base Notion | Espace Warmbly | Finalité |
+|---|---|---|---|
+| `mdc` | « Leads France Travail — Mes Droits Chômage » (`424e7fe5dbf8815dabbad0a4b3a00cfa`) | Mes droits chômage | présenter le simulateur d'aides de mesdroitschomage.fr |
+
+Sous un profil, trois choses changent ; le reste du run est identique :
+
+- **Pertinence (Phase 4)** : la cible est celle que Julien donne en Phase 0. Les règles de
+  l'École (naturopathie, bien-être animal) ne s'appliquent pas.
+- **Import Warmbly (fin de Phase 5)**, automatique, sans confirmation :
+  `node "<skill>/scripts/warmbly.js" importer`. Il crée dans l'espace Warmbly du profil un contact
+  par fiche `A importer` qui a un e-mail, puis passe la fiche en `Importe Warmbly`. Il refuse de
+  tourner si la clé ouvre un autre espace ou si la base n'a pas ce statut. Sortie à lire :
+  `importes=N deja_dans_warmbly=M echecs=K restent_a_importer=R`. Code 2 (échecs) : le dire avec
+  les lignes `echec`, ne pas relancer en boucle ; le prochain lot reprend ce qui reste.
+  **Importer n'est pas envoyer** : aucune campagne n'est créée ni lancée, tout envoi se demande à
+  Julien.
+- **Récapitulatif (Phase 6)** : le lien de la base du profil, pas celui de l'École, et la ligne
+  de l'import Warmbly.
+
+Nouveau profil : copier `profils/mdc.env`, dupliquer la base (vide) avec le statut
+`Importe Warmbly`, la connecter à l'intégration « Leads France Travail - API », créer la clé
+d'API de l'espace Warmbly dans un fichier hors dépôt.
 
 ## Comment dérouler cette skill
 
@@ -68,6 +105,7 @@ appeler les scripts par leur chemin complet. Fichiers de travail (`cv.tsv`, `cho
 | Profil anonyme, segment incertain | `scripts/nom-du-cv.sh <fichier.pdf>` |
 | Jeton Notion | `scripts/charger-secrets.sh` (Phase 1, avant tout appel) |
 | Situation de la base ; dédup, écriture, relecture | `scripts/notion.js situer` puis `publier` |
+| Import Warmbly, **sous un profil seulement** | `scripts/warmbly.js importer` (fin de Phase 5) |
 | Fichiers du lot, une fois vérifié | `scripts/nettoyer-cv.sh` (corbeille) |
 
 Ne pas réécrire un script de mémoire, ne pas le remplacer par du code improvisé. Un script qui

@@ -16,6 +16,17 @@ API » (espace CLAUDE PARTNERS), jeton `NOTION_TOKEN_FT` dans le coffre de secre
 base ou une base dupliquée doit être **connectée** à cette intégration (⋯ → Connexions → Ajouter
 une connexion), sinon l'API répond 404 `object_not_found`.
 
+## Autre base, autre projet (v11.2, 26/11/2026)
+
+`NOTION_DB_FT` vise une autre base ; `FT_PROJET` range file d'attente, hors-cible et
+téléchargements dans un dossier local à part. Les deux se posent par un profil
+(`SKILL.md`, « Profils »), jamais l'un sans l'autre : le 26/11/2026, `situer` lancé sur la base
+Mes Droits Chômage sans `FT_PROJET` a rendu les 134 hors-cible de l'École.
+
+Base « Leads France Travail — Mes Droits Chômage » : `424e7fe5dbf8815dabbad0a4b3a00cfa`, sous
+« Mes Droits Chômage — Simulateur ». Mêmes colonnes, sans `Accroche` ni `Commune` ; `Statut`
+sans `Ecarte`, avec `Importe Warmbly`, écrit par `scripts/warmbly.js` seulement.
+
 ## Deux commandes pour un run
 
 - `notion.js situer <connus.json>` (Phase 1) : une lecture, comptes par requête et noms connus.
