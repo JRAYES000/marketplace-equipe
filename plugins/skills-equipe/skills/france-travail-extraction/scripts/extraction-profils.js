@@ -235,10 +235,10 @@ window.__corps = async (BATCH, BUDGET_MS) => {
     // candidat a écrit son numéro dans son texte de présentation. On prend le
     // champ en priorité, le texte en repli, et on note d'où vient la valeur.
     const zoneTel = (t.match(/Numéro de téléphone\n([^\n]+)/) || [])[1] || '';
-    const telChamp = (zoneTel.match(/(?:\+33|0)[ .]?[1-9](?:[ .]?\d{2}){4}/) || [])[0] || '';
+    const telChamp = (zoneTel.match(/(?:\+33|\+590|\+594|\+596|\+262|0)[ .]?[1-9](?:[ .]?\d{2}){4}/) || [])[0] || '';
     // Le repli ne lit que le haut du panneau : sous « Experiences », un numero est celui d'un employeur.
     const hautPanneau = t.split(/\n\s*Exp[ée]riences?\b/i)[0];
-    const telTexte = (hautPanneau.match(/(?:\+33|0)[ .]?[1-9](?:[ .]?\d{2}){4}/) || [])[0] || '';
+    const telTexte = (hautPanneau.match(/(?:\+33|\+590|\+594|\+596|\+262|0)[ .]?[1-9](?:[ .]?\d{2}){4}/) || [])[0] || '';
     // Aucune localisation lue (v9.6, Julien 04/10/2026) : ni commune, ni adresse, ni code postal.
 
     const btnDL = q ? [...q.querySelectorAll('a,button')].find(e => /Télécharger/i.test(norm(e.textContent))) : null;

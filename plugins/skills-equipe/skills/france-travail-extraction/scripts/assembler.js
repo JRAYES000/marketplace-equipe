@@ -71,7 +71,7 @@ const norm = s => ' ' + (s || '').normalize('NFD').replace(/[̀-ͯ]/g, '')
   .toLowerCase().replace(/[^a-z0-9]+/g, ' ').trim() + ' ';
 const chiffres = s => (s || '').replace(/\D/g, '').replace(/^33/, '0');
 // Format de la table : 06 XX XX XX XX.
-const formatTel = s => { const d = chiffres(s); return d.length === 10 ? d.replace(/(..)(?!$)/g, '$1 ') : (s || ''); };
+const formatTel = s => { const d = chiffres(s).replace(/^(33|590|594|596|262)(?=\d{9}$)/, '0'); return d.length === 10 ? d.replace(/(..)(?!$)/g, '$1 ') : (s || ''); };
 
 // ---- Journal -------------------------------------------------------------------------------
 // v10.0 : dossier du lot rempli par l'ecouteur Playwright (playwright.js) d'abord, Downloads en repli.

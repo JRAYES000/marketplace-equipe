@@ -125,3 +125,7 @@ Dans l'espace recruteur (à tenir à jour à chaque nouvelle recherche enregistr
 
 - « Formation naturopathie dispo immediate maj 3 mois » (créée le 29/09/2026) ;
 - « Reconversion bien-etre dispo immediate maj 3 mois » (créée le 04/10/2026).
+
+Profil `mdc` : aucune recherche enregistrée à ce jour. « Création d'entreprise » + « Disponibilité
+immédiate » a servi au premier lot (26/11/2026) sans être enregistrée : à enregistrer au
+prochain lot, sous « Creation entreprise dispo immediate », puis l'ajouter ici.

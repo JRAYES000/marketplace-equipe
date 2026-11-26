@@ -630,3 +630,14 @@ Phase 5 bis recopie desormais seulement les Id acceptes par `ecrire`.
   fermee) : au premier lot, lire `run.sansCV`.
 • warmbly.js : cree une fois le segment « FT - <requete> » (custom.requete equals). Teste en reel :
   segments_crees=1 puis 0, 9 membres. L'operateur d'egalite est `equals`, pas `eq`.
+
+2026-11-26 — v11.4 : quatre suites du premier lot mdc (Julien).
+• Telephones d'outre-mer : +590, +594, +596, +262 lus comme +33 (emails-depuis-cv.sh, panneau,
+  formatTel). « +596 696 74 50 86 » -> « 06 96 74 50 86 ». Fiche et contact de ce jour corriges.
+• warmbly.js rend les comptes de verification d'adresses. Warmbly verifie seul a la creation
+  (sonde SMTP) : inutile de lancer « contact verify ». Teste en reel avec une fiche d'essai
+  (invalides=1 pour l'adresse d'essai), puis fiche archivee, contact et segment d'essai supprimes.
+• Recherche enregistree : l'etape existait et avait ete sautee ; elle entre dans la barriere de
+  la Phase 2, avec le controle des filtres restes d'un lot precedent.
+• Dossier Drive : assembler.js cree deja le sous-dossier quand son parent existe (mkdirSync
+  recursif). Rien a changer.

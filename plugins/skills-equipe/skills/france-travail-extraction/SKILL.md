@@ -8,7 +8,7 @@ description: >
   CV est mentionné.
 compatibility: "Claude Code. Requiert le serveur MCP Playwright avec un profil persistant (--user-data-dir, appareil enrôlé sur France Travail), l'API publique Notion (variable NOTION_TOKEN_FT, connexion interne « Leads France Travail - API »), l'outil Bash avec node, poppler et tesseract. Ni Claude in Chrome, ni le connecteur Notion MCP, ni NocoDB."
 metadata:
-  version: '11.3.0'
+  version: '11.4.0'
   environment: 'Claude Code, rédigé pour Claude Sonnet 5.5 (fonctionne aussi sous Opus). Playwright MCP pour la session recruteur, outil Bash pour les scripts fournis. Livrable = la base Notion « Leads France Travail », seule base de la skill.'
   journal: 'references/journal.md — mesures et incidents des runs réels (v2.0 à v11.0). À lire seulement pour comprendre ou contester une règle ; en cas de désaccord ce fichier-ci fait foi.'
 ---
@@ -68,7 +68,10 @@ Sous un profil, trois choses changent ; le reste du run est identique :
   ce qui reste. Chaque contact porte les champs personnalisés `source`, `fonction` et `requete`.
   Le script crée une fois le segment « FT - <requête> » (condition `requete` égale à la
   requête) : vivant, il reçoit seul les contacts des lots suivants. Pas de label : il doublerait
-  le champ `requete`.
+  le champ `requete`. Warmbly vérifie seul chaque adresse à la création ; le script attend la
+  fin (60 s au plus) et rend `verification (espace entier) : valides=… invalides=… inconnues=…`,
+  à reporter dans le récapitulatif. `inconnues` est normal pour Outlook, Hotmail et iCloud, qui
+  ne répondent pas à la sonde. `invalides` > 0 : le dire, ne rien supprimer.
   **Importer n'est pas envoyer** : aucune campagne n'est créée ni lancée, tout envoi se demande à
   Julien.
 - **Récapitulatif (Phase 6)** : le lien de la base du profil, pas celui de l'École, et la ligne
@@ -239,13 +242,18 @@ L'appareil est enrôlé : aucun code, sauf à la toute première connexion d'un 
    l'interface, puis filtres, en suivant `references/annexes.md`, section « Nouvelle requête ».
    L'en-tête « N résultats pour : X » fait foi, pas les tags. Puis « Enregistrez votre
    recherche », nom en ASCII sans `<`, **case d'abonnement décochée** (elle déclenche des
-   e-mails d'alerte), et ajouter la ligne dans `references/annexes.md`.
+   e-mails d'alerte), et ajouter la ligne dans `references/annexes.md`. **Étape obligatoire,
+   avant le premier profil** : sautée au premier lot mdc (26/11/2026), elle oblige à reposer
+   mot-clé et filtres à la main au lot suivant. Vérifier aussi qu'aucun filtre d'un lot précédent
+   n'est resté actif (« Profil mis à jour < 3 mois » l'était ce jour-là).
 5. **Marquer le début du lot**, juste avant le premier CV :
    `bash "<skill>/scripts/ocr-par-tour.sh" 0 "<tmp>/cv.tsv"`.
 
 Julien peut réduire la fenêtre : le parcours tourne à pleine vitesse (annexes, « Pourquoi Playwright »).
 
-**Barrière :** `ft-connexion.js` a rendu `connecte: true`, et l'en-tête affiche la bonne requête.
+**Barrière :** `ft-connexion.js` a rendu `connecte: true`, l'en-tête affiche la bonne requête,
+les filtres affichés sont ceux de la Phase 0, et la recherche est enregistrée (son nom figure
+dans `references/annexes.md`).
 
 ## Phase 3 — Parcourir les profils
 

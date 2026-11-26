@@ -30,7 +30,9 @@ set -u
 
 MINUTES="${1:-60}"
 SORTIE="${2:-}"
-RE_TEL='(\+33|0)[ .]?[1-9]([ .]?[0-9]{2}){4}'
+# Outre-mer (v11.4) : +590 Guadeloupe, +594 Guyane, +596 Martinique, +262 Reunion et Mayotte.
+# « +596 696 74 50 86 » se lit 06 96 74 50 86 (CV du 26/11/2026, numero rate en v11.3).
+RE_TEL='(\+33|\+590|\+594|\+596|\+262|0)[ .]?[1-9]([ .]?[0-9]{2}){4}'
 
 # Sous Windows, winget installe poppler et tesseract HORS du PATH : les outils
 # sont bien la, mais introuvables depuis Git Bash. Constate le 2026-09-17 sur le
@@ -116,7 +118,7 @@ emails_du_fichier() {
 
   # Format homogene : les CV ecrivent 0612345678, 06.12.34.56.78, 06 12 34 56 78.
   if [ -n "$tel" ]; then
-    tel=$(printf '%s' "$tel" | tr -d ' .' | sed -E 's/^\+33/0/' | sed -E 's/(..)/\1 /g' | sed 's/ $//')
+    tel=$(printf '%s' "$tel" | tr -d ' .' | sed -E 's/^\+(33|590|594|596|262)/0/' | sed -E 's/(..)/\1 /g' | sed 's/ $//')
   fi
 
   nomf=$(basename "$pdf")

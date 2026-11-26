@@ -180,6 +180,21 @@ const sec = process.argv.includes('--sec');
       }
     }
   }
+  // Verification des adresses (v11.4) : Warmbly la lance seul a la creation d'un contact (sonde
+  // SMTP, constate le 26/11/2026 : 5 valides, 4 inconnues sur 9). On attend qu'elle finisse, 60 s
+  // au plus, puis on rend les comptes de l'espace. Lecture seule : rien n'est declenche ici.
+  if (importes) {
+    let v = null;
+    for (let i = 0; i < 12; i++) {
+      const r = warmbly(['contact', 'verification-status']);
+      if (!r.ok) { console.log('  verification illisible : ' + r.err); v = null; break; }
+      v = r.data.counts || {};
+      if (!v.pending) break;
+      await pause(5000);
+    }
+    if (v) console.log('verification (espace entier) : valides=' + (v.valid || 0) + ' risquees=' + (v.risky || 0) +
+      ' invalides=' + (v.invalid || 0) + ' inconnues=' + (v.unknown || 0) + ' en_attente=' + (v.pending || 0));
+  }
   const reste = (await aImporter()).length;
   console.log('importes=' + importes + ' deja_dans_warmbly=' + deja + ' segments_crees=' + segments + ' echecs=' + echecs + ' restent_a_importer=' + reste);
   process.exit(echecs || reste ? 2 : 0);
