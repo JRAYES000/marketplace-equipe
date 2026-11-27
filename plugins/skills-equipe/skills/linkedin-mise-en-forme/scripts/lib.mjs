@@ -548,7 +548,13 @@ const dire = (bon, nom, detail) => ({ bon, nom, detail });
  * compte, du plus recent au plus ancien (5 au plus) ; le premier tient lieu de `precedent`, et le
  * critere "variete sur les 5 derniers posts" s'ajoute. Retourne { resultats, passes, total }.
  */
-export function verifierTexte(corps, { precedent, precedents, nomsPropres = [], offre } = {}) {
+// Plafonds par compte (27/11/2026) : julien-mdc (Mes Droits Chômage) monte a 8 passages en gras et demande 3 a 8 emojis
+// (demande de Julien : plus de gras, des emojis pour la lisibilite). Les autres comptes gardent 4 gras et 0 a 6 emojis.
+export const LIMITES_PAR_COMPTE = { 'julien-mdc': { grasMax: 8, emojisMin: 3, emojisMax: 8 } };
+export const LIMITES_DEFAUT = { grasMax: 4, emojisMin: 0, emojisMax: 6 };
+
+export function verifierTexte(corps, { precedent, precedents, nomsPropres = [], offre, limites = LIMITES_DEFAUT } = {}) {
+  const { grasMax, emojisMin, emojisMax } = { ...LIMITES_DEFAUT, ...limites };
   const lignes = corps.split("\n");
   const resultats = [];
 
@@ -579,7 +585,7 @@ export function verifierTexte(corps, { precedent, precedents, nomsPropres = [], 
   // 18/10/2026 : 4 passages au maximum par post (30/09 : 2 ; avant : au moins huit). Mesure
   // Buffer du 18/10 sur les posts Partners : les 5 meilleurs mettent le TJM en gras.
   const gras = segmentsGras(corps);
-  resultats.push(dire(gras.length <= 4, "gras : 4 passages au maximum", `${gras.length} trouve(s)`));
+  resultats.push(dire(gras.length <= grasMax, `gras : ${grasMax} passages au maximum`, `${gras.length} trouve(s)`));
 
   // 18/10/2026 : l'accroche n'est jamais entierement en gras. Mesure Buffer du 18/10 : les 13
   // posts Partners a question tout en gras font 391 impressions de mediane, contre 2 926 pour
@@ -618,7 +624,7 @@ export function verifierTexte(corps, { precedent, precedents, nomsPropres = [], 
   resultats.push(dire(titres.length <= 4, "4 blocs a titre au maximum", titres.length ? titres.join(" / ") : "aucun titre en gras"));
 
   const emojis = corps.match(EMOJI_G) || [];
-  resultats.push(dire(emojis.length <= 6, "6 emojis au maximum", `${emojis.length} trouve(s)`));
+  resultats.push(dire(emojis.length >= emojisMin && emojis.length <= emojisMax, emojisMin ? `${emojisMin} a ${emojisMax} emojis` : `${emojisMax} emojis au maximum`, `${emojis.length} trouve(s)`));
   const horsTete = lignes.filter((l) => EMOJI.test(l) && !new RegExp(`^${EMOJI.source}`, "u").test(l));
   resultats.push(dire(horsTete.length === 0, "emojis en tete de ligne", horsTete.length ? horsTete[0].slice(0, 50) : "toutes en tete"));
 

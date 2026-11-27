@@ -835,3 +835,16 @@ test("offre : sans --offre, meme avec la ligne dans le .md, l'exception ne s'app
   assert.match(critereChiffres(r.stdout), /^ECHEC/);
   assert.equal(r.stdout.includes("Exception « offre »"), false);
 });
+
+test("limites par compte : julien-mdc accepte 8 gras et exige 3 a 8 emojis (27/11/2026)", async () => {
+  const { LIMITES_PAR_COMPTE } = await import("../scripts/lib.mjs");
+  const mots = ["un", "deux", "trois", "quatre", "cinq", "six"];
+  const corps = "Une accroche simple et claire.\n\n" + mots.map((m) => `Phrase courte. **Point ${m}**`).join("\n\n");
+  const nom = (r, debut) => r.resultats.find((x) => x.nom.startsWith(debut));
+  assert.equal(nom(verifierTexte(corps), "gras :").bon, false);
+  const mdc = verifierTexte(corps, { limites: LIMITES_PAR_COMPTE["julien-mdc"] });
+  assert.equal(nom(mdc, "gras :").bon, true);
+  assert.equal(nom(mdc, "3 a 8 emojis").bon, false);
+  const avecEmojis = verifierTexte("Une accroche simple.\n\n✅ un\n\n✅ deux\n\n✅ trois", { limites: LIMITES_PAR_COMPTE["julien-mdc"] });
+  assert.equal(nom(avecEmojis, "3 a 8 emojis").bon, true);
+});

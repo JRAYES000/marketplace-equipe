@@ -37,8 +37,8 @@
 // deux formes comptent. Chemins en C:/... — node ne resout pas la forme /c/Users/...
 import { readFileSync, existsSync } from "node:fs";
 import { basename, join } from "node:path";
-import { enGras, ACCENTUE, verifierTexte, lireNomsPropres, controlerOffre } from "./lib.mjs";
-import { lireCorpsFichier, resoudrePrecedent } from "./precedent.mjs";
+import { enGras, ACCENTUE, verifierTexte, lireNomsPropres, controlerOffre, LIMITES_PAR_COMPTE } from "./lib.mjs";
+import { lireCorpsFichier, resoudrePrecedent, compteDepuisNom } from "./precedent.mjs";
 import { dossierLivrables } from "../../../lib/livrables.mjs";
 
 const OPTIONS_AVEC_VALEUR = ["--precedent", "--compte", "--dossier", "--noms-propres", "--offre"];
@@ -110,7 +110,9 @@ const fichierNoms = options["noms-propres"] || join(process.env.LIVRABLES_LINKED
 const nomsPropres = lireNomsPropres(fichierNoms);
 console.log(`Noms propres autorises (${nomsPropres.length}) : ${nomsPropres.length ? nomsPropres.join(", ") : "aucun"} -- ${existsSync(fichierNoms) ? fichierNoms : "fichier absent : " + fichierNoms}`);
 
-const { resultats, passes, total } = verifierTexte(corps, { ...(precedent !== undefined ? { precedent, precedents } : {}), nomsPropres, ...(offre ? { offre } : {}) });
+const compteMesure = options.compte || compteDepuisNom(arg);
+const limites = LIMITES_PAR_COMPTE[compteMesure];
+const { resultats, passes, total } = verifierTexte(corps, { ...(precedent !== undefined ? { precedent, precedents } : {}), nomsPropres, ...(offre ? { offre } : {}), ...(limites ? { limites } : {}) });
 for (const r of resultats) console.log(`${r.bon ? "OK   " : "ECHEC"} ${r.nom.padEnd(38)} ${r.detail}`);
 console.log(`\n${passes}/${total} criteres passes`);
 process.exit(passes === total ? 0 : 1);

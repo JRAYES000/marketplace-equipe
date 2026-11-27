@@ -2,6 +2,10 @@
 
 Ce que disait le tableau du README avant le 22/11/2026, quand chaque ligne empilait les changements datés. Le README ne garde plus que ce que fait la skill aujourd'hui.
 
+## 27/11/2026 (1.64.0)
+
+- linkedin-mise-en-forme 1.16.0 : plafonds par compte (`LIMITES_PAR_COMPTE` dans `scripts/lib.mjs`). `julien-mdc` accepte 8 passages en gras et exige 3 à 8 emojis (demande de Julien : plus de gras, des emojis pour la lisibilité) ; les autres comptes gardent 4 gras et 6 emojis au plus. 106 tests.
+
 ## 27/11/2026 (1.63.0)
 
 - linkedin-mise-en-forme 1.15.0 : troisième compte `julien-mdc` (Mes Droits Chômage, même profil LinkedIn que `julien-partners`) avec sa section de règles (lecteur grand public, sources officielles, trois axes de provocation, lien UTM en commentaire). Préfixe `m<N>.final.txt` reconnu par `precedent.mjs` (déduction du compte et recherche des posts précédents), `controle-avant-publication.mjs` et `lib/file-n8n.mjs` (compte `mdc`, format `video`). Le domaine mesdroitschomage compte comme un lien. 105 tests.

@@ -42,6 +42,9 @@ Les règles 0 à 7 s'appliquent, avec ces ajustements :
   jamais les demandeurs d'emploi.
 - **Lien** : simulateur en premier commentaire, avec `utm_source=linkedin&utm_medium=post&utm_campaign=<slug>`.
 - **Règle 1** : `julien-partners` et `julien-mdc` sont le même profil : 2 posts par jour pour les deux réunis.
+- **Gras et emojis** (demande de Julien du 27/11/2026, plafonds du script pour ce compte seul) : 4 à 8 passages en gras sans accent
+  (mots et phrases qui portent le post : chiffre, verdict, conséquence) ; 3 à 8 emojis selon la longueur, en tête de ligne,
+  utiles à la lecture (puces de liste, repères) ; listes à puces dès que trois éléments se suivent.
 - **Formats** : texte, image (visuels Meta de `ads/visuels/` du dépôt MESDROITSCHOMAGE, publiés sur R2),
   vidéo native (`format: video`, MP4 public des Shorts sur R2 `reels/<slug>.mp4`).
 
