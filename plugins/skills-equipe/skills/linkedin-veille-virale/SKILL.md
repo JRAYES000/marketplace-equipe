@@ -9,6 +9,8 @@ description: >
 
 # linkedin-veille-virale
 
+> **Compte `julien-partners` recyclé le 27/11/2026.** Le profil LinkedIn `linkedin.com/in/julien-rayes-claude-partners` est devenu `linkedin.com/in/julien-rayes-mesdroitschomage` et fait la promotion de Mes Droits Chômage (simulateur d'aides publiques). Ne plus rien y publier, commenter ni programmer au titre de Claude Partners sans l'accord écrit de Julien. Les posts déjà publiés restent en ligne. Ancien profil relevé dans `MESDROITSCHOMAGE/reseaux/linkedin/ancien-profil-claude-partners.md`.
+
 Sommaire : Règles · Déroulé · Point de situation · Comptes à surveiller · Variables
 d'environnement · Garde-fous · Publication · Bilan et suivi à 7 jours · Pièges · Annexes.
 

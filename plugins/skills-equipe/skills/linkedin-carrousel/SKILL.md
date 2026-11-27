@@ -9,6 +9,8 @@ description: >
 
 # linkedin-carrousel
 
+> **Compte `julien-partners` recyclé le 27/11/2026.** Le profil LinkedIn `linkedin.com/in/julien-rayes-claude-partners` est devenu `linkedin.com/in/julien-rayes-mesdroitschomage` et fait la promotion de Mes Droits Chômage (simulateur d'aides publiques). Ne plus rien y publier, commenter ni programmer au titre de Claude Partners sans l'accord écrit de Julien. Les posts déjà publiés restent en ligne. Ancien profil relevé dans `MESDROITSCHOMAGE/reseaux/linkedin/ancien-profil-claude-partners.md`.
+
 Sommaire : Installation · Déroulé · Comptes · Modèles de page et charte · Règles de contenu ·
 Garde-fous automatiques · Publication · Pièges · Annexes.
 

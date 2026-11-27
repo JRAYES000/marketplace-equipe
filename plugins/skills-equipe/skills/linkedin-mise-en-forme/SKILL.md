@@ -10,6 +10,8 @@ description: >
 
 # LinkedIn — mise en forme
 
+> **Compte `julien-partners` recyclé le 27/11/2026.** Le profil LinkedIn `linkedin.com/in/julien-rayes-claude-partners` est devenu `linkedin.com/in/julien-rayes-mesdroitschomage` et fait la promotion de Mes Droits Chômage (simulateur d'aides publiques). Ne plus rien y publier, commenter ni programmer au titre de Claude Partners sans l'accord écrit de Julien. Les posts déjà publiés restent en ligne. Ancien profil relevé dans `MESDROITSCHOMAGE/reseaux/linkedin/ancien-profil-claude-partners.md`.
+
 Sommaire : 0. Règles de Julien du 14/10 · Ordre de travail · 1. Accroche · 2. Gras · 3. Blocs ·
 4. Emojis · 5. Lecture à 13 ans · 6. Arbitrage anti-IA · 7. Tournures interdites et variété ·
 Contrôle par script · Pièges · Ce que la skill ne fait pas.

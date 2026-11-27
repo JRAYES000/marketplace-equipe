@@ -9,6 +9,8 @@ description: >
 
 # linkedin-commentaires
 
+> **Compte `julien-partners` recyclé le 27/11/2026.** Le profil LinkedIn `linkedin.com/in/julien-rayes-claude-partners` est devenu `linkedin.com/in/julien-rayes-mesdroitschomage` et fait la promotion de Mes Droits Chômage (simulateur d'aides publiques). Ne plus rien y publier, commenter ni programmer au titre de Claude Partners sans l'accord écrit de Julien. Les posts déjà publiés restent en ligne. Ancien profil relevé dans `MESDROITSCHOMAGE/reseaux/linkedin/ancien-profil-claude-partners.md`.
+
 Sommaire : Déroulé · Point de situation · Comptes cibles · Variables d'environnement ·
 Garde-fous automatiques · Règles de rédaction · Suivi à 3 jours · Pièges · Annexes.
 
