@@ -9,7 +9,7 @@
 //   2. sinon : un avertissement, jamais un echec. (Le repli sur l'API Zernio est retire le
 //      21/11/2026 : Zernio est abandonne depuis le 08/10/2026 et ne voit pas les posts Buffer.)
 //
-// Compte : "a<N>.final.txt" = julien-agency, "p<N>.final.txt" = julien-partners (convention du
+// Compte : "a<N>.final.txt" = julien-agency, "p<N>.final.txt" = julien-partners, "m<N>.final.txt" = julien-mdc (convention du
 // dossier livrables), ou --compte explicite.
 //
 // "Le plus recent" = ordre (dossier date, numero du fichier). Si le brouillon est lui-meme dans
@@ -21,13 +21,13 @@ import { dossierLivrables } from "../../../lib/livrables.mjs";
 
 export const DOSSIER_PAR_DEFAUT = join(dossierLivrables(), "linkedin");
 export const NB_POSTS_VARIETE = 5;
-const PREFIXES = { a: "julien-agency", p: "julien-partners" };
+const PREFIXES = { a: "julien-agency", p: "julien-partners", m: "julien-mdc" };
 
 export function compteDepuisNom(chemin) {
-  const m = basename(chemin).match(/^([ap])\d+/i);
+  const m = basename(chemin).match(/^([apm])\d+/i);
   if (m) return PREFIXES[m[1].toLowerCase()];
   // posts-nouveaux/ : « AAAA-MM-JJ-agency-q2.final.txt », « AAAA-MM-JJ-partners-duet.final.txt »
-  const n = basename(chemin).match(/^\d{4}-\d{2}-\d{2}-(agency|partners)-/i);
+  const n = basename(chemin).match(/^\d{4}-\d{2}-\d{2}-(agency|partners|mdc)-/i);
   return n ? `julien-${n[1].toLowerCase()}` : null;
 }
 
@@ -42,7 +42,7 @@ export function postsLocauxDuCompte(dossier, compte) {
   for (const d of readdirSync(dossier)) {
     if (!/^\d{4}-\d{2}-\d{2}/.test(d) || !statSync(join(dossier, d)).isDirectory()) continue;
     for (const f of readdirSync(join(dossier, d))) {
-      if (/^[ap]\d+\.final\.txt$/i.test(f) && compteDepuisNom(f) === compte) trouves.push({ chemin: join(dossier, d, f), cle: cle(d, f) });
+      if (/^[apm]\d+\.final\.txt$/i.test(f) && compteDepuisNom(f) === compte) trouves.push({ chemin: join(dossier, d, f), cle: cle(d, f) });
     }
   }
   return trouves.sort((x, y) => compare(x.cle, y.cle));

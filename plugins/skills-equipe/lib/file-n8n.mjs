@@ -3,7 +3,7 @@
 // Partagé par linkedin-mise-en-forme (controle-avant-publication.mjs --n8n) et analyse-lundi-linkedin
 // (file-depuis-n8n.mjs, qui écrit file-attente-buffer.txt pour verifier-creneaux.mjs).
 
-const FORMATS = { texte: "T", image: "I", carrousel: "C" };
+const FORMATS = { texte: "T", image: "I", carrousel: "C", video: "V" };
 
 /** Réponse de get_data_table_rows ({ rows: [...] }), tableau de lignes, ou plusieurs pages concaténées. */
 export function lignesN8n(donnees) {
@@ -26,7 +26,7 @@ export function fileDepuisN8n(lignes, { statut = "a_publier" } = {}) {
   return lignes.filter((l) => l && l.statut === statut).map((l) => {
     const t = new Date(l.publier_le);
     if (!l.publier_le || Number.isNaN(t.getTime())) throw new Error(`Ligne ${l.id ?? "?"} : publier_le illisible (${l.publier_le}).`);
-    const compte = { agency: "julien-agency", partners: "julien-partners" }[String(l.compte || "").replace(/^julien-/, "")];
+    const compte = { agency: "julien-agency", partners: "julien-partners", mdc: "julien-mdc" }[String(l.compte || "").replace(/^julien-/, "")];
     if (!compte) throw new Error(`Ligne ${l.id ?? "?"} : compte inconnu (${l.compte}).`);
     return { ...paris(t), instant: t.toISOString(), compte, format: FORMATS[l.format] || "?", texte: String(l.texte || ""), id: l.id };
   }).sort((a, b) => a.instant.localeCompare(b.instant));

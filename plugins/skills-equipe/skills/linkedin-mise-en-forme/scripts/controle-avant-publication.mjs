@@ -111,12 +111,12 @@ function retrouver(debut, textes) {
 
 if (!existsSync(fichierFile)) { console.error(`ERREUR : file introuvable : ${fichierFile}`); process.exit(2); }
 const textes = indexerTextes();
-const LIGNE = /^(\d{4}-\d{2}-\d{2}) (\d{2}:\d{2}) (julien-partners|julien-agency) # ([TIC]) (.+)$/;
+const LIGNE = /^(\d{4}-\d{2}-\d{2}) (\d{2}:\d{2}) (julien-partners|julien-agency|julien-mdc) # ([TICV]) (.+)$/;
 const file = [];
 // texteComplet : texte de la table n8n ; a defaut, seul le debut releve est controle.
 const ajouterPost = (compte, date, heure, format, debut, texteComplet) => {
   const trouve = retrouver(debut, textes);
-  file.push({ id: `${compte === "julien-agency" ? "A" : "P"} ${date} ${heure}`, compte, date, heure, format, debut,
+  file.push({ id: `${compte === "julien-agency" ? "A" : compte === "julien-mdc" ? "M" : "P"} ${date} ${heure}`, compte, date, heure, format, debut,
     texte: trouve ? trouve.texte : texteComplet || debut, complet: !!trouve || !!texteComplet, type: trouve?.type, sujet: trouve?.sujet || registre.get(`${date} ${heure} ${compte}`), source: trouve ? trouve.chemin : null, autres: trouve?.autres || [] });
 };
 if (opt.n8n) {

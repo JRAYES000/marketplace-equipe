@@ -450,7 +450,7 @@ export const typeAccroche = (l) => (
           : VERBE_ANNONCE.test(l) ? "annonce"
             : DEUX_PHRASES.test(l) ? "situation"
               : "affirmation");
-const EST_LIEN = /https?:\/\/|claudeagency\.fr|claudepartners/i;
+const EST_LIEN = /https?:\/\/|claudeagency\.fr|claudepartners|mesdroitschomage/i;
 const lignesDe = (corps) => corps.replace(/\r\n/g, "\n").trim().split("\n");
 // Derniere ligne "utile" : ni Source, ni hashtags, ni URL seule. C'est la fin au sens de la regle.
 const finDuPost = (corps) => {

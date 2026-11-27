@@ -36,6 +36,11 @@ test("compteDepuisNom : a<N> = julien-agency, p<N> = julien-partners, le reste =
   assert.equal(compteDepuisNom("brouillon.txt"), null);
 });
 
+test("compteDepuisNom : m<N> et AAAA-MM-JJ-mdc- = julien-mdc (Mes Droits Chômage, 27/11/2026)", () => {
+  assert.equal(compteDepuisNom("C:/x/2026-11-27/m1.final.txt"), "julien-mdc");
+  assert.equal(compteDepuisNom("2026-11-28-mdc-carence.final.txt"), "julien-mdc");
+});
+
 test("postsLocauxDuCompte : seulement le compte, seulement les .final.txt, tri par dossier puis numero (a10 apres a2)", () => {
   const { racine } = livrables();
   assert.deepEqual(noms(postsLocauxDuCompte(racine, "julien-agency")), [

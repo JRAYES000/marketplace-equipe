@@ -2,6 +2,11 @@
 
 Ce que disait le tableau du README avant le 22/11/2026, quand chaque ligne empilait les changements datés. Le README ne garde plus que ce que fait la skill aujourd'hui.
 
+## 27/11/2026 (1.63.0)
+
+- linkedin-mise-en-forme 1.15.0 : troisième compte `julien-mdc` (Mes Droits Chômage, même profil LinkedIn que `julien-partners`) avec sa section de règles (lecteur grand public, sources officielles, trois axes de provocation, lien UTM en commentaire). Préfixe `m<N>.final.txt` reconnu par `precedent.mjs` (déduction du compte et recherche des posts précédents), `controle-avant-publication.mjs` et `lib/file-n8n.mjs` (compte `mdc`, format `video`). Le domaine mesdroitschomage compte comme un lien. 105 tests.
+- Référence `publication-linkedin-n8n.md` : compte `mdc` et format `video` (MP4 public, `LINKEDIN_UPLOAD_VIDEO`), ajoutés le même jour au workflow 38 et testés en brouillon.
+
 ## 27/11/2026 (1.62.3)
 
 - Compte `julien-partners` recyclé : le profil `julien-rayes-claude-partners` devient `julien-rayes-mesdroitschomage` (Mes Droits Chômage). Avertissement en tête de analyse-lundi-linkedin, annonce-mission-linkedin, linkedin-carrousel, linkedin-commentaires, linkedin-veille-virale et linkedin-mise-en-forme : plus rien n'est publié au titre de Claude Partners sur ce compte sans l'accord écrit de Julien.

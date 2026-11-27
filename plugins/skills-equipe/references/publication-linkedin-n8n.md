@@ -12,11 +12,11 @@ Par le MCP `n8n` : `add_data_table_rows` (table `GCjlt3vNRlqbBfUB`, projet `2MVl
 
 | Colonne | Valeur |
 |---|---|
-| `compte` | `agency` (Claude Agency) ou `partners` (Claude Partners) |
-| `format` | `texte`, `image` ou `carrousel` (document PDF) |
+| `compte` | `agency` (Claude Agency), `mdc` (Mes Droits Chômage) ou `partners` (même profil que `mdc`, plus utilisé depuis le 27/11/2026) |
+| `format` | `texte`, `image`, `carrousel` (document PDF) ou `video` (MP4, depuis le 27/11/2026) |
 | `texte` | le post, 3 000 caractères au plus ; `**mot**` est converti en gras Unicode ; **aucun lien** (refusé) |
-| `media_url` | image ou PDF : URL **https publique** que n8n peut télécharger (pas un fichier local) |
-| `titre` | carrousel : titre affiché sous le document (obligatoire) ; image : texte alternatif |
+| `media_url` | image, PDF ou MP4 : URL **https publique** que n8n peut télécharger (pas un fichier local). Vidéo : LinkedIn la récupère lui-même par `LINKEDIN_UPLOAD_VIDEO` (Composio), qui attend qu'elle soit prête |
+| `titre` | carrousel : titre affiché sous le document (obligatoire) ; image : texte alternatif ; vidéo : titre facultatif |
 | `premier_commentaire` | le lien et son texte, 1 250 caractères au plus (facultatif) |
 | `publier_le` | date ISO de publication (`2026-11-24T08:30:00+01:00`) |
 | `statut` | `a_publier` ; `a_tester` crée un **brouillon invisible** sans commentaire |

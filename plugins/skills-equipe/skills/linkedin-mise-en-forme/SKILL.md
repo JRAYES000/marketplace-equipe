@@ -16,12 +16,34 @@ Sommaire : 0. Règles de Julien du 14/10 · Ordre de travail · 1. Accroche · 2
 4. Emojis · 5. Lecture à 13 ans · 6. Arbitrage anti-IA · 7. Tournures interdites et variété ·
 Contrôle par script · Pièges · Ce que la skill ne fait pas.
 
-Ces règles valent pour les deux comptes, Claude Agency et Claude Partners, au même niveau. Elles
+Ces règles valent pour les comptes Claude Agency, Claude Partners et Mes Droits Chômage, au même niveau. Elles
 sont la source de vérité de la forme pour toutes les skills linkedin-* (gras, formulations
 interdites, accents, anglicismes). Seule exception : la légende d'un carrousel (5 lignes, 60 à 700
 caractères, gras facultatif) suit ses propres limites, dans `linkedin-carrousel`. La règle 0 vaut pour tous.
 Historique des décisions : [references/historique.md](references/historique.md). Cas de test :
 [references/evals.md](references/evals.md).
+
+## Compte Mes Droits Chômage (`julien-mdc`, depuis le 27/11/2026)
+
+Le profil `linkedin.com/in/julien-rayes-mesdroitschomage` (ancien Claude Partners, même personne LinkedIn
+`urn:li:person:ZvLHybJZhj`) fait la promotion du simulateur d'aides de mesdroitschomage.fr. Fichiers
+`m<N>.final.txt` ou `AAAA-MM-JJ-mdc-<slug>.final.txt` ; `compte: mdc` dans `publications_linkedin`.
+Les règles 0 à 7 s'appliquent, avec ces ajustements :
+
+- **Lecteur** : un salarié, un demandeur d'emploi ou un parent, pas un freelance IA. Vouvoiement sur LinkedIn
+  (les Shorts tutoient).
+- **Sources** : officielles seulement (service-public.gouv.fr, unedic.org, francetravail.fr, caf.fr,
+  sites en .gouv.fr, Légifrance), relues le jour même. Page francetravail.fr : jamais de date de
+  modification. La source se met en clair, `(source : unedic.org, règlement général, art. 14)`.
+- **Fait réel (règle 2)** : une règle officielle, un exemple chiffré refait à la main, un Short ou une
+  pub Meta déjà publiés par Mes Droits Chômage. Jamais de témoignage inventé.
+- **Provocation** : trois axes testés, l'idée reçue cassée, la charge contre la complexité du système,
+  le cliché de société retourné (« les chômeurs profitent »). La cible est l'idée ou le système,
+  jamais les demandeurs d'emploi.
+- **Lien** : simulateur en premier commentaire, avec `utm_source=linkedin&utm_medium=post&utm_campaign=<slug>`.
+- **Règle 1** : `julien-partners` et `julien-mdc` sont le même profil : 2 posts par jour pour les deux réunis.
+- **Formats** : texte, image (visuels Meta de `ads/visuels/` du dépôt MESDROITSCHOMAGE, publiés sur R2),
+  vidéo native (`format: video`, MP4 public des Shorts sur R2 `reels/<slug>.mp4`).
 
 ## 0. Les 6 règles de Julien du 14/10/2026 — elles priment sur tout le reste
 

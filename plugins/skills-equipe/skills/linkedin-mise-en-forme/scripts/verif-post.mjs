@@ -21,7 +21,7 @@
 //          livrables-Claude-Agency/linkedin/). Sans
 //          post precedent : un AVERTISSEMENT, jamais un echec (regle du 30/09/2026).
 //   options : --precedent <fichier>  post precedent donne a la main (prioritaire)
-//             --compte <julien-agency|julien-partners>  sinon deduit du nom a<N>/p<N>.final.txt
+//             --compte <julien-agency|julien-partners|julien-mdc>  sinon deduit du nom a<N>/p<N>/m<N>.final.txt
 //             --dossier <dossier>    dossier des livrables (sinon LIVRABLES_LINKEDIN_DIR, sinon
 //                                    ~/OneDrive/Documents/GitHub/livrables-Claude-Agency/linkedin)
 //             --sans-precedent       ne mesure pas la regle de variete
