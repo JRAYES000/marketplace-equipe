@@ -89,6 +89,8 @@ function fiche(pg) {
     telephone: (p.Telephone && p.Telephone.phone_number) || '',
     fonction: texte(p.Fonction && p.Fonction.rich_text),
     requete: texte(p.Requete && p.Requete.rich_text),
+    objet: texte(p.Objet && p.Objet.rich_text),
+    accroche: texte(p.Accroche && p.Accroche.rich_text),
   };
 }
 async function aImporter() {
@@ -111,6 +113,10 @@ const casse = s => s.toLowerCase().replace(/(^|[\s'-])(\p{L})/gu, (_, a, b) => a
 
 // ---- Commande -----------------------------------------------------------------------------------
 const sec = process.argv.includes('--sec');
+// Champs exiges par le modele de l'Email 1 (v11.7, Julien 27/11/2026) : FT_WARMBLY_REQUIS=objet,accroche.
+// Sous le profil mdc, importer declenche l'envoi : une fiche sans ces textes reste « A importer ».
+const REQUIS = (process.env.FT_WARMBLY_REQUIS || '').split(',').map(s => s.trim().toLowerCase()).filter(Boolean);
+const manque = f => REQUIS.filter(k => !String(f[k] || '').trim());
 (async () => {
   if (process.argv[2] !== 'importer') die('usage : node warmbly.js importer [--sec]');
   if (!PROJET) die('FT_PROJET absent : l import Warmbly est reserve a un projet declare (voir SKILL.md, « Profils »)');
@@ -132,12 +138,16 @@ const sec = process.argv.includes('--sec');
 
   const fiches = await aImporter();
   console.log('espace Warmbly : ' + org.data.organization_name + ' ; fiches « ' + A_IMPORTER + ' » avec e-mail : ' + fiches.length);
+  const incompletes = fiches.filter(f => manque(f).length);
+  if (REQUIS.length) console.log('champs exiges : ' + REQUIS.join(', ') + ' ; fiches sans ces textes (restent « ' + A_IMPORTER + ' ») : ' + incompletes.length);
   if (sec) return console.log('simulation : rien ecrit');
 
-  let importes = 0, deja = 0, echecs = 0;
+  let importes = 0, deja = 0, echecs = 0, sansTexte = 0;
   const requetes = new Set();
   for (const f of fiches) {
     const qui = [f.prenom, f.nom].filter(Boolean).join(' ');
+    const absents = manque(f);
+    if (absents.length) { sansTexte++; console.log('  sans texte (' + absents.join(', ') + ') : ' + qui); continue; }
     const vu = warmbly(['contact', 'lookup', '--email', f.email]);
     if (!vu.ok && !vu.absent) { echecs++; console.log('  echec (recherche) : ' + qui + ' -> ' + vu.err); continue; }
     // Reponse de lookup, relevee le 26/11/2026 : { contact: {…} | null, match }.
@@ -150,6 +160,8 @@ const sec = process.argv.includes('--sec');
       if (f.telephone) corps.phone = f.telephone;
       if (f.fonction) corps.custom_fields.fonction = f.fonction;
       if (f.requete) corps.custom_fields.requete = f.requete;
+      if (f.objet) corps.custom_fields.objet = f.objet;
+      if (f.accroche) corps.custom_fields.accroche = f.accroche;
       const cr = warmbly(['contact', 'create', '--input', '-', '--idempotency-key', 'ft-' + f.page], JSON.stringify(corps));
       if (!cr.ok) { echecs++; console.log('  echec (creation) : ' + qui + ' -> ' + cr.err); continue; }
       importes++;
@@ -196,6 +208,6 @@ const sec = process.argv.includes('--sec');
       ' invalides=' + (v.invalid || 0) + ' inconnues=' + (v.unknown || 0) + ' en_attente=' + (v.pending || 0));
   }
   const reste = (await aImporter()).length;
-  console.log('importes=' + importes + ' deja_dans_warmbly=' + deja + ' segments_crees=' + segments + ' echecs=' + echecs + ' restent_a_importer=' + reste);
+  console.log('importes=' + importes + ' deja_dans_warmbly=' + deja + ' segments_crees=' + segments + ' sans_texte=' + sansTexte + ' echecs=' + echecs + ' restent_a_importer=' + reste);
   process.exit(echecs || reste ? 2 : 0);
 })().catch(e => die(e.message));

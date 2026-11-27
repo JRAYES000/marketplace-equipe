@@ -678,3 +678,11 @@ Phase 5 bis recopie desormais seulement les Id acceptes par `ecrire`.
 2026-11-26 — v11.6.2 : plafond de la campagne mdc passe de 10 a 20 envois par jour (Julien).
 • Reglage « Maximum per mailbox per day » de la campagne, une seule boite d'envoi. Lu apres
   enregistrement : compteur « 5 of 20 sent today ».
+
+2026-11-27 — v11.7.0 : textes de l'Email 1 (profil mdc). Constat : le modele Warmbly « Email 1 -
+simulateur » attend les champs objet et accroche, que l'import ne posait pas ; seules les 7
+fiches preparees a la main les avaient. 27 leads sur 34 ont recu un e-mail sans objet, avec
+« J'ai lu votre profil sur France Travail : » suivi de rien (dossier Envoyes de
+contact@mesdroitschomage.fr). Campagne mise en pause, modele passe en objet fixe, relancee.
+Correctif : colonnes Notion Objet et Accroche (base mdc), redigees en Phase 4 dans choix.json,
+exigees par assembler.js lot et par warmbly.js importer (FT_WARMBLY_REQUIS dans profils/mdc.env).

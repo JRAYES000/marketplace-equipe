@@ -8,7 +8,7 @@ description: >
   CV est mentionné.
 compatibility: "Claude Code. Requiert le serveur MCP Playwright avec un profil persistant (--user-data-dir, appareil enrôlé sur France Travail), l'API publique Notion (variable NOTION_TOKEN_FT, connexion interne « Leads France Travail - API »), l'outil Bash avec node, poppler et tesseract. Ni Claude in Chrome, ni le connecteur Notion MCP, ni NocoDB."
 metadata:
-  version: '11.6.2'
+  version: '11.7.0'
   environment: 'Claude Code, rédigé pour Claude Sonnet 5.5 (fonctionne aussi sous Opus). Playwright MCP pour la session recruteur, outil Bash pour les scripts fournis. Livrable = la base Notion « Leads France Travail », seule base de la skill.'
   journal: 'references/journal.md — mesures et incidents des runs réels (v2.0 à v11.0). À lire seulement pour comprendre ou contester une règle ; en cas de désaccord ce fichier-ci fait foi.'
 ---
@@ -55,15 +55,36 @@ d'attente Notion, hors-cible et téléchargements ne se mélangent jamais avec c
 |---|---|---|---|
 | `mdc` | « Leads France Travail — Mes Droits Chômage » (`424e7fe5dbf8815dabbad0a4b3a00cfa`) | Mes droits chômage | présenter le simulateur d'aides de mesdroitschomage.fr |
 
-Sous un profil, trois choses changent ; le reste du run est identique :
+Sous un profil, quatre choses changent ; le reste du run est identique :
 
 - **Pertinence (Phase 4)** : la cible est celle que Julien donne en Phase 0. Les règles de
   l'École (naturopathie, bien-être animal) ne s'appliquent pas.
+- **Textes de l'Email 1 (Phase 4)**, si le profil pose `FT_WARMBLY_REQUIS=objet,accroche`
+  (profil `mdc`) : chaque profil gardé **avec email** reçoit dans `choix.json` un `Objet` et une
+  `Accroche`, rédigés par Claude. Le modèle Warmbly les insère tels quels (objet du mail ;
+  « J'ai lu votre profil sur France Travail : <accroche> »). Sans eux, l'e-mail part sans objet
+  et avec une phrase coupée : 27 envois ainsi les 26 et 27/11/2026.
+  - **Objet** : « votre projet de … » ou « votre projet dans … », 40 caractères au plus, en
+    minuscules (sauf sigle ou nom propre), sans point. Il nomme le projet ou le métier visé.
+    Exemples réels : « votre projet dans la moto », « votre projet de tatouage », « votre projet
+    de DPO externe ».
+  - **Accroche** : une phrase, 160 caractères au plus, qui commence en minuscule et finit par un
+    point, adressée en « vous ». Faits tirés du **titre et de la présentation du profil**
+    seulement, jamais du CV (il ne sert qu'à l'email, au téléphone et au nom). Exemples réels :
+    « vous préparez la création de votre entreprise de tatouage. » ; « après 15 ans comme
+    chauffeur routier, vous créez votre entreprise dans la restauration. »
+  - **Jamais** : santé, handicap, âge, situation familiale, lieu, motif de fin de contrat, ni rien
+    que le candidat n'a pas écrit lui-même. Pas d'accolade (`{` `}` cassent le modèle).
+  - Profil qui ne dit rien de concret : objet et accroche sobres tirés de la requête (« votre
+    projet de création » ; « vous préparez la création de votre entreprise. »).
+  - Contrôles : `assembler.js lot` refuse le lot (rien écrit) si une fiche avec email n'a pas ses
+    deux textes, dépasse un plafond ou contient une accolade ; `warmbly.js importer` laisse
+    « A importer » toute fiche sans ces textes (ligne `sans texte`, compteur `sans_texte=`).
 - **Import Warmbly (fin de Phase 5)**, automatique, sans confirmation :
   `node "<skill>/scripts/warmbly.js" importer`. Il crée dans l'espace Warmbly du profil un contact
   par fiche `A importer` qui a un e-mail, puis passe la fiche en `Importe Warmbly`. Il refuse de
   tourner si la clé ouvre un autre espace ou si la base n'a pas ce statut. Sortie à lire :
-  `importes=N deja_dans_warmbly=M segments_crees=S echecs=K restent_a_importer=R`. Code 2
+  `importes=N deja_dans_warmbly=M segments_crees=S sans_texte=T echecs=K restent_a_importer=R`. Code 2
   (échecs) : le dire avec les lignes `echec`, ne pas relancer en boucle ; le prochain lot reprend
   ce qui reste. Chaque contact porte les champs personnalisés `source`, `fonction` et `requete`.
   Le script crée une fois le segment « FT - <requête> » (condition `requete` égale à la
@@ -354,6 +375,8 @@ pertinent est plus petit que la cible, le dire. **Ne jamais compléter avec du h
      pet sitter, palefrenier, bien-être équin, éleveur. Sa **Fonction nomme l'animal**
      (« Reconversion bien-être animal », « Aspirante auxiliaire vétérinaire », « Pet sitter en
      reconversion »…).
+   - **Sous le profil `mdc`** : chaque profil gardé avec email porte aussi `Objet` et `Accroche`
+     (`{"Fonction": "…", "Objet": "…", "Accroche": "…"}`), règles dans « Profils » ci-dessus.
    - **Fonction** : le titre en casse lisible, condensé à une trentaine de caractères
      (« Actuellement ASH - objectif Infirmière libérale » → « Aspirante infirmière libérale »).
    - **Profil anonyme** (intitulé à la place du nom) : `scripts/nom-du-cv.sh <fichier>` sur son

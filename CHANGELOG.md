@@ -2,6 +2,10 @@
 
 Ce que disait le tableau du README avant le 22/11/2026, quand chaque ligne empilait les changements datés. Le README ne garde plus que ce que fait la skill aujourd'hui.
 
+## 27/11/2026 (1.65.0)
+
+- france-travail-extraction 11.7.0 : sous le profil `mdc`, `Objet` et `Accroche` de l'Email 1 Warmbly rédigés en Phase 4 (`choix.json`), écrits dans deux nouvelles colonnes Notion de la base mdc et posés en champs `objet` / `accroche` du contact Warmbly. `FT_WARMBLY_REQUIS=objet,accroche` (profil) : `assembler.js lot` refuse un lot où une fiche avec email n'a pas ses textes (ou dépasse 40 / 160 caractères, ou contient une accolade) ; `warmbly.js importer` laisse ces fiches « A importer » (`sans_texte=`). Cause : 27 e-mails partis sans objet les 26 et 27/11/2026. Sans profil, rien ne change.
+
 ## 27/11/2026 (1.64.0)
 
 - linkedin-mise-en-forme 1.16.0 : plafonds par compte (`LIMITES_PAR_COMPTE` dans `scripts/lib.mjs`). `julien-mdc` accepte 8 passages en gras et exige 3 à 8 emojis (demande de Julien : plus de gras, des emojis pour la lisibilité) ; les autres comptes gardent 4 gras et 6 emojis au plus. 106 tests.

@@ -71,7 +71,8 @@ Colonnes (ASCII, ce sont des identifiants de schéma) : `Nom` (MAJUSCULES, à d�
 `Fonction`, `Requete`, `Date extraction` (jour **et heure** du `lot`, v10.5 ; `--heure HH:MM` si
 le lot est rejoué un autre jour), `Profil mis a jour`, `Statut` (`A importer` par défaut),
 `Note` (jamais vide). La colonne `Accroche` des fiches anciennes (premier e-mail SalesHandy) ne
-s'écrit plus.
+s'écrit plus dans la base de l'École. Base `mdc` seulement (v11.7, 27/11/2026) : `Objet` et
+`Accroche`, textes de l'Email 1 Warmbly, écrits depuis `choix.json` et exigés par l'import.
 
 Posés hors extraction, jamais écrits par `notion.js` (23/11/2026) : les valeurs de `Statut`
 `Contacte`, `A repondu`, `Inscrit`, `Pas interesse` ; les colonnes `Dernier contact` (date),

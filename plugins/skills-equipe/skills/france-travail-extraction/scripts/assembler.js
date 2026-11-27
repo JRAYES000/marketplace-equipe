@@ -325,6 +325,23 @@ if (cmd === 'revue') {
     if (x.a.cv) pourDrive.push({ cv: x.a.cv, Nom: o.Nom, Prenom: o.Prenom || '' });
     return o;
   });
+  // Textes de l'Email 1 (v11.7, Julien 27/11/2026) : sous un profil qui les exige
+  // (FT_WARMBLY_REQUIS=objet,accroche), chaque fiche avec email doit les porter, sinon l'e-mail
+  // part sans objet (27 envois ainsi le 26-27/11/2026). Ils viennent de choix.json.
+  const requis = (process.env.FT_WARMBLY_REQUIS || '').split(',').map(s => s.trim()).filter(Boolean)
+    .map(s => s.charAt(0).toUpperCase() + s.slice(1).toLowerCase());
+  const PLAFOND = { Objet: 40, Accroche: 160 };
+  const fautes = [];
+  for (const o of lot) {
+    if (!o.Email) continue;
+    for (const k of requis) {
+      const v = String(o[k] || '').trim();
+      if (!v) fautes.push(o.Nom + ' : ' + k + ' manquant');
+      else if (/[{}]/.test(v)) fautes.push(o.Nom + ' : ' + k + ' contient une accolade');
+      else if (PLAFOND[k] && v.length > PLAFOND[k]) fautes.push(o.Nom + ' : ' + k + ' de ' + v.length + ' caracteres (' + PLAFOND[k] + ' au plus)');
+    }
+  }
+  if (fautes.length) die('textes de l Email 1 a completer dans choix.json, rien ecrit :\n  ' + fautes.join('\n  '));
   fs.writeFileSync(opt.sortie, JSON.stringify(lot, null, 1));
   console.log('lot ecrit : ' + lot.length + ' fiche(s), dont ' + lot.filter(o => o.Email).length + ' avec email et ' +
     lot.filter(o => o.Telephone).length + ' avec telephone -> ' + opt.sortie);

@@ -33,12 +33,14 @@ const DELAI_MS = 30000; // par requete : sans lui, une connexion muette bloque ~
 // « Importe SalesHandy » reste lisible sur les fiches anciennes, mais ne s'ecrit plus (v11.0).
 const STATUTS = ['A importer', 'Ecarte'];
 // « Type de requete » est une formule Notion : jamais ecrite, jamais recopiee.
-// La colonne Notion « Accroche » (premier e-mail SalesHandy, v10.2) n'est plus ni lue ni ecrite.
+// « Objet » et « Accroche » (v11.7, Julien 27/11/2026) : textes de l'Email 1 Warmbly, ecrits par
+// Claude en Phase 4 sous un profil qui les exige (FT_WARMBLY_REQUIS). Les bases sans ces colonnes
+// (Ecole) ne les recoivent jamais : une valeur vide n'est pas ecrite.
 const COLONNES = ['Nom', 'Prenom', 'Email', 'Telephone', 'Fonction', 'Requete',
-  'Date extraction', 'Profil mis a jour', 'Statut', 'Note'];
+  'Date extraction', 'Profil mis a jour', 'Statut', 'Note', 'Objet', 'Accroche'];
 const TYPES = { Nom: 'title', Prenom: 'rich_text', Email: 'email', Telephone: 'phone_number',
   Fonction: 'rich_text', Requete: 'rich_text', 'Date extraction': 'date',
-  'Profil mis a jour': 'date', Statut: 'select', Note: 'rich_text' };
+  'Profil mis a jour': 'date', Statut: 'select', Note: 'rich_text', Objet: 'rich_text', Accroche: 'rich_text' };
 const FILE = path.join(DOSSIER_FILE, 'notion-attente.json');
 const ECARTES = path.join(DOSSIER_FILE, 'ecartes.json');
 
