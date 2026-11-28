@@ -2,6 +2,10 @@
 
 Ce que disait le tableau du README avant le 22/11/2026, quand chaque ligne empilait les changements datés. Le README ne garde plus que ce que fait la skill aujourd'hui.
 
+## 28/11/2026 (1.65.1)
+
+- revue-qualite 1.1.3 : la grille web renvoie vers `site-ops-ecole-naturo` (ecole-naturo.fr est un site statique depuis le 28/11/2026) au lieu de `wordpress-ops-ecole-naturo`.
+
 ## 27/11/2026 (1.65.0)
 
 - france-travail-extraction 11.7.0 : sous le profil `mdc`, `Objet` et `Accroche` de l'Email 1 Warmbly rédigés en Phase 4 (`choix.json`), écrits dans deux nouvelles colonnes Notion de la base mdc et posés en champs `objet` / `accroche` du contact Warmbly. `FT_WARMBLY_REQUIS=objet,accroche` (profil) : `assembler.js lot` refuse un lot où une fiche avec email n'a pas ses textes (ou dépasse 40 / 160 caractères, ou contient une accolade) ; `warmbly.js importer` laisse ces fiches « A importer » (`sans_texte=`). Cause : 27 e-mails partis sans objet les 26 et 27/11/2026. Sans profil, rien ne change.
